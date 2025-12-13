@@ -1,16 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Trash2, FileText } from 'lucide-react';
 import { type Expense } from '@/lib/types/expense';
+import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@/lib/utils';
 
 interface ExpenseListProps {
   refreshTrigger: number;
+  onDelete: () => void;
 }
 
-export function ExpenseList({ refreshTrigger }: ExpenseListProps) {
+export function ExpenseList({ refreshTrigger, onDelete }: ExpenseListProps) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const fetchExpenses = async () => {
     setIsLoading(true);
@@ -25,10 +29,33 @@ export function ExpenseList({ refreshTrigger }: ExpenseListProps) {
       } else {
         setError('Failed to load expenses');
       }
-    } catch (error) {
-      setError('Failed to load expenses');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this expense?')) {
+      return;
+    }
+
+    setDeletingId(id);
+
+    try {
+      const response = await fetch(`/api/expenses/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setExpenses(expenses.filter(exp => exp.id !== id));
+        onDelete();
+      } else {
+        alert('Failed to delete expense');
+      }
+    } catch {
+      alert('Failed to delete expense');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -38,7 +65,7 @@ export function ExpenseList({ refreshTrigger }: ExpenseListProps) {
 
   if (isLoading) {
     return (
-      <div className="w-full max-w-4xl mx-auto p-6">
+      <div className="w-full p-6">
         <p className="text-center text-zinc-600 dark:text-zinc-400">Loading expenses...</p>
       </div>
     );
@@ -46,7 +73,7 @@ export function ExpenseList({ refreshTrigger }: ExpenseListProps) {
 
   if (error) {
     return (
-      <div className="w-full max-w-4xl mx-auto p-6">
+      <div className="w-full p-6">
         <p className="text-center text-red-600 dark:text-red-400">{error}</p>
       </div>
     );
@@ -54,53 +81,94 @@ export function ExpenseList({ refreshTrigger }: ExpenseListProps) {
 
   if (expenses.length === 0) {
     return (
-      <div className="w-full max-w-4xl mx-auto p-6">
+      <div className="w-full p-6">
         <p className="text-center text-zinc-600 dark:text-zinc-400">No expenses yet. Add your first expense above!</p>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-6">
-      <h2 className="text-2xl font-semibold mb-6 text-zinc-900 dark:text-zinc-50">All Expenses</h2>
+    <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md border border-zinc-200 dark:border-zinc-800 p-6">
+      <div className="flex items-center gap-2 mb-6">
+        <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+          Expense Details / جزئیات هزینه‌ها
+        </h2>
+      </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse bg-white dark:bg-zinc-900 shadow-md rounded-lg overflow-hidden">
+        <table className="w-full border-collapse">
           <thead className="bg-zinc-100 dark:bg-zinc-800">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-900 dark:text-zinc-100">Date</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-900 dark:text-zinc-100">Category</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-900 dark:text-zinc-100">Description</th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-zinc-900 dark:text-zinc-100">Toman</th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-zinc-900 dark:text-zinc-100">USD</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+                Description / توضیحات
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+                Category / دسته‌بندی
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+                Date / تاریخ
+              </th>
+              <th className="px-4 py-3 text-right text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+                Amount / مبلغ
+              </th>
+              <th className="px-4 py-3 w-[50px]" />
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-700">
-            {expenses.map((expense) => (
-              <tr key={expense.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
-                <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">
-                  {new Date(expense.date).toLocaleDateString()}
-                </td>
-                <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">
-                  {expense.category}
-                </td>
-                <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">
-                  {expense.description}
-                </td>
-                <td className="px-4 py-3 text-sm text-right text-zinc-700 dark:text-zinc-300">
-                  {expense.price_toman.toLocaleString()}
-                </td>
-                <td className="px-4 py-3 text-sm text-right text-zinc-700 dark:text-zinc-300">
-                  ${expense.price_usd.toFixed(2)}
-                </td>
-              </tr>
-            ))}
+            {expenses.map((expense) => {
+              const categoryLabels = getCategoryLabel(expense.category);
+              const farsiDate = formatToFarsiDate(expense.date);
+
+              return (
+                <tr
+                  key={expense.id}
+                  className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+                >
+                  <td className="px-4 py-3 text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                    {expense.description}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    <div className="flex flex-col">
+                      <span className="text-zinc-900 dark:text-zinc-100">{categoryLabels.en}</span>
+                      <span className="text-zinc-600 dark:text-zinc-400 text-xs" dir="rtl">
+                        {categoryLabels.fa}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    <div className="flex flex-col">
+                      <span className="text-zinc-900 dark:text-zinc-100">{expense.date}</span>
+                      <span className="text-zinc-600 dark:text-zinc-400 text-xs" dir="rtl">
+                        {farsiDate}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-right">
+                    <div className="flex flex-col">
+                      <span className="text-zinc-900 dark:text-zinc-100 font-medium" dir="rtl">
+                        {formatNumber(expense.price_toman)} تومان
+                      </span>
+                      <span className="text-zinc-600 dark:text-zinc-400 text-xs">
+                        ${formatNumber(expense.price_usd)} USD
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => handleDelete(expense.id)}
+                      disabled={deletingId === expense.id}
+                      className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50 transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
-      </div>
-
-      <div className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
-        Total: {expenses.length} expense{expenses.length !== 1 ? 's' : ''}
       </div>
     </div>
   );
