@@ -118,8 +118,9 @@ export function ExpenseForm({ onExpenseAdded }: ExpenseFormProps) {
               id="price_toman"
               required
               step="0.01"
-              value={formData.price_toman}
-              onChange={(e) => setFormData({ ...formData, price_toman: parseFloat(e.target.value) || 0 })}
+              min="0"
+              value={formData.price_toman || ''}
+              onChange={(e) => setFormData({ ...formData, price_toman: parseFloat(e.target.value) })}
               className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -133,8 +134,9 @@ export function ExpenseForm({ onExpenseAdded }: ExpenseFormProps) {
               id="price_usd"
               required
               step="0.01"
-              value={formData.price_usd}
-              onChange={(e) => setFormData({ ...formData, price_usd: parseFloat(e.target.value) || 0 })}
+              min="0"
+              value={formData.price_usd || ''}
+              onChange={(e) => setFormData({ ...formData, price_usd: parseFloat(e.target.value) })}
               className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
