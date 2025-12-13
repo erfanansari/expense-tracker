@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "migrate": "tsx lib/db/migrate.ts",
+    "db:test": "tsx lib/db/test-connection.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.15.15",
@@ -19,9 +21,11 @@
     "@types/node": "^24.10.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.2.3",
     "eslint": "^9.39.2",
     "eslint-config-next": "16.0.10",
     "tailwindcss": "^4.1.18",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   },
   "packageManager": "pnpm@10.24.0"

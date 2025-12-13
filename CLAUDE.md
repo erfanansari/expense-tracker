@@ -29,20 +29,68 @@ pnpm start
 
 # Lint code
 pnpm lint
+
+# Database management
+pnpm migrate       # Run database migration
+pnpm db:test       # Test database connection and verify tables
 ```
 
 ## Project Structure
 
 ```
 expense-tracker/
-├── app/              # Next.js App Router directory
-│   ├── layout.tsx    # Root layout with font configuration
-│   ├── page.tsx      # Home page
-│   └── globals.css   # Global Tailwind styles
-├── public/           # Static assets
-├── .env.local        # Environment variables (contains Turso credentials)
-└── tsconfig.json     # TypeScript configuration
+├── app/
+│   ├── api/
+│   │   └── expenses/
+│   │       └── route.ts    # GET and POST endpoints for expenses
+│   ├── layout.tsx          # Root layout with font configuration
+│   ├── page.tsx            # Home page with expense form and list
+│   └── globals.css         # Global Tailwind styles
+├── components/
+│   ├── expense-form.tsx    # Client component for adding expenses
+│   └── expense-list.tsx    # Client component for displaying expenses
+├── lib/
+│   ├── db/
+│   │   ├── client.ts       # Turso database client singleton
+│   │   ├── schema.sql      # Database schema definition
+│   │   ├── migrate.ts      # Migration script
+│   │   └── test-connection.ts  # Database connection test utility
+│   └── types/
+│       └── expense.ts      # TypeScript interfaces for Expense
+├── public/                 # Static assets
+├── .env.local             # Environment variables (Turso credentials)
+└── tsconfig.json          # TypeScript configuration
 ```
+
+## Application Features
+
+This is a minimal expense tracker with the following functionality:
+- Add new expenses with date, category, description, price in Toman, and price in USD
+- View all expenses in a sortable table (sorted by date descending)
+- Form validation for all required fields
+- Real-time UI updates after adding expenses
+- Dark mode support
+
+### Database Schema
+
+The `expenses` table has the following structure:
+- `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+- `date`: TEXT (ISO format date)
+- `category`: TEXT (e.g., Food, Transport, Entertainment)
+- `description`: TEXT (expense details)
+- `price_toman`: REAL (price in Iranian Toman)
+- `price_usd`: REAL (price in US Dollars)
+- `created_at`: TEXT (timestamp, default CURRENT_TIMESTAMP)
+
+An index on the `date` column is created for faster date-based queries.
+
+### API Routes
+
+- `GET /api/expenses`: Fetch all expenses (sorted by date DESC)
+- `POST /api/expenses`: Create a new expense
+  - Request body: `{ date, category, description, price_toman, price_usd }`
+  - Validates all required fields and data types
+  - Returns 201 on success, 400 on validation error, 500 on server error
 
 ## Configuration Details
 
@@ -57,6 +105,12 @@ expense-tracker/
 Database credentials are stored in `.env.local`:
 - `TURSO_DATABASE_URL`: Connection URL to Turso database
 - `TURSO_AUTH_TOKEN`: Authentication token
+
+**Database Setup:**
+1. Ensure `.env.local` contains valid Turso credentials
+2. Run `pnpm migrate` to create the expenses table
+3. Use `pnpm db:test` to verify the database connection and table setup
+4. The database client is initialized in `lib/db/client.ts` and reused across the application
 
 ### Tailwind CSS v4
 This project uses Tailwind CSS v4 with the new PostCSS plugin (`@tailwindcss/postcss`). Configuration is in `postcss.config.mjs`.
