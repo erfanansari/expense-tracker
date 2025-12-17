@@ -48,19 +48,19 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans">
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-zinc-900 dark:text-zinc-50">
               Expense Tracker / <span className="text-zinc-600 dark:text-zinc-50">ردیاب هزینه</span>
             </h1>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
+            <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-1">
               Track your personal expenses / هزینه‌های شخصی خود را ردیابی کنید
             </p>
           </div>
-          <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-            <Wallet className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
+            <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
             <span>Last 30 days / ۳۰ روز گذشته</span>
           </div>
         </div>
@@ -69,7 +69,7 @@ export default function Home() {
         {!isLoading && <ExpenseStats expenses={expenses} />}
 
         {/* Add New Expense Form */}
-        <div className="mt-6">
+        <div className="mt-4 sm:mt-6">
           <ExpenseForm
             onExpenseAdded={handleExpenseChange}
             editingExpense={editingExpense}
@@ -79,13 +79,13 @@ export default function Home() {
 
         {/* Charts */}
         {!isLoading && expenses.length > 0 && (
-          <div className="mt-6">
+          <div className="mt-4 sm:mt-6">
             <ExpenseCharts expenses={expenses} />
           </div>
         )}
 
         {/* Expense Table */}
-        <div className="mt-6">
+        <div className="mt-4 sm:mt-6">
           <ExpenseList
             refreshTrigger={refreshTrigger}
             onDelete={handleExpenseChange}

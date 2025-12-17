@@ -66,54 +66,54 @@ export function ExpenseList({ refreshTrigger, onDelete, onEdit }: ExpenseListPro
 
   if (isLoading) {
     return (
-      <div className="w-full p-6">
-        <p className="text-center text-zinc-600 dark:text-zinc-400">Loading expenses...</p>
+      <div className="w-full p-4 sm:p-6">
+        <p className="text-center text-sm sm:text-base text-zinc-600 dark:text-zinc-400">Loading expenses...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="w-full p-6">
-        <p className="text-center text-red-600 dark:text-red-400">{error}</p>
+      <div className="w-full p-4 sm:p-6">
+        <p className="text-center text-sm sm:text-base text-red-600 dark:text-red-400">{error}</p>
       </div>
     );
   }
 
   if (expenses.length === 0) {
     return (
-      <div className="w-full p-6">
-        <p className="text-center text-zinc-600 dark:text-zinc-400">No expenses yet. Add your first expense above!</p>
+      <div className="w-full p-4 sm:p-6">
+        <p className="text-center text-sm sm:text-base text-zinc-600 dark:text-zinc-400">No expenses yet. Add your first expense above!</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md border border-zinc-200 dark:border-zinc-800 p-6">
-      <div className="flex items-center gap-2 mb-6">
-        <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+    <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6">
+      <div className="flex items-center gap-2 mb-4 sm:mb-6">
+        <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
+        <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-50">
           Expense Details / جزئیات هزینه‌ها
         </h2>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto -mx-4 sm:mx-0">
         <table className="w-full border-collapse">
           <thead className="bg-zinc-100 dark:bg-zinc-800">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+              <th className="px-2 py-2 sm:px-4 sm:py-3 text-left text-xs sm:text-sm font-semibold text-zinc-600 dark:text-zinc-400">
                 Description / توضیحات
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+              <th className="px-2 py-2 sm:px-4 sm:py-3 text-left text-xs sm:text-sm font-semibold text-zinc-600 dark:text-zinc-400">
                 Category / دسته‌بندی
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+              <th className="px-2 py-2 sm:px-4 sm:py-3 text-left text-xs sm:text-sm font-semibold text-zinc-600 dark:text-zinc-400">
                 Date / تاریخ
               </th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+              <th className="px-2 py-2 sm:px-4 sm:py-3 text-right text-xs sm:text-sm font-semibold text-zinc-600 dark:text-zinc-400">
                 Amount / مبلغ
               </th>
-              <th className="px-4 py-3 text-center text-sm font-semibold text-zinc-600 dark:text-zinc-400 w-[100px]">
+              <th className="px-2 py-2 sm:px-4 sm:py-3 text-center text-xs sm:text-sm font-semibold text-zinc-600 dark:text-zinc-400 w-[80px] sm:w-[100px]">
                 Actions / عملیات
               </th>
             </tr>
@@ -128,51 +128,51 @@ export function ExpenseList({ refreshTrigger, onDelete, onEdit }: ExpenseListPro
                   key={expense.id}
                   className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
                 >
-                  <td className="px-4 py-3 text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                  <td className="px-2 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm font-medium text-zinc-900 dark:text-zinc-100">
                     {expense.description}
                   </td>
-                  <td className="px-4 py-3 text-sm">
+                  <td className="px-2 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm">
                     <div className="flex flex-col">
                       <span className="text-zinc-900 dark:text-zinc-100">{categoryLabels.en}</span>
-                      <span className="text-zinc-600 dark:text-zinc-400 text-xs" dir="rtl">
+                      <span className="text-zinc-600 dark:text-zinc-400 text-[10px] sm:text-xs" dir="rtl">
                         {categoryLabels.fa}
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm">
+                  <td className="px-2 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm">
                     <div className="flex flex-col">
                       <span className="text-zinc-900 dark:text-zinc-100">{expense.date}</span>
-                      <span className="text-zinc-600 dark:text-zinc-400 text-xs" dir="rtl">
+                      <span className="text-zinc-600 dark:text-zinc-400 text-[10px] sm:text-xs" dir="rtl">
                         {farsiDate}
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-right">
+                  <td className="px-2 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm text-right">
                     <div className="flex flex-col">
                       <span className="text-zinc-900 dark:text-zinc-100 font-medium" dir="rtl">
                         {formatNumber(expense.price_toman)} تومان
                       </span>
-                      <span className="text-zinc-600 dark:text-zinc-400 text-xs">
+                      <span className="text-zinc-600 dark:text-zinc-400 text-[10px] sm:text-xs">
                         ${expense.price_usd.toFixed(2)} USD
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-center gap-2">
+                  <td className="px-2 py-2 sm:px-4 sm:py-3">
+                    <div className="flex items-center justify-center gap-1 sm:gap-2">
                       <button
                         onClick={() => onEdit(expense)}
-                        className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                        className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors p-1"
                         title="Edit"
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(expense.id)}
                         disabled={deletingId === expense.id}
-                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50 transition-colors"
+                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50 transition-colors p-1"
                         title="Delete"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </button>
                     </div>
                   </td>

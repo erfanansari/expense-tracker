@@ -166,11 +166,11 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
   };
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md border border-zinc-200 dark:border-zinc-800 p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div className="flex items-center gap-2">
-          <Plus className="h-5 w-5 text-green-600 dark:text-green-400" />
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+          <Plus className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
+          <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-50">
             {editingExpense ? 'Edit Expense / ویرایش هزینه' : 'Add New Expense / افزودن هزینه جدید'}
           </h2>
         </div>

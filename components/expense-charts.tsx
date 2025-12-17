@@ -96,16 +96,16 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
       {/* Pie Chart */}
-      <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md border border-zinc-200 dark:border-zinc-800 p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <PieChartIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+      <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6">
+        <div className="flex items-center gap-2 mb-3 sm:mb-4">
+          <PieChartIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
+          <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-50">
             By Category / بر اساس دسته‌بندی
           </h3>
         </div>
-        <div className="h-[300px]">
+        <div className="h-[250px] sm:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -125,14 +125,14 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-2">
+        <div className="mt-3 sm:mt-4 grid grid-cols-2 gap-2">
           {categoryTotals.map((cat, index) => (
             <div key={cat.category} className="flex items-center gap-2">
               <div
-                className="w-3 h-3 rounded-full flex-shrink-0"
+                className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0"
                 style={{ backgroundColor: COLORS[index % COLORS.length] }}
               />
-              <span className="text-sm text-zinc-600 dark:text-zinc-400 truncate">
+              <span className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 truncate">
                 {cat.name} / {cat.nameFa}
               </span>
             </div>
@@ -141,14 +141,14 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
       </div>
 
       {/* Bar Chart */}
-      <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md border border-zinc-200 dark:border-zinc-800 p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <BarChart3 className="h-5 w-5 text-green-600 dark:text-green-400" />
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+      <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6">
+        <div className="flex items-center gap-2 mb-3 sm:mb-4">
+          <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
+          <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-50">
             Category Comparison / مقایسه دسته‌بندی
           </h3>
         </div>
-        <div className="h-[300px]">
+        <div className="h-[250px] sm:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={categoryTotals} layout="vertical" margin={{ left: 0, right: 20 }}>
               <XAxis
@@ -176,14 +176,14 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
       </div>
 
       {/* Area Chart - Daily Spending */}
-      <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md border border-zinc-200 dark:border-zinc-800 p-6 lg:col-span-2">
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+      <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 lg:col-span-2">
+        <div className="flex items-center gap-2 mb-3 sm:mb-4">
+          <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 dark:text-purple-400" />
+          <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-50">
             Daily Spending Trend / روند هزینه روزانه
           </h3>
         </div>
-        <div className="h-[250px]">
+        <div className="h-[200px] sm:h-[250px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={dailyTotals} margin={{ left: 0, right: 20, top: 10, bottom: 0 }}>
               <defs>
