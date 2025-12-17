@@ -35,7 +35,17 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
           const data = await response.json();
           const rate = parseInt(data.usd.value, 10);
           setExchangeRate(rate);
-          console.log(`Exchange rate fetched: ${rate.toLocaleString()} Toman per USD (${data.usd.date})`);
+
+          // Log cache status
+          if (data._meta) {
+            if (data._meta.cached) {
+              console.log(`💾 Exchange rate from CACHE: ${rate.toLocaleString()} Toman/USD (age: ${data._meta.cacheAgeHours?.toFixed(1)}h)`);
+            } else {
+              console.log(`🌐 Exchange rate FRESH fetch: ${rate.toLocaleString()} Toman/USD (${data.usd.date})`);
+            }
+          } else {
+            console.log(`Exchange rate: ${rate.toLocaleString()} Toman/USD (${data.usd.date})`);
+          }
         } else {
           console.error('Failed to fetch exchange rate: API returned error');
         }
