@@ -113,7 +113,7 @@ export function ExpenseList({ refreshTrigger, onDelete, onEdit }: ExpenseListPro
               <th className="px-2 py-2 sm:px-4 sm:py-3 text-right text-xs sm:text-sm font-semibold text-zinc-600 dark:text-zinc-400">
                 Amount / مبلغ
               </th>
-              <th className="px-2 py-2 sm:px-4 sm:py-3 text-center text-xs sm:text-sm font-semibold text-zinc-600 dark:text-zinc-400 w-[80px] sm:w-[100px]">
+              <th className="px-2 py-2 sm:px-4 sm:py-3 text-center text-xs sm:text-sm font-semibold text-zinc-600 dark:text-zinc-400 w-20 sm:w-25">
                 Actions / عملیات
               </th>
             </tr>

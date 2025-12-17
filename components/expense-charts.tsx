@@ -105,8 +105,8 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
             By Category / بر اساس دسته‌بندی
           </h3>
         </div>
-        <div className="h-[250px] sm:h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-[250px] sm:h-75">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <PieChart>
               <Pie
                 data={categoryTotals}
@@ -129,7 +129,7 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
           {categoryTotals.map((cat, index) => (
             <div key={cat.category} className="flex items-center gap-2">
               <div
-                className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0"
+                className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full shrink-0"
                 style={{ backgroundColor: COLORS[index % COLORS.length] }}
               />
               <span className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 truncate">
@@ -148,8 +148,8 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
             Category Comparison / مقایسه دسته‌بندی
           </h3>
         </div>
-        <div className="h-[250px] sm:h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-[250px] sm:h-75">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <BarChart data={categoryTotals} layout="vertical" margin={{ left: 0, right: 20 }}>
               <XAxis
                 type="number"
@@ -184,7 +184,7 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
           </h3>
         </div>
         <div className="h-[200px] sm:h-[250px]">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <AreaChart data={dailyTotals} margin={{ left: 0, right: 20, top: 10, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
