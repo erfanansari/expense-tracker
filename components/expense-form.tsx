@@ -36,13 +36,9 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
           const rate = parseInt(data.usd.value, 10);
           setExchangeRate(rate);
 
-          // Log cache status
-          if (data._meta) {
-            if (data._meta.cached) {
-              console.log(`💾 Exchange rate from CACHE: ${rate.toLocaleString()} Toman/USD (age: ${data._meta.cacheAgeHours?.toFixed(1)}h)`);
-            } else {
-              console.log(`🌐 Exchange rate FRESH fetch: ${rate.toLocaleString()} Toman/USD (${data.usd.date})`);
-            }
+          // Log fetch status
+          if (data._meta?.fetchedAt) {
+            console.log(`🌐 Exchange rate: ${rate.toLocaleString()} Toman/USD (fetched: ${data._meta.fetchedAt}, cached until: ${data._meta.cachedUntil})`);
           } else {
             console.log(`Exchange rate: ${rate.toLocaleString()} Toman/USD (${data.usd.date})`);
           }
