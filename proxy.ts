@@ -3,9 +3,9 @@ import type { NextRequest } from 'next/server';
 
 export function proxy(request: NextRequest) {
   // Only enable auth in production
-  // if (process.env.NODE_ENV !== 'production') {
-  //   return NextResponse.next();
-  // }
+  if (process.env.NODE_ENV !== 'production') {
+    return NextResponse.next();
+  }
 
   // Skip auth for API routes (optional, remove if you want to protect API too)
   if (request.nextUrl.pathname.startsWith('/api')) {
