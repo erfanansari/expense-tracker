@@ -568,60 +568,140 @@ export default function DashboardPage() {
 
               {/* Spending Heatmap Calendar */}
               <div className="bg-zinc-900 rounded-xl p-4 sm:p-6 border border-zinc-800">
-                <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center gap-2 mb-6">
                   <div className="p-2 bg-purple-500/10 rounded-lg">
                     <BarChart3 className="h-5 w-5 text-purple-400" />
                   </div>
-                  <h3 className="text-base sm:text-lg font-semibold">Daily Activity / فعالیت روزانه</h3>
+                  <h3 className="text-base sm:text-lg font-semibold">Spending Heatmap / نقشه حرارتی هزینه</h3>
                 </div>
 
-                <div className="space-y-3">
-                  {(() => {
-                    // Get last 7 days of spending
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    const last7Days = [];
+                {(() => {
+                  // Determine which month to display based on dateRange
+                  let displayYear = new Date().getFullYear();
+                  let displayMonth = new Date().getMonth();
 
-                    for (let i = 6; i >= 0; i--) {
-                      const date = new Date(today);
-                      date.setDate(date.getDate() - i);
-                      const dateStr = date.toISOString().split('T')[0];
-                      const dayExpenses = expenses.filter(exp => exp.date === dateStr);
-                      const dayTotal = dayExpenses.reduce((sum, exp) => sum + exp.price_toman, 0);
-                      last7Days.push({
-                        date: dateStr,
-                        dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
-                        total: dayTotal,
-                        count: dayExpenses.length
-                      });
-                    }
+                  if (dateRange === 'THIS_MONTH') {
+                    // Current month
+                    displayMonth = new Date().getMonth();
+                    displayYear = new Date().getFullYear();
+                  } else if (dateRange === 'LAST_MONTH') {
+                    // Last month
+                    const lastMonth = new Date();
+                    lastMonth.setMonth(lastMonth.getMonth() - 1);
+                    displayMonth = lastMonth.getMonth();
+                    displayYear = lastMonth.getFullYear();
+                  } else {
+                    // For other ranges (7D, 30D, YTD, ALL_TIME), show current month
+                    displayMonth = new Date().getMonth();
+                    displayYear = new Date().getFullYear();
+                  }
+                  
+                  // Get all days in display month
+                  const firstDay = new Date(displayYear, displayMonth, 1);
+                  const lastDay = new Date(displayYear, displayMonth + 1, 0);
+                  const daysInMonth = lastDay.getDate();
+                  const startingDayOfWeek = firstDay.getDay();
+                  
+                  // Build calendar with spending data from filteredExpenses
+                  const calendarDays = [];
+                  for (let i = 0; i < startingDayOfWeek; i++) {
+                    calendarDays.push({ date: null, total: 0, count: 0 });
+                  }
+                  
+                  for (let day = 1; day <= daysInMonth; day++) {
+                    const dateStr = `${displayYear}-${String(displayMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const dayExpenses = filteredExpenses.filter(exp => exp.date === dateStr);
+                    const dayTotal = dayExpenses.reduce((sum, exp) => sum + exp.price_toman, 0);
+                    calendarDays.push({
+                      date: day,
+                      dateStr,
+                      total: dayTotal,
+                      count: dayExpenses.length
+                    });
+                  }
+                  
+                  // Find max spending for color scaling
+                  const maxSpending = Math.max(...calendarDays.filter(d => d.date).map(d => d.total), 1);
+                  
+                  // Get color based on spending intensity
+                  const getHeatmapColor = (total) => {
+                    if (total === 0) return '#27272a';
+                    const intensity = total / maxSpending;
+                    if (intensity > 0.8) return '#dc2626';
+                    if (intensity > 0.6) return '#ea580c';
+                    if (intensity > 0.4) return '#f59e0b';
+                    if (intensity > 0.2) return '#3b82f6';
+                    return '#60a5fa';
+                  };
 
-                    const maxSpending = Math.max(...last7Days.map(d => d.total), 1);
+                  const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-                    return (
-                      <div className="space-y-2">
-                        {last7Days.map((day) => (
-                          <div key={day.date}>
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs text-zinc-400">{day.dayName} ({day.date.split('-')[2]})</span>
-                              <span className="text-xs font-semibold text-white">{day.count} {day.count === 1 ? 'transaction' : 'transactions'}</span>
-                            </div>
-                            <div className="w-full bg-zinc-700 rounded-full h-1.5">
-                              <div
-                                className="h-full rounded-full transition-all"
-                                style={{
-                                  width: `${maxSpending > 0 ? (day.total / maxSpending) * 100 : 0}%`,
-                                  backgroundColor: day.total === 0 ? '#52525b' : day.total > maxSpending * 0.7 ? '#ef4444' : day.total > maxSpending * 0.4 ? '#f97316' : '#3b82f6'
-                                }}
-                              />
-                            </div>
-                            <span className="text-xs text-zinc-500">{day.total > 0 ? formatNumber(day.total) + ' ت' : '-'}</span>
+                  return (
+                    <div>
+                      {/* Month label */}
+                      <p className="text-sm text-zinc-400 mb-4">
+                        {new Date(displayYear, displayMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                      </p>
+                      
+                      {/* Day labels */}
+                      <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-3">
+                        {dayLabels.map(label => (
+                          <div key={label} className="text-center">
+                            <p className="text-xs text-zinc-500 font-medium">{label}</p>
                           </div>
                         ))}
                       </div>
-                    );
-                  })()}
-                </div>
+
+                      {/* Heatmap grid */}
+                      <div className="grid grid-cols-7 gap-1 sm:gap-2">
+                        {calendarDays.map((day, idx) => (
+                          <div key={idx} className="group relative">
+                            {day.date ? (
+                              <div
+                                className="aspect-square rounded-lg cursor-pointer transition-all hover:ring-2 hover:ring-purple-400"
+                                style={{
+                                  backgroundColor: getHeatmapColor(day.total),
+                                }}
+                                title={`${day.date} - ${day.count} transactions - ${formatNumber(day.total)} ت`}
+                              >
+                                <div className="flex items-center justify-center h-full">
+                                  <span className="text-xs sm:text-sm font-semibold text-white">{day.date}</span>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="aspect-square rounded-lg bg-transparent" />
+                            )}
+                            
+                            {/* Tooltip on hover */}
+                            {day.date && (
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-zinc-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 border border-zinc-700">
+                                <p className="font-semibold">{day.count} {day.count === 1 ? 'transaction' : 'transactions'}</p>
+                                <p>{formatNumber(day.total)} ت</p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Legend */}
+                      <div className="mt-4 pt-4 border-t border-zinc-700">
+                        <p className="text-xs text-zinc-400 mb-2">Spending Intensity / شدت هزینه</p>
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="text-zinc-400">Less</span>
+                          <div className="flex gap-1">
+                            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: '#27272a' }} />
+                            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: '#60a5fa' }} />
+                            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: '#3b82f6' }} />
+                            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: '#f59e0b' }} />
+                            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: '#ea580c' }} />
+                            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: '#dc2626' }} />
+                          </div>
+                          <span className="text-zinc-400">More</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </div>
