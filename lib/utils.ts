@@ -19,11 +19,11 @@ export const categories = [
   { value: "Food", label: "Food", labelFa: "غذا" },
   { value: "Transport", label: "Transport", labelFa: "حمل و نقل" },
   { value: "Work", label: "Work", labelFa: "کار" },
-  { value: "Other", label: "Other", labelFa: "سایر" },
-  { value: "Shopping", label: "Shopping", labelFa: "خرید" },
   { value: "Healthcare", label: "Healthcare", labelFa: "بهداشت و درمان" },
-  { value: "Entertainment", label: "Entertainment", labelFa: "سرگرمی" },
   { value: "Utilities", label: "Utilities", labelFa: "قبوض" },
+  { value: "Rent", label: "Rent", labelFa: "اجاره" },
+  { value: "Clothing", label: "Clothing", labelFa: "پوشاک" },
+  { value: "Other", label: "Other", labelFa: "سایر" },
 ];
 
 export function getCategoryLabel(category: string): { en: string; fa: string } {
