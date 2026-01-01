@@ -43,7 +43,7 @@ export default function ReportsPage() {
         {/* Header */}
         <div className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-sm sticky top-0 z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-purple-500/10 rounded-lg">
                   <BarChart3 className="h-5 w-5 text-purple-400" />
@@ -53,7 +53,7 @@ export default function ReportsPage() {
                   <p className="text-sm text-zinc-400">Analyze your spending patterns</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                 <button className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
                   <Filter className="h-4 w-4" />
                   Filter
@@ -62,17 +62,13 @@ export default function ReportsPage() {
                   <Download className="h-4 w-4" />
                   Export
                 </button>
+                <DateRangeSelector value={dateRange} onChange={setDateRange} />
               </div>
             </div>
           </div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          {/* Date Range Selector */}
-          <div className="mb-6">
-            <DateRangeSelector value={dateRange} onChange={setDateRange} />
-          </div>
-
           {/* Statistics */}
           {!isLoading && (
             <div className="mb-6">
