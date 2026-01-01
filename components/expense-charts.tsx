@@ -164,7 +164,7 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
             Category Comparison / مقایسه دسته‌بندی
           </h3>
         </div>
-        <div className="h-[250px] sm:h-75">
+        <div className="h-[400px] sm:h-[500px]">
           <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <BarChart data={categoryTotals} layout="vertical" margin={{ left: 0, right: 20 }}>
               <XAxis
