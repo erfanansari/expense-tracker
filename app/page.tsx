@@ -22,7 +22,16 @@ export default function Home() {
       const response = await fetch('/api/expenses');
       if (response.ok) {
         const data = await response.json();
-        setExpenses(data);
+        // Handle both old format (array) and new format (object with expenses property)
+        // Backward compatibility: API returns array when no limit is provided
+        if (Array.isArray(data)) {
+          setExpenses(data);
+        } else if (data.expenses && Array.isArray(data.expenses)) {
+          // If paginated format is returned by mistake, use the expenses array
+          setExpenses(data.expenses);
+        } else {
+          setExpenses([]);
+        }
       }
     } finally {
       setIsLoading(false);
