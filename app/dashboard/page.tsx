@@ -624,7 +624,7 @@ export default function DashboardPage() {
                   const maxSpending = Math.max(...calendarDays.filter(d => d.date).map(d => d.total), 1);
                   
                   // Get color based on spending intensity
-                  const getHeatmapColor = (total) => {
+                  const getHeatmapColor = (total: number) => {
                     if (total === 0) return '#27272a';
                     const intensity = total / maxSpending;
                     if (intensity > 0.8) return '#dc2626';
