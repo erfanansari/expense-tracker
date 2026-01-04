@@ -1,40 +1,44 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function proxy(request: NextRequest) {
-  // Only enable auth in production
-  if (process.env.NODE_ENV !== 'production') {
-    return NextResponse.next();
-  }
+const publicRoutes = ['/login', '/signup', '/forgot-password', '/reset-password', '/'];
+const apiPublicRoutes = ['/api/auth/login', '/api/auth/signup', '/api/auth/forgot-password', '/api/auth/reset-password', '/api/auth/me'];
 
-  // Skip auth for API routes (optional, remove if you want to protect API too)
-  if (request.nextUrl.pathname.startsWith('/api')) {
-    return NextResponse.next();
-  }
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-  const basicAuth = request.headers.get('authorization');
-  const url = request.nextUrl;
-
-  if (basicAuth) {
-    const authValue = basicAuth.split(' ')[1];
-    const [user, pwd] = atob(authValue).split(':');
-
-    const validUser = process.env.AUTH_USERNAME || 'admin';
-    const validPassword = process.env.AUTH_PASSWORD || 'password';
-
-    if (user === validUser && pwd === validPassword) {
+  // Check if it's an API route
+  if (pathname.startsWith('/api')) {
+    // Public API routes can be accessed without auth
+    if (apiPublicRoutes.includes(pathname)) {
       return NextResponse.next();
     }
+
+    // Other API routes require authentication
+    const sessionId = request.cookies.get('session')?.value;
+    if (!sessionId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // For now, skip session validation in API routes to avoid DB calls during routing
+    // Sessions will be validated in the individual API route handlers
+    return NextResponse.next();
   }
 
-  url.pathname = '/api/auth';
+  // Public pages can be accessed without auth
+  if (publicRoutes.includes(pathname)) {
+    return NextResponse.next();
+  }
 
-  return NextResponse.rewrite(url, {
-    headers: {
-      'WWW-Authenticate': 'Basic realm="Secure Area"',
-    },
-    status: 401,
-  });
+  // All other pages require authentication
+  const sessionId = request.cookies.get('session')?.value;
+  if (!sessionId) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  // For client-side pages, trust the session cookie
+  // The actual validation will happen in the page components via the useAuth hook
+  return NextResponse.next();
 }
 
 export const config = {

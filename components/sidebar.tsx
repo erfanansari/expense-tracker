@@ -10,9 +10,9 @@ import {
   Settings,
   Zap,
   ChevronRight,
-  LogOut,
   Bell
 } from 'lucide-react';
+import { UserMenu } from './user-menu';
 
 interface NavItem {
   href: string;
@@ -145,19 +145,7 @@ export function Sidebar() {
 
       {/* User Profile */}
       <div className="p-4 border-t border-[#1f1f30]">
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-[#0f0f18] to-[#0a0a12] border border-[#1f1f30] hover:border-[#2a2a40] transition-all duration-200 cursor-pointer group">
-          <div className="relative">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-violet-500/30">
-              U
-            </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#0a0a12]" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white truncate">User</p>
-            <p className="text-xs text-zinc-500 truncate">Pro Account</p>
-          </div>
-          <LogOut className="h-4 w-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
-        </div>
+        <UserMenu />
       </div>
     </aside>
   );

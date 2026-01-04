@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db/client';
+import { getCurrentUser } from '@/lib/session';
 import { type CreateExpenseInput } from '@/lib/types/expense';
 
 // PUT /api/expenses/[id] - Update an expense
@@ -8,6 +9,15 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Get current user
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
 
     // Validate ID
@@ -15,6 +25,19 @@ export async function PUT(
       return NextResponse.json(
         { error: 'Invalid expense ID' },
         { status: 400 }
+      );
+    }
+
+    // Check if expense belongs to user
+    const existing = await db.execute({
+      sql: 'SELECT id FROM expenses WHERE id = ? AND user_id = ?',
+      args: [Number(id), user.userId]
+    });
+
+    if (existing.rows.length === 0) {
+      return NextResponse.json(
+        { error: 'Expense not found' },
+        { status: 404 }
       );
     }
 
@@ -32,14 +55,15 @@ export async function PUT(
     await db.execute({
       sql: `UPDATE expenses
             SET date = ?, category = ?, description = ?, price_toman = ?, price_usd = ?
-            WHERE id = ?`,
+            WHERE id = ? AND user_id = ?`,
       args: [
         body.date,
         body.category,
         body.description,
         body.price_toman,
         body.price_usd,
-        Number(id)
+        Number(id),
+        user.userId
       ]
     });
 
@@ -77,6 +101,15 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Get current user
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
 
     // Validate ID
@@ -87,11 +120,18 @@ export async function DELETE(
       );
     }
 
-    // Delete the expense
-    await db.execute({
-      sql: 'DELETE FROM expenses WHERE id = ?',
-      args: [Number(id)]
+    // Delete the expense (only if it belongs to user)
+    const result = await db.execute({
+      sql: 'DELETE FROM expenses WHERE id = ? AND user_id = ?',
+      args: [Number(id), user.userId]
     });
+
+    if (result.rowsAffected === 0) {
+      return NextResponse.json(
+        { error: 'Expense not found' },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json(
       { message: 'Expense deleted successfully' },

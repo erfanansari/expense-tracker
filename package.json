@@ -8,12 +8,14 @@
     "start": "next start",
     "lint": "eslint",
     "migrate": "tsx lib/db/migrate.ts",
+    "db:seed": "tsx lib/db/seed-user.ts",
     "db:test": "tsx lib/db/test-connection.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.15.15",
     "@vercel/analytics": "^1.6.1",
     "date-fns": "^4.1.0",
+    "jose": "^6.1.3",
     "lucide-react": "^0.561.0",
     "next": "16.0.10",
     "react": "19.2.3",
