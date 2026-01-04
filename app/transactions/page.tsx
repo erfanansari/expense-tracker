@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { ExpenseForm } from '@/components/expense-form';
-import { Trash2, Edit, Tag, Plus, Loader2 } from 'lucide-react';
+import { Trash2, Edit, Tag, Plus, Loader2, FileText, ArrowUpRight, Search, Filter } from 'lucide-react';
 import { type Expense } from '@/lib/types/expense';
 import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@/lib/utils';
 
@@ -143,21 +143,30 @@ export default function TransactionsPage() {
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-zinc-950 text-white">
+      <div className="min-h-screen bg-[var(--background)]">
         {/* Header */}
-        <div className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-sm sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="border-b border-[var(--border-subtle)] bg-[var(--background-card)]/80 backdrop-blur-xl sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold">Transactions</h1>
+              <div className="flex items-center gap-4">
+                <div className="p-2.5 bg-gradient-to-br from-violet-500/20 to-purple-500/20 rounded-xl border border-violet-500/20">
+                  <FileText className="h-6 w-6 text-violet-400" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-[var(--foreground)]">Transactions</h1>
+                  <p className="text-sm text-[var(--foreground-muted)]" dir="rtl">تراکنش‌ها</p>
+                </div>
+              </div>
               <button
                 onClick={() => {
                   setShowForm(!showForm);
                   setEditingExpense(undefined);
                 }}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                className="group relative px-5 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 rounded-xl text-sm font-semibold text-white transition-all duration-300 flex items-center gap-2 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40"
               >
                 <Plus className="h-4 w-4" />
-                Add Transaction
+                <span>Add Transaction</span>
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-violet-400 to-purple-400 opacity-0 group-hover:opacity-20 transition-opacity" />
               </button>
             </div>
           </div>
@@ -166,7 +175,7 @@ export default function TransactionsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {/* Expense Form */}
           {showForm && (
-            <div className="mb-6">
+            <div className="mb-6 animate-in slide-in-from-top-4 duration-300">
               <ExpenseForm
                 onExpenseAdded={handleExpenseChange}
                 editingExpense={editingExpense}
@@ -175,63 +184,77 @@ export default function TransactionsPage() {
             </div>
           )}
 
-          {/* Transactions Table */}
-          <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
+          {/* Transactions Card */}
+          <div className="relative bg-[var(--background-card)] rounded-2xl border border-[var(--border-subtle)] overflow-hidden">
+            {/* Card Glow Effect */}
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent" />
+
             {isLoading && expenses.length === 0 ? (
-              <div className="p-12 text-center">
-                <Loader2 className="h-8 w-8 animate-spin text-zinc-400 mx-auto mb-4" />
-                <p className="text-zinc-400">Loading transactions...</p>
+              <div className="p-16 text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-violet-500/10 mb-4">
+                  <Loader2 className="h-8 w-8 animate-spin text-violet-400" />
+                </div>
+                <p className="text-[var(--foreground-muted)] font-medium">Loading transactions...</p>
+                <p className="text-sm text-[var(--foreground-muted)]/60 mt-1" dir="rtl">در حال بارگذاری تراکنش‌ها...</p>
               </div>
             ) : error && expenses.length === 0 ? (
-              <div className="p-12 text-center">
-                <p className="text-red-400">{error}</p>
+              <div className="p-16 text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-red-500/10 mb-4">
+                  <FileText className="h-8 w-8 text-red-400" />
+                </div>
+                <p className="text-red-400 font-medium">{error}</p>
               </div>
             ) : expenses.length === 0 ? (
-              <div className="p-12 text-center">
-                <p className="text-zinc-400">No transactions yet. Add your first transaction above!</p>
+              <div className="p-16 text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[var(--background-elevated)] mb-4">
+                  <FileText className="h-8 w-8 text-[var(--foreground-muted)]" />
+                </div>
+                <p className="text-[var(--foreground-secondary)] font-medium">No transactions yet</p>
+                <p className="text-sm text-[var(--foreground-muted)] mt-1">Add your first transaction above!</p>
               </div>
             ) : (
               <>
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
-                    <thead className="bg-zinc-800/50">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                    <thead>
+                      <tr className="bg-[var(--background-elevated)]/50">
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--foreground-muted)] uppercase tracking-wider">
                           Description
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--foreground-muted)] uppercase tracking-wider">
                           Category
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--foreground-muted)] uppercase tracking-wider">
                           Date
                         </th>
-                        <th className="px-4 py-3 text-right text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-right text-xs font-semibold text-[var(--foreground-muted)] uppercase tracking-wider">
                           Amount
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-semibold text-zinc-400 uppercase tracking-wider w-24">
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-[var(--foreground-muted)] uppercase tracking-wider w-28">
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-800">
-                      {expenses.map((expense) => {
+                    <tbody className="divide-y divide-[var(--border-subtle)]">
+                      {expenses.map((expense, index) => {
                         const categoryLabels = getCategoryLabel(expense.category);
                         const farsiDate = formatToFarsiDate(expense.date);
 
                         return (
                           <tr
                             key={expense.id}
-                            className="hover:bg-zinc-800/30 transition-colors"
+                            className="group hover:bg-[var(--background-hover)] transition-colors duration-200"
+                            style={{ animationDelay: `${index * 20}ms` }}
                           >
-                            <td className="px-4 py-4">
-                              <div className="flex flex-col gap-1">
-                                <span className="text-sm font-medium text-white">{expense.description}</span>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-col gap-2">
+                                <span className="text-sm font-medium text-[var(--foreground)]">{expense.description}</span>
                                 {expense.tags && expense.tags.length > 0 && (
-                                  <div className="flex flex-wrap gap-1">
+                                  <div className="flex flex-wrap gap-1.5">
                                     {expense.tags.map(tag => (
                                       <div
                                         key={tag.id}
-                                        className="flex items-center gap-1 px-2 py-0.5 bg-purple-500/10 text-purple-400 rounded text-xs font-medium border border-purple-500/20"
+                                        className="flex items-center gap-1 px-2 py-0.5 bg-violet-500/10 text-violet-400 rounded-md text-xs font-medium border border-violet-500/20"
                                       >
                                         <Tag className="h-3 w-3" />
                                         <span>{tag.name}</span>
@@ -241,37 +264,37 @@ export default function TransactionsPage() {
                                 )}
                               </div>
                             </td>
-                            <td className="px-4 py-4">
+                            <td className="px-6 py-4">
                               <div className="flex flex-col">
-                                <span className="text-sm text-white">{categoryLabels.en}</span>
-                                <span className="text-xs text-zinc-400" dir="rtl">
+                                <span className="text-sm font-medium text-[var(--foreground)]">{categoryLabels.en}</span>
+                                <span className="text-xs text-[var(--foreground-muted)]" dir="rtl">
                                   {categoryLabels.fa}
                                 </span>
                               </div>
                             </td>
-                            <td className="px-4 py-4">
+                            <td className="px-6 py-4">
                               <div className="flex flex-col">
-                                <span className="text-sm text-white">{expense.date}</span>
-                                <span className="text-xs text-zinc-400" dir="rtl">
+                                <span className="text-sm text-[var(--foreground)]">{expense.date}</span>
+                                <span className="text-xs text-[var(--foreground-muted)]" dir="rtl">
                                   {farsiDate}
                                 </span>
                               </div>
                             </td>
-                            <td className="px-4 py-4 text-right">
+                            <td className="px-6 py-4 text-right">
                               <div className="flex flex-col items-end">
-                                <span className="text-sm font-medium text-white" dir="rtl">
+                                <span className="text-sm font-semibold text-[var(--foreground)]" dir="rtl">
                                   {formatNumber(expense.price_toman)} تومان
                                 </span>
-                                <span className="text-xs text-zinc-400">
+                                <span className="text-xs text-[var(--foreground-muted)]">
                                   ${expense.price_usd.toFixed(2)} USD
                                 </span>
                               </div>
                             </td>
-                            <td className="px-4 py-4">
-                              <div className="flex items-center justify-center gap-2">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center justify-center gap-1">
                                 <button
                                   onClick={() => handleEdit(expense)}
-                                  className="text-blue-400 hover:text-blue-300 transition-colors p-1.5 hover:bg-blue-500/10 rounded"
+                                  className="p-2 rounded-lg text-[var(--foreground-muted)] hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200"
                                   title="Edit"
                                 >
                                   <Edit className="h-4 w-4" />
@@ -279,7 +302,7 @@ export default function TransactionsPage() {
                                 <button
                                   onClick={() => handleDelete(expense.id)}
                                   disabled={deletingId === expense.id}
-                                  className="text-red-400 hover:text-red-300 disabled:opacity-50 transition-colors p-1.5 hover:bg-red-500/10 rounded"
+                                  className="p-2 rounded-lg text-[var(--foreground-muted)] hover:text-red-400 hover:bg-red-500/10 disabled:opacity-50 transition-all duration-200"
                                   title="Delete"
                                 >
                                   {deletingId === expense.id ? (
@@ -300,17 +323,22 @@ export default function TransactionsPage() {
                 {/* Infinite Loading Indicator */}
                 <div
                   ref={observerTarget}
-                  className="py-8 flex flex-col items-center justify-center gap-3 min-h-[120px]"
+                  className="py-8 flex flex-col items-center justify-center gap-3 border-t border-[var(--border-subtle)]"
                 >
                   {isLoadingMore && (
                     <>
-                      <Loader2 className="h-6 w-6 animate-spin text-purple-400" />
-                      <p className="text-sm text-zinc-400 font-medium">Loading more expenses...</p>
-                      <p className="text-xs text-zinc-500">Please wait while we fetch more transactions</p>
+                      <div className="flex items-center gap-3">
+                        <Loader2 className="h-5 w-5 animate-spin text-violet-400" />
+                        <p className="text-sm text-[var(--foreground-muted)] font-medium">Loading more transactions...</p>
+                      </div>
                     </>
                   )}
                   {!hasMore && expenses.length > 0 && (
-                    <p className="text-sm text-zinc-500">No more expenses to load</p>
+                    <div className="flex items-center gap-2 text-[var(--foreground-muted)]">
+                      <div className="h-px w-12 bg-[var(--border-subtle)]" />
+                      <p className="text-sm">End of transactions</p>
+                      <div className="h-px w-12 bg-[var(--border-subtle)]" />
+                    </div>
                   )}
                 </div>
               </>
@@ -321,4 +349,3 @@ export default function TransactionsPage() {
     </DashboardLayout>
   );
 }
-

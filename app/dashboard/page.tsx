@@ -31,15 +31,18 @@ function ExchangeRateCard() {
 
   if (isLoading || !rateData?.usd) {
     return (
-      <div className="bg-zinc-900 rounded-xl p-4 sm:p-6 border border-zinc-800 min-w-0">
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <div className="p-2 bg-emerald-500/10 rounded-lg">
-            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-400" />
+      <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] min-w-0 overflow-hidden group hover:border-amber-500/30 transition-all duration-300">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
+        <div className="flex items-center justify-between mb-4">
+          <div className="p-2.5 bg-gradient-to-br from-amber-500/20 to-orange-600/20 rounded-xl border border-amber-500/30 shadow-lg shadow-amber-500/10">
+            <DollarSign className="h-5 w-5 text-amber-400" />
           </div>
-          <MoreVertical className="h-4 w-4 text-zinc-400 cursor-pointer" />
         </div>
-        <h3 className="text-xs sm:text-sm text-zinc-400 mb-2 sm:mb-3">Exchange Rate</h3>
-        <p className="text-xs sm:text-sm text-zinc-500">Loading...</p>
+        <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-2">Exchange Rate</p>
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded-full border-2 border-amber-500/30 border-t-amber-500 animate-spin" />
+          <p className="text-sm text-zinc-500">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -61,48 +64,44 @@ function ExchangeRateCard() {
     : '';
 
   return (
-    <div className="bg-zinc-900 rounded-xl p-4 sm:p-6 border border-zinc-800 min-w-0">
-      <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <div className="p-2 bg-emerald-500/10 rounded-lg">
-          <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-400" />
+    <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] min-w-0 overflow-hidden group hover:border-amber-500/30 transition-all duration-300">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
+      <div className="absolute -top-20 -right-20 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+      <div className="flex items-center justify-between mb-4">
+        <div className="p-2.5 bg-gradient-to-br from-amber-500/20 to-orange-600/20 rounded-xl border border-amber-500/30 shadow-lg shadow-amber-500/10">
+          <DollarSign className="h-5 w-5 text-amber-400" />
         </div>
-        <MoreVertical className="h-4 w-4 text-zinc-400 cursor-pointer" />
+        <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg border ${
+          isZero
+            ? 'bg-zinc-800/50 text-zinc-400 border-zinc-700'
+            : change > 0
+            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+            : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+        }`}>
+          {isZero ? (
+            <>
+              <Minus className="h-3 w-3" />
+              <span>Stable</span>
+            </>
+          ) : (
+            <>
+              {change > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+              <span>{change > 0 ? '+' : ''}{formatNumber(Math.abs(change))}</span>
+            </>
+          )}
+        </div>
       </div>
-      <h3 className="text-xs sm:text-sm text-zinc-400 mb-2 sm:mb-3">Exchange Rate</h3>
-      <div className="space-y-2 sm:space-y-3">
-        <p className="text-xl sm:text-2xl font-bold text-emerald-400">
-          ${formatNumber(rate)} Toman
+
+      <div>
+        <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-2">Exchange Rate</p>
+        <p className="text-2xl sm:text-3xl font-bold text-amber-400 tabular-nums">
+          {formatNumber(rate)} <span className="text-lg text-zinc-500">تومان</span>
         </p>
-        <div className="flex items-center">
-          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-            isZero
-              ? 'bg-zinc-800 text-zinc-400'
-              : change > 0
-              ? 'bg-green-900/30 text-green-400'
-              : 'bg-red-900/30 text-red-400'
-          }`}>
-            {isZero ? (
-              <>
-                <Minus className="h-3 w-3" />
-                <span>No change</span>
-              </>
-            ) : (
-              <>
-                {change > 0 ? (
-                  <TrendingUp className="h-3 w-3" />
-                ) : (
-                  <TrendingDown className="h-3 w-3" />
-                )}
-                <span>{change > 0 ? '+' : ''}{formatNumber(Math.abs(change))}</span>
-              </>
-            )}
-          </div>
-        </div>
         {lastUpdate && (
-          <div className="flex flex-col text-xs">
-            <span className="text-zinc-500">Updated</span>
-            <span className="text-white">{lastUpdate}</span>
-          </div>
+          <p className="text-sm text-zinc-400 mt-1.5 font-medium">
+            Updated at {lastUpdate}
+          </p>
         )}
       </div>
     </div>
@@ -195,18 +194,27 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-zinc-950 text-white overflow-x-hidden">
+      <div className="min-h-screen bg-[#05050a] text-white overflow-x-hidden relative">
+        {/* Background effects */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-violet-500/5 rounded-full blur-[150px]" />
+          <div className="absolute bottom-1/4 right-0 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-[120px]" />
+        </div>
+
         {/* Header */}
-        <div className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-sm sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <h1 className="text-xl sm:text-2xl font-bold">Dashboard</h1>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+        <div className="border-b border-[#1f1f30] bg-[#0a0a12]/80 backdrop-blur-xl sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">Dashboard</h1>
+                <p className="text-sm text-zinc-500 mt-1">Welcome back! Here's your financial overview.</p>
+              </div>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <a
                   href="/transactions"
-                  className="px-3 sm:px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+                  className="px-4 sm:px-5 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <Plus className="h-4 w-4" />
                   <span className="hidden sm:inline">Add Transaction</span>
                   <span className="sm:hidden">Add</span>
                 </a>
@@ -216,85 +224,93 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-6 sm:py-8 relative">
           {/* Key Metrics */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6 sm:mb-8">
             {/* Total Expenses */}
-            <div className="bg-zinc-900 rounded-xl p-4 sm:p-6 border border-zinc-800 min-w-0">
+            <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] min-w-0 overflow-hidden group hover:border-violet-500/30 transition-all duration-300">
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent" />
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-violet-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
               <div className="flex items-center justify-between mb-4">
-                <div className="p-2 bg-purple-500/10 rounded-lg">
-                  <DollarSign className="h-5 w-5 text-purple-400" />
+                <div className="p-2.5 bg-gradient-to-br from-violet-500/20 to-purple-600/20 rounded-xl border border-violet-500/30 shadow-lg shadow-violet-500/10">
+                  <DollarSign className="h-5 w-5 text-violet-400" />
                 </div>
-                <MoreVertical className="h-4 w-4 text-zinc-400 cursor-pointer" />
               </div>
-              <h3 className="text-xs sm:text-sm text-zinc-400 mb-2 sm:mb-3">Total Expenses / کل هزینه‌ها</h3>
-              <p className="text-2xl sm:text-3xl font-bold text-white mb-1">
-                {formatNumber(totalToman)}
-              </p>
-              <p className="text-sm sm:text-base text-white mb-1 sm:mb-2" dir="rtl">تومان</p>
-              <p className="text-xs text-zinc-400">
-                ${totalUsd.toFixed(2)} USD
-              </p>
+
+              <div>
+                <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-2">Total Expenses</p>
+                <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums" dir="rtl">
+                  {formatNumber(totalToman)} <span className="text-lg text-zinc-500">تومان</span>
+                </p>
+                <p className="text-sm text-zinc-400 mt-1.5 font-medium">
+                  ${totalUsd.toFixed(2)} USD
+                </p>
+              </div>
             </div>
 
             {/* Transaction Count */}
-            <div className="bg-zinc-900 rounded-xl p-4 sm:p-6 border border-zinc-800 min-w-0">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="p-2 bg-blue-500/10 rounded-lg">
-                  <Hash className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" />
+            <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] min-w-0 overflow-hidden group hover:border-cyan-500/30 transition-all duration-300">
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-xl border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
+                  <Hash className="h-5 w-5 text-cyan-400" />
                 </div>
-                <MoreVertical className="h-4 w-4 text-zinc-400 cursor-pointer" />
               </div>
-              <h3 className="text-xs sm:text-sm text-zinc-400 mb-2 sm:mb-3">Number of Transactions / تعداد تراکنش</h3>
-              <p className="text-2xl sm:text-3xl font-bold text-white">{transactionCount}</p>
+
+              <div>
+                <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-2">Transactions</p>
+                <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums">{transactionCount}</p>
+                <p className="text-sm text-zinc-400 mt-1.5 font-medium" dir="rtl">تعداد تراکنش</p>
+              </div>
             </div>
 
             {/* Average Daily Spending */}
-            <div className="bg-zinc-900 rounded-xl p-4 sm:p-6 border border-zinc-800 min-w-0">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="p-2 bg-green-500/10 rounded-lg">
-                  <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-green-400" />
+            <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] min-w-0 overflow-hidden group hover:border-emerald-500/30 transition-all duration-300">
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-2.5 bg-gradient-to-br from-emerald-500/20 to-green-600/20 rounded-xl border border-emerald-500/30 shadow-lg shadow-emerald-500/10">
+                  <BarChart3 className="h-5 w-5 text-emerald-400" />
                 </div>
-                <MoreVertical className="h-4 w-4 text-zinc-400 cursor-pointer" />
+                {lastMonthTotal > 0 && (
+                  <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg border ${
+                    monthOverMonthChange >= 0
+                      ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                      : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                  }`}>
+                    {monthOverMonthChange >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                    <span>{Math.abs(monthOverMonthChange).toFixed(1)}%</span>
+                  </div>
+                )}
               </div>
-              <h3 className="text-xs sm:text-sm text-zinc-400 mb-2 sm:mb-3">Average Daily Spending / میانگین هزینه روزانه</h3>
-              {(() => {
-                const dates = filteredExpenses.map(exp => new Date(exp.date).getTime());
-                const firstDate = dates.length > 0 ? new Date(Math.min(...dates)) : new Date();
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                firstDate.setHours(0, 0, 0, 0);
-                const totalDays = Math.ceil((today.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-                const avgDailyToman = totalDays > 0 ? totalToman / totalDays : 0;
-                const avgDailyUsd = totalDays > 0 ? totalUsd / totalDays : 0;
-                return (
-                  <>
-                    <p className="text-2xl sm:text-3xl font-bold text-white mb-1">
-                      {formatNumber(avgDailyToman)}
-                    </p>
-                    <p className="text-sm sm:text-base text-white mb-1 sm:mb-2" dir="rtl">تومان</p>
-                    <p className="text-xs text-zinc-400 mb-2">
-                      ${avgDailyUsd.toFixed(2)} USD
-                    </p>
-                  </>
-                );
-              })()}
-              {lastMonthTotal > 0 && (
-                <div className="flex items-center gap-1 mt-2">
-                  {monthOverMonthChange >= 0 ? (
+
+              <div>
+                <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-2">Daily Average</p>
+                {(() => {
+                  const dates = filteredExpenses.map(exp => new Date(exp.date).getTime());
+                  const firstDate = dates.length > 0 ? new Date(Math.min(...dates)) : new Date();
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  firstDate.setHours(0, 0, 0, 0);
+                  const totalDays = Math.ceil((today.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                  const avgDailyToman = totalDays > 0 ? totalToman / totalDays : 0;
+                  const avgDailyUsd = totalDays > 0 ? totalUsd / totalDays : 0;
+                  return (
                     <>
-                      <TrendingUp className="h-3.5 w-3.5 text-green-400" />
-                      <span className="text-sm text-green-400">{Math.abs(monthOverMonthChange).toFixed(1)}%</span>
+                      <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums" dir="rtl">
+                        {formatNumber(avgDailyToman)} <span className="text-lg text-zinc-500">تومان</span>
+                      </p>
+                      <p className="text-sm text-zinc-400 mt-1.5 font-medium">
+                        ${avgDailyUsd.toFixed(2)} USD
+                      </p>
                     </>
-                  ) : (
-                    <>
-                      <TrendingDown className="h-3.5 w-3.5 text-red-400" />
-                      <span className="text-sm text-red-400">{Math.abs(monthOverMonthChange).toFixed(1)}%</span>
-                    </>
-                  )}
-                  <span className="text-xs text-zinc-500 ml-1">vs last month</span>
-                </div>
-              )}
+                  );
+                })()}
+              </div>
             </div>
 
             {/* Exchange Rate */}
@@ -303,16 +319,18 @@ export default function DashboardPage() {
           </div>
 
           {/* Insights Dashboard */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mb-6 sm:mb-8">
             {/* Top 3 Categories */}
-            <div className="bg-zinc-900 rounded-xl p-4 sm:p-6 border border-zinc-800 min-w-0">
+            <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] min-w-0 overflow-hidden group hover:border-yellow-500/30 transition-all duration-300">
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent" />
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-yellow-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
               <div className="flex items-center justify-between mb-4">
-                <div className="p-2 bg-yellow-500/10 rounded-lg">
+                <div className="p-2.5 bg-gradient-to-br from-yellow-500/20 to-amber-600/20 rounded-xl border border-yellow-500/30 shadow-lg shadow-yellow-500/10">
                   <Lightbulb className="h-5 w-5 text-yellow-400" />
                 </div>
-                <MoreVertical className="h-4 w-4 text-zinc-400 cursor-pointer" />
               </div>
-              <h3 className="text-xs sm:text-sm text-zinc-400 mb-3 sm:mb-4">Top 3 Spending Categories / ۳ دسته بندی برتر</h3>
+              <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-3">Top Categories</p>
               {(() => {
                 const now = new Date();
                 const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -320,10 +338,10 @@ export default function DashboardPage() {
                   const expDate = new Date(exp.date);
                   return expDate >= startOfMonth;
                 });
-                
+
                 // Use this month's expenses if available, otherwise use all filtered expenses
                 const dataToUse = thisMonthExpenses.length > 0 ? thisMonthExpenses : filteredExpenses;
-                
+
                 const monthCategoryTotals = dataToUse.reduce((acc, exp) => {
                   const existing = acc.find(item => item.category === exp.category);
                   if (existing) {
@@ -343,137 +361,154 @@ export default function DashboardPage() {
                 const topThree = monthCategoryTotals.sort((a, b) => b.value - a.value).slice(0, 3);
 
                 return topThree.length > 0 ? (
-                  <div className="space-y-2">
-                    <p className="text-xs text-zinc-500 mb-2">{thisMonthExpenses.length > 0 ? 'This Month' : 'Overall'}</p>
+                  <div className="space-y-3">
+                    <p className="text-xs text-zinc-500 font-medium">{thisMonthExpenses.length > 0 ? 'This Month' : 'Overall'}</p>
                     {topThree.map((cat, index) => (
-                      <div key={cat.category} className="flex items-center justify-between text-xs sm:text-sm">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-yellow-400">{index + 1}.</span>
+                      <div key={cat.category} className="flex items-center justify-between p-2.5 bg-[#0a0a12]/50 rounded-xl border border-[#1f1f30] hover:border-[#2a2a40] transition-colors">
+                        <div className="flex items-center gap-3">
+                          <span className="w-6 h-6 flex items-center justify-center rounded-lg bg-yellow-500/20 text-yellow-400 text-xs font-bold">{index + 1}</span>
                           <div className="flex flex-col min-w-0">
-                            <span className="text-white font-medium truncate">{cat.name}</span>
-                            <span className="text-zinc-400 text-xs truncate">{cat.nameFa}</span>
+                            <span className="text-white font-medium text-sm truncate">{cat.name}</span>
+                            <span className="text-zinc-500 text-xs truncate" dir="rtl">{cat.nameFa}</span>
                           </div>
                         </div>
-                        <span className="font-semibold text-white whitespace-nowrap ml-2">{formatNumber(cat.value)}</span>
+                        <span className="font-bold text-white text-sm whitespace-nowrap tabular-nums">{formatNumber(cat.value)}</span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-zinc-400">No expense data available</p>
+                  <p className="text-sm text-zinc-500">No expense data available</p>
                 );
               })()}
             </div>
 
             {/* Highest Single Expense */}
-            <div className="bg-zinc-900 rounded-xl p-4 sm:p-6 border border-zinc-800 min-w-0">
+            <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] min-w-0 overflow-hidden group hover:border-rose-500/30 transition-all duration-300">
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-rose-500/50 to-transparent" />
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-rose-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
               <div className="flex items-center justify-between mb-4">
-                <div className="p-2 bg-amber-500/10 rounded-lg">
-                  <TrendingUp className="h-5 w-5 text-amber-400" />
+                <div className="p-2.5 bg-gradient-to-br from-rose-500/20 to-pink-600/20 rounded-xl border border-rose-500/30 shadow-lg shadow-rose-500/10">
+                  <TrendingUp className="h-5 w-5 text-rose-400" />
                 </div>
-                <MoreVertical className="h-4 w-4 text-zinc-400 cursor-pointer" />
               </div>
-              <h3 className="text-xs sm:text-sm text-zinc-400 mb-3 sm:mb-4">Highest Single Expense / بالاترین هزینه تکی</h3>
+              <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-3">Highest Expense</p>
               {(() => {
-                const highestExpense = filteredExpenses.reduce((max, exp) => 
+                const highestExpense = filteredExpenses.reduce((max, exp) =>
                   exp.price_toman > max.price_toman ? exp : max
                 , filteredExpenses[0]);
 
                 return highestExpense ? (
                   <>
-                    <p className="text-2xl sm:text-3xl font-bold text-amber-400 mb-1">
-                      {formatNumber(highestExpense.price_toman)}
+                    <p className="text-2xl sm:text-3xl font-bold text-rose-400 tabular-nums" dir="rtl">
+                      {formatNumber(highestExpense.price_toman)} <span className="text-lg text-zinc-500">تومان</span>
                     </p>
-                    <p className="text-sm sm:text-base text-white mb-2 sm:mb-3" dir="rtl">تومان</p>
-                    <p className="text-xs text-zinc-400 mb-1">
+                    <p className="text-sm text-zinc-400 mt-1.5 font-medium">
                       ${highestExpense.price_usd.toFixed(2)} USD
                     </p>
-                    <p className="text-xs text-zinc-400 mb-1">
-                      {new Date(highestExpense.date).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric'
-                      })}
-                    </p>
-                    <p className="text-xs text-zinc-400">{getCategoryLabel(highestExpense.category).en} / {getCategoryLabel(highestExpense.category).fa}</p>
+                    <div className="mt-3 pt-3 border-t border-[#1f1f30]">
+                      <p className="text-xs text-zinc-500 mb-1">
+                        {new Date(highestExpense.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+                      </p>
+                      <p className="text-sm text-white font-medium">{getCategoryLabel(highestExpense.category).en}</p>
+                    </div>
                   </>
                 ) : (
-                  <p className="text-xs text-zinc-400">No expenses yet</p>
+                  <p className="text-sm text-zinc-500">No expenses yet</p>
                 );
               })()}
             </div>
 
             {/* Month over Month Change */}
-            <div className="bg-zinc-900 rounded-xl p-4 sm:p-6 border border-zinc-800 min-w-0">
+            <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] min-w-0 overflow-hidden group hover:border-indigo-500/30 transition-all duration-300">
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
               <div className="flex items-center justify-between mb-4">
-                <div className={`p-2 rounded-lg ${
-                  monthOverMonthChange >= 0 
-                    ? 'bg-red-500/10' 
-                    : 'bg-green-500/10'
+                <div className={`p-2.5 rounded-xl border shadow-lg ${
+                  monthOverMonthChange >= 0
+                    ? 'bg-gradient-to-br from-rose-500/20 to-red-600/20 border-rose-500/30 shadow-rose-500/10'
+                    : 'bg-gradient-to-br from-emerald-500/20 to-green-600/20 border-emerald-500/30 shadow-emerald-500/10'
                 }`}>
                   {monthOverMonthChange >= 0 ? (
-                    <TrendingUp className="h-5 w-5 text-red-400" />
+                    <TrendingUp className="h-5 w-5 text-rose-400" />
                   ) : (
-                    <TrendingDown className="h-5 w-5 text-green-400" />
+                    <TrendingDown className="h-5 w-5 text-emerald-400" />
                   )}
                 </div>
-                <MoreVertical className="h-4 w-4 text-zinc-400 cursor-pointer" />
               </div>
-              <h3 className="text-xs sm:text-sm text-zinc-400 mb-3 sm:mb-4">Spending vs Last Month / هزینه درمقابل ماه گذشته</h3>
+              <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-3">vs Last Month</p>
               {lastMonthTotal > 0 ? (
                 <>
-                  <p className={`text-2xl sm:text-3xl font-bold mb-2 ${
-                    monthOverMonthChange >= 0 
-                      ? 'text-red-400' 
-                      : 'text-green-400'
+                  <p className={`text-2xl sm:text-3xl font-bold tabular-nums ${
+                    monthOverMonthChange >= 0 ? 'text-rose-400' : 'text-emerald-400'
                   }`}>
                     {monthOverMonthChange >= 0 ? '+' : ''}{monthOverMonthChange.toFixed(1)}%
                   </p>
-                  <p className="text-xs sm:text-sm text-zinc-400 mb-2">
-                    You're spending <span className="text-white font-medium">{monthOverMonthChange >= 0 ? 'more' : 'less'}</span> than last month
+                  <p className="text-sm text-zinc-400 mt-1.5 font-medium">
+                    Spending <span className={`font-semibold ${monthOverMonthChange >= 0 ? 'text-rose-400' : 'text-emerald-400'}`}>{monthOverMonthChange >= 0 ? 'more' : 'less'}</span> than last month
                   </p>
-                  <p className="text-xs text-zinc-400 mb-1">This Month: {formatNumber(thisMonthTotalToman)} ت</p>
-                  <p className="text-xs text-zinc-400">Last Month: {formatNumber(lastMonthTotalToman)} ت</p>
+                  <div className="mt-3 pt-3 border-t border-[#1f1f30] space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-zinc-500">This Month</span>
+                      <span className="text-white font-medium tabular-nums">{formatNumber(thisMonthTotalToman)} ت</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-zinc-500">Last Month</span>
+                      <span className="text-zinc-400 tabular-nums">{formatNumber(lastMonthTotalToman)} ت</span>
+                    </div>
+                  </div>
                 </>
               ) : (
-                <p className="text-xs text-zinc-400">Not enough data to compare</p>
+                <p className="text-sm text-zinc-500">Not enough data to compare</p>
               )}
             </div>
           </div>
 
           {/* Expenses by Category - Full Width */}
           {categoryData.length > 0 && (
-            <div className="bg-zinc-900 rounded-xl p-4 sm:p-6 border border-zinc-800 overflow-x-hidden">
-              <div className="flex items-center justify-between mb-4 sm:mb-6">
-                <h2 className="text-base sm:text-lg font-semibold">Expenses by Category</h2>
+            <div className="relative bg-gradient-to-br from-[#0a0a12] to-[#05050a] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] overflow-hidden mb-6 sm:mb-8">
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/30 to-transparent" />
+
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-gradient-to-br from-violet-500/20 to-purple-600/20 rounded-lg border border-violet-500/30">
+                  <BarChart3 className="h-4 w-4 text-violet-400" />
+                </div>
+                <h2 className="text-lg font-semibold text-white">Expenses by Category</h2>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {categoryData.map((cat, index) => (
-                  <div key={cat.category} className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-zinc-800/50 rounded-lg min-w-0">
+                  <div key={cat.category} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-[#0f0f18]/50 rounded-xl border border-[#1f1f30] hover:border-[#2a2a40] transition-colors min-w-0 group">
                     <div
-                      className="w-1.5 sm:w-2 h-6 sm:h-8 rounded shrink-0"
-                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      className="w-1.5 h-10 rounded-full shrink-0 shadow-lg"
+                      style={{
+                        backgroundColor: COLORS[index % COLORS.length],
+                        boxShadow: `0 0 10px ${COLORS[index % COLORS.length]}40`
+                      }}
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1 gap-2">
+                      <div className="flex items-center justify-between mb-2 gap-2">
                         <div className="flex flex-col min-w-0 flex-1">
-                          <span className="text-xs sm:text-sm font-medium truncate">{cat.name}</span>
-                          <span className="text-[10px] sm:text-xs text-zinc-400 truncate" dir="rtl">{cat.nameFa}</span>
+                          <span className="text-sm font-semibold text-white truncate">{cat.name}</span>
+                          <span className="text-xs text-zinc-500 truncate" dir="rtl">{cat.nameFa}</span>
                         </div>
                         <div className="flex flex-col items-end shrink-0">
-                          <span className="text-xs sm:text-sm font-bold whitespace-nowrap" dir="rtl">
+                          <span className="text-sm font-bold text-white whitespace-nowrap tabular-nums" dir="rtl">
                             {formatNumber(cat.value)} تومان
                           </span>
-                          <span className="text-[10px] sm:text-xs text-zinc-400 whitespace-nowrap">
+                          <span className="text-xs text-zinc-500 whitespace-nowrap">
                             ${cat.usdValue.toFixed(2)} USD
                           </span>
                         </div>
                       </div>
-                      <div className="w-full bg-zinc-700 rounded-full h-1 sm:h-1.5">
+                      <div className="w-full bg-[#1f1f30] rounded-full h-2">
                         <div
-                          className="h-full rounded-full"
+                          className="h-full rounded-full transition-all duration-500"
                           style={{
                             width: `${totalToman > 0 ? (cat.value / totalToman) * 100 : 0}%`,
-                            backgroundColor: COLORS[index % COLORS.length]
+                            backgroundColor: COLORS[index % COLORS.length],
+                            boxShadow: `0 0 8px ${COLORS[index % COLORS.length]}50`
                           }}
                         />
                       </div>
@@ -485,31 +520,40 @@ export default function DashboardPage() {
           )}
 
           {/* Enhanced Charts */}
-          <div className="mt-8 mb-6">
-            <h2 className="text-lg sm:text-xl font-semibold mb-4">Enhanced Charts / نمودارهای پیشرفته</h2>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-6">
+              <h2 className="text-xl font-bold text-white">Enhanced Analytics</h2>
+              <span className="text-sm text-zinc-500" dir="rtl">نمودارهای پیشرفته</span>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
               {/* Comparison Chart - This Month vs Last Month */}
-              <div className="bg-zinc-900 rounded-xl p-4 sm:p-6 border border-zinc-800">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 bg-blue-500/10 rounded-lg">
-                    <BarChart3 className="h-5 w-5 text-blue-400" />
+              <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] overflow-hidden group hover:border-cyan-500/30 transition-all duration-300">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
+                <div className="absolute -top-20 -left-20 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-xl border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
+                    <BarChart3 className="h-5 w-5 text-cyan-400" />
                   </div>
-                  <h3 className="text-base sm:text-lg font-semibold">Month Comparison / مقایسه ماهانه</h3>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">Month Comparison</h3>
+                    <p className="text-xs text-zinc-500" dir="rtl">مقایسه ماهانه</p>
+                  </div>
                 </div>
-                
-                <div className="space-y-4">
+
+                <div className="space-y-5">
                   {/* This Month Bar */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-zinc-300">
+                      <span className="text-sm font-medium text-white">
                         {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                       </span>
-                      <span className="text-sm font-semibold text-white">{formatNumber(thisMonthTotalToman)} ت</span>
+                      <span className="text-sm font-bold text-cyan-400 tabular-nums">{formatNumber(thisMonthTotalToman)} ت</span>
                     </div>
-                    <div className="w-full bg-zinc-700 rounded-full h-2">
+                    <div className="w-full bg-[#1f1f30] rounded-full h-3">
                       <div
-                        className="h-full rounded-full bg-blue-500"
+                        className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/30 transition-all duration-500"
                         style={{
                           width: `${Math.max(thisMonthTotalToman, lastMonthTotalToman) > 0 ? (thisMonthTotalToman / Math.max(thisMonthTotalToman, lastMonthTotalToman)) * 100 : 0}%`
                         }}
@@ -520,14 +564,14 @@ export default function DashboardPage() {
                   {/* Last Month Bar */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-zinc-300">
+                      <span className="text-sm font-medium text-zinc-400">
                         {new Date(new Date().getFullYear(), new Date().getMonth() - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                       </span>
-                      <span className="text-sm font-semibold text-white">{formatNumber(lastMonthTotalToman)} ت</span>
+                      <span className="text-sm font-bold text-zinc-400 tabular-nums">{formatNumber(lastMonthTotalToman)} ت</span>
                     </div>
-                    <div className="w-full bg-zinc-700 rounded-full h-2">
+                    <div className="w-full bg-[#1f1f30] rounded-full h-3">
                       <div
-                        className="h-full rounded-full bg-zinc-500"
+                        className="h-full rounded-full bg-zinc-600 transition-all duration-500"
                         style={{
                           width: `${Math.max(thisMonthTotalToman, lastMonthTotalToman) > 0 ? (lastMonthTotalToman / Math.max(thisMonthTotalToman, lastMonthTotalToman)) * 100 : 0}%`
                         }}
@@ -536,43 +580,47 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Difference */}
-                  <div className="pt-2 border-t border-zinc-700">
+                  <div className="pt-4 border-t border-[#1f1f30]">
                     {thisMonthTotalToman > 0 && lastMonthTotalToman > 0 ? (
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between p-3 bg-[#0a0a12]/50 rounded-xl">
                         <span className="text-sm text-zinc-400">Difference</span>
                         <div className="flex items-center gap-2">
                           {thisMonthTotalToman > lastMonthTotalToman ? (
-                            <TrendingUp className="h-4 w-4 text-red-400" />
+                            <TrendingUp className="h-4 w-4 text-rose-400" />
                           ) : (
-                            <TrendingDown className="h-4 w-4 text-green-400" />
+                            <TrendingDown className="h-4 w-4 text-emerald-400" />
                           )}
-                          <span className={`text-sm font-semibold ${
-                            thisMonthTotalToman > lastMonthTotalToman ? 'text-red-400' : 'text-green-400'
+                          <span className={`text-sm font-bold tabular-nums ${
+                            thisMonthTotalToman > lastMonthTotalToman ? 'text-rose-400' : 'text-emerald-400'
                           }`}>
                             {formatNumber(Math.abs(thisMonthTotalToman - lastMonthTotalToman))} ت
                           </span>
                         </div>
                       </div>
                     ) : (
-                      <div className="text-xs text-zinc-400">
-                        {thisMonthTotalToman === 0 && lastMonthTotalToman > 0 ? (
-                          <p>No spending recorded in {new Date().toLocaleDateString('en-US', { month: 'long' })} yet</p>
-                        ) : lastMonthTotalToman === 0 ? (
-                          <p>No data to compare</p>
-                        ) : null}
-                      </div>
+                      <p className="text-sm text-zinc-500">
+                        {thisMonthTotalToman === 0 && lastMonthTotalToman > 0
+                          ? `No spending recorded in ${new Date().toLocaleDateString('en-US', { month: 'long' })} yet`
+                          : 'No data to compare'}
+                      </p>
                     )}
                   </div>
                 </div>
               </div>
 
               {/* Spending Heatmap Calendar */}
-              <div className="bg-zinc-900 rounded-xl p-4 sm:p-6 border border-zinc-800">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="p-2 bg-purple-500/10 rounded-lg">
-                    <BarChart3 className="h-5 w-5 text-purple-400" />
+              <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] overflow-hidden group hover:border-violet-500/30 transition-all duration-300">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent" />
+                <div className="absolute -top-20 -right-20 w-40 h-40 bg-violet-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2.5 bg-gradient-to-br from-violet-500/20 to-purple-600/20 rounded-xl border border-violet-500/30 shadow-lg shadow-violet-500/10">
+                    <BarChart3 className="h-5 w-5 text-violet-400" />
                   </div>
-                  <h3 className="text-base sm:text-lg font-semibold">Spending Heatmap / نقشه حرارتی هزینه</h3>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">Spending Heatmap</h3>
+                    <p className="text-xs text-zinc-500" dir="rtl">نقشه حرارتی هزینه</p>
+                  </div>
                 </div>
 
                 {(() => {
@@ -595,19 +643,19 @@ export default function DashboardPage() {
                     displayMonth = new Date().getMonth();
                     displayYear = new Date().getFullYear();
                   }
-                  
+
                   // Get all days in display month
                   const firstDay = new Date(displayYear, displayMonth, 1);
                   const lastDay = new Date(displayYear, displayMonth + 1, 0);
                   const daysInMonth = lastDay.getDate();
                   const startingDayOfWeek = firstDay.getDay();
-                  
+
                   // Build calendar with spending data from filteredExpenses
                   const calendarDays = [];
                   for (let i = 0; i < startingDayOfWeek; i++) {
                     calendarDays.push({ date: null, total: 0, count: 0 });
                   }
-                  
+
                   for (let day = 1; day <= daysInMonth; day++) {
                     const dateStr = `${displayYear}-${String(displayMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                     const dayExpenses = filteredExpenses.filter(exp => exp.date === dateStr);
@@ -619,19 +667,19 @@ export default function DashboardPage() {
                       count: dayExpenses.length
                     });
                   }
-                  
+
                   // Find max spending for color scaling
                   const maxSpending = Math.max(...calendarDays.filter(d => d.date).map(d => d.total), 1);
-                  
+
                   // Get color based on spending intensity
                   const getHeatmapColor = (total: number) => {
-                    if (total === 0) return '#27272a';
+                    if (total === 0) return '#1f1f30';
                     const intensity = total / maxSpending;
-                    if (intensity > 0.8) return '#dc2626';
-                    if (intensity > 0.6) return '#ea580c';
-                    if (intensity > 0.4) return '#f59e0b';
-                    if (intensity > 0.2) return '#3b82f6';
-                    return '#60a5fa';
+                    if (intensity > 0.8) return '#8b5cf6';
+                    if (intensity > 0.6) return '#a78bfa';
+                    if (intensity > 0.4) return '#c4b5fd';
+                    if (intensity > 0.2) return '#6366f1';
+                    return '#818cf8';
                   };
 
                   const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -639,44 +687,45 @@ export default function DashboardPage() {
                   return (
                     <div>
                       {/* Month label */}
-                      <p className="text-sm text-zinc-400 mb-4">
+                      <p className="text-sm text-white font-medium mb-4">
                         {new Date(displayYear, displayMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                       </p>
-                      
+
                       {/* Day labels */}
-                      <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-3">
+                      <div className="grid grid-cols-7 gap-1.5 sm:gap-2 mb-3">
                         {dayLabels.map(label => (
                           <div key={label} className="text-center">
-                            <p className="text-xs text-zinc-500 font-medium">{label}</p>
+                            <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wide">{label}</p>
                           </div>
                         ))}
                       </div>
 
                       {/* Heatmap grid */}
-                      <div className="grid grid-cols-7 gap-1 sm:gap-2">
+                      <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
                         {calendarDays.map((day, idx) => (
                           <div key={idx} className="group relative">
                             {day.date ? (
                               <div
-                                className="aspect-square rounded-lg cursor-pointer transition-all hover:ring-2 hover:ring-purple-400"
+                                className="aspect-square rounded-lg cursor-pointer transition-all hover:ring-2 hover:ring-violet-400 hover:scale-105"
                                 style={{
                                   backgroundColor: getHeatmapColor(day.total),
+                                  boxShadow: day.total > 0 ? `0 0 10px ${getHeatmapColor(day.total)}40` : 'none'
                                 }}
                                 title={`${day.date} - ${day.count} transactions - ${formatNumber(day.total)} ت`}
                               >
                                 <div className="flex items-center justify-center h-full">
-                                  <span className="text-xs sm:text-sm font-semibold text-white">{day.date}</span>
+                                  <span className="text-xs sm:text-sm font-bold text-white">{day.date}</span>
                                 </div>
                               </div>
                             ) : (
                               <div className="aspect-square rounded-lg bg-transparent" />
                             )}
-                            
+
                             {/* Tooltip on hover */}
                             {day.date && (
-                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-zinc-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 border border-zinc-700">
-                                <p className="font-semibold">{day.count} {day.count === 1 ? 'transaction' : 'transactions'}</p>
-                                <p>{formatNumber(day.total)} ت</p>
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-[#0f0f18] text-white text-xs px-3 py-2 rounded-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 border border-[#2a2a40] shadow-xl">
+                                <p className="font-bold text-white">{day.count} {day.count === 1 ? 'transaction' : 'transactions'}</p>
+                                <p className="text-violet-400 font-medium">{formatNumber(day.total)} ت</p>
                               </div>
                             )}
                           </div>
@@ -684,19 +733,19 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Legend */}
-                      <div className="mt-4 pt-4 border-t border-zinc-700">
-                        <p className="text-xs text-zinc-400 mb-2">Spending Intensity / شدت هزینه</p>
-                        <div className="flex items-center gap-2 text-xs">
-                          <span className="text-zinc-400">Less</span>
-                          <div className="flex gap-1">
-                            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: '#27272a' }} />
-                            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: '#60a5fa' }} />
-                            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: '#3b82f6' }} />
-                            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: '#f59e0b' }} />
-                            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: '#ea580c' }} />
-                            <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: '#dc2626' }} />
+                      <div className="mt-5 pt-4 border-t border-[#1f1f30]">
+                        <p className="text-xs text-zinc-500 font-medium mb-3">Spending Intensity</p>
+                        <div className="flex items-center gap-3 text-xs">
+                          <span className="text-zinc-500">Less</span>
+                          <div className="flex gap-1.5">
+                            <div className="w-4 h-4 rounded-md shadow-inner" style={{ backgroundColor: '#1f1f30' }} />
+                            <div className="w-4 h-4 rounded-md" style={{ backgroundColor: '#818cf8', boxShadow: '0 0 6px #818cf830' }} />
+                            <div className="w-4 h-4 rounded-md" style={{ backgroundColor: '#6366f1', boxShadow: '0 0 6px #6366f130' }} />
+                            <div className="w-4 h-4 rounded-md" style={{ backgroundColor: '#c4b5fd', boxShadow: '0 0 6px #c4b5fd30' }} />
+                            <div className="w-4 h-4 rounded-md" style={{ backgroundColor: '#a78bfa', boxShadow: '0 0 6px #a78bfa30' }} />
+                            <div className="w-4 h-4 rounded-md" style={{ backgroundColor: '#8b5cf6', boxShadow: '0 0 6px #8b5cf630' }} />
                           </div>
-                          <span className="text-zinc-400">More</span>
+                          <span className="text-zinc-500">More</span>
                         </div>
                       </div>
                     </div>

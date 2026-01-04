@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, Tag as TagIcon, Plus } from 'lucide-react';
+import { X, Tag as TagIcon, Plus, Loader2 } from 'lucide-react';
 import { type Tag } from '@/lib/types/expense';
 
 interface TagInputProps {
@@ -133,18 +133,18 @@ export function TagInput({ selectedTags, onTagsChange }: TagInputProps) {
   return (
     <div className="relative">
       {/* Selected Tags + Input */}
-      <div className="flex flex-wrap items-center gap-2 px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent min-h-[42px]">
+      <div className="flex flex-wrap items-center gap-2 px-4 py-3 bg-[var(--background-elevated)] border border-[var(--border-subtle)] rounded-xl focus-within:border-violet-500/50 focus-within:ring-2 focus-within:ring-violet-500/20 transition-all min-h-[48px]">
         {selectedTags.map(tag => (
           <div
             key={tag.id}
-            className="flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded text-xs font-medium"
+            className="group flex items-center gap-1.5 px-2.5 py-1 bg-violet-500/15 text-violet-400 rounded-lg text-sm font-medium border border-violet-500/20 hover:border-violet-500/40 transition-all"
           >
-            <TagIcon className="h-3 w-3" />
+            <TagIcon className="h-3.5 w-3.5" />
             <span>{tag.name}</span>
             <button
               type="button"
               onClick={() => removeTag(tag.id)}
-              className="hover:text-blue-900 dark:hover:text-blue-200"
+              className="ml-0.5 p-0.5 rounded hover:bg-violet-500/20 transition-colors"
             >
               <X className="h-3 w-3" />
             </button>
@@ -158,8 +158,8 @@ export function TagInput({ selectedTags, onTagsChange }: TagInputProps) {
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => inputValue && setShowSuggestions(true)}
-          placeholder={selectedTags.length === 0 ? "Add tags ..." : ""}
-          className="flex-1 min-w-[120px] outline-none bg-transparent text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-500 dark:placeholder:text-zinc-500"
+          placeholder={selectedTags.length === 0 ? "Add tags..." : ""}
+          className="flex-1 min-w-[120px] outline-none bg-transparent text-[var(--foreground)] placeholder:text-[var(--foreground-muted)]"
         />
       </div>
 
@@ -167,16 +167,16 @@ export function TagInput({ selectedTags, onTagsChange }: TagInputProps) {
       {showSuggestions && (inputValue.trim() || filteredTags.length > 0) && (
         <div
           ref={suggestionsRef}
-          className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-md shadow-lg z-10 max-h-48 overflow-y-auto"
+          className="absolute top-full left-0 right-0 mt-2 bg-[var(--background-card)] border border-[var(--border-subtle)] rounded-xl shadow-xl shadow-black/20 z-20 max-h-48 overflow-y-auto"
         >
           {filteredTags.map(tag => (
             <button
               key={tag.id}
               type="button"
               onClick={() => selectTag(tag)}
-              className="w-full px-3 py-2 text-left hover:bg-zinc-100 dark:hover:bg-zinc-700 text-sm text-zinc-900 dark:text-zinc-100 flex items-center gap-2"
+              className="w-full px-4 py-2.5 text-left hover:bg-[var(--background-hover)] text-sm text-[var(--foreground)] flex items-center gap-2.5 transition-colors first:rounded-t-xl"
             >
-              <TagIcon className="h-3 w-3 text-zinc-500" />
+              <TagIcon className="h-4 w-4 text-violet-400" />
               {tag.name}
             </button>
           ))}
@@ -187,15 +187,19 @@ export function TagInput({ selectedTags, onTagsChange }: TagInputProps) {
               type="button"
               onClick={() => createTag(inputValue)}
               disabled={isCreating}
-              className="w-full px-3 py-2 text-left hover:bg-blue-50 dark:hover:bg-blue-900/20 text-sm text-blue-600 dark:text-blue-400 flex items-center gap-2 border-t border-zinc-200 dark:border-zinc-700 disabled:opacity-50"
+              className="w-full px-4 py-2.5 text-left hover:bg-violet-500/10 text-sm text-violet-400 flex items-center gap-2.5 border-t border-[var(--border-subtle)] disabled:opacity-50 last:rounded-b-xl transition-colors"
             >
-              <Plus className="h-3 w-3" />
+              {isCreating ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4" />
+              )}
               {isCreating ? 'Creating...' : `Create "${inputValue}"`}
             </button>
           )}
 
           {filteredTags.length === 0 && !inputValue.trim() && (
-            <div className="px-3 py-2 text-sm text-zinc-500 dark:text-zinc-400">
+            <div className="px-4 py-3 text-sm text-[var(--foreground-muted)]">
               Start typing to search or create tags...
             </div>
           )}

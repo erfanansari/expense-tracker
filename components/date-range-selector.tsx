@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar } from 'lucide-react';
+import { Calendar, ChevronDown } from 'lucide-react';
 
 export type DateRange = '7D' | '30D' | 'THIS_MONTH' | 'LAST_MONTH' | 'YTD' | 'ALL_TIME';
 
@@ -20,19 +20,27 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
   ];
 
   return (
-    <div className="flex items-center gap-2">
-      <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value as DateRange)}
-        className="bg-zinc-800 border border-zinc-700 text-white text-xs sm:text-sm rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label} / {option.labelFa}
-          </option>
-        ))}
-      </select>
+    <div className="relative group">
+      <div className="flex items-center gap-2 px-4 py-2.5 bg-[#0f0f18] border border-[#1f1f30] hover:border-violet-500/30 rounded-xl transition-all duration-200 cursor-pointer shadow-lg shadow-black/10">
+        <Calendar className="h-4 w-4 text-violet-400" />
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value as DateRange)}
+          className="appearance-none bg-transparent border-none text-sm font-semibold text-white cursor-pointer focus:outline-none pr-6"
+          style={{ background: 'transparent' }}
+        >
+          {options.map((option) => (
+            <option
+              key={option.value}
+              value={option.value}
+              className="bg-[#0f0f18] text-white"
+            >
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <ChevronDown className="h-4 w-4 text-zinc-400 group-hover:text-violet-400 transition-colors absolute right-3 pointer-events-none" />
+      </div>
     </div>
   );
 }
@@ -46,23 +54,23 @@ export function getDateRangeFilter(range: DateRange): { start: Date; end: Date }
 
   switch (range) {
     case '7D':
-      start.setDate(today.getDate() - 6); // Last 7 days including today
+      start.setDate(today.getDate() - 6);
       break;
     case '30D':
-      start.setDate(today.getDate() - 29); // Last 30 days including today
+      start.setDate(today.getDate() - 29);
       break;
     case 'THIS_MONTH':
-      start = new Date(today.getFullYear(), today.getMonth(), 1); // 1st of current month
+      start = new Date(today.getFullYear(), today.getMonth(), 1);
       break;
     case 'LAST_MONTH':
-      start = new Date(today.getFullYear(), today.getMonth() - 1, 1); // 1st of last month
-      end.setDate(0); // Last day of previous month
+      start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      end.setDate(0);
       break;
     case 'YTD':
-      start = new Date(today.getFullYear(), 0, 1); // Jan 1 of current year
+      start = new Date(today.getFullYear(), 0, 1);
       break;
     case 'ALL_TIME':
-      return null; // No filter
+      return null;
     default:
       return null;
   }
@@ -77,7 +85,7 @@ export function filterExpensesByDateRange<T extends { date: string }>(
   const filter = getDateRangeFilter(range);
 
   if (!filter) {
-    return expenses; // ALL_TIME
+    return expenses;
   }
 
   const { start, end } = filter;
@@ -93,7 +101,6 @@ export function getChartGranularity(range: DateRange): 'daily' | 'weekly' | 'mon
   const filter = getDateRangeFilter(range);
 
   if (!filter) {
-    // For ALL_TIME, we need to calculate based on actual data
     return 'monthly';
   }
 
