@@ -438,3 +438,6 @@ Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allow
  GET /login 200 in 11ms (compile: 3ms, proxy.ts: 1481µs, render: 7ms)
  POST /api/auth/login 200 in 728ms (compile: 5ms, proxy.ts: 4ms, render: 719ms)
  GET /login 200 in 12ms (compile: 1992µs, proxy.ts: 1206µs, render: 8ms)
+   Reload env: .env.local
+ GET /login 200 in 164ms (compile: 111ms, proxy.ts: 38ms, render: 15ms)
+ GET /login 200 in 162ms (compile: 61ms, proxy.ts: 35ms, render: 66ms)
