@@ -441,3 +441,10 @@ Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allow
    Reload env: .env.local
  GET /login 200 in 164ms (compile: 111ms, proxy.ts: 38ms, render: 15ms)
  GET /login 200 in 162ms (compile: 61ms, proxy.ts: 35ms, render: 66ms)
+ POST /api/auth/login 200 in 782ms (compile: 33ms, proxy.ts: 9ms, render: 739ms)
+ GET /login 200 in 27ms (compile: 9ms, proxy.ts: 5ms, render: 14ms)
+ POST /api/auth/login 200 in 283ms (compile: 1820µs, proxy.ts: 2ms, render: 280ms)
+ GET /login 200 in 13ms (compile: 1625µs, proxy.ts: 1513µs, render: 10ms)
+ POST /api/auth/login 401 in 830ms (compile: 6ms, proxy.ts: 15ms, render: 809ms)
+ POST /api/auth/login 200 in 850ms (compile: 11ms, proxy.ts: 9ms, render: 831ms)
+ GET /login 200 in 25ms (compile: 8ms, proxy.ts: 1879µs, render: 15ms)

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function LoginPage() {
@@ -9,7 +8,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -30,7 +28,8 @@ export default function LoginPage() {
         return;
       }
 
-      router.push('/dashboard');
+      // Use hard navigation to ensure middleware runs with new cookie
+      window.location.href = '/dashboard';
     } catch (err) {
       setError('An error occurred. Please try again.');
       console.error(err);

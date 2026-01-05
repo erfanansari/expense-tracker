@@ -1,28 +1,68 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { jwtVerify } from 'jose';
 
-const publicRoutes = ['/login', '/signup', '/forgot-password', '/reset-password', '/'];
+const TOKEN_COOKIE_NAME = 'auth_token';
+
+// Routes that don't require authentication
+const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/reset-password'];
+
+// API routes that don't require authentication
 const apiPublicRoutes = ['/api/auth/login', '/api/auth/signup', '/api/auth/forgot-password', '/api/auth/reset-password', '/api/auth/me'];
+
+// Routes that should redirect to dashboard if already authenticated
+const authRoutes = ['/login', '/signup', '/forgot-password', '/reset-password'];
+
+const JWT_SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET || 'your-secret-key-change-in-production'
+);
+
+async function verifyAuth(token: string): Promise<boolean> {
+  try {
+    await jwtVerify(token, JWT_SECRET, {
+      issuer: 'kharji',
+      audience: 'kharji-users',
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Check if it's an API route
+  // Get auth token from cookie
+  const token = request.cookies.get(TOKEN_COOKIE_NAME)?.value;
+  const isAuthenticated = token ? await verifyAuth(token) : false;
+
+  // Handle API routes
   if (pathname.startsWith('/api')) {
     // Public API routes can be accessed without auth
-    if (apiPublicRoutes.includes(pathname)) {
+    if (apiPublicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))) {
       return NextResponse.next();
     }
 
     // Other API routes require authentication
-    const sessionId = request.cookies.get('session')?.value;
-    if (!sessionId) {
+    if (!isAuthenticated) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // For now, skip session validation in API routes to avoid DB calls during routing
-    // Sessions will be validated in the individual API route handlers
     return NextResponse.next();
+  }
+
+  // Handle root path
+  if (pathname === '/') {
+    if (isAuthenticated) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    } else {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
+
+  // Redirect authenticated users away from auth pages
+  if (authRoutes.includes(pathname) && isAuthenticated) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   // Public pages can be accessed without auth
@@ -31,13 +71,12 @@ export async function proxy(request: NextRequest) {
   }
 
   // All other pages require authentication
-  const sessionId = request.cookies.get('session')?.value;
-  if (!sessionId) {
-    return NextResponse.redirect(new URL('/login', request.url));
+  if (!isAuthenticated) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('from', pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
-  // For client-side pages, trust the session cookie
-  // The actual validation will happen in the page components via the useAuth hook
   return NextResponse.next();
 }
 
