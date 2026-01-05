@@ -80,33 +80,32 @@ export default function ReportsPage() {
           {/* Charts */}
           {!isLoading && filteredExpenses.length > 0 ? (
             <div className="relative">
-              <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-violet-500/30 to-transparent" />
-              <div className="bg-gradient-to-br from-[#0a0a12] to-[#05050a] rounded-2xl p-6 sm:p-8 border border-[#1f1f30]">
+              <div className="bg-white rounded-xl p-6 sm:p-8 border border-[#e5e5e5] shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-lg border border-cyan-500/30">
-                    <TrendingUp className="h-4 w-4 text-cyan-400" />
+                  <div className="p-2 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+                    <TrendingUp className="h-4 w-4 text-[#0070f3]" />
                   </div>
-                  <h2 className="text-lg font-semibold text-white">Spending Analytics</h2>
+                  <h2 className="text-lg font-semibold text-[#171717]">Spending Analytics</h2>
                 </div>
                 <ExpenseCharts expenses={filteredExpenses} granularity={chartGranularity} />
               </div>
             </div>
           ) : isLoading ? (
-            <div className="bg-gradient-to-br from-[#0a0a12] to-[#05050a] rounded-2xl p-16 border border-[#1f1f30] text-center">
+            <div className="bg-white rounded-xl p-16 border border-[#e5e5e5] shadow-sm text-center">
               <div className="flex flex-col items-center gap-4">
-                <div className="w-12 h-12 rounded-full border-2 border-violet-500/30 border-t-violet-500 animate-spin" />
-                <p className="text-zinc-400 font-medium">Loading reports...</p>
+                <div className="w-12 h-12 rounded-full border-2 border-[#e5e5e5] border-t-[#0070f3] animate-spin" />
+                <p className="text-[#525252] font-medium">Loading reports...</p>
               </div>
             </div>
           ) : (
-            <div className="bg-gradient-to-br from-[#0a0a12] to-[#05050a] rounded-2xl p-16 border border-[#1f1f30] text-center">
+            <div className="bg-white rounded-xl p-16 border border-[#e5e5e5] shadow-sm text-center">
               <div className="flex flex-col items-center gap-4 max-w-md mx-auto">
-                <div className="p-4 bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 rounded-2xl border border-[#2a2a40]">
-                  <Sparkles className="h-10 w-10 text-zinc-600" />
+                <div className="p-4 bg-[#fafafa] rounded-xl border border-[#e5e5e5]">
+                  <Sparkles className="h-10 w-10 text-[#a3a3a3]" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">No data available</h3>
-                  <p className="text-zinc-500">No transactions found for the selected period. Try adjusting your date range.</p>
+                  <h3 className="text-lg font-semibold text-[#171717] mb-2">No data available</h3>
+                  <p className="text-[#a3a3a3]">No transactions found for the selected period. Try adjusting your date range.</p>
                 </div>
               </div>
             </div>

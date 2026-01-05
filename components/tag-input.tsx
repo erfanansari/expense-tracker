@@ -133,18 +133,18 @@ export function TagInput({ selectedTags, onTagsChange }: TagInputProps) {
   return (
     <div className="relative">
       {/* Selected Tags + Input */}
-      <div className="flex flex-wrap items-center gap-2 px-4 py-3 bg-[var(--background-elevated)] border border-[var(--border-subtle)] rounded-xl focus-within:border-violet-500/50 focus-within:ring-2 focus-within:ring-violet-500/20 transition-all min-h-[48px]">
+      <div className="flex flex-wrap items-center gap-2 px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg focus-within:border-[#0070f3] focus-within:ring-2 focus-within:ring-[#0070f3]/10 transition-all min-h-[48px]">
         {selectedTags.map(tag => (
           <div
             key={tag.id}
-            className="group flex items-center gap-1.5 px-2.5 py-1 bg-violet-500/15 text-violet-400 rounded-lg text-sm font-medium border border-violet-500/20 hover:border-violet-500/40 transition-all"
+            className="group flex items-center gap-1.5 px-2.5 py-1 bg-[#f5f5f5] text-[#525252] rounded-md text-sm font-medium border border-[#e5e5e5] hover:border-[#d4d4d4] transition-all"
           >
             <TagIcon className="h-3.5 w-3.5" />
             <span>{tag.name}</span>
             <button
               type="button"
               onClick={() => removeTag(tag.id)}
-              className="ml-0.5 p-0.5 rounded hover:bg-violet-500/20 transition-colors"
+              className="ml-0.5 p-0.5 rounded hover:bg-[#e5e5e5] transition-colors"
             >
               <X className="h-3 w-3" />
             </button>
@@ -159,7 +159,7 @@ export function TagInput({ selectedTags, onTagsChange }: TagInputProps) {
           onKeyDown={handleKeyDown}
           onFocus={() => inputValue && setShowSuggestions(true)}
           placeholder={selectedTags.length === 0 ? "Add tags..." : ""}
-          className="flex-1 min-w-[120px] outline-none bg-transparent text-[var(--foreground)] placeholder:text-[var(--foreground-muted)]"
+          className="flex-1 min-w-[120px] outline-none bg-transparent text-[#171717] placeholder:text-[#a3a3a3]"
         />
       </div>
 
@@ -167,16 +167,16 @@ export function TagInput({ selectedTags, onTagsChange }: TagInputProps) {
       {showSuggestions && (inputValue.trim() || filteredTags.length > 0) && (
         <div
           ref={suggestionsRef}
-          className="absolute top-full left-0 right-0 mt-2 bg-[var(--background-card)] border border-[var(--border-subtle)] rounded-xl shadow-xl shadow-black/20 z-20 max-h-48 overflow-y-auto"
+          className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#e5e5e5] rounded-lg shadow-lg z-20 max-h-48 overflow-y-auto"
         >
           {filteredTags.map(tag => (
             <button
               key={tag.id}
               type="button"
               onClick={() => selectTag(tag)}
-              className="w-full px-4 py-2.5 text-left hover:bg-[var(--background-hover)] text-sm text-[var(--foreground)] flex items-center gap-2.5 transition-colors first:rounded-t-xl"
+              className="w-full px-4 py-2.5 text-left hover:bg-[#f5f5f5] text-sm text-[#171717] flex items-center gap-2.5 transition-colors first:rounded-t-lg"
             >
-              <TagIcon className="h-4 w-4 text-violet-400" />
+              <TagIcon className="h-4 w-4 text-[#a3a3a3]" />
               {tag.name}
             </button>
           ))}
@@ -187,7 +187,7 @@ export function TagInput({ selectedTags, onTagsChange }: TagInputProps) {
               type="button"
               onClick={() => createTag(inputValue)}
               disabled={isCreating}
-              className="w-full px-4 py-2.5 text-left hover:bg-violet-500/10 text-sm text-violet-400 flex items-center gap-2.5 border-t border-[var(--border-subtle)] disabled:opacity-50 last:rounded-b-xl transition-colors"
+              className="w-full px-4 py-2.5 text-left hover:bg-[#0070f3]/10 text-sm text-[#0070f3] flex items-center gap-2.5 border-t border-[#e5e5e5] disabled:opacity-50 last:rounded-b-lg transition-colors"
             >
               {isCreating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -199,7 +199,7 @@ export function TagInput({ selectedTags, onTagsChange }: TagInputProps) {
           )}
 
           {filteredTags.length === 0 && !inputValue.trim() && (
-            <div className="px-4 py-3 text-sm text-[var(--foreground-muted)]">
+            <div className="px-4 py-3 text-sm text-[#a3a3a3]">
               Start typing to search or create tags...
             </div>
           )}
