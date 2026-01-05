@@ -1,0 +1,450 @@
+
+> kharji@0.1.0 dev
+> next dev
+
+   ▲ Next.js 16.0.10 (Turbopack)
+   - Local:         http://localhost:3000
+   - Network:       http://172.20.10.10:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1010ms
+ ○ Compiling / ...
+ GET / 307 in 15.9s (compile: 15.7s, proxy.ts: 103ms, render: 125ms)
+ GET /login 200 in 277ms (compile: 239ms, proxy.ts: 1514µs, render: 37ms)
+ GET /signup 200 in 263ms (compile: 232ms, proxy.ts: 7ms, render: 24ms)
+ POST /api/auth/signup 400 in 201ms (compile: 188ms, proxy.ts: 4ms, render: 9ms)
+ POST /api/auth/signup 400 in 8ms (compile: 1409µs, proxy.ts: 4ms, render: 3ms)
+ POST /api/auth/signup 201 in 3.9s (compile: 2ms, proxy.ts: 4ms, render: 3.9s)
+ GET /dashboard 200 in 278ms (compile: 251ms, proxy.ts: 6ms, render: 21ms)
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/auth/me 200 in 675ms (compile: 74ms, proxy.ts: 2ms, render: 598ms)
+ GET /api/auth/me 200 in 158ms (compile: 1793µs, proxy.ts: 9ms, render: 147ms)
+ GET /api/expenses 200 in 3.8s (compile: 109ms, proxy.ts: 3ms, render: 3.7s)
+ GET /api/expenses 200 in 576ms (compile: 3ms, proxy.ts: 2ms, render: 571ms)
+[Exchange Rate] Error: TypeError: fetch failed
+    at async GET (app/api/exchange-rate/route.ts:16:22)
+  14 |     console.log(`[Exchange Rate] Fetching data from Navasan API...`);
+  15 |
+> 16 |     const response = await fetch(`https://api.navasan.tech/latest/?item=usd&api_key=${apiKey}`, {
+     |                      ^
+  17 |       next: { revalidate: CACHE_DURATION_SECONDS } // Next.js will cache this fetch for 24 hours
+  18 |     });
+  19 | {
+  [cause]: Error [ConnectTimeoutError]: Connect Timeout Error (attempted addresses: 172.67.209.16:443, 2606:4700:3031::6815:4afb:443, 104.21.74.251:443, 2606:4700:3033::ac43:d110:443, timeout: 10000ms)
+      at ignore-listed frames {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+ GET /api/exchange-rate 500 in 10.7s (compile: 91ms, proxy.ts: 3ms, render: 10.6s)
+[Exchange Rate] Fetching data from Navasan API...
+[Exchange Rate] Error: TypeError: fetch failed
+    at async GET (app/api/exchange-rate/route.ts:16:22)
+  14 |     console.log(`[Exchange Rate] Fetching data from Navasan API...`);
+  15 |
+> 16 |     const response = await fetch(`https://api.navasan.tech/latest/?item=usd&api_key=${apiKey}`, {
+     |                      ^
+  17 |       next: { revalidate: CACHE_DURATION_SECONDS } // Next.js will cache this fetch for 24 hours
+  18 |     });
+  19 | {
+  [cause]: AggregateError: 
+      at ignore-listed frames {
+    code: 'ETIMEDOUT'
+  }
+}
+ GET /api/exchange-rate 500 in 6.0s (compile: 3ms, proxy.ts: 3ms, render: 6.0s)
+ GET /dashboard 200 in 110ms (compile: 4ms, proxy.ts: 5ms, render: 102ms)
+[Exchange Rate] Fetching data from Navasan API...
+[Exchange Rate] API Usage - Monthly: 61, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:11:33.216Z
+ GET /api/exchange-rate 200 in 1568ms (compile: 7ms, proxy.ts: 5ms, render: 1555ms)
+ GET /api/expenses 200 in 2.0s (compile: 3ms, proxy.ts: 10ms, render: 2.0s)
+ GET /api/auth/me 200 in 6.0s (compile: 3ms, proxy.ts: 6ms, render: 6.0s)
+ GET /settings 404 in 228ms (compile: 201ms, proxy.ts: 5ms, render: 22ms)
+ GET /settings 404 in 45ms (compile: 3ms, proxy.ts: 1598µs, render: 40ms)
+ GET /dashboard 200 in 48ms (compile: 4ms, proxy.ts: 3ms, render: 41ms)
+ GET /login 200 in 64ms (compile: 18ms, proxy.ts: 8ms, render: 37ms)
+ POST /api/auth/login 200 in 1828ms (compile: 170ms, proxy.ts: 5ms, render: 1653ms)
+ GET /dashboard 200 in 64ms (compile: 5ms, proxy.ts: 10ms, render: 49ms)
+[Exchange Rate] Fetching data from Navasan API...
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/auth/me 200 in 177ms (compile: 8ms, proxy.ts: 7ms, render: 163ms)
+ GET /api/auth/me 200 in 180ms (compile: 16ms, proxy.ts: 7ms, render: 157ms)
+ GET /api/expenses 200 in 837ms (compile: 8ms, proxy.ts: 20ms, render: 809ms)
+ GET /api/expenses 200 in 883ms (compile: 20ms, proxy.ts: 5ms, render: 858ms)
+[Exchange Rate] API Usage - Monthly: 63, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:32:29.638Z
+ GET /api/exchange-rate 200 in 904ms (compile: 20ms, proxy.ts: 7ms, render: 877ms)
+[Exchange Rate] API Usage - Monthly: 63, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:32:29.634Z
+ GET /api/exchange-rate 200 in 911ms (compile: 11ms, proxy.ts: 7ms, render: 893ms)
+ GET /login 200 in 138ms (compile: 8ms, proxy.ts: 65ms, render: 66ms)
+ GET /login 200 in 198ms (compile: 24ms, proxy.ts: 29ms, render: 144ms)
+ GET /dashboard 200 in 78ms (compile: 6ms, proxy.ts: 15ms, render: 56ms)
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/expenses 401 in 964ms (compile: 863ms, proxy.ts: 14ms, render: 86ms)
+ GET /api/auth/me 200 in 981ms (compile: 908ms, proxy.ts: 15ms, render: 58ms)
+[Exchange Rate] API Usage - Monthly: 64, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:39:56.147Z
+ GET /api/exchange-rate 200 in 1166ms (compile: 32ms, proxy.ts: 15ms, render: 1120ms)
+ ✓ Compiled in 135ms
+ GET /api/auth/me 200 in 44ms (compile: 13ms, proxy.ts: 24ms, render: 7ms)
+ GET /api/auth/me 200 in 8ms (compile: 2ms, proxy.ts: 1894µs, render: 3ms)
+ ✓ Compiled in 110ms
+ GET /api/auth/me 200 in 80ms (compile: 26ms, proxy.ts: 15ms, render: 39ms)
+ GET /api/auth/me 200 in 11ms (compile: 3ms, proxy.ts: 3ms, render: 5ms)
+ GET /api/auth/me 200 in 18ms (compile: 1297µs, proxy.ts: 4ms, render: 13ms)
+ GET /api/auth/me 200 in 26ms (compile: 7ms, proxy.ts: 6ms, render: 14ms)
+ GET /login 200 in 63ms (compile: 10ms, proxy.ts: 10ms, render: 42ms)
+ GET /login 200 in 32ms (compile: 1458µs, proxy.ts: 4ms, render: 26ms)
+ GET /dashboard 200 in 184ms (compile: 72ms, proxy.ts: 3ms, render: 109ms)
+ GET /api/auth/me 200 in 8ms (compile: 2ms, proxy.ts: 3ms, render: 3ms)
+ GET /api/expenses 401 in 11ms (compile: 6ms, proxy.ts: 3ms, render: 2ms)
+ GET /api/auth/me 200 in 14ms (compile: 1403µs, proxy.ts: 1815µs, render: 11ms)
+[Exchange Rate] Fetching data from Navasan API...
+[Exchange Rate] API Usage - Monthly: 64, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:43:19.364Z
+ GET /api/exchange-rate 200 in 567ms (compile: 1211µs, proxy.ts: 1935µs, render: 564ms)
+ GET /dashboard 200 in 49ms (compile: 3ms, proxy.ts: 3ms, render: 43ms)
+ GET /api/expenses 401 in 15ms (compile: 3ms, proxy.ts: 4ms, render: 8ms)
+ GET /api/auth/me 200 in 15ms (compile: 6ms, proxy.ts: 4ms, render: 5ms)
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/auth/me 200 in 20ms (compile: 9ms, proxy.ts: 3ms, render: 8ms)
+[Exchange Rate] API Usage - Monthly: 64, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:43:25.397Z
+ GET /api/exchange-rate 200 in 839ms (compile: 12ms, proxy.ts: 3ms, render: 823ms)
+ GET / 307 in 76ms (compile: 4ms, proxy.ts: 2ms, render: 70ms)
+ GET /dashboard 200 in 39ms (compile: 2ms, proxy.ts: 1508µs, render: 36ms)
+ GET /api/auth/me 200 in 17ms (compile: 7ms, proxy.ts: 2ms, render: 7ms)
+ GET /api/expenses 401 in 17ms (compile: 10ms, proxy.ts: 3ms, render: 4ms)
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/auth/me 200 in 11ms (compile: 1433µs, proxy.ts: 3ms, render: 7ms)
+[Exchange Rate] API Usage - Monthly: 64, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:43:30.499Z
+ GET /api/exchange-rate 200 in 443ms (compile: 3ms, proxy.ts: 3ms, render: 437ms)
+ GET /settings 404 in 33ms (compile: 17ms, proxy.ts: 4ms, render: 12ms)
+ GET /settings 404 in 24ms (compile: 4ms, proxy.ts: 1588µs, render: 18ms)
+ GET /dashboard 200 in 53ms (compile: 2ms, proxy.ts: 3ms, render: 48ms)
+ GET /api/expenses 401 in 8ms (compile: 1036µs, proxy.ts: 1607µs, render: 5ms)
+ GET /dashboard 200 in 66ms (compile: 7ms, proxy.ts: 4ms, render: 56ms)
+ GET /api/expenses 401 in 18ms (compile: 5ms, proxy.ts: 5ms, render: 8ms)
+ GET /api/auth/me 200 in 18ms (compile: 8ms, proxy.ts: 5ms, render: 5ms)
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/auth/me 200 in 24ms (compile: 10ms, proxy.ts: 5ms, render: 9ms)
+[Exchange Rate] API Usage - Monthly: 64, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:43:57.081Z
+ GET /api/exchange-rate 200 in 693ms (compile: 14ms, proxy.ts: 5ms, render: 674ms)
+ GET / 307 in 31ms (compile: 3ms, proxy.ts: 3ms, render: 25ms)
+ GET /login 200 in 22ms (compile: 3ms, proxy.ts: 1373µs, render: 18ms)
+ GET / 307 in 33ms (compile: 1745µs, proxy.ts: 3ms, render: 28ms)
+ GET /login 200 in 22ms (compile: 1417µs, proxy.ts: 1689µs, render: 19ms)
+ GET /api/auth/me 200 in 26ms (compile: 7ms, proxy.ts: 5ms, render: 14ms)
+ GET /api/auth/me 200 in 6ms (compile: 1010µs, proxy.ts: 1689µs, render: 3ms)
+ GET /api/auth/me 200 in 9ms (compile: 2ms, proxy.ts: 1841µs, render: 4ms)
+ GET /api/auth/me 200 in 6ms (compile: 1321µs, proxy.ts: 1934µs, render: 3ms)
+ ✓ Compiled in 55ms
+ GET /login 200 in 52ms (compile: 6ms, proxy.ts: 5ms, render: 41ms)
+ GET /dashboard 200 in 186ms (compile: 73ms, proxy.ts: 3ms, render: 111ms)
+ GET /api/expenses 401 in 9ms (compile: 2ms, proxy.ts: 2ms, render: 5ms)
+ GET /api/auth/me 200 in 8ms (compile: 1919µs, proxy.ts: 3ms, render: 4ms)
+ GET /api/auth/me 200 in 7ms (compile: 1533µs, proxy.ts: 1567µs, render: 4ms)
+ GET /api/auth/me 200 in 7ms (compile: 1424µs, proxy.ts: 1701µs, render: 4ms)
+ GET /api/auth/me 200 in 8ms (compile: 1110µs, proxy.ts: 3ms, render: 4ms)
+ ✓ Compiled in 25ms
+ GET /login 200 in 75ms (compile: 27ms, proxy.ts: 13ms, render: 35ms)
+ POST /api/auth/login 401 in 1051ms (compile: 72ms, proxy.ts: 7ms, render: 973ms)
+ POST /api/auth/login 200 in 220ms (compile: 2ms, proxy.ts: 4ms, render: 213ms)
+ GET /dashboard 200 in 98ms (compile: 57ms, proxy.ts: 3ms, render: 38ms)
+ GET /api/auth/me 200 in 13ms (compile: 3ms, proxy.ts: 3ms, render: 8ms)
+ GET /api/auth/me 200 in 6ms (compile: 1084µs, proxy.ts: 1744µs, render: 4ms)
+ GET /api/auth/me 200 in 6ms (compile: 1050µs, proxy.ts: 1312µs, render: 4ms)
+ GET /api/auth/me 200 in 6ms (compile: 1134µs, proxy.ts: 1573µs, render: 3ms)
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/expenses 200 in 385ms (compile: 5ms, proxy.ts: 3ms, render: 377ms)
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:46:24.531Z
+ GET /api/exchange-rate 200 in 753ms (compile: 4ms, proxy.ts: 1698µs, render: 748ms)
+[Exchange Rate] Fetching data from Navasan API...
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:46:25.283Z
+ GET /api/exchange-rate 200 in 158ms (compile: 1301µs, proxy.ts: 2ms, render: 155ms)
+ GET /api/expenses 200 in 583ms (compile: 1506µs, proxy.ts: 1830µs, render: 580ms)
+ POST /api/auth/logout 200 in 86ms (compile: 74ms, proxy.ts: 8ms, render: 4ms)
+ GET /login 200 in 11ms (compile: 1971µs, proxy.ts: 1307µs, render: 8ms)
+ POST /api/auth/login 401 in 638ms (compile: 1990µs, proxy.ts: 4ms, render: 632ms)
+ GET /forgot-password 200 in 248ms (compile: 224ms, proxy.ts: 3ms, render: 20ms)
+ GET /signup 200 in 34ms (compile: 11ms, proxy.ts: 7ms, render: 16ms)
+ POST /api/auth/signup 201 in 1329ms (compile: 49ms, proxy.ts: 3ms, render: 1277ms)
+ GET /dashboard 200 in 21ms (compile: 3ms, proxy.ts: 4ms, render: 14ms)
+ GET /api/auth/me 200 in 10ms (compile: 1719µs, proxy.ts: 3ms, render: 5ms)
+ GET /api/auth/me 200 in 7ms (compile: 1013µs, proxy.ts: 2ms, render: 3ms)
+ GET /api/auth/me 200 in 6ms (compile: 1208µs, proxy.ts: 1489µs, render: 4ms)
+ GET /api/auth/me 200 in 6ms (compile: 1360µs, proxy.ts: 1922µs, render: 3ms)
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/expenses 200 in 183ms (compile: 7ms, proxy.ts: 3ms, render: 174ms)
+ GET /api/expenses 200 in 146ms (compile: 1391µs, proxy.ts: 1799µs, render: 143ms)
+ GET /api/exchange-rate 200 in 334ms (compile: 1553µs, proxy.ts: 1559µs, render: 331ms)
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:46:46.639Z
+ GET /transactions 200 in 276ms (compile: 209ms, proxy.ts: 4ms, render: 64ms)
+ GET /api/auth/me 200 in 22ms (compile: 4ms, proxy.ts: 10ms, render: 8ms)
+ GET /api/auth/me 200 in 8ms (compile: 1010µs, proxy.ts: 1572µs, render: 6ms)
+ GET /api/expenses?limit=20 200 in 670ms (compile: 8ms, proxy.ts: 5ms, render: 658ms)
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/tags 200 in 253ms (compile: 66ms, proxy.ts: 4ms, render: 183ms)
+ GET /api/tags 200 in 178ms (compile: 1372µs, proxy.ts: 2ms, render: 175ms)
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:46:54.522Z
+ GET /api/exchange-rate 200 in 443ms (compile: 1575µs, proxy.ts: 2ms, render: 439ms)
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/exchange-rate 200 in 95ms (compile: 1386µs, proxy.ts: 2ms, render: 91ms)
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:46:54.988Z
+ POST /api/expenses 201 in 646ms (compile: 2ms, proxy.ts: 3ms, render: 640ms)
+ GET /api/expenses?limit=20 200 in 722ms (compile: 3ms, proxy.ts: 1684µs, render: 717ms)
+ GET / 307 in 37ms (compile: 4ms, proxy.ts: 3ms, render: 30ms)
+ GET /login 200 in 23ms (compile: 3ms, proxy.ts: 1229µs, render: 19ms)
+ ⚠ Cross origin request detected from 172.20.10.10 to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ POST /api/auth/login 200 in 884ms (compile: 2ms, proxy.ts: 3ms, render: 878ms)
+ GET /login 200 in 11ms (compile: 3ms, proxy.ts: 1279µs, render: 7ms)
+ POST /api/auth/login 200 in 195ms (compile: 2ms, proxy.ts: 2ms, render: 190ms)
+ GET /login 200 in 12ms (compile: 1574µs, proxy.ts: 1385µs, render: 9ms)
+ POST /api/auth/login 200 in 211ms (compile: 1317µs, proxy.ts: 4ms, render: 205ms)
+ GET /login 200 in 12ms (compile: 1428µs, proxy.ts: 1627µs, render: 8ms)
+ POST /api/auth/login 200 in 212ms (compile: 1414µs, proxy.ts: 1907µs, render: 209ms)
+ GET /login 200 in 10ms (compile: 1390µs, proxy.ts: 1517µs, render: 7ms)
+ POST /api/auth/login 200 in 253ms (compile: 1514µs, proxy.ts: 3ms, render: 249ms)
+ GET /login 200 in 9ms (compile: 1153µs, proxy.ts: 1063µs, render: 7ms)
+ POST /api/auth/login 200 in 211ms (compile: 1735µs, proxy.ts: 6ms, render: 203ms)
+ GET /login 200 in 9ms (compile: 1268µs, proxy.ts: 1188µs, render: 6ms)
+ POST /api/auth/login 200 in 224ms (compile: 1325µs, proxy.ts: 3ms, render: 220ms)
+ GET /login 200 in 12ms (compile: 1968µs, proxy.ts: 1152µs, render: 9ms)
+ POST /api/auth/login 200 in 218ms (compile: 1449µs, proxy.ts: 1440µs, render: 215ms)
+ GET /login 200 in 10ms (compile: 1122µs, proxy.ts: 1069µs, render: 8ms)
+ POST /api/auth/login 200 in 202ms (compile: 902µs, proxy.ts: 1630µs, render: 199ms)
+ GET /login 200 in 11ms (compile: 1662µs, proxy.ts: 1229µs, render: 8ms)
+ POST /api/auth/login 200 in 263ms (compile: 1745µs, proxy.ts: 1686µs, render: 260ms)
+ GET /login 200 in 12ms (compile: 1595µs, proxy.ts: 1350µs, render: 9ms)
+ POST /api/auth/login 200 in 746ms (compile: 1672µs, proxy.ts: 2ms, render: 742ms)
+ GET /login 200 in 12ms (compile: 1793µs, proxy.ts: 1112µs, render: 9ms)
+ GET /login 200 in 25ms (compile: 1530µs, proxy.ts: 5ms, render: 18ms)
+ POST /api/auth/login 200 in 766ms (compile: 1479µs, proxy.ts: 3ms, render: 761ms)
+ GET /login 200 in 9ms (compile: 1262µs, proxy.ts: 1300µs, render: 7ms)
+ GET / 307 in 32ms (compile: 2ms, proxy.ts: 3ms, render: 27ms)
+ GET /login 200 in 21ms (compile: 1294µs, proxy.ts: 1048µs, render: 19ms)
+ POST /api/auth/login 200 in 665ms (compile: 2ms, proxy.ts: 2ms, render: 661ms)
+ GET /login 200 in 9ms (compile: 1526µs, proxy.ts: 1276µs, render: 7ms)
+ GET /login 200 in 20ms (compile: 2ms, proxy.ts: 1250µs, render: 17ms)
+ POST /api/auth/login 200 in 229ms (compile: -2387µs, proxy.ts: 7ms, render: 225ms)
+ GET /login 200 in 10ms (compile: 1751µs, proxy.ts: 1475µs, render: 7ms)
+ POST /api/auth/login 200 in 250ms (compile: 2ms, proxy.ts: 3ms, render: 244ms)
+ GET /login 200 in 12ms (compile: 1868µs, proxy.ts: 2ms, render: 8ms)
+ POST /api/auth/login 200 in 790ms (compile: 1835µs, proxy.ts: 3ms, render: 785ms)
+ GET /login 200 in 10ms (compile: 1580µs, proxy.ts: 1910µs, render: 7ms)
+ GET /transactions 200 in 30ms (compile: 3ms, proxy.ts: 1969µs, render: 25ms)
+ GET /api/auth/me 200 in 17ms (compile: 3ms, proxy.ts: 8ms, render: 6ms)
+ GET /api/auth/me 200 in 6ms (compile: 1200µs, proxy.ts: 1439µs, render: 3ms)
+ GET /api/expenses?limit=20 200 in 1272ms (compile: 6ms, proxy.ts: 8ms, render: 1258ms)
+ POST /api/auth/logout 200 in 16ms (compile: 3ms, proxy.ts: 8ms, render: 5ms)
+ GET /login 200 in 14ms (compile: 1495µs, proxy.ts: 1800µs, render: 11ms)
+ POST /api/auth/login 200 in 2.1s (compile: 2ms, proxy.ts: 5ms, render: 2.1s)
+ GET /dashboard 200 in 15ms (compile: 4ms, proxy.ts: 3ms, render: 9ms)
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/auth/me 200 in 22ms (compile: 5ms, proxy.ts: 6ms, render: 11ms)
+ GET /api/auth/me 200 in 7ms (compile: 1152µs, proxy.ts: 1804µs, render: 4ms)
+ GET /api/auth/me 200 in 5ms (compile: 802µs, proxy.ts: 1091µs, render: 3ms)
+ GET /api/auth/me 200 in 6ms (compile: 1035µs, proxy.ts: 1455µs, render: 4ms)
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:48:58.814Z
+ GET /api/exchange-rate 200 in 626ms (compile: 4ms, proxy.ts: 6ms, render: 615ms)
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/expenses 200 in 675ms (compile: 9ms, proxy.ts: 6ms, render: 659ms)
+ GET /api/exchange-rate 200 in 80ms (compile: 1899µs, proxy.ts: 3ms, render: 76ms)
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:48:59.439Z
+ GET /api/expenses 200 in 313ms (compile: 1042µs, proxy.ts: 1476µs, render: 311ms)
+ POST /api/auth/logout 200 in 11ms (compile: 3ms, proxy.ts: 4ms, render: 5ms)
+ GET /login 200 in 16ms (compile: 2ms, proxy.ts: 1872µs, render: 12ms)
+ POST /api/auth/login 200 in 957ms (compile: 3ms, proxy.ts: 3ms, render: 952ms)
+ GET /login 200 in 14ms (compile: 2ms, proxy.ts: 3ms, render: 9ms)
+ POST /api/auth/login 200 in 799ms (compile: 3ms, proxy.ts: 5ms, render: 792ms)
+ GET /login 200 in 10ms (compile: 1353µs, proxy.ts: 1279µs, render: 7ms)
+ GET /login 200 in 30ms (compile: 2ms, proxy.ts: 4ms, render: 24ms)
+ POST /api/auth/login 200 in 690ms (compile: 2ms, proxy.ts: 3ms, render: 684ms)
+ GET /login 200 in 11ms (compile: 1595µs, proxy.ts: 1575µs, render: 7ms)
+ GET /login 200 in 48ms (compile: 7ms, proxy.ts: 6ms, render: 34ms)
+ ✓ Compiled in 100ms
+ GET /signup 200 in 122ms (compile: 72ms, proxy.ts: 4ms, render: 46ms)
+ GET /dashboard 200 in 20ms (compile: 3ms, proxy.ts: 7ms, render: 10ms)
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/auth/me 200 in 24ms (compile: 3ms, proxy.ts: 2ms, render: 19ms)
+ GET /api/expenses 401 in 33ms (compile: 17ms, proxy.ts: 2ms, render: 14ms)
+ GET /api/expenses 401 in 13ms (compile: 2ms, proxy.ts: 6ms, render: 4ms)
+ GET /api/auth/me 200 in 9ms (compile: 4ms, proxy.ts: 2ms, render: 3ms)
+ GET /api/auth/me 200 in 12ms (compile: 5ms, proxy.ts: 2ms, render: 5ms)
+ GET /api/auth/me 200 in 31ms (compile: 6ms, proxy.ts: 19ms, render: 5ms)
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:51:20.097Z
+ GET /api/exchange-rate 200 in 535ms (compile: 6ms, proxy.ts: 1982µs, render: 527ms)
+[Exchange Rate] Fetching data from Navasan API...
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:51:20.635Z
+ GET /api/exchange-rate 200 in 170ms (compile: 2ms, proxy.ts: 2ms, render: 166ms)
+ GET /api/auth/me 200 in 19ms (compile: 5ms, proxy.ts: 8ms, render: 6ms)
+ GET /api/expenses 401 in 17ms (compile: 6ms, proxy.ts: 7ms, render: 5ms)
+ GET /api/auth/me 200 in 6ms (compile: 1447µs, proxy.ts: 2ms, render: 2ms)
+ GET /api/expenses 401 in 8ms (compile: 4ms, proxy.ts: 1628µs, render: 3ms)
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/auth/me 200 in 12ms (compile: 1703µs, proxy.ts: 6ms, render: 4ms)
+ GET /api/auth/me 200 in 6ms (compile: 1008µs, proxy.ts: 1557µs, render: 3ms)
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:51:22.271Z
+ GET /api/exchange-rate 200 in 170ms (compile: 3ms, proxy.ts: 3ms, render: 165ms)
+[Exchange Rate] Fetching data from Navasan API...
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:51:22.441Z
+ GET /api/exchange-rate 200 in 170ms (compile: 1356µs, proxy.ts: 1649µs, render: 167ms)
+ GET /api/auth/me 200 in 14ms (compile: 3ms, proxy.ts: 2ms, render: 9ms)
+ GET /api/expenses 401 in 19ms (compile: 13ms, proxy.ts: 3ms, render: 3ms)
+ GET /api/auth/me 200 in 10ms (compile: 5ms, proxy.ts: 3ms, render: 2ms)
+ GET /api/expenses 401 in 11ms (compile: 7ms, proxy.ts: 3ms, render: 1932µs)
+ GET /api/auth/me 200 in 6ms (compile: 1067µs, proxy.ts: 1554µs, render: 3ms)
+ GET /api/auth/me 200 in 4ms (compile: 957µs, proxy.ts: 1357µs, render: 1756µs)
+ ✓ Compiled in 52ms
+ GET /api/auth/me 200 in 8ms (compile: 1451µs, proxy.ts: 2ms, render: 5ms)
+ GET /api/expenses 401 in 15ms (compile: 7ms, proxy.ts: 1909µs, render: 7ms)
+ GET /api/auth/me 200 in 8ms (compile: 1374µs, proxy.ts: 2ms, render: 4ms)
+ GET /api/expenses 401 in 7ms (compile: 3ms, proxy.ts: 1604µs, render: 2ms)
+ GET /api/auth/me 200 in 8ms (compile: 1519µs, proxy.ts: 1803µs, render: 5ms)
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/auth/me 200 in 6ms (compile: 1188µs, proxy.ts: 1844µs, render: 3ms)
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:51:24.324Z
+ GET /api/exchange-rate 200 in 164ms (compile: 7ms, proxy.ts: 1813µs, render: 155ms)
+[Exchange Rate] Fetching data from Navasan API...
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:51:24.485Z
+ GET /api/exchange-rate 200 in 138ms (compile: 2ms, proxy.ts: 1452µs, render: 134ms)
+ GET /login?id=80f92754-e04c-4c2a-b63a-724d86a91302&vscodeBrowserReqId=1767559935291 200 in 210ms (compile: 70ms, proxy.ts: 43ms, render: 97ms)
+ GET /signup?id=80f92754-e04c-4c2a-b63a-724d86a91302&vscodeBrowserReqId=1767559941470 200 in 31ms (compile: 3ms, proxy.ts: 2ms, render: 26ms)
+ GET /login 200 in 24ms (compile: 6ms, proxy.ts: 5ms, render: 13ms)
+ POST /api/auth/login 200 in 1043ms (compile: 3ms, proxy.ts: 3ms, render: 1038ms)
+ GET /dashboard 200 in 54ms (compile: 6ms, proxy.ts: 3ms, render: 45ms)
+ GET /api/auth/me 200 in 44ms (compile: 17ms, proxy.ts: 4ms, render: 22ms)
+ GET /api/auth/me 200 in 7ms (compile: 3ms, proxy.ts: 1662µs, render: 3ms)
+ GET /api/auth/me 200 in 8ms (compile: 1362µs, proxy.ts: 1275µs, render: 5ms)
+ GET /api/auth/me 200 in 6ms (compile: 990µs, proxy.ts: 1626µs, render: 3ms)
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/expenses 200 in 415ms (compile: 5ms, proxy.ts: 6ms, render: 404ms)
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:53:02.818Z
+ GET /api/exchange-rate 200 in 649ms (compile: 1342µs, proxy.ts: 1249µs, render: 647ms)
+[Exchange Rate] Fetching data from Navasan API...
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:53:03.469Z
+ GET /api/exchange-rate 200 in 148ms (compile: 1547µs, proxy.ts: 1390µs, render: 145ms)
+ GET /api/expenses 200 in 566ms (compile: 1088µs, proxy.ts: 1332µs, render: 563ms)
+ POST /api/auth/logout 200 in 12ms (compile: 3ms, proxy.ts: 4ms, render: 5ms)
+ GET /login 200 in 18ms (compile: 3ms, proxy.ts: 1773µs, render: 14ms)
+ POST /api/auth/login 200 in 749ms (compile: 2ms, proxy.ts: 4ms, render: 743ms)
+ GET /dashboard 200 in 14ms (compile: 3ms, proxy.ts: 2ms, render: 9ms)
+ GET /api/auth/me 200 in 10ms (compile: 3ms, proxy.ts: 3ms, render: 3ms)
+ GET /api/auth/me 200 in 7ms (compile: 1122µs, proxy.ts: 2ms, render: 4ms)
+ GET /api/auth/me 200 in 8ms (compile: 3ms, proxy.ts: 1605µs, render: 4ms)
+ GET /api/auth/me 200 in 8ms (compile: 1248µs, proxy.ts: 1575µs, render: 5ms)
+[Exchange Rate] Fetching data from Navasan API...
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:53:10.768Z
+ GET /api/exchange-rate 200 in 547ms (compile: 1055µs, proxy.ts: 1643µs, render: 544ms)
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/expenses 200 in 765ms (compile: 6ms, proxy.ts: 3ms, render: 756ms)
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T20:53:11.316Z
+ GET /api/exchange-rate 200 in 179ms (compile: 1507µs, proxy.ts: 2ms, render: 175ms)
+ GET /api/expenses 200 in 398ms (compile: 1783µs, proxy.ts: 1788µs, render: 394ms)
+ POST /api/auth/logout 200 in 10ms (compile: 2ms, proxy.ts: 3ms, render: 4ms)
+ GET /login 200 in 14ms (compile: 2ms, proxy.ts: 1667µs, render: 10ms)
+ GET /login 200 in 23ms (compile: 5ms, proxy.ts: 1323µs, render: 17ms)
+ POST /api/auth/login 200 in 992ms (compile: 6ms, proxy.ts: 4ms, render: 982ms)
+ GET /login 200 in 18ms (compile: 3ms, proxy.ts: 1691µs, render: 13ms)
+ POST /api/auth/login 200 in 192ms (compile: 1538µs, proxy.ts: 5ms, render: 185ms)
+ GET /login 200 in 11ms (compile: 1954µs, proxy.ts: 2ms, render: 7ms)
+ POST /api/auth/login 200 in 203ms (compile: 1690µs, proxy.ts: 1887µs, render: 199ms)
+ GET /login 200 in 13ms (compile: 1561µs, proxy.ts: 1730µs, render: 9ms)
+ GET /login 200 in 59ms (compile: 8ms, proxy.ts: 10ms, render: 40ms)
+ POST /api/auth/login 200 in 980ms (compile: 76ms, proxy.ts: 2ms, render: 902ms)
+ GET /login 200 in 14ms (compile: 3ms, proxy.ts: 1784µs, render: 9ms)
+ POST /api/auth/login 200 in 226ms (compile: 5ms, proxy.ts: 4ms, render: 217ms)
+ GET /login 200 in 14ms (compile: 2ms, proxy.ts: 2ms, render: 10ms)
+ POST /api/auth/login 200 in 223ms (compile: 1512µs, proxy.ts: 2ms, render: 219ms)
+ GET /login 200 in 47ms (compile: 4ms, proxy.ts: 7ms, render: 37ms)
+ POST /api/auth/login 200 in 216ms (compile: 1513µs, proxy.ts: 1818µs, render: 213ms)
+ GET /login 200 in 16ms (compile: 1671µs, proxy.ts: 1044µs, render: 13ms)
+ POST /api/auth/login 200 in 220ms (compile: 1083µs, proxy.ts: 1381µs, render: 218ms)
+ GET /login 200 in 10ms (compile: 1504µs, proxy.ts: 1400µs, render: 7ms)
+ POST /api/auth/login 200 in 221ms (compile: 1196µs, proxy.ts: 1930µs, render: 217ms)
+ GET /login 200 in 15ms (compile: 2ms, proxy.ts: 1739µs, render: 11ms)
+ POST /api/auth/login 200 in 216ms (compile: 1146µs, proxy.ts: 1714µs, render: 213ms)
+ GET /login 200 in 11ms (compile: 1505µs, proxy.ts: 1331µs, render: 8ms)
+ POST /api/auth/login 200 in 248ms (compile: 1176µs, proxy.ts: 1614µs, render: 245ms)
+ GET /login 200 in 11ms (compile: 1641µs, proxy.ts: 1630µs, render: 8ms)
+ GET / 307 in 64ms (compile: 17ms, proxy.ts: 3ms, render: 44ms)
+ GET /dashboard 200 in 87ms (compile: 4ms, proxy.ts: 1277µs, render: 82ms)
+ GET /api/auth/me 200 in 26ms (compile: 3ms, proxy.ts: 4ms, render: 19ms)
+ GET /api/expenses 401 in 28ms (compile: 6ms, proxy.ts: 3ms, render: 20ms)
+ GET /api/auth/me 200 in 16ms (compile: 7ms, proxy.ts: 4ms, render: 5ms)
+ GET / 307 in 44ms (compile: 9ms, proxy.ts: 1444µs, render: 34ms)
+ GET /login 200 in 65ms (compile: 3ms, proxy.ts: 1879µs, render: 61ms)
+ GET /login 200 in 20ms (compile: 1784µs, proxy.ts: 1350µs, render: 17ms)
+ POST /api/auth/login 200 in 795ms (compile: 9ms, proxy.ts: 8ms, render: 778ms)
+ GET /login 200 in 14ms (compile: 3ms, proxy.ts: 1847µs, render: 9ms)
+ POST /api/auth/login 200 in 1525ms (compile: 76ms, proxy.ts: 7ms, render: 1442ms)
+ GET /login 200 in 16ms (compile: 3ms, proxy.ts: 1596µs, render: 11ms)
+ GET /login 200 in 28ms (compile: 2ms, proxy.ts: 2ms, render: 23ms)
+ GET /login 200 in 49ms (compile: 5ms, proxy.ts: 1430µs, render: 43ms)
+ GET / 307 in 29ms (compile: 3ms, proxy.ts: 2ms, render: 24ms)
+ GET /login 200 in 22ms (compile: 2ms, proxy.ts: 1293µs, render: 18ms)
+ POST /api/auth/login 200 in 723ms (compile: 1649µs, proxy.ts: 3ms, render: 719ms)
+ GET /login 200 in 10ms (compile: 1850µs, proxy.ts: 1446µs, render: 7ms)
+ GET /login 200 in 24ms (compile: 1545µs, proxy.ts: 3ms, render: 19ms)
+ GET /login 200 in 23ms (compile: 1867µs, proxy.ts: 3ms, render: 18ms)
+ GET /login 200 in 22ms (compile: 1489µs, proxy.ts: 3ms, render: 18ms)
+ POST /api/auth/login 401 in 868ms (compile: 6ms, proxy.ts: 7ms, render: 855ms)
+ POST /api/auth/login 200 in 829ms (compile: 3ms, proxy.ts: 5ms, render: 821ms)
+ GET /dashboard 200 in 18ms (compile: 4ms, proxy.ts: 2ms, render: 12ms)
+[Exchange Rate] Fetching data from Navasan API...
+ GET /api/auth/me 200 in 33ms (compile: 20ms, proxy.ts: 6ms, render: 7ms)
+ GET /api/auth/me 200 in 9ms (compile: 2ms, proxy.ts: 4ms, render: 3ms)
+ GET /api/auth/me 200 in 7ms (compile: 1453µs, proxy.ts: 2ms, render: 4ms)
+ GET /api/auth/me 200 in 7ms (compile: 1213µs, proxy.ts: 3ms, render: 3ms)
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T21:01:48.484Z
+ GET /api/exchange-rate 200 in 782ms (compile: 6ms, proxy.ts: 6ms, render: 770ms)
+[Exchange Rate] Fetching data from Navasan API...
+[Exchange Rate] API Usage - Monthly: 65, Daily: 0, Hourly: 0
+[Exchange Rate] Data fetched successfully at 2026-01-04T21:01:49.260Z
+ GET /api/exchange-rate 200 in 168ms (compile: 1160µs, proxy.ts: 1351µs, render: 166ms)
+ GET /api/expenses 200 in 1123ms (compile: 13ms, proxy.ts: 6ms, render: 1104ms)
+ GET /api/expenses 200 in 406ms (compile: 2ms, proxy.ts: 2ms, render: 402ms)
+ POST /api/auth/logout 200 in 73ms (compile: 63ms, proxy.ts: 3ms, render: 6ms)
+ GET /login 200 in 13ms (compile: 2ms, proxy.ts: 1811µs, render: 8ms)
+ POST /api/auth/login 200 in 1057ms (compile: 1705µs, proxy.ts: 4ms, render: 1052ms)
+ GET /login 200 in 13ms (compile: 1987µs, proxy.ts: 1400µs, render: 9ms)
+ GET /login 200 in 32ms (compile: 3ms, proxy.ts: 4ms, render: 26ms)
+ POST /api/auth/login 200 in 1059ms (compile: 2ms, proxy.ts: 3ms, render: 1054ms)
+ GET /login 200 in 12ms (compile: 1989µs, proxy.ts: 1501µs, render: 9ms)
+ POST /api/auth/login 200 in 327ms (compile: 3ms, proxy.ts: 5ms, render: 319ms)
+ GET /login 200 in 11ms (compile: 3ms, proxy.ts: 1481µs, render: 7ms)
+ POST /api/auth/login 200 in 728ms (compile: 5ms, proxy.ts: 4ms, render: 719ms)
+ GET /login 200 in 12ms (compile: 1992µs, proxy.ts: 1206µs, render: 8ms)
+   Reload env: .env.local
+ GET /login 200 in 164ms (compile: 111ms, proxy.ts: 38ms, render: 15ms)
+ GET /login 200 in 162ms (compile: 61ms, proxy.ts: 35ms, render: 66ms)
+ POST /api/auth/login 200 in 782ms (compile: 33ms, proxy.ts: 9ms, render: 739ms)
+ GET /login 200 in 27ms (compile: 9ms, proxy.ts: 5ms, render: 14ms)
+ POST /api/auth/login 200 in 283ms (compile: 1820µs, proxy.ts: 2ms, render: 280ms)
+ GET /login 200 in 13ms (compile: 1625µs, proxy.ts: 1513µs, render: 10ms)
+ POST /api/auth/login 401 in 830ms (compile: 6ms, proxy.ts: 15ms, render: 809ms)
+ POST /api/auth/login 200 in 850ms (compile: 11ms, proxy.ts: 9ms, render: 831ms)
+ GET /login 200 in 25ms (compile: 8ms, proxy.ts: 1879µs, render: 15ms)

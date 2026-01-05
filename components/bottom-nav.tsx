@@ -8,6 +8,7 @@ import {
   BarChart3,
   Wallet
 } from 'lucide-react';
+import { MobileUserMenu } from './user-menu';
 
 interface NavItem {
   href: string;
@@ -63,6 +64,9 @@ export function BottomNav() {
             </Link>
           );
         })}
+
+        {/* User Account Menu */}
+        <MobileUserMenu />
       </div>
     </nav>
   );

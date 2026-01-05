@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db/client';
+import { getCurrentUser } from '@/lib/session';
 import { type CreateExpenseInput, type Expense } from '@/lib/types/expense';
 
 // GET /api/expenses - Fetch expenses with pagination support
@@ -10,6 +11,15 @@ import { type CreateExpenseInput, type Expense } from '@/lib/types/expense';
 // If limit is provided, returns paginated format: { expenses, nextCursor, hasMore }
 export async function GET(request: Request) {
   try {
+    // Get current user
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     // Handle both Request object and edge cases
     let url: URL;
     try {
@@ -25,7 +35,10 @@ export async function GET(request: Request) {
     // Backward compatibility: if no limit is specified, return all expenses in old format (array)
     // This is used by the page component for stats and charts
     if (!limitParam || limitParam === '') {
-      const result = await db.execute('SELECT * FROM expenses ORDER BY date DESC, created_at DESC');
+      const result = await db.execute({
+        sql: 'SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC, created_at DESC',
+        args: [user.userId]
+      });
 
       // Fetch tags for all expenses
       const expenseIds = result.rows.map(row => row.id);
@@ -73,15 +86,15 @@ export async function GET(request: Request) {
     // Paginated response
     const limit = Math.min(parseInt(limitParam, 10), 100); // Max 100 items per request
 
-    let sql = 'SELECT * FROM expenses';
-    const args: any[] = [];
+    let sql = 'SELECT * FROM expenses WHERE user_id = ?';
+    const args: any[] = [user.userId];
 
     // Apply cursor-based pagination
     // Since we order by date DESC, created_at DESC, id DESC, we want items that come after the cursor
     // This means: date < cursor_date OR (date = cursor_date AND created_at < cursor_created_at) OR (date = cursor_date AND created_at = cursor_created_at AND id < cursor_id)
     if (cursor) {
       const [cursorDate, cursorCreatedAt, cursorId] = cursor.split(':');
-      sql += ` WHERE (date < ? OR (date = ? AND created_at < ?) OR (date = ? AND created_at = ? AND id < ?))`;
+      sql += ` AND (date < ? OR (date = ? AND created_at < ?) OR (date = ? AND created_at = ? AND id < ?))`;
       args.push(cursorDate, cursorDate, cursorCreatedAt, cursorDate, cursorCreatedAt, parseInt(cursorId, 10));
     }
 
@@ -159,6 +172,15 @@ export async function GET(request: Request) {
 // POST /api/expenses - Create a new expense
 export async function POST(request: Request) {
   try {
+    // Get current user
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const body: CreateExpenseInput = await request.json();
 
     // Validate required fields
@@ -177,10 +199,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Insert the expense
+    // Insert the expense with user_id
     const expenseResult = await db.execute({
-      sql: 'INSERT INTO expenses (date, category, description, price_toman, price_usd) VALUES (?, ?, ?, ?, ?) RETURNING id',
-      args: [body.date, body.category, body.description, body.price_toman, body.price_usd]
+      sql: 'INSERT INTO expenses (user_id, date, category, description, price_toman, price_usd) VALUES (?, ?, ?, ?, ?, ?) RETURNING id',
+      args: [user.userId, body.date, body.category, body.description, body.price_toman, body.price_usd]
     });
 
     const expenseId = expenseResult.rows[0].id as number;

@@ -1,40 +1,83 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { jwtVerify } from 'jose';
 
-export function proxy(request: NextRequest) {
-  // Only enable auth in production
-  if (process.env.NODE_ENV !== 'production') {
-    return NextResponse.next();
+const TOKEN_COOKIE_NAME = 'auth_token';
+
+// Routes that don't require authentication
+const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/reset-password'];
+
+// API routes that don't require authentication
+const apiPublicRoutes = ['/api/auth/login', '/api/auth/signup', '/api/auth/forgot-password', '/api/auth/reset-password', '/api/auth/me'];
+
+// Routes that should redirect to dashboard if already authenticated
+const authRoutes = ['/login', '/signup', '/forgot-password', '/reset-password'];
+
+const JWT_SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET || 'your-secret-key-change-in-production'
+);
+
+async function verifyAuth(token: string): Promise<boolean> {
+  try {
+    await jwtVerify(token, JWT_SECRET, {
+      issuer: 'kharji',
+      audience: 'kharji-users',
+    });
+    return true;
+  } catch {
+    return false;
   }
+}
 
-  // Skip auth for API routes (optional, remove if you want to protect API too)
-  if (request.nextUrl.pathname.startsWith('/api')) {
-    return NextResponse.next();
-  }
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-  const basicAuth = request.headers.get('authorization');
-  const url = request.nextUrl;
+  // Get auth token from cookie
+  const token = request.cookies.get(TOKEN_COOKIE_NAME)?.value;
+  const isAuthenticated = token ? await verifyAuth(token) : false;
 
-  if (basicAuth) {
-    const authValue = basicAuth.split(' ')[1];
-    const [user, pwd] = atob(authValue).split(':');
-
-    const validUser = process.env.AUTH_USERNAME || 'admin';
-    const validPassword = process.env.AUTH_PASSWORD || 'password';
-
-    if (user === validUser && pwd === validPassword) {
+  // Handle API routes
+  if (pathname.startsWith('/api')) {
+    // Public API routes can be accessed without auth
+    if (apiPublicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))) {
       return NextResponse.next();
+    }
+
+    // Other API routes require authentication
+    if (!isAuthenticated) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    return NextResponse.next();
+  }
+
+  // Handle root path
+  if (pathname === '/') {
+    if (isAuthenticated) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    } else {
+      return NextResponse.redirect(new URL('/login', request.url));
     }
   }
 
-  url.pathname = '/api/auth';
+  // Redirect authenticated users away from auth pages
+  if (authRoutes.includes(pathname) && isAuthenticated) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
 
-  return NextResponse.rewrite(url, {
-    headers: {
-      'WWW-Authenticate': 'Basic realm="Secure Area"',
-    },
-    status: 401,
-  });
+  // Public pages can be accessed without auth
+  if (publicRoutes.includes(pathname)) {
+    return NextResponse.next();
+  }
+
+  // All other pages require authentication
+  if (!isAuthenticated) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('from', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
