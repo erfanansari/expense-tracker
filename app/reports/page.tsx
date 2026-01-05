@@ -39,34 +39,29 @@ export default function ReportsPage() {
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-[#05050a] text-white relative">
-        {/* Background effects */}
-        <div className="fixed inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-violet-500/5 rounded-full blur-[120px]" />
-          <div className="absolute bottom-1/4 left-0 w-[400px] h-[400px] bg-cyan-500/5 rounded-full blur-[100px]" />
-        </div>
+      <div className="min-h-screen bg-[#ffffff]">
 
         {/* Header */}
-        <div className="border-b border-[#1f1f30] bg-[#0a0a12]/80 backdrop-blur-xl sticky top-0 z-10">
+        <div className="border-b border-[#e5e5e5] bg-white/95 backdrop-blur-xl sticky top-0 z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-br from-violet-500/20 to-purple-600/20 rounded-xl border border-violet-500/30 shadow-lg shadow-violet-500/10">
-                  <BarChart3 className="h-6 w-6 text-violet-400" />
+                <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+                  <BarChart3 className="h-6 w-6 text-[#525252]" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">Reports</h1>
-                  <p className="text-sm text-zinc-500 mt-0.5">Analyze your spending patterns</p>
+                  <h1 className="text-2xl font-bold text-[#171717]">Reports</h1>
+                  <p className="text-sm text-[#a3a3a3] mt-0.5">Analyze your spending patterns</p>
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <button className="px-4 py-2.5 bg-[#0f0f18] hover:bg-[#1a1a28] border border-[#2a2a40] hover:border-[#3a3a55] rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 group">
-                  <Filter className="h-4 w-4 text-zinc-400 group-hover:text-white transition-colors" />
-                  <span className="text-zinc-300 group-hover:text-white transition-colors">Filter</span>
+                <button className="px-4 py-2.5 bg-white hover:bg-[#f5f5f5] border border-[#e5e5e5] rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 group">
+                  <Filter className="h-4 w-4 text-[#a3a3a3] group-hover:text-[#171717] transition-colors" />
+                  <span className="text-[#525252] group-hover:text-[#171717] transition-colors">Filter</span>
                 </button>
-                <button className="px-4 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:scale-[1.02] active:scale-[0.98]">
-                  <Download className="h-4 w-4" />
-                  Export
+                <button className="px-4 py-2.5 bg-[#000000] hover:bg-[#171717] rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-sm">
+                  <Download className="h-4 w-4 text-white" />
+                  <span className="text-white">Export</span>
                 </button>
                 <DateRangeSelector value={dateRange} onChange={setDateRange} />
               </div>

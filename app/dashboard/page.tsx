@@ -31,17 +31,16 @@ function ExchangeRateCard() {
 
   if (isLoading || !rateData?.usd) {
     return (
-      <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] min-w-0 overflow-hidden group hover:border-amber-500/30 transition-all duration-300">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
+      <div className="relative bg-white rounded-xl p-5 sm:p-6 border border-[#e5e5e5] min-w-0 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <div className="p-2.5 bg-gradient-to-br from-amber-500/20 to-orange-600/20 rounded-xl border border-amber-500/30 shadow-lg shadow-amber-500/10">
-            <DollarSign className="h-5 w-5 text-amber-400" />
+          <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+            <DollarSign className="h-5 w-5 text-[#525252]" />
           </div>
         </div>
-        <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-2">Exchange Rate</p>
+        <p className="text-xs text-[#a3a3a3] font-medium uppercase tracking-wider mb-2">Exchange Rate</p>
         <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-full border-2 border-amber-500/30 border-t-amber-500 animate-spin" />
-          <p className="text-sm text-zinc-500">Loading...</p>
+          <div className="w-5 h-5 rounded-full border-2 border-[#e5e5e5] border-t-[#8b5cf6] animate-spin" />
+          <p className="text-sm text-[#a3a3a3]">Loading...</p>
         </div>
       </div>
     );
@@ -64,20 +63,17 @@ function ExchangeRateCard() {
     : '';
 
   return (
-    <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] min-w-0 overflow-hidden group hover:border-amber-500/30 transition-all duration-300">
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
-      <div className="absolute -top-20 -right-20 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
+    <div className="relative bg-white rounded-xl p-5 sm:p-6 border border-[#e5e5e5] min-w-0 shadow-sm hover:shadow-md transition-all duration-200">
       <div className="flex items-center justify-between mb-4">
-        <div className="p-2.5 bg-gradient-to-br from-amber-500/20 to-orange-600/20 rounded-xl border border-amber-500/30 shadow-lg shadow-amber-500/10">
-          <DollarSign className="h-5 w-5 text-amber-400" />
+        <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+          <DollarSign className="h-5 w-5 text-[#525252]" />
         </div>
-        <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg border ${
+        <div className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-md border ${
           isZero
-            ? 'bg-zinc-800/50 text-zinc-400 border-zinc-700'
+            ? 'bg-[#fafafa] text-[#a3a3a3] border-[#e5e5e5]'
             : change > 0
-            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-            : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+            ? 'bg-[#ecfdf5] text-[#10b981] border-[#e5e5e5]'
+            : 'bg-[#fef2f2] text-[#ef4444] border-[#e5e5e5]'
         }`}>
           {isZero ? (
             <>
@@ -94,12 +90,12 @@ function ExchangeRateCard() {
       </div>
 
       <div>
-        <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-2">Exchange Rate</p>
-        <p className="text-2xl sm:text-3xl font-bold text-amber-400 tabular-nums">
-          {formatNumber(rate)} <span className="text-lg text-zinc-500">تومان</span>
+        <p className="text-xs text-[#a3a3a3] font-medium uppercase tracking-wider mb-2">Exchange Rate</p>
+        <p className="text-2xl sm:text-3xl font-semibold text-[#171717] tabular-nums">
+          {formatNumber(rate)} <span className="text-lg text-[#a3a3a3]">تومان</span>
         </p>
         {lastUpdate && (
-          <p className="text-sm text-zinc-400 mt-1.5 font-medium">
+          <p className="text-sm text-[#525252] mt-1.5 font-medium">
             Updated at {lastUpdate}
           </p>
         )}
@@ -194,25 +190,19 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-[#05050a] text-white overflow-x-hidden relative">
-        {/* Background effects */}
-        <div className="fixed inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-violet-500/5 rounded-full blur-[150px]" />
-          <div className="absolute bottom-1/4 right-0 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-[120px]" />
-        </div>
-
+      <div className="min-h-screen bg-white overflow-x-hidden relative">
         {/* Header */}
-        <div className="border-b border-[#1f1f30] bg-[#0a0a12]/80 backdrop-blur-xl sticky top-0 z-10">
+        <div className="border-b border-[#e5e5e5] bg-white sticky top-0 z-10">
           <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-5">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">Dashboard</h1>
-                <p className="text-sm text-zinc-500 mt-1">Welcome back! Here's your financial overview.</p>
+                <h1 className="text-2xl sm:text-3xl font-semibold text-[#171717]">Dashboard</h1>
+                <p className="text-sm text-[#a3a3a3] mt-1">Welcome back! Here's your financial overview.</p>
               </div>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <a
                   href="/transactions"
-                  className="px-4 sm:px-5 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-4 sm:px-5 py-2.5 bg-[#000000] hover:bg-[#171717] text-white rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
                 >
                   <Plus className="h-4 w-4" />
                   <span className="hidden sm:inline">Add Transaction</span>
@@ -228,59 +218,50 @@ export default function DashboardPage() {
           {/* Key Metrics */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6 sm:mb-8">
             {/* Total Expenses */}
-            <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] min-w-0 overflow-hidden group hover:border-violet-500/30 transition-all duration-300">
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent" />
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-violet-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
+            <div className="relative bg-white rounded-xl p-5 sm:p-6 border border-[#e5e5e5] min-w-0 shadow-sm hover:shadow-md transition-all duration-200">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-2.5 bg-gradient-to-br from-violet-500/20 to-purple-600/20 rounded-xl border border-violet-500/30 shadow-lg shadow-violet-500/10">
-                  <DollarSign className="h-5 w-5 text-violet-400" />
+                <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+                  <DollarSign className="h-5 w-5 text-[#525252]" />
                 </div>
               </div>
 
               <div>
-                <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-2">Total Expenses</p>
-                <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums" dir="rtl">
-                  {formatNumber(totalToman)} <span className="text-lg text-zinc-500">تومان</span>
+                <p className="text-xs text-[#a3a3a3] font-medium uppercase tracking-wider mb-2">Total Expenses</p>
+                <p className="text-2xl sm:text-3xl font-semibold text-[#171717] tabular-nums" dir="rtl">
+                  {formatNumber(totalToman)} <span className="text-lg text-[#a3a3a3]">تومان</span>
                 </p>
-                <p className="text-sm text-zinc-400 mt-1.5 font-medium">
+                <p className="text-sm text-[#525252] mt-1.5 font-medium">
                   ${totalUsd.toFixed(2)} USD
                 </p>
               </div>
             </div>
 
             {/* Transaction Count */}
-            <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] min-w-0 overflow-hidden group hover:border-cyan-500/30 transition-all duration-300">
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
+            <div className="relative bg-white rounded-xl p-5 sm:p-6 border border-[#e5e5e5] min-w-0 shadow-sm hover:shadow-md transition-all duration-200">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-xl border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
-                  <Hash className="h-5 w-5 text-cyan-400" />
+                <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+                  <Hash className="h-5 w-5 text-[#525252]" />
                 </div>
               </div>
 
               <div>
-                <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-2">Transactions</p>
-                <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums">{transactionCount}</p>
-                <p className="text-sm text-zinc-400 mt-1.5 font-medium" dir="rtl">تعداد تراکنش</p>
+                <p className="text-xs text-[#a3a3a3] font-medium uppercase tracking-wider mb-2">Transactions</p>
+                <p className="text-2xl sm:text-3xl font-semibold text-[#171717] tabular-nums">{transactionCount}</p>
+                <p className="text-sm text-[#525252] mt-1.5 font-medium" dir="rtl">تعداد تراکنش</p>
               </div>
             </div>
 
             {/* Average Daily Spending */}
-            <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] min-w-0 overflow-hidden group hover:border-emerald-500/30 transition-all duration-300">
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
+            <div className="relative bg-white rounded-xl p-5 sm:p-6 border border-[#e5e5e5] min-w-0 shadow-sm hover:shadow-md transition-all duration-200">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-2.5 bg-gradient-to-br from-emerald-500/20 to-green-600/20 rounded-xl border border-emerald-500/30 shadow-lg shadow-emerald-500/10">
-                  <BarChart3 className="h-5 w-5 text-emerald-400" />
+                <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+                  <BarChart3 className="h-5 w-5 text-[#525252]" />
                 </div>
                 {lastMonthTotal > 0 && (
-                  <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg border ${
+                  <div className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-md border ${
                     monthOverMonthChange >= 0
-                      ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                      : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                      ? 'bg-[#fef2f2] text-[#ef4444] border-[#e5e5e5]'
+                      : 'bg-[#ecfdf5] text-[#10b981] border-[#e5e5e5]'
                   }`}>
                     {monthOverMonthChange >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                     <span>{Math.abs(monthOverMonthChange).toFixed(1)}%</span>
@@ -289,7 +270,7 @@ export default function DashboardPage() {
               </div>
 
               <div>
-                <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-2">Daily Average</p>
+                <p className="text-xs text-[#a3a3a3] font-medium uppercase tracking-wider mb-2">Daily Average</p>
                 {(() => {
                   const dates = filteredExpenses.map(exp => new Date(exp.date).getTime());
                   const firstDate = dates.length > 0 ? new Date(Math.min(...dates)) : new Date();
@@ -301,10 +282,10 @@ export default function DashboardPage() {
                   const avgDailyUsd = totalDays > 0 ? totalUsd / totalDays : 0;
                   return (
                     <>
-                      <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums" dir="rtl">
-                        {formatNumber(avgDailyToman)} <span className="text-lg text-zinc-500">تومان</span>
+                      <p className="text-2xl sm:text-3xl font-semibold text-[#171717] tabular-nums" dir="rtl">
+                        {formatNumber(avgDailyToman)} <span className="text-lg text-[#a3a3a3]">تومان</span>
                       </p>
-                      <p className="text-sm text-zinc-400 mt-1.5 font-medium">
+                      <p className="text-sm text-[#525252] mt-1.5 font-medium">
                         ${avgDailyUsd.toFixed(2)} USD
                       </p>
                     </>
@@ -321,16 +302,13 @@ export default function DashboardPage() {
           {/* Insights Dashboard */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mb-6 sm:mb-8">
             {/* Top 3 Categories */}
-            <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] min-w-0 overflow-hidden group hover:border-yellow-500/30 transition-all duration-300">
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent" />
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-yellow-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
+            <div className="relative bg-white rounded-xl p-5 sm:p-6 border border-[#e5e5e5] min-w-0 shadow-sm hover:shadow-md transition-all duration-200">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-2.5 bg-gradient-to-br from-yellow-500/20 to-amber-600/20 rounded-xl border border-yellow-500/30 shadow-lg shadow-yellow-500/10">
-                  <Lightbulb className="h-5 w-5 text-yellow-400" />
+                <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+                  <Lightbulb className="h-5 w-5 text-[#525252]" />
                 </div>
               </div>
-              <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-3">Top Categories</p>
+              <p className="text-xs text-[#a3a3a3] font-medium uppercase tracking-wider mb-3">Top Categories</p>
               {(() => {
                 const now = new Date();
                 const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -362,37 +340,34 @@ export default function DashboardPage() {
 
                 return topThree.length > 0 ? (
                   <div className="space-y-3">
-                    <p className="text-xs text-zinc-500 font-medium">{thisMonthExpenses.length > 0 ? 'This Month' : 'Overall'}</p>
+                    <p className="text-xs text-[#a3a3a3] font-medium">{thisMonthExpenses.length > 0 ? 'This Month' : 'Overall'}</p>
                     {topThree.map((cat, index) => (
-                      <div key={cat.category} className="flex items-center justify-between p-2.5 bg-[#0a0a12]/50 rounded-xl border border-[#1f1f30] hover:border-[#2a2a40] transition-colors">
+                      <div key={cat.category} className="flex items-center justify-between p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5] hover:border-[#d4d4d4] transition-colors">
                         <div className="flex items-center gap-3">
-                          <span className="w-6 h-6 flex items-center justify-center rounded-lg bg-yellow-500/20 text-yellow-400 text-xs font-bold">{index + 1}</span>
+                          <span className="w-6 h-6 flex items-center justify-center rounded-md bg-[#0070f3] text-white text-xs font-semibold">{index + 1}</span>
                           <div className="flex flex-col min-w-0">
-                            <span className="text-white font-medium text-sm truncate">{cat.name}</span>
-                            <span className="text-zinc-500 text-xs truncate" dir="rtl">{cat.nameFa}</span>
+                            <span className="text-[#171717] font-medium text-sm truncate">{cat.name}</span>
+                            <span className="text-[#a3a3a3] text-xs truncate" dir="rtl">{cat.nameFa}</span>
                           </div>
                         </div>
-                        <span className="font-bold text-white text-sm whitespace-nowrap tabular-nums">{formatNumber(cat.value)}</span>
+                        <span className="font-semibold text-[#171717] text-sm whitespace-nowrap tabular-nums">{formatNumber(cat.value)}</span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-zinc-500">No expense data available</p>
+                  <p className="text-sm text-[#a3a3a3]">No expense data available</p>
                 );
               })()}
             </div>
 
             {/* Highest Single Expense */}
-            <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] min-w-0 overflow-hidden group hover:border-rose-500/30 transition-all duration-300">
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-rose-500/50 to-transparent" />
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-rose-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
+            <div className="relative bg-white rounded-xl p-5 sm:p-6 border border-[#e5e5e5] min-w-0 shadow-sm hover:shadow-md transition-all duration-200">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-2.5 bg-gradient-to-br from-rose-500/20 to-pink-600/20 rounded-xl border border-rose-500/30 shadow-lg shadow-rose-500/10">
-                  <TrendingUp className="h-5 w-5 text-rose-400" />
+                <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+                  <TrendingUp className="h-5 w-5 text-[#525252]" />
                 </div>
               </div>
-              <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-3">Highest Expense</p>
+              <p className="text-xs text-[#a3a3a3] font-medium uppercase tracking-wider mb-3">Highest Expense</p>
               {(() => {
                 const highestExpense = filteredExpenses.reduce((max, exp) =>
                   exp.price_toman > max.price_toman ? exp : max
@@ -400,115 +375,101 @@ export default function DashboardPage() {
 
                 return highestExpense ? (
                   <>
-                    <p className="text-2xl sm:text-3xl font-bold text-rose-400 tabular-nums" dir="rtl">
-                      {formatNumber(highestExpense.price_toman)} <span className="text-lg text-zinc-500">تومان</span>
+                    <p className="text-2xl sm:text-3xl font-semibold text-[#171717] tabular-nums" dir="rtl">
+                      {formatNumber(highestExpense.price_toman)} <span className="text-lg text-[#a3a3a3]">تومان</span>
                     </p>
-                    <p className="text-sm text-zinc-400 mt-1.5 font-medium">
+                    <p className="text-sm text-[#525252] mt-1.5 font-medium">
                       ${highestExpense.price_usd.toFixed(2)} USD
                     </p>
-                    <div className="mt-3 pt-3 border-t border-[#1f1f30]">
-                      <p className="text-xs text-zinc-500 mb-1">
+                    <div className="mt-3 pt-3 border-t border-[#e5e5e5]">
+                      <p className="text-xs text-[#a3a3a3] mb-1">
                         {new Date(highestExpense.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
                       </p>
-                      <p className="text-sm text-white font-medium">{getCategoryLabel(highestExpense.category).en}</p>
+                      <p className="text-sm text-[#171717] font-medium">{getCategoryLabel(highestExpense.category).en}</p>
                     </div>
                   </>
                 ) : (
-                  <p className="text-sm text-zinc-500">No expenses yet</p>
+                  <p className="text-sm text-[#a3a3a3]">No expenses yet</p>
                 );
               })()}
             </div>
 
             {/* Month over Month Change */}
-            <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] min-w-0 overflow-hidden group hover:border-indigo-500/30 transition-all duration-300">
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
+            <div className="relative bg-white rounded-xl p-5 sm:p-6 border border-[#e5e5e5] min-w-0 shadow-sm hover:shadow-md transition-all duration-200">
               <div className="flex items-center justify-between mb-4">
-                <div className={`p-2.5 rounded-xl border shadow-lg ${
+                <div className={`p-2.5 rounded-lg border ${
                   monthOverMonthChange >= 0
-                    ? 'bg-gradient-to-br from-rose-500/20 to-red-600/20 border-rose-500/30 shadow-rose-500/10'
-                    : 'bg-gradient-to-br from-emerald-500/20 to-green-600/20 border-emerald-500/30 shadow-emerald-500/10'
+                    ? 'bg-[#fef2f2] border-[#e5e5e5]'
+                    : 'bg-[#ecfdf5] border-[#e5e5e5]'
                 }`}>
                   {monthOverMonthChange >= 0 ? (
-                    <TrendingUp className="h-5 w-5 text-rose-400" />
+                    <TrendingUp className="h-5 w-5 text-[#ef4444]" />
                   ) : (
-                    <TrendingDown className="h-5 w-5 text-emerald-400" />
+                    <TrendingDown className="h-5 w-5 text-[#10b981]" />
                   )}
                 </div>
               </div>
-              <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-3">vs Last Month</p>
+              <p className="text-xs text-[#a3a3a3] font-medium uppercase tracking-wider mb-3">vs Last Month</p>
               {lastMonthTotal > 0 ? (
                 <>
-                  <p className={`text-2xl sm:text-3xl font-bold tabular-nums ${
-                    monthOverMonthChange >= 0 ? 'text-rose-400' : 'text-emerald-400'
+                  <p className={`text-2xl sm:text-3xl font-semibold tabular-nums ${
+                    monthOverMonthChange >= 0 ? 'text-[#ef4444]' : 'text-[#10b981]'
                   }`}>
                     {monthOverMonthChange >= 0 ? '+' : ''}{monthOverMonthChange.toFixed(1)}%
                   </p>
-                  <p className="text-sm text-zinc-400 mt-1.5 font-medium">
-                    Spending <span className={`font-semibold ${monthOverMonthChange >= 0 ? 'text-rose-400' : 'text-emerald-400'}`}>{monthOverMonthChange >= 0 ? 'more' : 'less'}</span> than last month
+                  <p className="text-sm text-[#525252] mt-1.5 font-medium">
+                    Spending <span className={`font-semibold ${monthOverMonthChange >= 0 ? 'text-[#ef4444]' : 'text-[#10b981]'}`}>{monthOverMonthChange >= 0 ? 'more' : 'less'}</span> than last month
                   </p>
-                  <div className="mt-3 pt-3 border-t border-[#1f1f30] space-y-1">
+                  <div className="mt-3 pt-3 border-t border-[#e5e5e5] space-y-1">
                     <div className="flex justify-between text-xs">
-                      <span className="text-zinc-500">This Month</span>
-                      <span className="text-white font-medium tabular-nums">{formatNumber(thisMonthTotalToman)} ت</span>
+                      <span className="text-[#a3a3a3]">This Month</span>
+                      <span className="text-[#171717] font-medium tabular-nums">{formatNumber(thisMonthTotalToman)} ت</span>
                     </div>
                     <div className="flex justify-between text-xs">
-                      <span className="text-zinc-500">Last Month</span>
-                      <span className="text-zinc-400 tabular-nums">{formatNumber(lastMonthTotalToman)} ت</span>
+                      <span className="text-[#a3a3a3]">Last Month</span>
+                      <span className="text-[#525252] tabular-nums">{formatNumber(lastMonthTotalToman)} ت</span>
                     </div>
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-zinc-500">Not enough data to compare</p>
+                <p className="text-sm text-[#a3a3a3]">Not enough data to compare</p>
               )}
             </div>
           </div>
 
           {/* Expenses by Category - Full Width */}
           {categoryData.length > 0 && (
-            <div className="relative bg-gradient-to-br from-[#0a0a12] to-[#05050a] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] overflow-hidden mb-6 sm:mb-8">
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/30 to-transparent" />
-
+            <div className="relative bg-white rounded-xl p-5 sm:p-6 border border-[#e5e5e5] overflow-hidden mb-6 sm:mb-8 shadow-sm">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gradient-to-br from-violet-500/20 to-purple-600/20 rounded-lg border border-violet-500/30">
-                  <BarChart3 className="h-4 w-4 text-violet-400" />
+                <div className="p-2 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+                  <BarChart3 className="h-4 w-4 text-[#525252]" />
                 </div>
-                <h2 className="text-lg font-semibold text-white">Expenses by Category</h2>
+                <h2 className="text-lg font-semibold text-[#171717]">Expenses by Category</h2>
               </div>
 
               <div className="space-y-3">
                 {categoryData.map((cat, index) => (
-                  <div key={cat.category} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-[#0f0f18]/50 rounded-xl border border-[#1f1f30] hover:border-[#2a2a40] transition-colors min-w-0 group">
-                    <div
-                      className="w-1.5 h-10 rounded-full shrink-0 shadow-lg"
-                      style={{
-                        backgroundColor: COLORS[index % COLORS.length],
-                        boxShadow: `0 0 10px ${COLORS[index % COLORS.length]}40`
-                      }}
-                    />
+                  <div key={cat.category} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-[#fafafa] rounded-lg border border-[#e5e5e5] hover:border-[#d4d4d4] transition-colors min-w-0 group">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-2 gap-2">
                         <div className="flex flex-col min-w-0 flex-1">
-                          <span className="text-sm font-semibold text-white truncate">{cat.name}</span>
-                          <span className="text-xs text-zinc-500 truncate" dir="rtl">{cat.nameFa}</span>
+                          <span className="text-sm font-semibold text-[#171717] truncate">{cat.name}</span>
+                          <span className="text-xs text-[#a3a3a3] truncate" dir="rtl">{cat.nameFa}</span>
                         </div>
                         <div className="flex flex-col items-end shrink-0">
-                          <span className="text-sm font-bold text-white whitespace-nowrap tabular-nums" dir="rtl">
+                          <span className="text-sm font-semibold text-[#171717] whitespace-nowrap tabular-nums" dir="rtl">
                             {formatNumber(cat.value)} تومان
                           </span>
-                          <span className="text-xs text-zinc-500 whitespace-nowrap">
+                          <span className="text-xs text-[#a3a3a3] whitespace-nowrap">
                             ${cat.usdValue.toFixed(2)} USD
                           </span>
                         </div>
                       </div>
-                      <div className="w-full bg-[#1f1f30] rounded-full h-2">
+                      <div className="w-full bg-[#e5e5e5] rounded-full h-2">
                         <div
-                          className="h-full rounded-full transition-all duration-500"
+                          className="h-full rounded-full transition-all duration-500 bg-[#0070f3]"
                           style={{
-                            width: `${totalToman > 0 ? (cat.value / totalToman) * 100 : 0}%`,
-                            backgroundColor: COLORS[index % COLORS.length],
-                            boxShadow: `0 0 8px ${COLORS[index % COLORS.length]}50`
+                            width: `${totalToman > 0 ? (cat.value / totalToman) * 100 : 0}%`
                           }}
                         />
                       </div>
@@ -522,23 +483,20 @@ export default function DashboardPage() {
           {/* Enhanced Charts */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-6">
-              <h2 className="text-xl font-bold text-white">Enhanced Analytics</h2>
-              <span className="text-sm text-zinc-500" dir="rtl">نمودارهای پیشرفته</span>
+              <h2 className="text-xl font-semibold text-[#171717]">Enhanced Analytics</h2>
+              <span className="text-sm text-[#a3a3a3]" dir="rtl">نمودارهای پیشرفته</span>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
               {/* Comparison Chart - This Month vs Last Month */}
-              <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] overflow-hidden group hover:border-cyan-500/30 transition-all duration-300">
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
-                <div className="absolute -top-20 -left-20 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
+              <div className="relative bg-white rounded-xl p-5 sm:p-6 border border-[#e5e5e5] overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-xl border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
-                    <BarChart3 className="h-5 w-5 text-cyan-400" />
+                  <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+                    <BarChart3 className="h-5 w-5 text-[#525252]" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white">Month Comparison</h3>
-                    <p className="text-xs text-zinc-500" dir="rtl">مقایسه ماهانه</p>
+                    <h3 className="text-lg font-semibold text-[#171717]">Month Comparison</h3>
+                    <p className="text-xs text-[#a3a3a3]" dir="rtl">مقایسه ماهانه</p>
                   </div>
                 </div>
 
@@ -546,14 +504,14 @@ export default function DashboardPage() {
                   {/* This Month Bar */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-white">
+                      <span className="text-sm font-medium text-[#171717]">
                         {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                       </span>
-                      <span className="text-sm font-bold text-cyan-400 tabular-nums">{formatNumber(thisMonthTotalToman)} ت</span>
+                      <span className="text-sm font-semibold text-[#171717] tabular-nums">{formatNumber(thisMonthTotalToman)} ت</span>
                     </div>
-                    <div className="w-full bg-[#1f1f30] rounded-full h-3">
+                    <div className="w-full bg-[#e5e5e5] rounded-full h-3">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/30 transition-all duration-500"
+                        className="h-full rounded-full bg-[#0070f3] transition-all duration-500"
                         style={{
                           width: `${Math.max(thisMonthTotalToman, lastMonthTotalToman) > 0 ? (thisMonthTotalToman / Math.max(thisMonthTotalToman, lastMonthTotalToman)) * 100 : 0}%`
                         }}
@@ -564,14 +522,14 @@ export default function DashboardPage() {
                   {/* Last Month Bar */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-zinc-400">
+                      <span className="text-sm font-medium text-[#525252]">
                         {new Date(new Date().getFullYear(), new Date().getMonth() - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                       </span>
-                      <span className="text-sm font-bold text-zinc-400 tabular-nums">{formatNumber(lastMonthTotalToman)} ت</span>
+                      <span className="text-sm font-semibold text-[#525252] tabular-nums">{formatNumber(lastMonthTotalToman)} ت</span>
                     </div>
-                    <div className="w-full bg-[#1f1f30] rounded-full h-3">
+                    <div className="w-full bg-[#e5e5e5] rounded-full h-3">
                       <div
-                        className="h-full rounded-full bg-zinc-600 transition-all duration-500"
+                        className="h-full rounded-full bg-[#d4d4d4] transition-all duration-500"
                         style={{
                           width: `${Math.max(thisMonthTotalToman, lastMonthTotalToman) > 0 ? (lastMonthTotalToman / Math.max(thisMonthTotalToman, lastMonthTotalToman)) * 100 : 0}%`
                         }}
@@ -580,25 +538,25 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Difference */}
-                  <div className="pt-4 border-t border-[#1f1f30]">
+                  <div className="pt-4 border-t border-[#e5e5e5]">
                     {thisMonthTotalToman > 0 && lastMonthTotalToman > 0 ? (
-                      <div className="flex items-center justify-between p-3 bg-[#0a0a12]/50 rounded-xl">
-                        <span className="text-sm text-zinc-400">Difference</span>
+                      <div className="flex items-center justify-between p-3 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+                        <span className="text-sm text-[#525252]">Difference</span>
                         <div className="flex items-center gap-2">
                           {thisMonthTotalToman > lastMonthTotalToman ? (
-                            <TrendingUp className="h-4 w-4 text-rose-400" />
+                            <TrendingUp className="h-4 w-4 text-[#ef4444]" />
                           ) : (
-                            <TrendingDown className="h-4 w-4 text-emerald-400" />
+                            <TrendingDown className="h-4 w-4 text-[#10b981]" />
                           )}
-                          <span className={`text-sm font-bold tabular-nums ${
-                            thisMonthTotalToman > lastMonthTotalToman ? 'text-rose-400' : 'text-emerald-400'
+                          <span className={`text-sm font-semibold tabular-nums ${
+                            thisMonthTotalToman > lastMonthTotalToman ? 'text-[#ef4444]' : 'text-[#10b981]'
                           }`}>
                             {formatNumber(Math.abs(thisMonthTotalToman - lastMonthTotalToman))} ت
                           </span>
                         </div>
                       </div>
                     ) : (
-                      <p className="text-sm text-zinc-500">
+                      <p className="text-sm text-[#a3a3a3]">
                         {thisMonthTotalToman === 0 && lastMonthTotalToman > 0
                           ? `No spending recorded in ${new Date().toLocaleDateString('en-US', { month: 'long' })} yet`
                           : 'No data to compare'}
@@ -609,17 +567,14 @@ export default function DashboardPage() {
               </div>
 
               {/* Spending Heatmap Calendar */}
-              <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl p-5 sm:p-6 border border-[#1f1f30] overflow-hidden group hover:border-violet-500/30 transition-all duration-300">
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent" />
-                <div className="absolute -top-20 -right-20 w-40 h-40 bg-violet-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
+              <div className="relative bg-white rounded-xl p-5 sm:p-6 border border-[#e5e5e5] overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2.5 bg-gradient-to-br from-violet-500/20 to-purple-600/20 rounded-xl border border-violet-500/30 shadow-lg shadow-violet-500/10">
-                    <BarChart3 className="h-5 w-5 text-violet-400" />
+                  <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+                    <BarChart3 className="h-5 w-5 text-[#525252]" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white">Spending Heatmap</h3>
-                    <p className="text-xs text-zinc-500" dir="rtl">نقشه حرارتی هزینه</p>
+                    <h3 className="text-lg font-semibold text-[#171717]">Spending Heatmap</h3>
+                    <p className="text-xs text-[#a3a3a3]" dir="rtl">نقشه حرارتی هزینه</p>
                   </div>
                 </div>
 
@@ -673,13 +628,13 @@ export default function DashboardPage() {
 
                   // Get color based on spending intensity
                   const getHeatmapColor = (total: number) => {
-                    if (total === 0) return '#1f1f30';
+                    if (total === 0) return '#f5f5f5';
                     const intensity = total / maxSpending;
-                    if (intensity > 0.8) return '#8b5cf6';
-                    if (intensity > 0.6) return '#a78bfa';
-                    if (intensity > 0.4) return '#c4b5fd';
-                    if (intensity > 0.2) return '#6366f1';
-                    return '#818cf8';
+                    if (intensity > 0.8) return '#0070f3';
+                    if (intensity > 0.6) return '#3b9aff';
+                    if (intensity > 0.4) return '#66b3ff';
+                    if (intensity > 0.2) return '#99ccff';
+                    return '#cce5ff';
                   };
 
                   const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -687,7 +642,7 @@ export default function DashboardPage() {
                   return (
                     <div>
                       {/* Month label */}
-                      <p className="text-sm text-white font-medium mb-4">
+                      <p className="text-sm text-[#171717] font-medium mb-4">
                         {new Date(displayYear, displayMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                       </p>
 
@@ -695,7 +650,7 @@ export default function DashboardPage() {
                       <div className="grid grid-cols-7 gap-1.5 sm:gap-2 mb-3">
                         {dayLabels.map(label => (
                           <div key={label} className="text-center">
-                            <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wide">{label}</p>
+                            <p className="text-[10px] text-[#a3a3a3] font-semibold uppercase tracking-wide">{label}</p>
                           </div>
                         ))}
                       </div>
@@ -706,15 +661,14 @@ export default function DashboardPage() {
                           <div key={idx} className="group relative">
                             {day.date ? (
                               <div
-                                className="aspect-square rounded-lg cursor-pointer transition-all hover:ring-2 hover:ring-violet-400 hover:scale-105"
+                                className="aspect-square rounded-lg cursor-pointer transition-all hover:ring-2 hover:ring-[#0070f3] hover:scale-105 border border-[#e5e5e5]"
                                 style={{
-                                  backgroundColor: getHeatmapColor(day.total),
-                                  boxShadow: day.total > 0 ? `0 0 10px ${getHeatmapColor(day.total)}40` : 'none'
+                                  backgroundColor: getHeatmapColor(day.total)
                                 }}
                                 title={`${day.date} - ${day.count} transactions - ${formatNumber(day.total)} ت`}
                               >
                                 <div className="flex items-center justify-center h-full">
-                                  <span className="text-xs sm:text-sm font-bold text-white">{day.date}</span>
+                                  <span className={`text-xs sm:text-sm font-semibold ${day.total > 0 ? 'text-white' : 'text-[#a3a3a3]'}`}>{day.date}</span>
                                 </div>
                               </div>
                             ) : (
@@ -723,9 +677,9 @@ export default function DashboardPage() {
 
                             {/* Tooltip on hover */}
                             {day.date && (
-                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-[#0f0f18] text-white text-xs px-3 py-2 rounded-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 border border-[#2a2a40] shadow-xl">
-                                <p className="font-bold text-white">{day.count} {day.count === 1 ? 'transaction' : 'transactions'}</p>
-                                <p className="text-violet-400 font-medium">{formatNumber(day.total)} ت</p>
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-white text-[#171717] text-xs px-3 py-2 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 border border-[#e5e5e5] shadow-lg">
+                                <p className="font-semibold text-[#171717]">{day.count} {day.count === 1 ? 'transaction' : 'transactions'}</p>
+                                <p className="text-[#0070f3] font-medium">{formatNumber(day.total)} ت</p>
                               </div>
                             )}
                           </div>
@@ -733,19 +687,19 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Legend */}
-                      <div className="mt-5 pt-4 border-t border-[#1f1f30]">
-                        <p className="text-xs text-zinc-500 font-medium mb-3">Spending Intensity</p>
+                      <div className="mt-5 pt-4 border-t border-[#e5e5e5]">
+                        <p className="text-xs text-[#a3a3a3] font-medium mb-3">Spending Intensity</p>
                         <div className="flex items-center gap-3 text-xs">
-                          <span className="text-zinc-500">Less</span>
+                          <span className="text-[#a3a3a3]">Less</span>
                           <div className="flex gap-1.5">
-                            <div className="w-4 h-4 rounded-md shadow-inner" style={{ backgroundColor: '#1f1f30' }} />
-                            <div className="w-4 h-4 rounded-md" style={{ backgroundColor: '#818cf8', boxShadow: '0 0 6px #818cf830' }} />
-                            <div className="w-4 h-4 rounded-md" style={{ backgroundColor: '#6366f1', boxShadow: '0 0 6px #6366f130' }} />
-                            <div className="w-4 h-4 rounded-md" style={{ backgroundColor: '#c4b5fd', boxShadow: '0 0 6px #c4b5fd30' }} />
-                            <div className="w-4 h-4 rounded-md" style={{ backgroundColor: '#a78bfa', boxShadow: '0 0 6px #a78bfa30' }} />
-                            <div className="w-4 h-4 rounded-md" style={{ backgroundColor: '#8b5cf6', boxShadow: '0 0 6px #8b5cf630' }} />
+                            <div className="w-4 h-4 rounded-md border border-[#e5e5e5]" style={{ backgroundColor: '#f5f5f5' }} />
+                            <div className="w-4 h-4 rounded-md border border-[#e5e5e5]" style={{ backgroundColor: '#cce5ff' }} />
+                            <div className="w-4 h-4 rounded-md border border-[#e5e5e5]" style={{ backgroundColor: '#99ccff' }} />
+                            <div className="w-4 h-4 rounded-md border border-[#e5e5e5]" style={{ backgroundColor: '#66b3ff' }} />
+                            <div className="w-4 h-4 rounded-md border border-[#e5e5e5]" style={{ backgroundColor: '#3b9aff' }} />
+                            <div className="w-4 h-4 rounded-md border border-[#e5e5e5]" style={{ backgroundColor: '#0070f3' }} />
                           </div>
-                          <span className="text-zinc-500">More</span>
+                          <span className="text-[#a3a3a3]">More</span>
                         </div>
                       </div>
                     </div>
