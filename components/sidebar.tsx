@@ -15,7 +15,7 @@ import {
   LogOut,
   ChevronUp
 } from 'lucide-react';
-import { UserMenu } from './user-menu';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 interface NavItem {
   href: string;
@@ -32,6 +32,7 @@ const navItems: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { logout } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -141,8 +142,7 @@ export function Sidebar() {
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#525252] hover:bg-[#f5f5f5] hover:text-[#171717] transition-colors"
                 onClick={() => {
                   setIsUserMenuOpen(false);
-                  // Add logout logic here
-                  console.log('Logging out...');
+                  logout();
                 }}
               >
                 <LogOut className="h-4 w-4" />

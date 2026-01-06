@@ -88,10 +88,12 @@ input[type="password"],
 select,
 textarea {
   font-family: var(--font-geist-sans), sans-serif !important;
-  background: var(--background) !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
   border: 1px solid var(--border-subtle) !important;
-  color: var(--foreground) !important;
+  color: #171717 !important;
   transition: all 0.2s ease;
+  color-scheme: light !important;
 }
 
 input[type="text"]:focus,
