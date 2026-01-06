@@ -53,10 +53,11 @@
 /* Light theme */
 html {
   color-scheme: light;
+  background: #ffffff;
 }
 
 body {
-  background: var(--background);
+  background: #ffffff;
   color: var(--foreground);
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
@@ -129,6 +130,13 @@ select {
   padding-right: 36px !important;
   -webkit-appearance: none !important;
   appearance: none !important;
+  color-scheme: light !important;
+}
+
+/* Force light backgrounds on select dropdowns */
+select option {
+  background-color: #ffffff !important;
+  color: #171717 !important;
 }
 
 /* Scrollbar styling */

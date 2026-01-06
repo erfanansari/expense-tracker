@@ -27,13 +27,19 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
           value={value}
           onChange={(e) => onChange(e.target.value as DateRange)}
           className="appearance-none bg-transparent border-none text-sm font-semibold text-[#171717] cursor-pointer focus:outline-none focus:ring-0 pr-6 outline-none"
-          style={{ background: 'transparent', outline: 'none', boxShadow: 'none' }}
+          style={{
+            background: 'transparent',
+            outline: 'none',
+            boxShadow: 'none',
+            colorScheme: 'light'
+          }}
         >
           {options.map((option) => (
             <option
               key={option.value}
               value={option.value}
               className="bg-white text-[#171717]"
+              style={{ background: '#ffffff', color: '#171717' }}
             >
               {option.label}
             </option>

@@ -144,7 +144,7 @@ export default function TransactionsPage() {
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-[var(--background)]">
+      <div className="min-h-screen bg-[#ffffff]">
         {/* Header */}
         <div className="border-b border-[#e5e5e5] bg-white/95 backdrop-blur-xl sticky top-0 z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">

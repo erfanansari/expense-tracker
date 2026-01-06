@@ -34,9 +34,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="bg-white">
+      <head>
+        <meta name="color-scheme" content="light" />
+      </head>
       <body
-        className={`${geistSans.variable} ${persianFont.variable} antialiased`}
+        className={`${geistSans.variable} ${persianFont.variable} antialiased bg-white`}
       >
         {children}
         <Analytics />
