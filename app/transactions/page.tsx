@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { ExpenseForm } from '@/components/expense-form';
+import { Loading } from '@/components/loading';
 import { Trash2, Edit, Tag, Plus, Loader2, FileText, ArrowUpRight, Search, Filter } from 'lucide-react';
 import { type Expense } from '@/lib/types/expense';
 import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@/lib/utils';
@@ -187,12 +188,8 @@ export default function TransactionsPage() {
           <div className="relative bg-white rounded-xl border border-[#e5e5e5] overflow-hidden shadow-sm">
 
             {isLoading && expenses.length === 0 ? (
-              <div className="p-16 text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-[#fafafa] mb-4 border border-[#e5e5e5]">
-                  <Loader2 className="h-8 w-8 animate-spin text-[#0070f3]" />
-                </div>
-                <p className="text-[#525252] font-medium">Loading transactions...</p>
-                <p className="text-sm text-[#a3a3a3] mt-1" dir="rtl">در حال بارگذاری تراکنش‌ها...</p>
+              <div className="p-8">
+                <Loading message="Loading transactions..." />
               </div>
             ) : error && expenses.length === 0 ? (
               <div className="p-16 text-center">

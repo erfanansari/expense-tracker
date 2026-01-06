@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { ExpenseCharts } from '@/components/expense-charts';
 import { ExpenseStats } from '@/components/expense-stats';
+import { Loading } from '@/components/loading';
 import { DateRangeSelector, type DateRange, filterExpensesByDateRange, getChartGranularity } from '@/components/date-range-selector';
 import { type Expense } from '@/lib/types/expense';
 import { BarChart3, Download, Filter, Sparkles, TrendingUp } from 'lucide-react';
@@ -91,12 +92,7 @@ export default function ReportsPage() {
               </div>
             </div>
           ) : isLoading ? (
-            <div className="bg-white rounded-xl p-16 border border-[#e5e5e5] shadow-sm text-center">
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-12 h-12 rounded-full border-2 border-[#e5e5e5] border-t-[#0070f3] animate-spin" />
-                <p className="text-[#525252] font-medium">Loading reports...</p>
-              </div>
-            </div>
+            <Loading message="Loading reports..." />
           ) : (
             <div className="bg-white rounded-xl p-16 border border-[#e5e5e5] shadow-sm text-center">
               <div className="flex flex-col items-center gap-4 max-w-md mx-auto">

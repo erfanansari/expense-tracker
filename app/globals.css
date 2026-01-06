@@ -100,8 +100,8 @@ input[type="email"]:focus,
 input[type="password"]:focus,
 select:focus,
 textarea:focus {
-  border-color: var(--accent-primary) !important;
-  box-shadow: 0 0 0 3px var(--accent-primary-muted) !important;
+  border-color: #0070f3 !important;
+  box-shadow: none !important;
   outline: none !important;
 }
 

@@ -26,8 +26,8 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
         <select
           value={value}
           onChange={(e) => onChange(e.target.value as DateRange)}
-          className="appearance-none bg-transparent border-none text-sm font-semibold text-[#171717] cursor-pointer focus:outline-none pr-6"
-          style={{ background: 'transparent' }}
+          className="appearance-none bg-transparent border-none text-sm font-semibold text-[#171717] cursor-pointer focus:outline-none focus:ring-0 pr-6 outline-none"
+          style={{ background: 'transparent', outline: 'none', boxShadow: 'none' }}
         >
           {options.map((option) => (
             <option
