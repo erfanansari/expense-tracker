@@ -10,34 +10,33 @@ interface ExpenseChartsProps {
   granularity?: 'daily' | 'weekly' | 'monthly';
 }
 
-// Premium gradient colors
+// Neutral colors for light mode
 const COLORS = [
-  '#8b5cf6', // violet
-  '#06b6d4', // cyan
-  '#f59e0b', // amber
-  '#ec4899', // pink
-  '#10b981', // emerald
-  '#f43f5e', // rose
-  '#84cc16', // lime
-  '#6366f1', // indigo
+  '#0070f3', // Vercel blue
+  '#525252', // dark gray
+  '#737373', // medium gray
+  '#10b981', // emerald (success)
+  '#3b82f6', // blue
+  '#a3a3a3', // light gray
+  '#2563eb', // darker blue
+  '#171717', // black
 ];
 
-// Custom tooltip component with glassmorphism effect
+// Custom tooltip component
 const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: { nameFa?: string; usdValue?: number } }> }) => {
   if (active && payload && payload.length) {
     const data = payload[0];
     const usdValue = data.payload.usdValue || 0;
     return (
-      <div className="bg-[#0f0f18]/95 backdrop-blur-xl border border-[#2a2a40] p-4 rounded-2xl shadow-2xl shadow-black/40">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent rounded-t-2xl" />
-        <p className="text-white font-bold text-lg" dir="rtl">
+      <div className="bg-white border border-[#e5e5e5] p-4 rounded-lg shadow-lg">
+        <p className="text-[#171717] font-bold text-lg" dir="rtl">
           {formatNumber(data.value)} تومان
         </p>
-        <p className="text-zinc-400 text-sm mt-1.5 font-medium">
+        <p className="text-[#a3a3a3] text-sm mt-1.5 font-medium">
           ${usdValue.toFixed(2)} USD
         </p>
         {data.payload.nameFa && (
-          <p className="text-violet-400 text-sm mt-2 font-medium" dir="rtl">
+          <p className="text-[#0070f3] text-sm mt-2 font-medium" dir="rtl">
             {data.payload.nameFa}
           </p>
         )}
@@ -124,33 +123,23 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Pie Chart */}
-      <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl border border-[#1f1f30] p-6 overflow-hidden group hover:border-violet-500/30 transition-all duration-300">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/60 to-transparent" />
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-violet-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="relative bg-white rounded-xl border border-[#e5e5e5] p-6 shadow-sm">
 
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 bg-gradient-to-br from-violet-500/20 to-purple-600/20 rounded-xl border border-violet-500/30 shadow-lg shadow-violet-500/10">
-            <PieChartIcon className="h-5 w-5 text-violet-400" />
+          <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+            <PieChartIcon className="h-5 w-5 text-[#0070f3]" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">
+            <h3 className="text-lg font-bold text-[#171717]">
               By Category
             </h3>
-            <p className="text-sm text-zinc-500" dir="rtl">بر اساس دسته‌بندی</p>
+            <p className="text-sm text-[#a3a3a3]" dir="rtl">بر اساس دسته‌بندی</p>
           </div>
         </div>
 
         <div className="h-[280px]">
           <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <PieChart>
-              <defs>
-                {COLORS.map((color, index) => (
-                  <linearGradient key={`gradient-${index}`} id={`pieGradient-${index}`} x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor={color} stopOpacity={1} />
-                    <stop offset="100%" stopColor={color} stopOpacity={0.7} />
-                  </linearGradient>
-                ))}
-              </defs>
               <Pie
                 data={categoryTotals}
                 cx="50%"
@@ -159,15 +148,15 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
                 outerRadius={110}
                 paddingAngle={4}
                 dataKey="value"
-                stroke="transparent"
+                stroke="#ffffff"
+                strokeWidth={2}
                 animationDuration={800}
                 animationEasing="ease-out"
               >
                 {categoryTotals.map((_, index) => (
                   <Cell
                     key={`cell-${index}`}
-                    fill={`url(#pieGradient-${index % COLORS.length})`}
-                    className="drop-shadow-lg"
+                    fill={COLORS[index % COLORS.length]}
                   />
                 ))}
               </Pie>
@@ -180,16 +169,15 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
           {categoryTotals.map((cat, index) => (
             <div
               key={cat.category}
-              className="flex items-center gap-2.5 p-2.5 rounded-xl bg-[#0a0a12]/50 hover:bg-[#1a1a28] border border-transparent hover:border-[#2a2a40] transition-all duration-200 cursor-default"
+              className="flex items-center gap-2.5 p-2.5 rounded-lg bg-[#fafafa] hover:bg-[#f5f5f5] border border-[#e5e5e5] transition-all duration-200 cursor-default"
             >
               <div
-                className="w-3 h-3 rounded-full shrink-0 shadow-lg"
+                className="w-3 h-3 rounded-full shrink-0"
                 style={{
-                  backgroundColor: COLORS[index % COLORS.length],
-                  boxShadow: `0 0 8px ${COLORS[index % COLORS.length]}40`
+                  backgroundColor: COLORS[index % COLORS.length]
                 }}
               />
-              <span className="text-sm text-zinc-400 truncate font-medium">
+              <span className="text-sm text-[#525252] truncate font-medium">
                 {cat.name}
               </span>
             </div>
@@ -198,57 +186,46 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
       </div>
 
       {/* Bar Chart */}
-      <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl border border-[#1f1f30] p-6 overflow-hidden group hover:border-emerald-500/30 transition-all duration-300">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/60 to-transparent" />
-        <div className="absolute -top-24 -left-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="relative bg-white rounded-xl border border-[#e5e5e5] p-6 shadow-sm">
 
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 bg-gradient-to-br from-emerald-500/20 to-green-600/20 rounded-xl border border-emerald-500/30 shadow-lg shadow-emerald-500/10">
-            <BarChart3 className="h-5 w-5 text-emerald-400" />
+          <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+            <BarChart3 className="h-5 w-5 text-[#10b981]" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">
+            <h3 className="text-lg font-bold text-[#171717]">
               Category Comparison
             </h3>
-            <p className="text-sm text-zinc-500" dir="rtl">مقایسه دسته‌بندی</p>
+            <p className="text-sm text-[#a3a3a3]" dir="rtl">مقایسه دسته‌بندی</p>
           </div>
         </div>
 
         <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <BarChart data={categoryTotals} layout="vertical" margin={{ left: 0, right: 20 }}>
-              <defs>
-                {COLORS.map((color, index) => (
-                  <linearGradient key={`barGradient-${index}`} id={`barGradient-${index}`} x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor={color} stopOpacity={0.8} />
-                    <stop offset="100%" stopColor={color} stopOpacity={1} />
-                  </linearGradient>
-                ))}
-              </defs>
               <XAxis
                 type="number"
                 tickFormatter={(value: number) => `${Math.round(value / 1_000_000)}M`}
-                stroke="#3f3f5a"
-                tick={{ fill: '#71717a', fontSize: 12, fontWeight: 500 }}
-                axisLine={{ stroke: '#1f1f30' }}
-                tickLine={{ stroke: '#1f1f30' }}
+                stroke="#e5e5e5"
+                tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: '#e5e5e5' }}
+                tickLine={{ stroke: '#e5e5e5' }}
               />
               <YAxis
                 type="category"
                 dataKey="nameFa"
                 width={80}
-                stroke="#3f3f5a"
-                tick={{ fill: '#a1a1aa', fontSize: 12, fontWeight: 500 }}
-                axisLine={{ stroke: '#1f1f30' }}
-                tickLine={{ stroke: '#1f1f30' }}
+                stroke="#e5e5e5"
+                tick={{ fill: '#525252', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: '#e5e5e5' }}
+                tickLine={{ stroke: '#e5e5e5' }}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: '#1f1f30' }} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: '#fafafa' }} />
               <Bar dataKey="value" radius={[0, 8, 8, 0]} animationDuration={800}>
                 {categoryTotals.map((_, index) => (
                   <Cell
                     key={`bar-${index}`}
-                    fill={`url(#barGradient-${index % COLORS.length})`}
-                    className="drop-shadow-md"
+                    fill={COLORS[index % COLORS.length]}
                   />
                 ))}
               </Bar>
@@ -258,22 +235,19 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
       </div>
 
       {/* Area Chart - Spending Trend */}
-      <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl border border-[#1f1f30] p-6 overflow-hidden lg:col-span-2 group hover:border-cyan-500/30 transition-all duration-300">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-500/60 to-transparent" />
-        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        <div className="absolute -top-24 -left-24 w-48 h-48 bg-violet-500/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="relative bg-white rounded-xl border border-[#e5e5e5] p-6 shadow-sm lg:col-span-2">
 
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-xl border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
-            <TrendingUp className="h-5 w-5 text-cyan-400" />
+          <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+            <TrendingUp className="h-5 w-5 text-[#0070f3]" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">
+            <h3 className="text-lg font-bold text-[#171717]">
               {granularity === 'daily' && 'Daily Spending Trend'}
               {granularity === 'weekly' && 'Weekly Spending Trend'}
               {granularity === 'monthly' && 'Monthly Spending Trend'}
             </h3>
-            <p className="text-sm text-zinc-500" dir="rtl">
+            <p className="text-sm text-[#a3a3a3]" dir="rtl">
               {granularity === 'daily' && 'روند هزینه روزانه'}
               {granularity === 'weekly' && 'روند هزینه هفتگی'}
               {granularity === 'monthly' && 'روند هزینه ماهانه'}
@@ -286,23 +260,18 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
             <AreaChart data={timeSeriesTotals} margin={{ left: 0, right: 20, top: 10, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.5} />
-                  <stop offset="50%" stopColor="#8b5cf6" stopOpacity={0.15} />
-                  <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="strokeGradient" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#8b5cf6" />
-                  <stop offset="50%" stopColor="#a78bfa" />
-                  <stop offset="100%" stopColor="#8b5cf6" />
+                  <stop offset="0%" stopColor="#0070f3" stopOpacity={0.2} />
+                  <stop offset="50%" stopColor="#0070f3" stopOpacity={0.1} />
+                  <stop offset="100%" stopColor="#0070f3" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1f1f30" opacity={0.8} vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" opacity={0.5} vertical={false} />
               <XAxis
                 dataKey="date"
-                stroke="#3f3f5a"
-                tick={{ fill: '#71717a', fontSize: 12, fontWeight: 500 }}
-                axisLine={{ stroke: '#1f1f30' }}
-                tickLine={{ stroke: '#1f1f30' }}
+                stroke="#e5e5e5"
+                tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: '#e5e5e5' }}
+                tickLine={{ stroke: '#e5e5e5' }}
                 tickFormatter={(value: string) => {
                   if (granularity === 'monthly') {
                     return value.slice(5);
@@ -313,18 +282,18 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
                 }}
               />
               <YAxis
-                stroke="#3f3f5a"
-                tick={{ fill: '#71717a', fontSize: 12, fontWeight: 500 }}
-                axisLine={{ stroke: '#1f1f30' }}
-                tickLine={{ stroke: '#1f1f30' }}
+                stroke="#e5e5e5"
+                tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: '#e5e5e5' }}
+                tickLine={{ stroke: '#e5e5e5' }}
                 tickFormatter={(value: number) => `${Math.round(value / 1_000_000)}M`}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#8b5cf6', strokeWidth: 1, strokeDasharray: '4 4' }} />
+              <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#0070f3', strokeWidth: 1, strokeDasharray: '4 4' }} />
               <Area
                 type="monotone"
                 dataKey="amount"
-                stroke="url(#strokeGradient)"
-                strokeWidth={3}
+                stroke="#0070f3"
+                strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorAmount)"
                 animationDuration={1000}

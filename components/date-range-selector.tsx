@@ -21,25 +21,25 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
 
   return (
     <div className="relative group">
-      <div className="flex items-center gap-2 px-4 py-2.5 bg-[#0f0f18] border border-[#1f1f30] hover:border-violet-500/30 rounded-xl transition-all duration-200 cursor-pointer shadow-lg shadow-black/10">
-        <Calendar className="h-4 w-4 text-violet-400" />
+      <div className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#e5e5e5] hover:border-[#0070f3] rounded-lg transition-all duration-200 cursor-pointer shadow-sm">
+        <Calendar className="h-4 w-4 text-[#0070f3]" />
         <select
           value={value}
           onChange={(e) => onChange(e.target.value as DateRange)}
-          className="appearance-none bg-transparent border-none text-sm font-semibold text-white cursor-pointer focus:outline-none pr-6"
-          style={{ background: 'transparent' }}
+          className="appearance-none bg-transparent border-none text-sm font-semibold text-[#171717] cursor-pointer focus:outline-none focus:ring-0 pr-6 outline-none"
+          style={{ background: 'transparent', outline: 'none', boxShadow: 'none' }}
         >
           {options.map((option) => (
             <option
               key={option.value}
               value={option.value}
-              className="bg-[#0f0f18] text-white"
+              className="bg-white text-[#171717]"
             >
               {option.label}
             </option>
           ))}
         </select>
-        <ChevronDown className="h-4 w-4 text-zinc-400 group-hover:text-violet-400 transition-colors absolute right-3 pointer-events-none" />
+        <ChevronDown className="h-4 w-4 text-[#a3a3a3] group-hover:text-[#0070f3] transition-colors absolute right-3 pointer-events-none" />
       </div>
     </div>
   );

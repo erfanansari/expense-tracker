@@ -179,25 +179,23 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
   };
 
   return (
-    <div className="relative bg-[var(--background-card)] rounded-2xl border border-[var(--border-subtle)] p-6 overflow-hidden">
-      {/* Card Glow Effect */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent" />
+    <div className="relative bg-white rounded-xl border border-[#e5e5e5] p-6 shadow-sm">
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-br from-emerald-500/20 to-green-500/20 rounded-xl border border-emerald-500/20">
+          <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
             {editingExpense ? (
-              <Save className="h-5 w-5 text-emerald-400" />
+              <Save className="h-5 w-5 text-[#525252]" />
             ) : (
-              <Plus className="h-5 w-5 text-emerald-400" />
+              <Plus className="h-5 w-5 text-[#525252]" />
             )}
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-[var(--foreground)]">
+            <h2 className="text-lg font-semibold text-[#171717]">
               {editingExpense ? 'Edit Expense' : 'Add New Expense'}
             </h2>
-            <p className="text-sm text-[var(--foreground-muted)]" dir="rtl">
+            <p className="text-sm text-[#a3a3a3]" dir="rtl">
               {editingExpense ? 'ویرایش هزینه' : 'افزودن هزینه جدید'}
             </p>
           </div>
@@ -205,7 +203,7 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
         {editingExpense && (
           <button
             onClick={handleCancel}
-            className="p-2 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background-hover)] transition-all"
+            className="p-2 rounded-lg text-[#a3a3a3] hover:text-[#171717] hover:bg-[#f5f5f5] transition-all"
           >
             <X className="h-5 w-5" />
           </button>
@@ -214,10 +212,10 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
 
       {/* Message */}
       {message && (
-        <div className={`mb-6 p-4 rounded-xl border ${
+        <div className={`mb-6 p-4 rounded-lg border ${
           message.type === 'success'
-            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-            : 'bg-red-500/10 border-red-500/20 text-red-400'
+            ? 'bg-[#ecfdf5] border-[#10b981] text-[#10b981]'
+            : 'bg-[#fef2f2] border-[#ef4444] text-[#ef4444]'
         }`}>
           {message.text}
         </div>
@@ -228,19 +226,19 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Category */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[var(--foreground-secondary)]">
-              <Layers className="h-4 w-4 text-violet-400" />
+            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
+              <Layers className="h-4 w-4 text-[#a3a3a3]" />
               Category / دسته‌بندی
             </label>
             <select
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               required
-              className="w-full px-4 py-3 bg-[var(--background-elevated)] border border-[var(--border-subtle)] rounded-xl text-[var(--foreground)] focus:outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all appearance-none cursor-pointer"
+              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] focus:outline-none focus:border-[#0070f3] focus:ring-2 focus:ring-[#0070f3]/10 transition-all appearance-none cursor-pointer"
             >
-              <option value="" className="bg-[var(--background-card)]">Select category...</option>
+              <option value="" className="bg-white">Select category...</option>
               {categories.map((cat) => (
-                <option key={cat.value} value={cat.value} className="bg-[var(--background-card)]">
+                <option key={cat.value} value={cat.value} className="bg-white">
                   {cat.label} / {cat.labelFa}
                 </option>
               ))}
@@ -249,8 +247,8 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
 
           {/* Date */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[var(--foreground-secondary)]">
-              <Calendar className="h-4 w-4 text-violet-400" />
+            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
+              <Calendar className="h-4 w-4 text-[#a3a3a3]" />
               Date / تاریخ
             </label>
             <input
@@ -258,15 +256,15 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
               required
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-4 py-3 bg-[var(--background-elevated)] border border-[var(--border-subtle)] rounded-xl text-[var(--foreground)] focus:outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
+              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] focus:outline-none focus:border-[#0070f3] focus:ring-2 focus:ring-[#0070f3]/10 transition-all"
             />
           </div>
         </div>
 
         {/* Description */}
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-[var(--foreground-secondary)]">
-            <FileText className="h-4 w-4 text-violet-400" />
+          <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
+            <FileText className="h-4 w-4 text-[#a3a3a3]" />
             Description / توضیحات
           </label>
           <textarea
@@ -275,14 +273,14 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
             rows={3}
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full px-4 py-3 bg-[var(--background-elevated)] border border-[var(--border-subtle)] rounded-xl text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all resize-none"
+            className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0070f3] focus:ring-2 focus:ring-[#0070f3]/10 transition-all resize-none"
           />
         </div>
 
         {/* Tags */}
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-[var(--foreground-secondary)]">
-            <span className="text-violet-400">#</span>
+          <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
+            <span className="text-[#a3a3a3]">#</span>
             Tags / برچسب‌ها
           </label>
           <TagInput selectedTags={selectedTags} onTagsChange={setSelectedTags} />
@@ -292,8 +290,8 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Toman */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[var(--foreground-secondary)]">
-              <span className="text-emerald-400 font-bold">T</span>
+            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
+              <span className="text-[#10b981] font-bold">T</span>
               Price (Toman) / مبلغ (تومان)
             </label>
             <input
@@ -304,14 +302,14 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
               step="1"
               value={formData.price_toman || ''}
               onChange={(e) => handleTomanChange(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 bg-[var(--background-elevated)] border border-[var(--border-subtle)] rounded-xl text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#10b981] focus:ring-2 focus:ring-[#10b981]/10 transition-all"
             />
           </div>
 
           {/* USD */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[var(--foreground-secondary)]">
-              <DollarSign className="h-4 w-4 text-blue-400" />
+            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
+              <DollarSign className="h-4 w-4 text-[#0070f3]" />
               Price (USD) / مبلغ (دلار)
             </label>
             <input
@@ -322,17 +320,17 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
               step="0.01"
               value={formData.price_usd || ''}
               onChange={(e) => handleUsdChange(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 bg-[var(--background-elevated)] border border-[var(--border-subtle)] rounded-xl text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all"
+              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0070f3] focus:ring-2 focus:ring-[#0070f3]/10 transition-all"
             />
           </div>
 
           {/* Exchange Rate */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[var(--foreground-secondary)]">
-              <span className="text-amber-400">↔</span>
+            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
+              <span className="text-[#a3a3a3]">↔</span>
               Rate (Toman/USD) / نرخ
               {isFetchingRate && (
-                <Loader2 className="h-3 w-3 animate-spin text-[var(--foreground-muted)]" />
+                <Loader2 className="h-3 w-3 animate-spin text-[#a3a3a3]" />
               )}
             </label>
             <input
@@ -344,7 +342,7 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
               value={exchangeRate || ''}
               onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
               disabled={isFetchingRate}
-              className="w-full px-4 py-3 bg-[var(--background-elevated)] border border-[var(--border-subtle)] rounded-xl text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition-all disabled:opacity-50 disabled:cursor-wait"
+              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0070f3] focus:ring-2 focus:ring-[#0070f3]/10 transition-all disabled:opacity-50 disabled:cursor-wait"
             />
           </div>
         </div>
@@ -354,7 +352,7 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
           <button
             type="submit"
             disabled={isSubmitting || isFetchingRate || !exchangeRate}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 disabled:from-violet-600/50 disabled:to-purple-600/50 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 disabled:shadow-none disabled:cursor-not-allowed"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#000000] hover:bg-[#171717] disabled:bg-[#a3a3a3] text-white font-semibold rounded-lg transition-all duration-200 shadow-sm disabled:cursor-not-allowed"
           >
             {isFetchingRate ? (
               <>
@@ -377,7 +375,7 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
             <button
               type="button"
               onClick={handleCancel}
-              className="px-6 py-3 border border-[var(--border-default)] text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--background-hover)] font-medium rounded-xl transition-all"
+              className="px-6 py-3 border border-[#d4d4d4] text-[#525252] hover:text-[#171717] hover:bg-[#f5f5f5] font-medium rounded-lg transition-all"
             >
               Cancel / لغو
             </button>
