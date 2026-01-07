@@ -19,6 +19,21 @@
       }
     ],
     "paths": {
+      "@types": ["./src/@types/index.ts"],
+      "@schemas": ["./src/@schemas/index.ts"],
+      "@actions/*": ["./src/actions/*"],
+      "@components/*": ["./src/components/*"],
+      "@configs": ["./src/configs/index.ts"],
+      "@configs/*": ["./src/configs/*"],
+      "@constants": ["./src/constants/index.ts"],
+      "@constants/*": ["./src/constants/*"],
+      "@core/*": ["./src/core/*"],
+      "@features/*": ["./src/features/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@storages/*": ["./src/storages/*"],
+      "@stores/*": ["./src/stores/*"],
+      "@styles/*": ["./src/styles/*"],
+      "@utils/*": ["./src/utils/*"],
       "@/*": ["./src/*"]
     },
     "baseUrl": "."

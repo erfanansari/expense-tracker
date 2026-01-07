@@ -1,12 +1,11 @@
 'use client';
 
+import type { FC } from 'react';
 import { Loader2 } from 'lucide-react';
 
-interface LoadingProps {
-  message?: string;
-}
+import type { LoadingProps } from './@types';
 
-export function Loading({ message = 'Loading...' }: LoadingProps) {
+const Loading: FC<LoadingProps> = ({ message = 'Loading...' }) => {
   return (
     <div className="bg-white rounded-xl p-16 border border-[#e5e5e5] shadow-sm">
       <div className="flex flex-col items-center gap-4">
@@ -17,4 +16,6 @@ export function Loading({ message = 'Loading...' }: LoadingProps) {
       </div>
     </div>
   );
-}
+};
+
+export default Loading;

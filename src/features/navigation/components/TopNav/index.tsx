@@ -1,15 +1,14 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import type { FC } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Zap, ChevronDown, LogOut, Settings, LayoutDashboard } from 'lucide-react';
+
 import { useAuth } from '@/features/auth/hooks/use-auth';
 
-interface NavItem {
-  href: string;
-  label: string;
-}
+import type { NavItem } from './@types';
 
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -19,7 +18,7 @@ const navItems: NavItem[] = [
   { href: '/settings', label: 'Settings' },
 ];
 
-export function TopNav() {
+const TopNav: FC = () => {
   const pathname = usePathname();
   const { logout } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -134,4 +133,6 @@ export function TopNav() {
       </div>
     </header>
   );
-}
+};
+
+export default TopNav;

@@ -1,6 +1,6 @@
 'use client';
 
-import { DashboardLayout } from '@/components/layouts/dashboard-layout';
+import { DashboardLayout } from '@components/DashboardLayout';
 import { Wallet, Plus, Sparkles, TrendingUp, PiggyBank, CreditCard, Building2, Coins } from 'lucide-react';
 
 export default function AssetsPage() {

@@ -1,6 +1,6 @@
 'use client';
 
-import { DashboardLayout } from '@/components/layouts/dashboard-layout';
+import { DashboardLayout } from '@components/DashboardLayout';
 import { User, Bell, Lock, Globe, Palette, Database, HelpCircle } from 'lucide-react';
 
 export default function SettingsPage() {

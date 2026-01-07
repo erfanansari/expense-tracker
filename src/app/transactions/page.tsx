@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { DashboardLayout } from '@/components/layouts/dashboard-layout';
+import { DashboardLayout } from '@components/DashboardLayout';
 import { ExpenseForm } from '@/features/expenses/components/expense-form';
-import { Loading } from '@/components/ui/loading';
+import { Loading } from '@components/Loading';
 import { Trash2, Edit, Tag, Plus, Loader2, FileText, ArrowUpRight, Search, Filter } from 'lucide-react';
 import { type Expense } from '@/@types/expense';
 import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@/utils';

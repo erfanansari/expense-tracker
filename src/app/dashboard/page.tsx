@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { DashboardLayout } from '@/components/layouts/dashboard-layout';
-import { DateRangeSelector, type DateRange, filterExpensesByDateRange } from '@/features/expenses/components/date-range-selector';
-import { type Expense } from '@/@types/expense';
+import DashboardLayout from '@components/DashboardLayout';
+import { DateRangeSelector, type DateRange, filterExpensesByDateRange } from '@features/expenses/components/date-range-selector';
+import type { Expense } from '@types';
 import { TrendingUp, TrendingDown, DollarSign, Hash, BarChart3, Plus, MoreVertical, Minus, Lightbulb } from 'lucide-react';
-import { formatNumber, getCategoryLabel } from '@/utils';
+import { formatNumber, getCategoryLabel } from '@utils';
 
 // Exchange Rate Card Component
 function ExchangeRateCard() {

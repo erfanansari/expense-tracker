@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { DashboardLayout } from '@/components/layouts/dashboard-layout';
+import { DashboardLayout } from '@components/DashboardLayout';
 import { ExpenseCharts } from '@/features/expenses/components/expense-charts';
 import { ExpenseStats } from '@/features/expenses/components/expense-stats';
-import { Loading } from '@/components/ui/loading';
+import { Loading } from '@components/Loading';
 import { DateRangeSelector, type DateRange, filterExpensesByDateRange, getChartGranularity } from '@/features/expenses/components/date-range-selector';
 import { type Expense } from '@/@types/expense';
 import { BarChart3, Download, Filter, Sparkles, TrendingUp } from 'lucide-react';
