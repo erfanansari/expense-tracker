@@ -16,6 +16,7 @@ const navItems: NavItem[] = [
   { href: '/transactions', label: 'Transactions' },
   { href: '/reports', label: 'Reports' },
   { href: '/assets', label: 'Assets' },
+  { href: '/settings', label: 'Settings' },
 ];
 
 export function TopNav() {
