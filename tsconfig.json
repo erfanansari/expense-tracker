@@ -33,6 +33,7 @@
       "@storages/*": ["./src/storages/*"],
       "@stores/*": ["./src/stores/*"],
       "@styles/*": ["./src/styles/*"],
+      "@utils": ["./src/utils/index.ts"],
       "@utils/*": ["./src/utils/*"],
       "@/*": ["./src/*"]
     },

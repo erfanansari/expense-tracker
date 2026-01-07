@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { DashboardLayout } from '@components/DashboardLayout';
-import { ExpenseCharts } from '@/features/expenses/components/expense-charts';
-import { ExpenseStats } from '@/features/expenses/components/expense-stats';
-import { Loading } from '@components/Loading';
-import { DateRangeSelector, type DateRange, filterExpensesByDateRange, getChartGranularity } from '@/features/expenses/components/date-range-selector';
-import { type Expense } from '@/@types/expense';
+import DashboardLayout from '@components/DashboardLayout';
+import { ExpenseCharts } from '@features/expenses/components/expense-charts';
+import { ExpenseStats } from '@features/expenses/components/expense-stats';
+import Loading from '@components/Loading';
+import { DateRangeSelector, type DateRange, filterExpensesByDateRange, getChartGranularity } from '@features/expenses/components/date-range-selector';
+import { type Expense } from '@types';
 import { BarChart3, Download, Filter, Sparkles, TrendingUp } from 'lucide-react';
 
 export default function ReportsPage() {
