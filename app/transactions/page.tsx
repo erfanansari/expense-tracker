@@ -145,34 +145,25 @@ export default function TransactionsPage() {
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-[#ffffff]">
-        {/* Header */}
-        <div className="border-b border-[#e5e5e5] bg-white/95 backdrop-blur-xl sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
-                  <FileText className="h-6 w-6 text-[#525252]" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-[#171717]">Transactions</h1>
-                  <p className="text-sm text-[#a3a3a3]" dir="rtl">تراکنش‌ها</p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  setShowForm(!showForm);
-                  setEditingExpense(undefined);
-                }}
-                className="px-5 py-2.5 bg-[#000000] hover:bg-[#171717] rounded-lg text-sm font-semibold text-white transition-all duration-200 flex items-center gap-2 shadow-sm"
-              >
-                <Plus className="h-4 w-4" />
-                <span>Add Transaction</span>
-              </button>
+        <div className="max-w-[1600px] mx-auto px-6 py-8">
+          {/* Page Header */}
+          <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#171717]">Transactions</h1>
+              <p className="text-xs sm:text-sm text-[#a3a3a3] mt-1">Manage and track all your expenses</p>
             </div>
+            <button
+              onClick={() => {
+                setShowForm(!showForm);
+                setEditingExpense(undefined);
+              }}
+              className="px-3 sm:px-5 py-2.5 bg-[#000000] hover:bg-[#171717] rounded-lg text-sm font-semibold text-white transition-all duration-200 flex items-center gap-2 shadow-sm flex-shrink-0"
+            >
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Add Transaction</span>
+            </button>
           </div>
-        </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {/* Expense Form */}
           {showForm && (
             <div className="mb-6 animate-in slide-in-from-top-4 duration-300">
@@ -185,30 +176,26 @@ export default function TransactionsPage() {
           )}
 
           {/* Transactions Card */}
-          <div className="relative bg-white rounded-xl border border-[#e5e5e5] overflow-hidden shadow-sm">
-
-            {isLoading && expenses.length === 0 ? (
-              <div className="p-8">
-                <Loading message="Loading transactions..." />
+          {isLoading && expenses.length === 0 ? (
+            <Loading message="Loading transactions..." />
+          ) : error && expenses.length === 0 ? (
+            <div className="relative bg-white rounded-xl border border-[#e5e5e5] shadow-sm p-16 text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-[#fef2f2] mb-4 border border-[#ef4444]">
+                <FileText className="h-8 w-8 text-[#ef4444]" />
               </div>
-            ) : error && expenses.length === 0 ? (
-              <div className="p-16 text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-[#fef2f2] mb-4 border border-[#ef4444]">
-                  <FileText className="h-8 w-8 text-[#ef4444]" />
-                </div>
-                <p className="text-[#ef4444] font-medium">{error}</p>
+              <p className="text-[#ef4444] font-medium">{error}</p>
+            </div>
+          ) : expenses.length === 0 ? (
+            <div className="relative bg-white rounded-xl border border-[#e5e5e5] shadow-sm p-16 text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-[#fafafa] mb-4 border border-[#e5e5e5]">
+                <FileText className="h-8 w-8 text-[#a3a3a3]" />
               </div>
-            ) : expenses.length === 0 ? (
-              <div className="p-16 text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-[#fafafa] mb-4 border border-[#e5e5e5]">
-                  <FileText className="h-8 w-8 text-[#a3a3a3]" />
-                </div>
-                <p className="text-[#525252] font-medium">No transactions yet</p>
-                <p className="text-sm text-[#a3a3a3] mt-1">Add your first transaction above!</p>
-              </div>
-            ) : (
-              <>
-                <div className="overflow-x-auto">
+              <p className="text-[#525252] font-medium">No transactions yet</p>
+              <p className="text-sm text-[#a3a3a3] mt-1">Add your first transaction above!</p>
+            </div>
+          ) : (
+            <div className="relative bg-white rounded-xl border border-[#e5e5e5] overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
                       <tr className="bg-[#fafafa]">
@@ -335,12 +322,12 @@ export default function TransactionsPage() {
                     </div>
                   )}
                 </div>
-              </>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>
   );
 }
+
 

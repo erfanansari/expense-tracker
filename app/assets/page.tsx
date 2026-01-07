@@ -7,29 +7,19 @@ export default function AssetsPage() {
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-[#ffffff]">
-
-        {/* Header */}
-        <div className="border-b border-[#e5e5e5] bg-white/95 backdrop-blur-xl sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
-                  <Wallet className="h-6 w-6 text-[#525252]" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-[#171717]">Assets</h1>
-                  <p className="text-sm text-[#a3a3a3] mt-0.5">Manage your wealth portfolio</p>
-                </div>
-              </div>
-              <button className="px-5 py-2.5 bg-[#000000] hover:bg-[#171717] rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 shadow-sm text-white">
-                <Plus className="h-4 w-4" />
-                Add Asset
-              </button>
+        <div className="max-w-[1600px] mx-auto px-6 py-8">
+          {/* Page Header */}
+          <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#171717]">Assets</h1>
+              <p className="text-xs sm:text-sm text-[#a3a3a3] mt-1">Manage your wealth portfolio</p>
             </div>
+            <button className="px-3 sm:px-5 py-2.5 bg-[#000000] hover:bg-[#171717] rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 shadow-sm text-white flex-shrink-0">
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Add Asset</span>
+            </button>
           </div>
-        </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
           {/* Quick Stats Preview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {[
@@ -103,5 +93,6 @@ export default function AssetsPage() {
     </DashboardLayout>
   );
 }
+
 
 

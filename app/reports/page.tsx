@@ -41,36 +41,26 @@ export default function ReportsPage() {
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-[#ffffff]">
-
-        {/* Header */}
-        <div className="border-b border-[#e5e5e5] bg-white/95 backdrop-blur-xl sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
-                  <BarChart3 className="h-6 w-6 text-[#525252]" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-[#171717]">Reports</h1>
-                  <p className="text-sm text-[#a3a3a3] mt-0.5">Analyze your spending patterns</p>
-                </div>
-              </div>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <button className="px-4 py-2.5 bg-white hover:bg-[#f5f5f5] border border-[#e5e5e5] rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 group">
-                  <Filter className="h-4 w-4 text-[#a3a3a3] group-hover:text-[#171717] transition-colors" />
-                  <span className="text-[#525252] group-hover:text-[#171717] transition-colors">Filter</span>
-                </button>
-                <button className="px-4 py-2.5 bg-[#000000] hover:bg-[#171717] rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-sm">
-                  <Download className="h-4 w-4 text-white" />
-                  <span className="text-white">Export</span>
-                </button>
-                <DateRangeSelector value={dateRange} onChange={setDateRange} />
-              </div>
+        <div className="max-w-[1600px] mx-auto px-6 py-8">
+          {/* Page Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#171717]">Reports</h1>
+              <p className="text-xs sm:text-sm text-[#a3a3a3] mt-1">Analyze your spending patterns</p>
+            </div>
+            <div className="flex flex-row items-center gap-2 sm:gap-3">
+              <DateRangeSelector value={dateRange} onChange={setDateRange} />
+              <button className="px-3 sm:px-4 py-2.5 bg-white hover:bg-[#f5f5f5] border border-[#e5e5e5] rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 group flex-shrink-0">
+                <Filter className="h-4 w-4 text-[#a3a3a3] group-hover:text-[#171717] transition-colors" />
+                <span className="hidden sm:inline text-[#525252] group-hover:text-[#171717] transition-colors">Filter</span>
+              </button>
+              <button className="px-3 sm:px-4 py-2.5 bg-[#000000] hover:bg-[#171717] rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-sm flex-shrink-0">
+                <Download className="h-4 w-4 text-white" />
+                <span className="hidden sm:inline text-white">Export</span>
+              </button>
             </div>
           </div>
-        </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
           {/* Statistics */}
           {!isLoading && (
             <div className="mb-8">
@@ -111,5 +101,6 @@ export default function ReportsPage() {
     </DashboardLayout>
   );
 }
+
 
 

@@ -191,30 +191,25 @@ export default function DashboardPage() {
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-white overflow-x-hidden relative">
-        {/* Header */}
-        <div className="border-b border-[#e5e5e5] bg-white sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-5">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-semibold text-[#171717]">Dashboard</h1>
-                <p className="text-sm text-[#a3a3a3] mt-1">Welcome back! Here's your financial overview.</p>
-              </div>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <a
-                  href="/transactions"
-                  className="px-4 sm:px-5 py-2.5 bg-[#000000] hover:bg-[#171717] text-white rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span className="hidden sm:inline">Add Transaction</span>
-                  <span className="sm:hidden">Add</span>
-                </a>
-                <DateRangeSelector value={dateRange} onChange={setDateRange} />
-              </div>
+        <div className="max-w-[1600px] mx-auto px-6 py-8">
+          {/* Page Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#171717]">Dashboard</h1>
+              <p className="text-xs sm:text-sm text-[#a3a3a3] mt-1">Welcome back! Here's your financial overview.</p>
+            </div>
+            <div className="flex flex-row items-center gap-2 sm:gap-3">
+              <DateRangeSelector value={dateRange} onChange={setDateRange} />
+              <a
+                href="/transactions"
+                className="px-3 sm:px-5 py-2.5 bg-[#000000] hover:bg-[#171717] text-white rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-sm flex-shrink-0"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Add Transaction</span>
+              </a>
             </div>
           </div>
-        </div>
 
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-6 sm:py-8 relative">
           {/* Key Metrics */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6 sm:mb-8">
             {/* Total Expenses */}
