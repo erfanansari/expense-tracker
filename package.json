@@ -7,9 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "migrate": "tsx lib/db/migrate.ts",
-    "db:seed": "tsx lib/db/seed-user.ts",
-    "db:test": "tsx lib/db/test-connection.ts"
+    "migrate": "tsx src/core/database/migrate.ts",
+    "db:seed": "tsx src/core/database/seed-user.ts",
+    "db:test": "tsx src/core/database/test-connection.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.15.15",
