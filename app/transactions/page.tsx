@@ -20,7 +20,6 @@ export default function TransactionsPage() {
   const [hasMore, setHasMore] = useState(true);
   const [editingExpense, setEditingExpense] = useState<Expense | undefined>(undefined);
   const [showForm, setShowForm] = useState(false);
-  const observerTarget = useRef<HTMLDivElement>(null);
   const isLoadingRef = useRef(false);
 
   const fetchExpenses = useCallback(async (cursor: string | null = null, isInitial = false) => {
@@ -120,28 +119,6 @@ export default function TransactionsPage() {
     fetchExpenses(null, true);
   }, [fetchExpenses]);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoadingRef.current) {
-          loadMore();
-        }
-      },
-      { threshold: 0.1, rootMargin: '100px' }
-    );
-
-    const currentTarget = observerTarget.current;
-    if (currentTarget) {
-      observer.observe(currentTarget);
-    }
-
-    return () => {
-      if (currentTarget) {
-        observer.unobserve(currentTarget);
-      }
-    };
-  }, [hasMore, loadMore]);
-
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-[#ffffff]">
@@ -194,9 +171,10 @@ export default function TransactionsPage() {
               <p className="text-sm text-[#a3a3a3] mt-1">Add your first transaction above!</p>
             </div>
           ) : (
-            <div className="relative bg-white rounded-xl border border-[#e5e5e5] overflow-hidden shadow-sm">
-              <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
+            <>
+              <div className="relative bg-white rounded-xl border border-[#e5e5e5] overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full" style={{ borderCollapse: 'collapse' }}>
                     <thead>
                       <tr className="bg-[#fafafa]">
                         <th className="px-6 py-4 text-left text-xs font-semibold text-[#a3a3a3] uppercase tracking-wider">
@@ -216,7 +194,7 @@ export default function TransactionsPage() {
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#e5e5e5]">
+                    <tbody>
                       {expenses.map((expense, index) => {
                         const categoryLabels = getCategoryLabel(expense.category);
                         const farsiDate = formatToFarsiDate(expense.date);
@@ -224,7 +202,7 @@ export default function TransactionsPage() {
                         return (
                           <tr
                             key={expense.id}
-                            className="group hover:bg-[#f5f5f5] transition-colors duration-200"
+                            className="group hover:bg-[#f5f5f5] transition-colors duration-200 border-t border-[#e5e5e5] first:border-t-0"
                             style={{ animationDelay: `${index * 20}ms` }}
                           >
                             <td className="px-6 py-4">
@@ -300,29 +278,36 @@ export default function TransactionsPage() {
                     </tbody>
                   </table>
                 </div>
+              </div>
 
-                {/* Infinite Loading Indicator */}
-                <div
-                  ref={observerTarget}
-                  className="py-8 flex flex-col items-center justify-center gap-3 border-t border-[#e5e5e5]"
-                >
-                  {isLoadingMore && (
-                    <>
-                      <div className="flex items-center gap-3">
-                        <Loader2 className="h-5 w-5 animate-spin text-[#0070f3]" />
-                        <p className="text-sm text-[#525252] font-medium">Loading more transactions...</p>
-                      </div>
-                    </>
-                  )}
-                  {!hasMore && expenses.length > 0 && (
-                    <div className="flex items-center gap-2 text-[#a3a3a3]">
-                      <div className="h-px w-12 bg-[#e5e5e5]" />
-                      <p className="text-sm">End of transactions</p>
-                      <div className="h-px w-12 bg-[#e5e5e5]" />
-                    </div>
-                  )}
+              {/* Load More Button - Separate from table */}
+              {hasMore && (
+                <div className="mt-4">
+                  <button
+                    onClick={loadMore}
+                    disabled={isLoadingMore}
+                    className="w-full cursor-pointer py-3 bg-white hover:bg-[#fafafa] border border-[#e5e5e5] rounded-lg text-sm font-medium text-[#525252] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    {isLoadingMore ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      'Load More'
+                    )}
+                  </button>
                 </div>
-            </div>
+              )}
+
+              {!hasMore && expenses.length > 0 && (
+                <div className="mt-6 py-4 flex items-center justify-center gap-2 text-[#a3a3a3]">
+                  <div className="h-px w-12 bg-[#e5e5e5]" />
+                  <p className="text-sm">End of transactions</p>
+                  <div className="h-px w-12 bg-[#e5e5e5]" />
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
