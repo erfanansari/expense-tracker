@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, X, Save, Loader2, DollarSign, Calendar, FileText, Layers } from 'lucide-react';
+import { Plus, X, Save, Loader2, DollarSign, Calendar, FileText, Layers, ChevronDown } from 'lucide-react';
 import { type CreateExpenseInput, type Tag } from '@/lib/types/expense';
 import { categories } from '@/lib/utils';
 import { tomanToUsd, usdToToman } from '@/lib/constants';
@@ -230,19 +230,22 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
               <Layers className="h-4 w-4 text-[#a3a3a3]" />
               Category / دسته‌بندی
             </label>
-            <select
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              required
-              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] focus:outline-none focus:border-[#0070f3] focus:ring-2 focus:ring-[#0070f3]/10 transition-all appearance-none cursor-pointer"
-            >
-              <option value="" className="bg-white">Select category...</option>
-              {categories.map((cat) => (
-                <option key={cat.value} value={cat.value} className="bg-white">
-                  {cat.label} / {cat.labelFa}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                required
+                className="w-full px-4 py-3 pr-10 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] focus:outline-none focus:border-[#0070f3] transition-all appearance-none cursor-pointer"
+              >
+                <option value="" className="bg-white">Select category...</option>
+                {categories.map((cat) => (
+                  <option key={cat.value} value={cat.value} className="bg-white">
+                    {cat.label} / {cat.labelFa}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="h-4 w-4 text-[#a3a3a3] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
           </div>
 
           {/* Date */}
@@ -256,7 +259,7 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
               required
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] focus:outline-none focus:border-[#0070f3] focus:ring-2 focus:ring-[#0070f3]/10 transition-all"
+              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] focus:outline-none focus:border-[#0070f3] transition-all"
             />
           </div>
         </div>
@@ -273,7 +276,7 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
             rows={3}
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0070f3] focus:ring-2 focus:ring-[#0070f3]/10 transition-all resize-none"
+            className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0070f3] transition-all resize-none"
           />
         </div>
 
@@ -302,7 +305,7 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
               step="1"
               value={formData.price_toman || ''}
               onChange={(e) => handleTomanChange(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#10b981] focus:ring-2 focus:ring-[#10b981]/10 transition-all"
+              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#10b981] transition-all"
             />
           </div>
 
@@ -320,7 +323,7 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
               step="0.01"
               value={formData.price_usd || ''}
               onChange={(e) => handleUsdChange(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0070f3] focus:ring-2 focus:ring-[#0070f3]/10 transition-all"
+              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0070f3] transition-all"
             />
           </div>
 
@@ -342,7 +345,7 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
               value={exchangeRate || ''}
               onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
               disabled={isFetchingRate}
-              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0070f3] focus:ring-2 focus:ring-[#0070f3]/10 transition-all disabled:opacity-50 disabled:cursor-wait"
+              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0070f3] transition-all disabled:opacity-50 disabled:cursor-wait"
             />
           </div>
         </div>

@@ -133,7 +133,7 @@ export function TagInput({ selectedTags, onTagsChange }: TagInputProps) {
   return (
     <div className="relative">
       {/* Selected Tags + Input */}
-      <div className="flex flex-wrap items-center gap-2 px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg focus-within:border-[#0070f3] focus-within:ring-2 focus-within:ring-[#0070f3]/10 transition-all min-h-[48px]">
+      <div className="flex flex-wrap items-center gap-2 px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg focus-within:border-[#0070f3] transition-all min-h-[48px]">
         {selectedTags.map(tag => (
           <div
             key={tag.id}
@@ -159,7 +159,7 @@ export function TagInput({ selectedTags, onTagsChange }: TagInputProps) {
           onKeyDown={handleKeyDown}
           onFocus={() => inputValue && setShowSuggestions(true)}
           placeholder={selectedTags.length === 0 ? "Add tags..." : ""}
-          className="flex-1 min-w-[120px] outline-none bg-transparent text-[#171717] placeholder:text-[#a3a3a3]"
+          className="flex-1 min-w-[120px] outline-none bg-transparent text-[#171717] placeholder:text-[#a3a3a3] "
         />
       </div>
 
