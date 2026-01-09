@@ -2,6 +2,7 @@
 
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { forwardRef } from 'react';
+import { twMerge } from 'tailwind-merge';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'outline' | 'danger';
@@ -19,7 +20,7 @@ const variantStyles = {
                     // <button className="px-4 py-2.5 border border-[#e5e5e5] hover:bg-[#f5f5f5] rounded-lg text-sm font-medium text-[#525252] transition-all"></button>
 
 export const getButtonClasses = (variant: 'primary' | 'outline' | 'danger' = 'primary', className = '') => {
-  return `${baseStyles} ${variantStyles[variant]} ${className}`;
+  return twMerge(baseStyles, variantStyles[variant], className);
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(

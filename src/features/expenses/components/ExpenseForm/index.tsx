@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, X, Save, Loader2, DollarSign, Calendar, FileText, Layers, ChevronDown } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
 import { type CreateExpenseInput, type Tag } from '@/@types/expense';
 import { EXPENSE_CATEGORIES } from '@/constants';
 import { tomanToUsd, usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
@@ -213,11 +214,12 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
 
       {/* Message */}
       {message && (
-        <div className={`mb-6 p-4 rounded-lg border ${
+        <div className={twMerge(
+          'mb-6 p-4 rounded-lg border',
           message.type === 'success'
             ? 'bg-[#ecfdf5] border-[#10b981] text-[#10b981]'
             : 'bg-[#fef2f2] border-[#ef4444] text-[#ef4444]'
-        }`}>
+        )}>
           {message.text}
         </div>
       )}

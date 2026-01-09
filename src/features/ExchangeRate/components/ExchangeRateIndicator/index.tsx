@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
 import { formatNumber } from '@/utils';
 
 interface ExchangeRateData {
@@ -89,13 +90,14 @@ const ExchangeRateIndicator = () => {
       </div>
 
       {/* Change Indicator */}
-      <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+      <div className={twMerge(
+        'flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium',
         isZero
           ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
           : isPositive
           ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
           : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-      }`}>
+      )}>
         {isZero ? (
           <span>—</span>
         ) : isPositive ? (

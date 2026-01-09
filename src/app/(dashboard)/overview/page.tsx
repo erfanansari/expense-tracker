@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { twMerge } from 'tailwind-merge';
 import DateRangeSelector, { type DateRange, filterExpensesByDateRange } from '@features/expenses/components/DateRangeSelector';
 import type { Expense } from '@types';
 import { TrendingUp, TrendingDown, DollarSign, Hash, BarChart3, Plus,  Minus, Lightbulb } from 'lucide-react';
@@ -68,13 +69,14 @@ function ExchangeRateCard() {
         <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
           <DollarSign className="h-5 w-5 text-[#525252]" />
         </div>
-        <div className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-md border ${
+        <div className={twMerge(
+          'flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-md border',
           isZero
             ? 'bg-[#fafafa] text-[#a3a3a3] border-[#e5e5e5]'
             : change > 0
             ? 'bg-[#ecfdf5] text-[#10b981] border-[#e5e5e5]'
             : 'bg-[#fef2f2] text-[#ef4444] border-[#e5e5e5]'
-        }`}>
+        )}>
           {isZero ? (
             <>
               <Minus className="h-3 w-3" />
@@ -252,11 +254,12 @@ export default function DashboardPage() {
                   <BarChart3 className="h-5 w-5 text-[#525252]" />
                 </div>
                 {lastMonthTotal > 0 && (
-                  <div className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-md border ${
-                    monthOverMonthChange >= 0
-                      ? 'bg-[#fef2f2] text-[#ef4444] border-[#e5e5e5]'
-                      : 'bg-[#ecfdf5] text-[#10b981] border-[#e5e5e5]'
-                  }`}>
+                  <div className={twMerge(
+                  'flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-md border',
+                  monthOverMonthChange >= 0
+                    ? 'bg-[#fef2f2] text-[#ef4444] border-[#e5e5e5]'
+                    : 'bg-[#ecfdf5] text-[#10b981] border-[#e5e5e5]'
+                )}>
                     {monthOverMonthChange >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                     <span>{Math.abs(monthOverMonthChange).toFixed(1)}%</span>
                   </div>
@@ -391,11 +394,12 @@ export default function DashboardPage() {
             {/* Month over Month Change */}
             <div className="relative bg-white rounded-xl p-5 sm:p-6 border border-[#e5e5e5] min-w-0 shadow-sm hover:shadow-md transition-all duration-200">
               <div className="flex items-center justify-between mb-4">
-                <div className={`p-2.5 rounded-lg border ${
+                <div className={twMerge(
+                  'p-2.5 rounded-lg border',
                   monthOverMonthChange >= 0
                     ? 'bg-[#fef2f2] border-[#e5e5e5]'
                     : 'bg-[#ecfdf5] border-[#e5e5e5]'
-                }`}>
+                )}>
                   {monthOverMonthChange >= 0 ? (
                     <TrendingUp className="h-5 w-5 text-[#ef4444]" />
                   ) : (
@@ -406,13 +410,14 @@ export default function DashboardPage() {
               <p className="text-xs text-[#a3a3a3] font-medium uppercase tracking-wider mb-3">vs Last Month</p>
               {lastMonthTotal > 0 ? (
                 <>
-                  <p className={`text-2xl sm:text-3xl font-semibold tabular-nums ${
+                  <p className={twMerge(
+                    'text-2xl sm:text-3xl font-semibold tabular-nums',
                     monthOverMonthChange >= 0 ? 'text-[#ef4444]' : 'text-[#10b981]'
-                  }`}>
+                  )}>
                     {monthOverMonthChange >= 0 ? '+' : ''}{monthOverMonthChange.toFixed(1)}%
                   </p>
                   <p className="text-sm text-[#525252] mt-1.5 font-medium">
-                    Spending <span className={`font-semibold ${monthOverMonthChange >= 0 ? 'text-[#ef4444]' : 'text-[#10b981]'}`}>{monthOverMonthChange >= 0 ? 'more' : 'less'}</span> than last month
+                    Spending <span className={twMerge('font-semibold', monthOverMonthChange >= 0 ? 'text-[#ef4444]' : 'text-[#10b981]')}>{monthOverMonthChange >= 0 ? 'more' : 'less'}</span> than last month
                   </p>
                   <div className="mt-3 pt-3 border-t border-[#e5e5e5] space-y-1">
                     <div className="flex justify-between text-xs">
@@ -542,9 +547,10 @@ export default function DashboardPage() {
                           ) : (
                             <TrendingDown className="h-4 w-4 text-[#10b981]" />
                           )}
-                          <span className={`text-sm font-semibold tabular-nums ${
+                          <span className={twMerge(
+                            'text-sm font-semibold tabular-nums',
                             thisMonthTotalToman > lastMonthTotalToman ? 'text-[#ef4444]' : 'text-[#10b981]'
-                          }`}>
+                          )}>
                             {formatNumber(Math.abs(thisMonthTotalToman - lastMonthTotalToman))} ت
                           </span>
                         </div>
@@ -662,7 +668,7 @@ export default function DashboardPage() {
                                 title={`${day.date} - ${day.count} transactions - ${formatNumber(day.total)} ت`}
                               >
                                 <div className="flex items-center justify-center h-full">
-                                  <span className={`text-xs sm:text-sm font-semibold ${day.total > 0 ? 'text-white' : 'text-[#a3a3a3]'}`}>{day.date}</span>
+                                  <span className={twMerge('text-xs sm:text-sm font-semibold', day.total > 0 ? 'text-white' : 'text-[#a3a3a3]')}>{day.date}</span>
                                 </div>
                               </div>
                             ) : (

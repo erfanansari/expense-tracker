@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next"
 import { Geist, Vazirmatn } from "next/font/google";
+import { twMerge } from 'tailwind-merge';
 import "@/styles/globals.css";
 
 const geistSans = Geist({
@@ -39,7 +40,7 @@ export default function RootLayout({
         <meta name="color-scheme" content="light" />
       </head>
       <body
-        className={`${geistSans.variable} ${persianFont.variable} antialiased bg-white`}
+        className={twMerge(geistSans.variable, persianFont.variable, 'antialiased bg-white')}
       >
         {children}
         <Analytics />

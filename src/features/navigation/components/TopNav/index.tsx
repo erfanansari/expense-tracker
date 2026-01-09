@@ -5,6 +5,7 @@ import type { FC } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Zap, ChevronDown, LogOut, Settings, LayoutDashboard } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
 
@@ -61,7 +62,7 @@ const TopNav: FC = () => {
                   </div>
                   <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-[#10b981] rounded-full border-2 border-white" />
                 </div>
-                <ChevronDown className={`h-4 w-4 text-[#a3a3a3] transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={twMerge('h-4 w-4 text-[#a3a3a3] transition-transform duration-200', isUserMenuOpen && 'rotate-180')} />
               </button>
 
               {/* Dropdown Menu */}
@@ -116,11 +117,12 @@ const TopNav: FC = () => {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative px-4 py-3 text-sm font-medium transition-colors whitespace-nowrap ${
+                className={twMerge(
+                  'relative px-4 py-3 text-sm font-medium transition-colors whitespace-nowrap',
                   isActive
                     ? 'text-[#171717]'
                     : 'text-[#a3a3a3] hover:text-[#171717]'
-                }`}
+                )}
               >
                 {item.label}
                 {isActive && (
