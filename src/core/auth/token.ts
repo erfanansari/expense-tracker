@@ -1,7 +1,8 @@
 import crypto from 'crypto';
-import { SignJWT, jwtVerify } from 'jose';
-import { authConfig } from '@/configs/auth.config';
+import { jwtVerify, SignJWT } from 'jose';
+
 import type { UserPayload } from '@/@types/auth';
+import { authConfig } from '@/configs/auth.config';
 
 const JWT_SECRET = new TextEncoder().encode(authConfig.jwt.secret);
 

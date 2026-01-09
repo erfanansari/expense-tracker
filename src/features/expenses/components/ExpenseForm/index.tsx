@@ -1,13 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus, X, Save, Loader2, DollarSign, Calendar, FileText, Layers, ChevronDown } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+import { Calendar, ChevronDown, DollarSign, FileText, Layers, Loader2, Plus, Save, X } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+
+import { tomanToUsd, usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
+
+import Button from '@components/Button';
+
 import { type CreateExpenseInput, type Tag } from '@/@types/expense';
 import { EXPENSE_CATEGORIES } from '@/constants';
-import { tomanToUsd, usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
+
 import TagInput from '../TagInput';
-import Button from '@components/Button';
 
 interface ExpenseFormProps {
   onExpenseAdded: () => void;
@@ -22,7 +27,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
     description: '',
     price_toman: 0,
     price_usd: 0,
-    tagIds: []
+    tagIds: [],
   });
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [exchangeRate, setExchangeRate] = useState(0);
@@ -43,7 +48,9 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
 
           // Log fetch status
           if (data._meta?.fetchedAt) {
-            console.log(`Exchange rate: ${rate.toLocaleString()} Toman/USD (fetched: ${data._meta.fetchedAt}, cached until: ${data._meta.cachedUntil})`);
+            console.log(
+              `Exchange rate: ${rate.toLocaleString()} Toman/USD (fetched: ${data._meta.fetchedAt}, cached until: ${data._meta.cachedUntil})`
+            );
           } else {
             console.log(`Exchange rate: ${rate.toLocaleString()} Toman/USD (${data.usd.date})`);
           }
@@ -69,7 +76,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
         description: editingExpense.description,
         price_toman: editingExpense.price_toman,
         price_usd: editingExpense.price_usd,
-        tagIds: editingExpense.tags?.map(t => t.id) || []
+        tagIds: editingExpense.tags?.map((t) => t.id) || [],
       });
       setSelectedTags(editingExpense.tags || []);
       // Calculate rate from existing data (full Toman value)
@@ -125,7 +132,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
       // Sync tagIds with selectedTags
       const dataToSubmit = {
         ...formData,
-        tagIds: selectedTags.map(t => t.id)
+        tagIds: selectedTags.map((t) => t.id),
       };
 
       const response = await fetch(url, {
@@ -139,7 +146,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
       if (response.ok) {
         setMessage({
           type: 'success',
-          text: editingExpense ? 'Expense updated successfully!' : 'Expense added successfully!'
+          text: editingExpense ? 'Expense updated successfully!' : 'Expense added successfully!',
         });
         setFormData({
           date: new Date().toISOString().split('T')[0],
@@ -147,7 +154,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
           description: '',
           price_toman: 0,
           price_usd: 0,
-          tagIds: []
+          tagIds: [],
         });
         setSelectedTags([]);
         // Keep the fetched exchange rate (don't reset it)
@@ -181,17 +188,12 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
   };
 
   return (
-    <div className="relative bg-white rounded-xl border border-[#e5e5e5] p-6 shadow-sm">
-
+    <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-6 shadow-sm">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
-            {editingExpense ? (
-              <Save className="h-5 w-5 text-[#525252]" />
-            ) : (
-              <Plus className="h-5 w-5 text-[#525252]" />
-            )}
+          <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
+            {editingExpense ? <Save className="h-5 w-5 text-[#525252]" /> : <Plus className="h-5 w-5 text-[#525252]" />}
           </div>
           <div>
             <h2 className="text-lg font-semibold text-[#171717]">
@@ -205,7 +207,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
         {editingExpense && (
           <button
             onClick={handleCancel}
-            className="p-2 rounded-lg text-[#a3a3a3] hover:text-[#171717] hover:bg-[#f5f5f5] transition-all"
+            className="rounded-lg p-2 text-[#a3a3a3] transition-all hover:bg-[#f5f5f5] hover:text-[#171717]"
           >
             <X className="h-5 w-5" />
           </button>
@@ -214,19 +216,21 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
 
       {/* Message */}
       {message && (
-        <div className={twMerge(
-          'mb-6 p-4 rounded-lg border',
-          message.type === 'success'
-            ? 'bg-[#ecfdf5] border-[#10b981] text-[#10b981]'
-            : 'bg-[#fef2f2] border-[#ef4444] text-[#ef4444]'
-        )}>
+        <div
+          className={twMerge(
+            'mb-6 rounded-lg border p-4',
+            message.type === 'success'
+              ? 'border-[#10b981] bg-[#ecfdf5] text-[#10b981]'
+              : 'border-[#ef4444] bg-[#fef2f2] text-[#ef4444]'
+          )}
+        >
           {message.text}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Row 1: Category and Date */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {/* Category */}
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
@@ -238,16 +242,18 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 required
-                className="w-full px-4 py-3 pr-10 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] focus:outline-none focus:border-[#0070f3] transition-all appearance-none cursor-pointer"
+                className="w-full cursor-pointer appearance-none rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 pr-10 text-[#171717] transition-all focus:border-[#0070f3] focus:outline-none"
               >
-                <option value="" className="bg-white">Select category...</option>
+                <option value="" className="bg-white">
+                  Select category...
+                </option>
                 {EXPENSE_CATEGORIES.map((cat) => (
                   <option key={cat.value} value={cat.value} className="bg-white">
                     {cat.label} / {cat.labelFa}
                   </option>
                 ))}
               </select>
-              <ChevronDown className="h-4 w-4 text-[#a3a3a3] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-[#a3a3a3]" />
             </div>
           </div>
 
@@ -262,7 +268,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
               required
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] focus:outline-none focus:border-[#0070f3] transition-all"
+              className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all focus:border-[#0070f3] focus:outline-none"
             />
           </div>
         </div>
@@ -279,7 +285,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
             rows={3}
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0070f3] transition-all resize-none"
+            className="w-full resize-none rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#0070f3] focus:outline-none"
           />
         </div>
 
@@ -293,11 +299,11 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
         </div>
 
         {/* Prices and Rate */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {/* Toman */}
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <span className="text-[#10b981] font-bold">T</span>
+              <span className="font-bold text-[#10b981]">T</span>
               Price (Toman) / مبلغ (تومان)
             </label>
             <input
@@ -308,7 +314,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
               step="1"
               value={formData.price_toman || ''}
               onChange={(e) => handleTomanChange(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#10b981] transition-all"
+              className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#10b981] focus:outline-none"
             />
           </div>
 
@@ -326,7 +332,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
               step="0.01"
               value={formData.price_usd || ''}
               onChange={(e) => handleUsdChange(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0070f3] transition-all"
+              className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#0070f3] focus:outline-none"
             />
           </div>
 
@@ -335,9 +341,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
             <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
               <span className="text-[#a3a3a3]">↔</span>
               Rate (Toman/USD) / نرخ
-              {isFetchingRate && (
-                <Loader2 className="h-3 w-3 animate-spin text-[#a3a3a3]" />
-              )}
+              {isFetchingRate && <Loader2 className="h-3 w-3 animate-spin text-[#a3a3a3]" />}
             </label>
             <input
               type="number"
@@ -348,7 +352,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
               value={exchangeRate || ''}
               onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
               disabled={isFetchingRate}
-              className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-lg text-[#171717] placeholder:text-[#a3a3a3] focus:outline-none focus:border-[#0070f3] transition-all disabled:opacity-50 disabled:cursor-wait"
+              className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#0070f3] focus:outline-none disabled:cursor-wait disabled:opacity-50"
             />
           </div>
         </div>
@@ -379,11 +383,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
             )}
           </Button>
           {editingExpense && (
-            <Button
-              type="button"
-              onClick={handleCancel}
-              variant="outline"
-            >
+            <Button type="button" onClick={handleCancel} variant="outline">
               Cancel / لغو
             </Button>
           )}
@@ -391,6 +391,6 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
       </form>
     </div>
   );
-}
+};
 
 export default ExpenseForm;

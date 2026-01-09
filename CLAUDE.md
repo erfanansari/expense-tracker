@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 This is an expense tracker application built with Next.js 16, using the App Router architecture. The stack includes:
+
 - **Framework**: Next.js 16.0.10 (React 19.2.3)
 - **Language**: TypeScript with strict mode enabled
 - **Database**: Turso (libSQL) via `@libsql/client`
@@ -65,6 +66,7 @@ expense-tracker/
 ## Application Features
 
 This is a minimal expense tracker with the following functionality:
+
 - Add new expenses with date, category, description, price in Toman, and price in USD
 - View all expenses in a sortable table (sorted by date descending)
 - Form validation for all required fields
@@ -74,6 +76,7 @@ This is a minimal expense tracker with the following functionality:
 ### Database Schema
 
 The `expenses` table has the following structure:
+
 - `id`: INTEGER PRIMARY KEY AUTOINCREMENT
 - `date`: TEXT (ISO format date)
 - `category`: TEXT (e.g., Food, Transport, Entertainment)
@@ -95,6 +98,7 @@ An index on the `date` column is created for faster date-based queries.
 ## Configuration Details
 
 ### TypeScript Configuration
+
 - Target: ES2017
 - Strict mode: enabled
 - Module resolution: bundler (Next.js optimized)
@@ -102,21 +106,27 @@ An index on the `date` column is created for faster date-based queries.
 - JSX: react-jsx
 
 ### Database (Turso/libSQL)
+
 Database credentials are stored in `.env.local`:
+
 - `TURSO_DATABASE_URL`: Connection URL to Turso database
 - `TURSO_AUTH_TOKEN`: Authentication token
 
 **Database Setup:**
+
 1. Ensure `.env.local` contains valid Turso credentials
 2. Run `pnpm migrate` to create the expenses table
 3. Use `pnpm db:test` to verify the database connection and table setup
 4. The database client is initialized in `lib/db/client.ts` and reused across the application
 
 ### Tailwind CSS v4
+
 This project uses Tailwind CSS v4 with the new PostCSS plugin (`@tailwindcss/postcss`). Configuration is in `postcss.config.mjs`.
 
 ### ESLint
+
 Uses Next.js ESLint config with TypeScript support:
+
 - `eslint-config-next/core-web-vitals`
 - `eslint-config-next/typescript`
 - Ignores: `.next/`, `out/`, `build/`, `next-env.d.ts`
@@ -124,12 +134,15 @@ Uses Next.js ESLint config with TypeScript support:
 ## Architecture Notes
 
 ### App Router (Next.js 16)
+
 This project uses the App Router (not Pages Router). All routes are defined in the `app/` directory using file-system based routing.
 
 ### Font Loading
+
 Custom fonts (Geist Sans and Geist Mono) are loaded via `next/font/google` in `app/layout.tsx` and applied using CSS variables (`--font-geist-sans`, `--font-geist-mono`).
 
 ### Styling Approach
+
 Tailwind CSS utility classes are used directly in components. Dark mode support is implemented via Tailwind's `dark:` variant.
 
 ## Important Conventions

@@ -20,18 +20,18 @@ const DateRangeSelector = ({ value, onChange }: DateRangeSelectorProps) => {
   ];
 
   return (
-    <div className="relative group">
-      <div className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#e5e5e5] hover:border-[#0070f3] rounded-lg transition-all duration-200 cursor-pointer shadow-sm">
+    <div className="group relative">
+      <div className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#e5e5e5] bg-white px-4 py-2.5 shadow-sm transition-all duration-200 hover:border-[#0070f3]">
         <Calendar className="h-4 w-4 text-[#0070f3]" />
         <select
           value={value}
           onChange={(e) => onChange(e.target.value as DateRange)}
-          className="appearance-none bg-transparent border-none text-sm font-semibold text-[#171717] cursor-pointer focus:outline-none focus:ring-0 pr-6 outline-none"
+          className="cursor-pointer appearance-none border-none bg-transparent pr-6 text-sm font-semibold text-[#171717] outline-none focus:ring-0 focus:outline-none"
           style={{
             background: 'transparent',
             outline: 'none',
             boxShadow: 'none',
-            colorScheme: 'light'
+            colorScheme: 'light',
           }}
         >
           {options.map((option) => (
@@ -45,11 +45,11 @@ const DateRangeSelector = ({ value, onChange }: DateRangeSelectorProps) => {
             </option>
           ))}
         </select>
-        <ChevronDown className="h-4 w-4 text-[#a3a3a3] group-hover:text-[#0070f3] transition-colors absolute right-3 pointer-events-none" />
+        <ChevronDown className="pointer-events-none absolute right-3 h-4 w-4 text-[#a3a3a3] transition-colors group-hover:text-[#0070f3]" />
       </div>
     </div>
   );
-}
+};
 
 export function getDateRangeFilter(range: DateRange): { start: Date; end: Date } | null {
   const today = new Date();
@@ -84,10 +84,7 @@ export function getDateRangeFilter(range: DateRange): { start: Date; end: Date }
   return { start, end };
 }
 
-export function filterExpensesByDateRange<T extends { date: string }>(
-  expenses: T[],
-  range: DateRange
-): T[] {
+export function filterExpensesByDateRange<T extends { date: string }>(expenses: T[], range: DateRange): T[] {
   const filter = getDateRangeFilter(range);
 
   if (!filter) {
@@ -96,7 +93,7 @@ export function filterExpensesByDateRange<T extends { date: string }>(
 
   const { start, end } = filter;
 
-  return expenses.filter(exp => {
+  return expenses.filter((exp) => {
     const expDate = new Date(exp.date);
     expDate.setHours(0, 0, 0, 0);
     return expDate >= start && expDate <= end;

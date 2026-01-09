@@ -1,7 +1,21 @@
 'use client';
 
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, CartesianGrid } from 'recharts';
-import { PieChartIcon, BarChart3, TrendingUp } from 'lucide-react';
+import { BarChart3, PieChartIcon, TrendingUp } from 'lucide-react';
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+
 import { type Expense } from '@/@types/expense';
 import { formatNumber, getCategoryLabel } from '@/utils';
 
@@ -23,20 +37,24 @@ const COLORS = [
 ];
 
 // Custom tooltip component
-const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: { nameFa?: string; usdValue?: number } }> }) => {
+const CustomTooltip = ({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: Array<{ value: number; payload: { nameFa?: string; usdValue?: number } }>;
+}) => {
   if (active && payload && payload.length) {
     const data = payload[0];
     const usdValue = data.payload.usdValue || 0;
     return (
-      <div className="bg-white border border-[#e5e5e5] p-4 rounded-lg shadow-lg">
-        <p className="text-[#171717] font-bold text-lg" dir="rtl">
+      <div className="rounded-lg border border-[#e5e5e5] bg-white p-4 shadow-lg">
+        <p className="text-lg font-bold text-[#171717]" dir="rtl">
           {formatNumber(data.value)} تومان
         </p>
-        <p className="text-[#a3a3a3] text-sm mt-1.5 font-medium">
-          ${usdValue.toFixed(2)} USD
-        </p>
+        <p className="mt-1.5 text-sm font-medium text-[#a3a3a3]">${usdValue.toFixed(2)} USD</p>
         {data.payload.nameFa && (
-          <p className="text-[#0070f3] text-sm mt-2 font-medium" dir="rtl">
+          <p className="mt-2 text-sm font-medium text-[#0070f3]" dir="rtl">
             {data.payload.nameFa}
           </p>
         )}
@@ -48,23 +66,26 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<
 
 export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseChartsProps) {
   // Calculate category totals
-  const categoryTotals = expenses.reduce((acc, exp) => {
-    const existing = acc.find(item => item.category === exp.category);
-    if (existing) {
-      existing.value += exp.price_toman;
-      existing.usdValue += exp.price_usd;
-    } else {
-      const labels = getCategoryLabel(exp.category);
-      acc.push({
-        category: exp.category,
-        name: labels.en,
-        nameFa: labels.fa,
-        value: exp.price_toman,
-        usdValue: exp.price_usd,
-      });
-    }
-    return acc;
-  }, [] as Array<{ category: string; name: string; nameFa: string; value: number; usdValue: number }>);
+  const categoryTotals = expenses.reduce(
+    (acc, exp) => {
+      const existing = acc.find((item) => item.category === exp.category);
+      if (existing) {
+        existing.value += exp.price_toman;
+        existing.usdValue += exp.price_usd;
+      } else {
+        const labels = getCategoryLabel(exp.category);
+        acc.push({
+          category: exp.category,
+          name: labels.en,
+          nameFa: labels.fa,
+          value: exp.price_toman,
+          usdValue: exp.price_usd,
+        });
+      }
+      return acc;
+    },
+    [] as Array<{ category: string; name: string; nameFa: string; value: number; usdValue: number }>
+  );
 
   categoryTotals.sort((a, b) => b.value - a.value);
 
@@ -87,7 +108,7 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
 
     const aggregated = new Map<string, { amount: number; usdValue: number }>();
 
-    expenses.forEach(exp => {
+    expenses.forEach((exp) => {
       const date = new Date(exp.date);
       let key: string;
 
@@ -121,19 +142,18 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
   const timeSeriesTotals = aggregateExpenses();
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       {/* Pie Chart */}
-      <div className="relative bg-white rounded-xl border border-[#e5e5e5] p-6 shadow-sm">
-
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+      <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-6 shadow-sm">
+        <div className="mb-6 flex items-center gap-3">
+          <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
             <PieChartIcon className="h-5 w-5 text-[#0070f3]" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-[#171717]">
-              By Category
-            </h3>
-            <p className="text-sm text-[#a3a3a3]" dir="rtl">بر اساس دسته‌بندی</p>
+            <h3 className="text-lg font-bold text-[#171717]">By Category</h3>
+            <p className="text-sm text-[#a3a3a3]" dir="rtl">
+              بر اساس دسته‌بندی
+            </p>
           </div>
         </div>
 
@@ -154,10 +174,7 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
                 animationEasing="ease-out"
               >
                 {categoryTotals.map((_, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
@@ -169,34 +186,31 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
           {categoryTotals.map((cat, index) => (
             <div
               key={cat.category}
-              className="flex items-center gap-2.5 p-2.5 rounded-lg bg-[#fafafa] hover:bg-[#f5f5f5] border border-[#e5e5e5] transition-all duration-200 cursor-default"
+              className="flex cursor-default items-center gap-2.5 rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5 transition-all duration-200 hover:bg-[#f5f5f5]"
             >
               <div
-                className="w-3 h-3 rounded-full shrink-0"
+                className="h-3 w-3 shrink-0 rounded-full"
                 style={{
-                  backgroundColor: COLORS[index % COLORS.length]
+                  backgroundColor: COLORS[index % COLORS.length],
                 }}
               />
-              <span className="text-sm text-[#525252] truncate font-medium">
-                {cat.name}
-              </span>
+              <span className="truncate text-sm font-medium text-[#525252]">{cat.name}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Bar Chart */}
-      <div className="relative bg-white rounded-xl border border-[#e5e5e5] p-6 shadow-sm">
-
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+      <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-6 shadow-sm">
+        <div className="mb-6 flex items-center gap-3">
+          <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
             <BarChart3 className="h-5 w-5 text-[#10b981]" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-[#171717]">
-              Category Comparison
-            </h3>
-            <p className="text-sm text-[#a3a3a3]" dir="rtl">مقایسه دسته‌بندی</p>
+            <h3 className="text-lg font-bold text-[#171717]">Category Comparison</h3>
+            <p className="text-sm text-[#a3a3a3]" dir="rtl">
+              مقایسه دسته‌بندی
+            </p>
           </div>
         </div>
 
@@ -223,10 +237,7 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
               <Tooltip content={<CustomTooltip />} cursor={{ fill: '#fafafa' }} />
               <Bar dataKey="value" radius={[0, 8, 8, 0]} animationDuration={800}>
                 {categoryTotals.map((_, index) => (
-                  <Cell
-                    key={`bar-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
+                  <Cell key={`bar-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Bar>
             </BarChart>
@@ -235,10 +246,9 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
       </div>
 
       {/* Area Chart - Spending Trend */}
-      <div className="relative bg-white rounded-xl border border-[#e5e5e5] p-6 shadow-sm lg:col-span-2">
-
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 bg-[#fafafa] rounded-lg border border-[#e5e5e5]">
+      <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-6 shadow-sm lg:col-span-2">
+        <div className="mb-6 flex items-center gap-3">
+          <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
             <TrendingUp className="h-5 w-5 text-[#0070f3]" />
           </div>
           <div>
@@ -288,7 +298,10 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
                 tickLine={{ stroke: '#e5e5e5' }}
                 tickFormatter={(value: number) => `${Math.round(value / 1_000_000)}M`}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#0070f3', strokeWidth: 1, strokeDasharray: '4 4' }} />
+              <Tooltip
+                content={<CustomTooltip />}
+                cursor={{ stroke: '#0070f3', strokeWidth: 1, strokeDasharray: '4 4' }}
+              />
               <Area
                 type="monotone"
                 dataKey="amount"

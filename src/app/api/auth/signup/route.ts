@@ -1,8 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/core/database/client';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+
 import { hashPassword } from '@/core/auth/password';
 import { generateToken } from '@/core/auth/token';
 import { isValidEmail, validatePassword } from '@/core/auth/validation';
+import { db } from '@/core/database/client';
 
 const TOKEN_COOKIE_NAME = 'auth_token';
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days in seconds
@@ -14,10 +16,7 @@ export async function POST(request: NextRequest) {
 
     // Validation
     if (!email || !password || !passwordConfirm) {
-      return NextResponse.json(
-        { error: 'Email and password are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
     if (!isValidEmail(email)) {
@@ -25,18 +24,12 @@ export async function POST(request: NextRequest) {
     }
 
     if (password !== passwordConfirm) {
-      return NextResponse.json(
-        { error: 'Passwords do not match' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Passwords do not match' }, { status: 400 });
     }
 
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.valid) {
-      return NextResponse.json(
-        { error: passwordValidation.errors.join(', ') },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: passwordValidation.errors.join(', ') }, { status: 400 });
     }
 
     // Check if user already exists
@@ -46,10 +39,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingUser.rows.length > 0) {
-      return NextResponse.json(
-        { error: 'User already exists' },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: 'User already exists' }, { status: 409 });
     }
 
     // Hash password
@@ -82,21 +72,15 @@ export async function POST(request: NextRequest) {
     const cookieString = cookieParts.join('; ');
 
     // Create response with Set-Cookie header
-    return new NextResponse(
-      JSON.stringify({ message: 'User created successfully', userId }),
-      {
-        status: 201,
-        headers: {
-          'Content-Type': 'application/json',
-          'Set-Cookie': cookieString,
-        },
-      }
-    );
+    return new NextResponse(JSON.stringify({ message: 'User created successfully', userId }), {
+      status: 201,
+      headers: {
+        'Content-Type': 'application/json',
+        'Set-Cookie': cookieString,
+      },
+    });
   } catch (error) {
     console.error('Signup error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

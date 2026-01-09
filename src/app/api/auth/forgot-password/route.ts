@@ -1,7 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/core/database/client';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+
 import { generateResetToken } from '@/core/auth/token';
 import { isValidEmail } from '@/core/auth/validation';
+import { db } from '@/core/database/client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,10 +12,7 @@ export async function POST(request: NextRequest) {
 
     // Validation
     if (!email || !isValidEmail(email)) {
-      return NextResponse.json(
-        { error: 'Valid email is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Valid email is required' }, { status: 400 });
     }
 
     // Find user
@@ -24,10 +23,7 @@ export async function POST(request: NextRequest) {
 
     if (userResult.rows.length === 0) {
       // Don't reveal if email exists for security reasons
-      return NextResponse.json(
-        { message: 'If that email exists, we sent a password reset link' },
-        { status: 200 }
-      );
+      return NextResponse.json({ message: 'If that email exists, we sent a password reset link' }, { status: 200 });
     }
 
     const userId = userResult.rows[0][0] as number;
@@ -52,9 +48,6 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error('Forgot password error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -1,11 +1,13 @@
 # Authentication System Implementation
 
 ## Overview
+
 A custom-built authentication system for the Kharji expense tracker application. Implements full user authentication from scratch without relying on third-party auth frameworks like NextAuth, Better Auth, or Clerk.
 
 ## Features Implemented
 
 ### 1. User Management
+
 - ✅ User registration (Sign up)
 - ✅ User login with email and password
 - ✅ User logout
@@ -14,6 +16,7 @@ A custom-built authentication system for the Kharji expense tracker application.
 - ✅ Session-based authentication
 
 ### 2. Security Features
+
 - ✅ Password hashing using PBKDF2 with salt
 - ✅ Session tokens (32 bytes, cryptographically secure)
 - ✅ Password reset tokens with expiration (1 hour)
@@ -26,9 +29,11 @@ A custom-built authentication system for the Kharji expense tracker application.
   - At least one number
 
 ### 3. Database Schema
+
 New tables created:
 
 #### `users`
+
 ```sql
 id INTEGER PRIMARY KEY AUTOINCREMENT
 email TEXT NOT NULL UNIQUE
@@ -38,6 +43,7 @@ updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 ```
 
 #### `sessions`
+
 ```sql
 id TEXT PRIMARY KEY
 user_id INTEGER NOT NULL
@@ -46,6 +52,7 @@ created_at TEXT DEFAULT CURRENT_TIMESTAMP
 ```
 
 #### `password_reset_tokens`
+
 ```sql
 id INTEGER PRIMARY KEY AUTOINCREMENT
 user_id INTEGER NOT NULL
@@ -57,6 +64,7 @@ created_at TEXT DEFAULT CURRENT_TIMESTAMP
 ### 4. API Endpoints
 
 #### Authentication Routes
+
 - `POST /api/auth/signup` - Create new user account
 - `POST /api/auth/login` - User login
 - `POST /api/auth/logout` - User logout
@@ -65,13 +73,16 @@ created_at TEXT DEFAULT CURRENT_TIMESTAMP
 - `GET /api/auth/me` - Get current authenticated user
 
 ### 5. Frontend Pages
+
 - `/login` - Login page with email/password form
 - `/signup` - Registration page with password confirmation
 - `/forgot-password` - Forgot password request form
 - `/reset-password?token=<token>` - Password reset form
 
 ### 6. Protected Routes
+
 All routes except the following require authentication:
+
 - `/` - Home page
 - `/login` - Login page
 - `/signup` - Signup page
@@ -80,7 +91,9 @@ All routes except the following require authentication:
 - `/api/auth/*` - Auth API routes (as appropriate)
 
 ### 7. Route Protection
+
 Implemented via `proxy.ts` (Next.js middleware):
+
 - Checks for valid session cookie
 - Validates session in database
 - Redirects unauthenticated users to login
@@ -89,7 +102,9 @@ Implemented via `proxy.ts` (Next.js middleware):
 ## Implementation Details
 
 ### Password Hashing
+
 Uses Node.js `crypto.pbkdf2Sync` with:
+
 - 16-byte random salt
 - 100,000 iterations
 - SHA-256 algorithm
@@ -98,6 +113,7 @@ Uses Node.js `crypto.pbkdf2Sync` with:
 Passwords stored as: `salt:hash` (hex-encoded)
 
 ### Session Management
+
 - Generated using 32 bytes of cryptographic random data
 - Stored in HTTP-only cookies
 - Validated on each request via database lookup
@@ -107,6 +123,7 @@ Passwords stored as: `salt:hash` (hex-encoded)
 ### User Flow
 
 #### Signup
+
 1. User enters email and password (with confirmation)
 2. Form validates on client
 3. Server validates email format and password strength
@@ -117,6 +134,7 @@ Passwords stored as: `salt:hash` (hex-encoded)
 8. Redirects to overview
 
 #### Login
+
 1. User enters email and password
 2. Server looks up user by email (case-insensitive)
 3. Verifies password against stored hash
@@ -125,6 +143,7 @@ Passwords stored as: `salt:hash` (hex-encoded)
 6. Redirects to overview
 
 #### Forgot Password
+
 1. User enters email
 2. Server generates reset token (32 bytes, 1-hour expiration)
 3. Stores token in database
@@ -132,6 +151,7 @@ Passwords stored as: `salt:hash` (hex-encoded)
 5. In production, token would be sent via email
 
 #### Reset Password
+
 1. User clicks reset link with token
 2. Frontend validates token format
 3. User enters new password
@@ -144,27 +164,33 @@ Passwords stored as: `salt:hash` (hex-encoded)
 ### Client-Side Utilities
 
 #### `useAuth` Hook
+
 Custom React hook for managing authentication state:
+
 ```typescript
 const { user, loading, error, logout, refetch } = useAuth();
 ```
 
 #### `UserMenu` Component
+
 Displays current user email and logout button in sidebar.
 
 ## Testing Authentication
 
 ### 1. Run migrations
+
 ```bash
 npm run migrate
 ```
 
 ### 2. Start development server
+
 ```bash
 npm run dev
 ```
 
 ### 3. Test flow
+
 1. Go to `http://localhost:3000` - redirects to login
 2. Click "Sign up" and create account
 3. Should be logged in and see overview
@@ -174,15 +200,18 @@ npm run dev
 7. Test forgot password and reset flow
 
 ## Environment Variables Required
+
 ```
 TURSO_DATABASE_URL=<your-database-url>
 TURSO_AUTH_TOKEN=<your-auth-token>
 ```
 
 ## Multi-User Support
+
 Each user's data (expenses, tags, etc.) is now isolated by user_id. The expenses and tags tables have been designed with user_id foreign keys to ensure data isolation.
 
 ## Future Enhancements
+
 - Email verification for signup
 - Two-factor authentication (2FA)
 - OAuth / Social login
@@ -193,6 +222,7 @@ Each user's data (expenses, tags, etc.) is now isolated by user_id. The expenses
 - Account lockout after failed attempts
 
 ## Security Notes
+
 - All sensitive operations use HTTPS in production (via cookie `secure` flag)
 - Session tokens are cryptographically random
 - Passwords are never stored in plain text

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+
 import { jwtVerify } from 'jose';
+
 import { authConfig } from '@/configs/auth.config';
 
 const JWT_SECRET = new TextEncoder().encode(authConfig.jwt.secret);
@@ -27,7 +29,7 @@ export default async function middleware(request: NextRequest) {
   // Handle API routes
   if (pathname.startsWith('/api')) {
     // Public API routes can be accessed without auth
-    if (authConfig.routes.apiPublic.some(route => pathname === route || pathname.startsWith(route + '/'))) {
+    if (authConfig.routes.apiPublic.some((route) => pathname === route || pathname.startsWith(`${route}/`))) {
       return NextResponse.next();
     }
 

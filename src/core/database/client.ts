@@ -1,4 +1,5 @@
 import { createClient } from '@libsql/client';
+
 import { databaseConfig } from '@/configs/database.config';
 
 if (!databaseConfig.url || !databaseConfig.authToken) {
@@ -7,5 +8,5 @@ if (!databaseConfig.url || !databaseConfig.authToken) {
 
 export const db = createClient({
   url: databaseConfig.url,
-  authToken: databaseConfig.authToken
+  authToken: databaseConfig.authToken,
 });

@@ -1,4 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+
 import { db } from '@/core/database/client';
 import { getCurrentUser } from '@/core/session/session';
 
@@ -12,7 +14,7 @@ export async function GET() {
 
     const result = await db.execute({
       sql: 'SELECT * FROM tags WHERE user_id = ? ORDER BY name ASC',
-      args: [user.userId]
+      args: [user.userId],
     });
 
     return NextResponse.json(result.rows);
@@ -41,7 +43,7 @@ export async function POST(request: NextRequest) {
     // Check if tag already exists for this user
     const existing = await db.execute({
       sql: 'SELECT id, name, created_at FROM tags WHERE LOWER(name) = LOWER(?) AND user_id = ?',
-      args: [trimmedName, user.userId]
+      args: [trimmedName, user.userId],
     });
 
     if (existing.rows.length > 0) {
@@ -52,7 +54,7 @@ export async function POST(request: NextRequest) {
     // Create new tag for this user
     const result = await db.execute({
       sql: 'INSERT INTO tags (user_id, name) VALUES (?, ?) RETURNING *',
-      args: [user.userId, trimmedName]
+      args: [user.userId, trimmedName],
     });
 
     return NextResponse.json(result.rows[0], { status: 201 });

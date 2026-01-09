@@ -1,19 +1,20 @@
 'use client';
 
-import DashboardLayout from '@components/DashboardLayout';
+import { Building2, Coins, CreditCard, PiggyBank, Plus, Sparkles, TrendingUp, Wallet } from 'lucide-react';
+
 import Button from '@components/Button';
-import { Wallet, Plus, Sparkles, TrendingUp, PiggyBank, CreditCard, Building2, Coins } from 'lucide-react';
+import DashboardLayout from '@components/DashboardLayout';
 
 export default function AssetsPage() {
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-[#ffffff]">
-        <div className="max-w-[1600px] mx-auto px-6 py-8">
+        <div className="mx-auto max-w-[1600px] px-6 py-8">
           {/* Page Header */}
-          <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8">
+          <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#171717]">Assets</h1>
-              <p className="text-xs sm:text-sm text-[#a3a3a3] mt-1">Manage your wealth portfolio</p>
+              <h1 className="text-xl font-bold text-[#171717] sm:text-2xl md:text-3xl">Assets</h1>
+              <p className="mt-1 text-xs text-[#a3a3a3] sm:text-sm">Manage your wealth portfolio</p>
             </div>
             <Button variant="primary" className="shrink-0">
               <Plus className="h-4 w-4" />
@@ -22,7 +23,7 @@ export default function AssetsPage() {
           </div>
 
           {/* Quick Stats Preview */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
             {[
               { label: 'Total Value', value: '$0.00', icon: TrendingUp, iconColor: '#0070f3' },
               { label: 'Savings', value: '$0.00', icon: PiggyBank, iconColor: '#10b981' },
@@ -31,35 +32,33 @@ export default function AssetsPage() {
             ].map((stat, i) => (
               <div
                 key={i}
-                className="relative bg-white rounded-xl p-5 border border-[#e5e5e5] shadow-sm hover:shadow-md transition-all duration-200"
+                className="relative rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md"
               >
-                <div className="p-2 bg-[#fafafa] rounded-lg border border-[#e5e5e5] w-fit mb-3">
+                <div className="mb-3 w-fit rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
                   <stat.icon className="h-4 w-4" style={{ color: stat.iconColor }} />
                 </div>
-                <p className="text-xs text-[#a3a3a3] font-medium uppercase tracking-wide">{stat.label}</p>
-                <p className="text-xl font-bold text-[#171717] mt-1">{stat.value}</p>
+                <p className="text-xs font-medium tracking-wide text-[#a3a3a3] uppercase">{stat.label}</p>
+                <p className="mt-1 text-xl font-bold text-[#171717]">{stat.value}</p>
               </div>
             ))}
           </div>
 
           {/* Empty State */}
-          <div className="relative bg-white rounded-xl p-16 border border-[#e5e5e5] shadow-sm">
-
-            <div className="max-w-lg mx-auto text-center relative">
-              <div className="relative inline-flex mb-6">
-                <div className="p-6 bg-[#fafafa] rounded-2xl border border-[#e5e5e5]">
+          <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-16 shadow-sm">
+            <div className="relative mx-auto max-w-lg text-center">
+              <div className="relative mb-6 inline-flex">
+                <div className="rounded-2xl border border-[#e5e5e5] bg-[#fafafa] p-6">
                   <Wallet className="h-12 w-12 text-[#525252]" />
                 </div>
               </div>
 
-              <h2 className="text-2xl font-bold text-[#171717] mb-3">
-                Start tracking your assets
-              </h2>
-              <p className="text-[#525252] mb-8 leading-relaxed">
-                Get a complete picture of your financial situation by adding your bank accounts, investments, properties, and more.
+              <h2 className="mb-3 text-2xl font-bold text-[#171717]">Start tracking your assets</h2>
+              <p className="mb-8 leading-relaxed text-[#525252]">
+                Get a complete picture of your financial situation by adding your bank accounts, investments,
+                properties, and more.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <Button variant="primary" className="w-full sm:w-auto">
                   <Plus className="h-5 w-5" />
                   Add Your First Asset
@@ -71,7 +70,7 @@ export default function AssetsPage() {
               </div>
 
               {/* Asset Types Preview */}
-              <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {[
                   { icon: CreditCard, label: 'Bank Accounts', iconColor: '#0070f3' },
                   { icon: Coins, label: 'Investments', iconColor: '#525252' },
@@ -80,10 +79,13 @@ export default function AssetsPage() {
                 ].map((type, i) => (
                   <div
                     key={i}
-                    className="p-4 bg-[#fafafa] rounded-lg border border-[#e5e5e5] hover:border-[#d4d4d4] transition-all duration-200 cursor-pointer group"
+                    className="group cursor-pointer rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-4 transition-all duration-200 hover:border-[#d4d4d4]"
                   >
-                    <type.icon className="h-6 w-6 mx-auto mb-2 transition-opacity opacity-60 group-hover:opacity-100" style={{ color: type.iconColor }} />
-                    <p className="text-xs text-[#a3a3a3] group-hover:text-[#525252] transition-colors">{type.label}</p>
+                    <type.icon
+                      className="mx-auto mb-2 h-6 w-6 opacity-60 transition-opacity group-hover:opacity-100"
+                      style={{ color: type.iconColor }}
+                    />
+                    <p className="text-xs text-[#a3a3a3] transition-colors group-hover:text-[#525252]">{type.label}</p>
                   </div>
                 ))}
               </div>
@@ -94,6 +96,3 @@ export default function AssetsPage() {
     </DashboardLayout>
   );
 }
-
-
-

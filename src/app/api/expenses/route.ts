@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
+
+import { type CreateExpenseInput, type Expense } from '@/@types/expense';
 import { db } from '@/core/database/client';
 import { getCurrentUser } from '@/core/session/session';
-import { type CreateExpenseInput, type Expense } from '@/@types/expense';
 
 // GET /api/expenses - Fetch expenses with pagination support
 // Query parameters:
@@ -14,10 +15,7 @@ export async function GET(request: Request) {
     // Get current user
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Handle both Request object and edge cases
@@ -37,12 +35,12 @@ export async function GET(request: Request) {
     if (!limitParam || limitParam === '') {
       const result = await db.execute({
         sql: 'SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC, created_at DESC',
-        args: [user.userId]
+        args: [user.userId],
       });
 
       // Fetch tags for all expenses
-      const expenseIds = result.rows.map(row => row.id);
-      let tagsMap: Record<number, any[]> = {};
+      const expenseIds = result.rows.map((row) => row.id);
+      const tagsMap: Record<number, any[]> = {};
 
       if (expenseIds.length > 0) {
         const placeholders = expenseIds.map(() => '?').join(',');
@@ -53,7 +51,7 @@ export async function GET(request: Request) {
             JOIN tags t ON et.tag_id = t.id
             WHERE et.expense_id IN (${placeholders})
           `,
-          args: expenseIds
+          args: expenseIds,
         });
 
         // Group tags by expense_id
@@ -64,7 +62,7 @@ export async function GET(request: Request) {
           tagsMap[row.expense_id].push({
             id: row.id,
             name: row.name,
-            created_at: row.created_at
+            created_at: row.created_at,
           });
         });
       }
@@ -77,7 +75,7 @@ export async function GET(request: Request) {
         price_toman: row.price_toman as number,
         price_usd: row.price_usd as number,
         created_at: row.created_at as string,
-        tags: tagsMap[row.id as number] || []
+        tags: tagsMap[row.id as number] || [],
       }));
 
       return NextResponse.json(expenses);
@@ -108,8 +106,8 @@ export async function GET(request: Request) {
     const expensesToReturn = hasMore ? result.rows.slice(0, limit) : result.rows;
 
     // Fetch tags for all expenses
-    const expenseIds = expensesToReturn.map(row => row.id);
-    let tagsMap: Record<number, any[]> = {};
+    const expenseIds = expensesToReturn.map((row) => row.id);
+    const tagsMap: Record<number, any[]> = {};
 
     if (expenseIds.length > 0) {
       const placeholders = expenseIds.map(() => '?').join(',');
@@ -120,7 +118,7 @@ export async function GET(request: Request) {
           JOIN tags t ON et.tag_id = t.id
           WHERE et.expense_id IN (${placeholders})
         `,
-        args: expenseIds
+        args: expenseIds,
       });
 
       // Group tags by expense_id
@@ -131,7 +129,7 @@ export async function GET(request: Request) {
         tagsMap[row.expense_id].push({
           id: row.id,
           name: row.name,
-          created_at: row.created_at
+          created_at: row.created_at,
         });
       });
     }
@@ -144,7 +142,7 @@ export async function GET(request: Request) {
       price_toman: row.price_toman as number,
       price_usd: row.price_usd as number,
       created_at: row.created_at as string,
-      tags: tagsMap[row.id as number] || []
+      tags: tagsMap[row.id as number] || [],
     }));
 
     // Generate next cursor from the last item
@@ -158,14 +156,11 @@ export async function GET(request: Request) {
     return NextResponse.json({
       expenses,
       nextCursor,
-      hasMore
+      hasMore,
     });
   } catch (error) {
     console.error('Failed to fetch expenses:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch expenses' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch expenses' }, { status: 500 });
   }
 }
 
@@ -175,34 +170,31 @@ export async function POST(request: Request) {
     // Get current user
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body: CreateExpenseInput = await request.json();
 
     // Validate required fields
-    if (!body.date || !body.category || !body.description || body.price_toman === undefined || body.price_usd === undefined) {
-      return NextResponse.json(
-        { error: 'All fields are required' },
-        { status: 400 }
-      );
+    if (
+      !body.date ||
+      !body.category ||
+      !body.description ||
+      body.price_toman === undefined ||
+      body.price_usd === undefined
+    ) {
+      return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
     }
 
     // Validate numbers
     if (typeof body.price_toman !== 'number' || typeof body.price_usd !== 'number') {
-      return NextResponse.json(
-        { error: 'Prices must be numbers' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Prices must be numbers' }, { status: 400 });
     }
 
     // Insert the expense with user_id
     const expenseResult = await db.execute({
       sql: 'INSERT INTO expenses (user_id, date, category, description, price_toman, price_usd) VALUES (?, ?, ?, ?, ?, ?) RETURNING id',
-      args: [user.userId, body.date, body.category, body.description, body.price_toman, body.price_usd]
+      args: [user.userId, body.date, body.category, body.description, body.price_toman, body.price_usd],
     });
 
     const expenseId = expenseResult.rows[0].id as number;
@@ -212,20 +204,14 @@ export async function POST(request: Request) {
       for (const tagId of body.tagIds) {
         await db.execute({
           sql: 'INSERT INTO expense_tags (expense_id, tag_id) VALUES (?, ?)',
-          args: [expenseId, tagId]
+          args: [expenseId, tagId],
         });
       }
     }
 
-    return NextResponse.json(
-      { message: 'Expense created successfully', id: expenseId },
-      { status: 201 }
-    );
+    return NextResponse.json({ message: 'Expense created successfully', id: expenseId }, { status: 201 });
   } catch (error) {
     console.error('Failed to create expense:', error);
-    return NextResponse.json(
-      { error: 'Failed to create expense' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create expense' }, { status: 500 });
   }
 }

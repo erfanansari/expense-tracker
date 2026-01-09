@@ -1,5 +1,6 @@
-import { config } from 'dotenv';
 import { createClient } from '@libsql/client';
+import { config } from 'dotenv';
+
 import { hashPassword } from '@/core/auth/password';
 
 // Load environment variables from .env.local
@@ -11,7 +12,7 @@ const DEFAULT_PASSWORD = 'ChangeMe123!'; // User should change this after first 
 async function seedUser() {
   const client = createClient({
     url: process.env.TURSO_DATABASE_URL!,
-    authToken: process.env.TURSO_AUTH_TOKEN!
+    authToken: process.env.TURSO_AUTH_TOKEN!,
   });
 
   try {
@@ -20,7 +21,7 @@ async function seedUser() {
     // Check if user already exists
     const existingUser = await client.execute({
       sql: 'SELECT id FROM users WHERE email = ?',
-      args: [DEFAULT_USER_EMAIL]
+      args: [DEFAULT_USER_EMAIL],
     });
 
     let userId: number;
@@ -33,7 +34,7 @@ async function seedUser() {
       const passwordHash = await hashPassword(DEFAULT_PASSWORD);
       const result = await client.execute({
         sql: 'INSERT INTO users (email, password_hash) VALUES (?, ?)',
-        args: [DEFAULT_USER_EMAIL, passwordHash]
+        args: [DEFAULT_USER_EMAIL, passwordHash],
       });
       userId = Number(result.lastInsertRowid);
       console.log(`Created user ${DEFAULT_USER_EMAIL} with id ${userId}`);
@@ -43,14 +44,14 @@ async function seedUser() {
     // Associate all existing expenses (with null user_id) to this user
     const updateResult = await client.execute({
       sql: 'UPDATE expenses SET user_id = ? WHERE user_id IS NULL',
-      args: [userId]
+      args: [userId],
     });
     console.log(`Associated ${updateResult.rowsAffected} expenses with user ${DEFAULT_USER_EMAIL}`);
 
     // Associate all existing tags (with null user_id) to this user
     const tagsResult = await client.execute({
       sql: 'UPDATE tags SET user_id = ? WHERE user_id IS NULL',
-      args: [userId]
+      args: [userId],
     });
     console.log(`Associated ${tagsResult.rowsAffected} tags with user ${DEFAULT_USER_EMAIL}`);
 

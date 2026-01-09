@@ -26,17 +26,20 @@ A beautiful, bilingual expense tracker built with Next.js. Track your personal e
 ## Getting Started
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd expense-tracker
 ```
 
 2. Install dependencies:
+
 ```bash
 pnpm install
 ```
 
 3. Set up environment variables:
+
 ```bash
 # Create .env.local file with:
 TURSO_DATABASE_URL=your_turso_database_url
@@ -45,11 +48,13 @@ NAVASAN_API_KEY=your_navasan_api_key  # Optional, uses free tier if not provided
 ```
 
 4. Run database migrations:
+
 ```bash
 pnpm migrate
 ```
 
 5. Start the development server:
+
 ```bash
 pnpm dev
 ```
@@ -81,22 +86,26 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 ## Features in Detail
 
 ### Expense Management
+
 - Add expenses with category, description, date, and dual currency amounts
 - Edit existing expenses inline
 - Delete expenses with confirmation
 - Auto-calculates currency conversion based on current exchange rate
 
 ### Statistics
+
 - **Total Expenses:** Sum of all expenses in both currencies
 - **Transaction Count:** Number of expense entries
 - **Average Daily Spending:** Calculated from first expense date to today
 
 ### Visualizations
+
 - **Category Distribution:** Pie chart showing spending breakdown by category
 - **Category Comparison:** Horizontal bar chart for easy comparison
 - **Daily Spending Trend:** Area chart showing spending patterns over time with zero-day filling
 
 ### Exchange Rate Integration
+
 - Fetches live USD/Toman rates from Navasan API
 - 24-hour CDN-level caching to minimize API calls
 - Automatic rate updates in the expense form

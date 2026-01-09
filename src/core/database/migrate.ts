@@ -1,6 +1,6 @@
-import { config } from 'dotenv';
 import { createClient } from '@libsql/client';
-import { readFileSync, readdirSync } from 'fs';
+import { config } from 'dotenv';
+import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 // Load environment variables from .env.local
@@ -9,7 +9,7 @@ config({ path: '.env.local' });
 async function migrate() {
   const client = createClient({
     url: process.env.TURSO_DATABASE_URL!,
-    authToken: process.env.TURSO_AUTH_TOKEN!
+    authToken: process.env.TURSO_AUTH_TOKEN!,
   });
 
   try {
@@ -21,7 +21,7 @@ async function migrate() {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE,
         executed_at TEXT DEFAULT CURRENT_TIMESTAMP
-      )`
+      )`,
     });
 
     // Get list of migration files
@@ -30,7 +30,7 @@ async function migrate() {
 
     try {
       migrationFiles = readdirSync(migrationsDir)
-        .filter(f => f.endsWith('.sql'))
+        .filter((f) => f.endsWith('.sql'))
         .sort();
     } catch {
       // migrations directory might not exist yet
@@ -42,7 +42,7 @@ async function migrate() {
       // Check if migration has already been run
       const result = await client.execute({
         sql: 'SELECT name FROM _migrations WHERE name = ?',
-        args: [file]
+        args: [file],
       });
 
       if (result.rows.length === 0) {
@@ -55,7 +55,7 @@ async function migrate() {
         // Record migration as executed
         await client.execute({
           sql: 'INSERT INTO _migrations (name) VALUES (?)',
-          args: [file]
+          args: [file],
         });
       } else {
         console.log(`Skipping already-executed migration: ${file}`);

@@ -1,5 +1,5 @@
-import { config } from 'dotenv';
 import { createClient } from '@libsql/client';
+import { config } from 'dotenv';
 
 // Load environment variables from .env.local
 config({ path: '.env.local' });
@@ -7,7 +7,7 @@ config({ path: '.env.local' });
 async function testConnection() {
   const client = createClient({
     url: process.env.TURSO_DATABASE_URL!,
-    authToken: process.env.TURSO_AUTH_TOKEN!
+    authToken: process.env.TURSO_AUTH_TOKEN!,
   });
 
   try {
@@ -21,7 +21,7 @@ async function testConnection() {
       console.log('✓ Table "expenses" exists');
 
       // Get table schema
-      const schema = await client.execute("PRAGMA table_info(expenses)");
+      const schema = await client.execute('PRAGMA table_info(expenses)');
       console.log('\nTable schema:');
       console.log(schema.rows);
 

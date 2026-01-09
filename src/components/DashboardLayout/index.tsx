@@ -10,9 +10,7 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-[#ffffff]">
       <TopNav />
-      <main className="bg-[#ffffff]">
-        {children}
-      </main>
+      <main className="bg-[#ffffff]">{children}</main>
     </div>
   );
 };

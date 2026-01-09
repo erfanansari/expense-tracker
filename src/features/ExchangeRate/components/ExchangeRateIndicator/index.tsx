@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+
+import { DollarSign, TrendingDown, TrendingUp } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+
 import { formatNumber } from '@/utils';
 
 interface ExchangeRateData {
@@ -72,17 +74,17 @@ const ExchangeRateIndicator = () => {
   const lastUpdate = rateData._meta?.fetchedAt
     ? new Date(rateData._meta.fetchedAt).toLocaleTimeString('en-US', {
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       })
     : '';
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+    <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
       {/* Rate Display */}
       <div className="flex items-center gap-2">
-        <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
+        <DollarSign className="h-4 w-4 text-emerald-600 sm:h-5 sm:w-5 dark:text-emerald-400" />
         <div className="flex items-baseline gap-1.5">
-          <span className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-zinc-50">
+          <span className="text-sm font-semibold text-zinc-900 sm:text-base dark:text-zinc-50">
             {formatNumber(rate)}
           </span>
           <span className="text-xs text-zinc-600 dark:text-zinc-400">Toman</span>
@@ -90,14 +92,16 @@ const ExchangeRateIndicator = () => {
       </div>
 
       {/* Change Indicator */}
-      <div className={twMerge(
-        'flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium',
-        isZero
-          ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
-          : isPositive
-          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-          : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-      )}>
+      <div
+        className={twMerge(
+          'flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
+          isZero
+            ? 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+            : isPositive
+              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+              : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+        )}
+      >
         {isZero ? (
           <span>—</span>
         ) : isPositive ? (
@@ -110,12 +114,10 @@ const ExchangeRateIndicator = () => {
 
       {/* Last Update */}
       {lastUpdate && (
-        <span className="text-[10px] sm:text-xs text-zinc-500 dark:text-zinc-500">
-          Updated {lastUpdate}
-        </span>
+        <span className="text-[10px] text-zinc-500 sm:text-xs dark:text-zinc-500">Updated {lastUpdate}</span>
       )}
     </div>
   );
-}
+};
 
 export default ExchangeRateIndicator;

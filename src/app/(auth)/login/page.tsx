@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+
 import Link from 'next/link';
 
 export default function LoginPage() {
@@ -39,20 +40,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 px-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-2xl p-8">
-        <h1 className="text-3xl font-bold mb-2 text-center text-gray-900">Log in</h1>
-        <p className="text-center text-gray-600 mb-6">Welcome back to Kharji</p>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 px-4">
+      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-2xl">
+        <h1 className="mb-2 text-center text-3xl font-bold text-gray-900">Log in</h1>
+        <p className="mb-6 text-center text-gray-600">Welcome back to Kharji</p>
 
         {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-            {error}
-          </div>
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="email" className="block text-sm font-semibold text-gray-800 mb-2">
+            <label htmlFor="email" className="mb-2 block text-sm font-semibold text-gray-800">
               Email Address
             </label>
             <input
@@ -62,13 +61,13 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="you@example.com"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
               disabled={loading}
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-semibold text-gray-800 mb-2">
+            <label htmlFor="password" className="mb-2 block text-sm font-semibold text-gray-800">
               Password
             </label>
             <input
@@ -78,7 +77,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
               disabled={loading}
             />
           </div>
@@ -86,7 +85,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 transition-colors duration-200"
+            className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition-colors duration-200 hover:bg-blue-700 disabled:bg-gray-400"
           >
             {loading ? 'Logging in...' : 'Log in'}
           </button>
@@ -94,13 +93,13 @@ export default function LoginPage() {
 
         <div className="mt-6 space-y-3 text-center text-sm">
           <p>
-            <Link href="/forgot-password" className="text-blue-600 hover:text-blue-700 font-medium">
+            <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-700">
               Forgot your password?
             </Link>
           </p>
           <p className="text-gray-600">
             New to Kharji?{' '}
-            <Link href="/signup" className="text-blue-600 hover:text-blue-700 font-medium">
+            <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-700">
               Create an account
             </Link>
           </p>

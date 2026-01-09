@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   /* Base Colors - Light Theme */
@@ -59,7 +59,7 @@ html {
 body {
   background: #ffffff;
   color: var(--foreground);
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -80,11 +80,11 @@ body {
 }
 
 /* Input styles */
-input[type="text"],
-input[type="number"],
-input[type="date"],
-input[type="email"],
-input[type="password"],
+input[type='text'],
+input[type='number'],
+input[type='date'],
+input[type='email'],
+input[type='password'],
 select,
 textarea {
   font-family: var(--font-geist-sans), sans-serif !important;
@@ -95,11 +95,11 @@ textarea {
   color-scheme: light !important;
 }
 
-input[type="text"]:focus,
-input[type="number"]:focus,
-input[type="date"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus,
+input[type='text']:focus,
+input[type='number']:focus,
+input[type='date']:focus,
+input[type='email']:focus,
+input[type='password']:focus,
 select:focus,
 textarea:focus {
   border-color: #0070f3 !important;
@@ -107,19 +107,19 @@ textarea:focus {
   outline: none !important;
 }
 
-input[type="date"] {
+input[type='date'] {
   -webkit-appearance: none;
   display: block;
   box-sizing: border-box;
 }
 
 /* Webkit date picker styling */
-input[type="date"]::-webkit-calendar-picker-indicator {
+input[type='date']::-webkit-calendar-picker-indicator {
   opacity: 0.6;
   cursor: pointer;
 }
 
-input[type="date"]::-webkit-calendar-picker-indicator:hover {
+input[type='date']::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
 }
 
@@ -234,7 +234,6 @@ select option {
   border: 1px solid var(--border-subtle);
 }
 
-
 /* Table hover rows */
 .table-row-hover {
   transition: background-color 0.15s ease;
@@ -246,8 +245,14 @@ select option {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {

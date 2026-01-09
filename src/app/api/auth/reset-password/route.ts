@@ -1,7 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/core/database/client';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+
 import { hashPassword } from '@/core/auth/password';
 import { validatePassword } from '@/core/auth/validation';
+import { db } from '@/core/database/client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,25 +12,16 @@ export async function POST(request: NextRequest) {
 
     // Validation
     if (!token || !password || !passwordConfirm) {
-      return NextResponse.json(
-        { error: 'Token and password are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Token and password are required' }, { status: 400 });
     }
 
     if (password !== passwordConfirm) {
-      return NextResponse.json(
-        { error: 'Passwords do not match' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Passwords do not match' }, { status: 400 });
     }
 
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.valid) {
-      return NextResponse.json(
-        { error: passwordValidation.errors.join(', ') },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: passwordValidation.errors.join(', ') }, { status: 400 });
     }
 
     // Find and validate reset token
@@ -39,10 +32,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (tokenResult.rows.length === 0) {
-      return NextResponse.json(
-        { error: 'Invalid or expired reset token' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid or expired reset token' }, { status: 400 });
     }
 
     const userId = tokenResult.rows[0][0] as number;
@@ -62,15 +52,9 @@ export async function POST(request: NextRequest) {
       args: [token],
     });
 
-    return NextResponse.json(
-      { message: 'Password reset successfully' },
-      { status: 200 }
-    );
+    return NextResponse.json({ message: 'Password reset successfully' }, { status: 200 });
   } catch (error) {
     console.error('Reset password error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

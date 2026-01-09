@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { Trash2, FileText, Edit, Tag } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { Edit, FileText, Tag, Trash2 } from 'lucide-react';
+
 import { type Expense } from '@/@types/expense';
 import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@/utils';
 
@@ -51,7 +53,7 @@ const ExpenseList = ({ refreshTrigger, onDelete, onEdit }: ExpenseListProps) => 
         if (isInitial) {
           setExpenses(data.expenses);
         } else {
-          setExpenses(prev => [...prev, ...data.expenses]);
+          setExpenses((prev) => [...prev, ...data.expenses]);
         }
 
         setNextCursor(data.nextCursor);
@@ -59,7 +61,7 @@ const ExpenseList = ({ refreshTrigger, onDelete, onEdit }: ExpenseListProps) => 
       } else {
         setError('Failed to load expenses');
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load expenses');
     } finally {
       setIsLoading(false);
@@ -87,7 +89,7 @@ const ExpenseList = ({ refreshTrigger, onDelete, onEdit }: ExpenseListProps) => 
       });
 
       if (response.ok) {
-        setExpenses(expenses.filter(exp => exp.id !== id));
+        setExpenses(expenses.filter((exp) => exp.id !== id));
         onDelete();
       } else {
         alert('Failed to delete expense');
@@ -133,9 +135,9 @@ const ExpenseList = ({ refreshTrigger, onDelete, onEdit }: ExpenseListProps) => 
 
   if (isLoading) {
     return (
-      <div className="w-full p-8 flex flex-col items-center gap-3">
-        <div className="w-8 h-8 rounded-full border-2 border-violet-500/30 border-t-violet-500 animate-spin" />
-        <p className="text-sm text-zinc-500 font-medium">Loading expenses...</p>
+      <div className="flex w-full flex-col items-center gap-3 p-8">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-500/30 border-t-violet-500" />
+        <p className="text-sm font-medium text-zinc-500">Loading expenses...</p>
       </div>
     );
   }
@@ -143,56 +145,56 @@ const ExpenseList = ({ refreshTrigger, onDelete, onEdit }: ExpenseListProps) => 
   if (error && expenses.length === 0) {
     return (
       <div className="w-full p-8">
-        <p className="text-center text-sm text-rose-400 font-medium">{error}</p>
+        <p className="text-center text-sm font-medium text-rose-400">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="relative bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] rounded-2xl border border-[#1f1f30] p-5 sm:p-6 overflow-hidden">
+    <div className="relative overflow-hidden rounded-2xl border border-[#1f1f30] bg-gradient-to-br from-[#0f0f18] to-[#0a0a12] p-5 sm:p-6">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
 
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-lg border border-cyan-500/30">
+      <div className="mb-6 flex items-center gap-3">
+        <div className="rounded-lg border border-cyan-500/30 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 p-2">
           <FileText className="h-4 w-4 text-cyan-400" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-white">
-            Expense Details
-          </h2>
-          <p className="text-xs text-zinc-500" dir="rtl">جزئیات هزینه‌ها</p>
+          <h2 className="text-lg font-semibold text-white">Expense Details</h2>
+          <p className="text-xs text-zinc-500" dir="rtl">
+            جزئیات هزینه‌ها
+          </p>
         </div>
       </div>
 
       {error && expenses.length > 0 && (
-        <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl">
-          <p className="text-sm text-rose-400 font-medium">{error}</p>
+        <div className="mb-4 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3">
+          <p className="text-sm font-medium text-rose-400">{error}</p>
         </div>
       )}
 
       {expenses.length === 0 ? (
         <div className="w-full p-8 text-center">
-          <p className="text-sm text-zinc-500 font-medium">No expenses yet. Add your first expense above!</p>
+          <p className="text-sm font-medium text-zinc-500">No expenses yet. Add your first expense above!</p>
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto -mx-5 sm:mx-0">
+          <div className="-mx-5 overflow-x-auto sm:mx-0">
             <table className="w-full border-collapse">
               <thead className="bg-[#0a0a12]/80">
                 <tr>
-                  <th className="px-3 py-3 sm:px-4 sm:py-4 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-semibold tracking-wider text-zinc-400 uppercase sm:px-4 sm:py-4">
                     Description
                   </th>
-                  <th className="px-3 py-3 sm:px-4 sm:py-4 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-semibold tracking-wider text-zinc-400 uppercase sm:px-4 sm:py-4">
                     Category
                   </th>
-                  <th className="px-3 py-3 sm:px-4 sm:py-4 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-semibold tracking-wider text-zinc-400 uppercase sm:px-4 sm:py-4">
                     Date
                   </th>
-                  <th className="px-3 py-3 sm:px-4 sm:py-4 text-right text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-right text-xs font-semibold tracking-wider text-zinc-400 uppercase sm:px-4 sm:py-4">
                     Amount
                   </th>
-                  <th className="px-3 py-3 sm:px-4 sm:py-4 text-center text-xs font-semibold text-zinc-400 uppercase tracking-wider w-20 sm:w-24">
+                  <th className="w-20 px-3 py-3 text-center text-xs font-semibold tracking-wider text-zinc-400 uppercase sm:w-24 sm:px-4 sm:py-4">
                     Actions
                   </th>
                 </tr>
@@ -203,19 +205,16 @@ const ExpenseList = ({ refreshTrigger, onDelete, onEdit }: ExpenseListProps) => 
                   const farsiDate = formatToFarsiDate(expense.date);
 
                   return (
-                    <tr
-                      key={expense.id}
-                      className="hover:bg-[#1a1a28]/50 transition-colors group"
-                    >
-                      <td className="px-3 py-3 sm:px-4 sm:py-4 text-sm font-medium text-white">
+                    <tr key={expense.id} className="group transition-colors hover:bg-[#1a1a28]/50">
+                      <td className="px-3 py-3 text-sm font-medium text-white sm:px-4 sm:py-4">
                         <div className="flex flex-col gap-1.5">
                           <span>{expense.description}</span>
                           {expense.tags && expense.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1">
-                              {expense.tags.map(tag => (
+                              {expense.tags.map((tag) => (
                                 <div
                                   key={tag.id}
-                                  className="flex items-center gap-1 px-2 py-0.5 bg-cyan-500/10 text-cyan-400 rounded-lg text-[10px] font-semibold border border-cyan-500/20"
+                                  className="flex items-center gap-1 rounded-lg border border-cyan-500/20 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold text-cyan-400"
                                 >
                                   <Tag className="h-2.5 w-2.5" />
                                   <span>{tag.name}</span>
@@ -225,31 +224,31 @@ const ExpenseList = ({ refreshTrigger, onDelete, onEdit }: ExpenseListProps) => 
                           )}
                         </div>
                       </td>
-                      <td className="px-3 py-3 sm:px-4 sm:py-4 text-sm">
+                      <td className="px-3 py-3 text-sm sm:px-4 sm:py-4">
                         <div className="flex flex-col">
-                          <span className="text-white font-medium">{categoryLabels.en}</span>
-                          <span className="text-zinc-500 text-xs" dir="rtl">
+                          <span className="font-medium text-white">{categoryLabels.en}</span>
+                          <span className="text-xs text-zinc-500" dir="rtl">
                             {categoryLabels.fa}
                           </span>
                         </div>
                       </td>
-                      <td className="px-3 py-3 sm:px-4 sm:py-4 text-sm">
+                      <td className="px-3 py-3 text-sm sm:px-4 sm:py-4">
                         <div className="flex flex-col">
-                          <span className="text-white font-medium">{expense.date}</span>
-                          <span className="text-zinc-500 text-xs" dir="rtl">
+                          <span className="font-medium text-white">{expense.date}</span>
+                          <span className="text-xs text-zinc-500" dir="rtl">
                             {farsiDate}
                           </span>
                         </div>
                       </td>
-                      <td className="px-3 py-3 sm:px-4 sm:py-4 text-sm text-right">
+                      <td className="px-3 py-3 text-right text-sm sm:px-4 sm:py-4">
                         <div className="flex flex-col items-end">
-                          <span className="text-white font-bold tabular-nums" dir="rtl">
+                          <span className="font-bold text-white tabular-nums" dir="rtl">
                             {formatNumber(expense.price_toman)} تومان
                           </span>
-                          <span className="relative group/amount text-zinc-500 text-xs cursor-help inline-block">
+                          <span className="group/amount relative inline-block cursor-help text-xs text-zinc-500">
                             ${expense.price_usd.toFixed(2)} USD
-                            <span className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-[calc(100%+0.5rem)] hidden group-hover/amount:inline-block whitespace-nowrap pointer-events-none z-10">
-                              <span className="bg-[#0f0f18] text-white text-[10px] px-3 py-1.5 rounded-lg shadow-xl border border-[#2a2a40] inline-block font-medium">
+                            <span className="pointer-events-none absolute top-1/2 left-0 z-10 hidden -translate-x-[calc(100%+0.5rem)] -translate-y-1/2 whitespace-nowrap group-hover/amount:inline-block">
+                              <span className="inline-block rounded-lg border border-[#2a2a40] bg-[#0f0f18] px-3 py-1.5 text-[10px] font-medium text-white shadow-xl">
                                 {formatNumber(Math.round(expense.price_toman / expense.price_usd))} Toman/USD
                               </span>
                             </span>
@@ -260,7 +259,7 @@ const ExpenseList = ({ refreshTrigger, onDelete, onEdit }: ExpenseListProps) => 
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => onEdit(expense)}
-                            className="p-2 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 rounded-lg transition-all duration-200"
+                            className="rounded-lg p-2 text-cyan-400 transition-all duration-200 hover:bg-cyan-500/10 hover:text-cyan-300"
                             title="Edit"
                           >
                             <Edit className="h-4 w-4" />
@@ -268,7 +267,7 @@ const ExpenseList = ({ refreshTrigger, onDelete, onEdit }: ExpenseListProps) => 
                           <button
                             onClick={() => handleDelete(expense.id)}
                             disabled={deletingId === expense.id}
-                            className="p-2 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg disabled:opacity-50 transition-all duration-200"
+                            className="rounded-lg p-2 text-rose-400 transition-all duration-200 hover:bg-rose-500/10 hover:text-rose-300 disabled:opacity-50"
                             title="Delete"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -283,21 +282,19 @@ const ExpenseList = ({ refreshTrigger, onDelete, onEdit }: ExpenseListProps) => 
           </div>
 
           {/* Intersection Observer target and loading indicator */}
-          <div ref={observerTarget} className="h-12 flex items-center justify-center">
+          <div ref={observerTarget} className="flex h-12 items-center justify-center">
             {isLoadingMore && (
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full border-2 border-violet-500/30 border-t-violet-500 animate-spin" />
-                <p className="text-sm text-zinc-500 font-medium">Loading more...</p>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-violet-500/30 border-t-violet-500" />
+                <p className="text-sm font-medium text-zinc-500">Loading more...</p>
               </div>
             )}
-            {!hasMore && expenses.length > 0 && (
-              <p className="text-sm text-zinc-600">No more expenses to load</p>
-            )}
+            {!hasMore && expenses.length > 0 && <p className="text-sm text-zinc-600">No more expenses to load</p>}
           </div>
         </>
       )}
     </div>
   );
-}
+};
 
 export default ExpenseList;
