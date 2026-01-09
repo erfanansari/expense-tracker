@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
 
     // In a real app, send email with reset link
     // For now, return the token (in production, send via email)
+    // eslint-disable-next-line no-console
     console.log(`Password reset token for ${email}: ${resetToken}`);
 
     return NextResponse.json(

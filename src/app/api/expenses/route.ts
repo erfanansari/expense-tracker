@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { type CreateExpenseInput, type Expense } from '@/@types/expense';
+import { type CreateExpenseInput, type Expense, type Tag } from '@/@types/expense';
 import { db } from '@/core/database/client';
 import { getCurrentUser } from '@/core/session/session';
 
@@ -40,7 +40,7 @@ export async function GET(request: Request) {
 
       // Fetch tags for all expenses
       const expenseIds = result.rows.map((row) => row.id);
-      const tagsMap: Record<number, any[]> = {};
+      const tagsMap: Record<number, Tag[]> = {};
 
       if (expenseIds.length > 0) {
         const placeholders = expenseIds.map(() => '?').join(',');
@@ -55,15 +55,16 @@ export async function GET(request: Request) {
         });
 
         // Group tags by expense_id
-        tagsResult.rows.forEach((row: any) => {
-          if (!tagsMap[row.expense_id]) {
-            tagsMap[row.expense_id] = [];
+        tagsResult.rows.forEach((row) => {
+          const expense_id = row.expense_id as number;
+          const id = row.id as number;
+          const name = row.name as string;
+          const created_at = row.created_at as string;
+
+          if (!tagsMap[expense_id]) {
+            tagsMap[expense_id] = [];
           }
-          tagsMap[row.expense_id].push({
-            id: row.id,
-            name: row.name,
-            created_at: row.created_at,
-          });
+          tagsMap[expense_id].push({ id, name, created_at });
         });
       }
 
@@ -85,7 +86,7 @@ export async function GET(request: Request) {
     const limit = Math.min(parseInt(limitParam, 10), 100); // Max 100 items per request
 
     let sql = 'SELECT * FROM expenses WHERE user_id = ?';
-    const args: any[] = [user.userId];
+    const args: (string | number)[] = [user.userId];
 
     // Apply cursor-based pagination
     // Since we order by date DESC, created_at DESC, id DESC, we want items that come after the cursor
@@ -107,7 +108,7 @@ export async function GET(request: Request) {
 
     // Fetch tags for all expenses
     const expenseIds = expensesToReturn.map((row) => row.id);
-    const tagsMap: Record<number, any[]> = {};
+    const tagsMap: Record<number, Tag[]> = {};
 
     if (expenseIds.length > 0) {
       const placeholders = expenseIds.map(() => '?').join(',');
@@ -122,15 +123,16 @@ export async function GET(request: Request) {
       });
 
       // Group tags by expense_id
-      tagsResult.rows.forEach((row: any) => {
-        if (!tagsMap[row.expense_id]) {
-          tagsMap[row.expense_id] = [];
+      tagsResult.rows.forEach((row) => {
+        const expense_id = row.expense_id as number;
+        const id = row.id as number;
+        const name = row.name as string;
+        const created_at = row.created_at as string;
+
+        if (!tagsMap[expense_id]) {
+          tagsMap[expense_id] = [];
         }
-        tagsMap[row.expense_id].push({
-          id: row.id,
-          name: row.name,
-          created_at: row.created_at,
-        });
+        tagsMap[expense_id].push({ id, name, created_at });
       });
     }
 

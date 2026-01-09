@@ -76,35 +76,41 @@ export default function ReportsPage() {
         )}
 
         {/* Charts */}
-        {!isLoading && filteredExpenses.length > 0 ? (
-          <div className="relative">
-            <div className="rounded-xl border border-[#e5e5e5] bg-white p-6 shadow-sm sm:p-8">
-              <div className="mb-6 flex items-center gap-3">
-                <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
-                  <TrendingUp className="h-4 w-4 text-[#0070f3]" />
+        {(() => {
+          if (!isLoading && filteredExpenses.length > 0) {
+            return (
+              <div className="relative">
+                <div className="rounded-xl border border-[#e5e5e5] bg-white p-6 shadow-sm sm:p-8">
+                  <div className="mb-6 flex items-center gap-3">
+                    <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
+                      <TrendingUp className="h-4 w-4 text-[#0070f3]" />
+                    </div>
+                    <h2 className="text-lg font-semibold text-[#171717]">Spending Analytics</h2>
+                  </div>
+                  <ExpenseCharts expenses={filteredExpenses} granularity={chartGranularity} />
                 </div>
-                <h2 className="text-lg font-semibold text-[#171717]">Spending Analytics</h2>
               </div>
-              <ExpenseCharts expenses={filteredExpenses} granularity={chartGranularity} />
+            );
+          }
+          if (isLoading) {
+            return <Loading message="Loading reports..." />;
+          }
+          return (
+            <div className="rounded-xl border border-[#e5e5e5] bg-white p-16 text-center shadow-sm">
+              <div className="mx-auto flex max-w-md flex-col items-center gap-4">
+                <div className="rounded-xl border border-[#e5e5e5] bg-[#fafafa] p-4">
+                  <Sparkles className="h-10 w-10 text-[#a3a3a3]" />
+                </div>
+                <div>
+                  <h3 className="mb-2 text-lg font-semibold text-[#171717]">No data available</h3>
+                  <p className="text-[#a3a3a3]">
+                    No transactions found for the selected period. Try adjusting your date range.
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-        ) : isLoading ? (
-          <Loading message="Loading reports..." />
-        ) : (
-          <div className="rounded-xl border border-[#e5e5e5] bg-white p-16 text-center shadow-sm">
-            <div className="mx-auto flex max-w-md flex-col items-center gap-4">
-              <div className="rounded-xl border border-[#e5e5e5] bg-[#fafafa] p-4">
-                <Sparkles className="h-10 w-10 text-[#a3a3a3]" />
-              </div>
-              <div>
-                <h3 className="mb-2 text-lg font-semibold text-[#171717]">No data available</h3>
-                <p className="text-[#a3a3a3]">
-                  No transactions found for the selected period. Try adjusting your date range.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </div>
   );

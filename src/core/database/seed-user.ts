@@ -1,3 +1,4 @@
+/* eslint-disable no-console, @typescript-eslint/no-non-null-assertion */
 import { createClient } from '@libsql/client';
 import { config } from 'dotenv';
 

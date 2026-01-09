@@ -83,11 +83,11 @@ function ExchangeRateCard() {
         <div
           className={twMerge(
             'flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold',
-            isZero
-              ? 'border-[#e5e5e5] bg-[#fafafa] text-[#a3a3a3]'
-              : change > 0
-                ? 'border-[#e5e5e5] bg-[#ecfdf5] text-[#10b981]'
-                : 'border-[#e5e5e5] bg-[#fef2f2] text-[#ef4444]'
+            (() => {
+              if (isZero) return 'border-[#e5e5e5] bg-[#fafafa] text-[#a3a3a3]';
+              if (change > 0) return 'border-[#e5e5e5] bg-[#ecfdf5] text-[#10b981]';
+              return 'border-[#e5e5e5] bg-[#fef2f2] text-[#ef4444]';
+            })()
           )}
         >
           {isZero ? (

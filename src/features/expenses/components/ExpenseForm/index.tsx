@@ -46,14 +46,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
           const rate = parseInt(data.usd.value, 10);
           setExchangeRate(rate);
 
-          // Log fetch status
-          if (data._meta?.fetchedAt) {
-            console.log(
-              `Exchange rate: ${rate.toLocaleString()} Toman/USD (fetched: ${data._meta.fetchedAt}, cached until: ${data._meta.cachedUntil})`
-            );
-          } else {
-            console.log(`Exchange rate: ${rate.toLocaleString()} Toman/USD (${data.usd.date})`);
-          }
+          // Exchange rate fetched successfully
         } else {
           console.warn('Exchange rate API unavailable, user must enter rate manually');
         }
@@ -365,22 +358,30 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
             variant="primary"
             className="flex-1"
           >
-            {isFetchingRate ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Loading rate...
-              </>
-            ) : isSubmitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                {editingExpense ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                {editingExpense ? 'Update / بروزرسانی' : 'Add / افزودن'}
-              </>
-            )}
+            {(() => {
+              if (isFetchingRate) {
+                return (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading rate...
+                  </>
+                );
+              }
+              if (isSubmitting) {
+                return (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                );
+              }
+              return (
+                <>
+                  {editingExpense ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                  {editingExpense ? 'Update / بروزرسانی' : 'Add / افزودن'}
+                </>
+              );
+            })()}
           </Button>
           {editingExpense && (
             <Button type="button" onClick={handleCancel} variant="outline">

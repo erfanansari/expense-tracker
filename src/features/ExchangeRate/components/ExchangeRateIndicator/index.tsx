@@ -95,20 +95,18 @@ const ExchangeRateIndicator = () => {
       <div
         className={twMerge(
           'flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
-          isZero
-            ? 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
-            : isPositive
-              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-              : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+          (() => {
+            if (isZero) return 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400';
+            if (isPositive) return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+            return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+          })()
         )}
       >
-        {isZero ? (
-          <span>—</span>
-        ) : isPositive ? (
-          <TrendingUp className="h-3 w-3" />
-        ) : (
-          <TrendingDown className="h-3 w-3" />
-        )}
+        {(() => {
+          if (isZero) return <span>—</span>;
+          if (isPositive) return <TrendingUp className="h-3 w-3" />;
+          return <TrendingDown className="h-3 w-3" />;
+        })()}
         <span>{isZero ? 'No change' : `${isPositive ? '+' : ''}${formatNumber(Math.abs(change))}`}</span>
       </div>
 

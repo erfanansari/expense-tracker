@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { NextResponse } from 'next/server';
 
 const CACHE_DURATION_SECONDS = 24 * 60 * 60; // 24 hours
