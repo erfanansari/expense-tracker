@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { ExpenseCharts } from '@features/expenses/components/ExpenseCharts';
 import Loading from '@components/Loading';
+import Button from '@components/Button';
 import DateRangeSelector, { type DateRange, filterExpensesByDateRange, getChartGranularity } from '@features/expenses/components/DateRangeSelector';
 import { type Expense } from '@types';
 import { Download, Filter, Sparkles, TrendingUp } from 'lucide-react';
@@ -48,14 +49,14 @@ export default function ReportsPage() {
             </div>
             <div className="flex flex-row items-center gap-2 sm:gap-3">
               <DateRangeSelector value={dateRange} onChange={setDateRange} />
-              <button className="px-3 sm:px-4 py-2.5 bg-white hover:bg-[#f5f5f5] border border-[#e5e5e5] rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 group flex-shrink-0">
-                <Filter className="h-4 w-4 text-[#a3a3a3] group-hover:text-[#171717] transition-colors" />
-                <span className="hidden sm:inline text-[#525252] group-hover:text-[#171717] transition-colors">Filter</span>
-              </button>
-              <button className="px-3 sm:px-4 py-2.5 bg-[#000000] hover:bg-[#171717] rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-sm flex-shrink-0">
-                <Download className="h-4 w-4 text-white" />
-                <span className="hidden sm:inline text-white">Export</span>
-              </button>
+              <Button variant="outline" className="shrink-0">
+                <Filter className="h-4 w-4" />
+                <span className="hidden sm:inline">Filter</span>
+              </Button>
+              <Button variant="primary" className="shrink-0">
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">Export</span>
+              </Button>
             </div>
           </div>
 

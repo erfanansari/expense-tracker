@@ -5,6 +5,7 @@ import DateRangeSelector, { type DateRange, filterExpensesByDateRange } from '@f
 import type { Expense } from '@types';
 import { TrendingUp, TrendingDown, DollarSign, Hash, BarChart3, Plus,  Minus, Lightbulb } from 'lucide-react';
 import { formatNumber, getCategoryLabel } from '@utils';
+import { getButtonClasses } from '@components/Button';
 
 // Exchange Rate Card Component
 function ExchangeRateCard() {
@@ -194,13 +195,13 @@ export default function DashboardPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
             <div className="min-w-0">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#171717]">Overview</h1>
-              <p className="text-xs sm:text-sm text-[#a3a3a3] mt-1">Welcome back! Here's your financial overview.</p>
+              <p className="text-xs sm:text-sm text-[#a3a3a3] mt-1">Welcome back! Here&apos;s your financial overview.</p>
             </div>
             <div className="flex flex-row items-center gap-2 sm:gap-3">
               <DateRangeSelector value={dateRange} onChange={setDateRange} />
               <a
                 href="/transactions"
-                className="px-3 sm:px-5 py-2.5 bg-[#000000] hover:bg-[#171717] text-white rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-sm flex-shrink-0"
+                className={getButtonClasses('primary', 'shrink-0')}
               >
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline">Add Transaction</span>

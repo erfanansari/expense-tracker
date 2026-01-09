@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Loading from '@components/Loading';
+import Button from '@components/Button';
 import { Trash2, Edit, Tag, Plus, Loader2, FileText } from 'lucide-react';
 import { type Expense } from '@types';
 import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@/utils';
@@ -281,10 +282,11 @@ export default function TransactionsPage() {
               {/* Load More Button - Separate from table */}
               {hasMore && (
                 <div className="mt-4">
-                  <button
+                  <Button
                     onClick={loadMore}
                     disabled={isLoadingMore}
-                    className="w-full cursor-pointer py-3 bg-white hover:bg-[#fafafa] border border-[#e5e5e5] rounded-lg text-sm font-medium text-[#525252] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
+                    variant="outline"
+                    className="w-full"
                   >
                     {isLoadingMore ? (
                       <>
@@ -294,7 +296,7 @@ export default function TransactionsPage() {
                     ) : (
                       'Load More'
                     )}
-                  </button>
+                  </Button>
                 </div>
               )}
 

@@ -1,6 +1,7 @@
 'use client';
 
 import DashboardLayout from '@components/DashboardLayout';
+import Button from '@components/Button';
 import { Wallet, Plus, Sparkles, TrendingUp, PiggyBank, CreditCard, Building2, Coins } from 'lucide-react';
 
 export default function AssetsPage() {
@@ -14,10 +15,10 @@ export default function AssetsPage() {
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#171717]">Assets</h1>
               <p className="text-xs sm:text-sm text-[#a3a3a3] mt-1">Manage your wealth portfolio</p>
             </div>
-            <button className="px-3 sm:px-5 py-2.5 bg-[#000000] hover:bg-[#171717] rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 shadow-sm text-white flex-shrink-0">
+            <Button variant="primary" className="shrink-0">
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">Add Asset</span>
-            </button>
+            </Button>
           </div>
 
           {/* Quick Stats Preview */}
@@ -59,14 +60,14 @@ export default function AssetsPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <button className="w-full sm:w-auto px-6 py-3 bg-[#000000] hover:bg-[#171717] rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-sm text-white">
+                <Button variant="primary" className="w-full sm:w-auto">
                   <Plus className="h-5 w-5" />
                   Add Your First Asset
-                </button>
-                <button className="w-full sm:w-auto px-6 py-3 bg-white hover:bg-[#f5f5f5] border border-[#e5e5e5] rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 group">
-                  <Sparkles className="h-5 w-5 text-[#a3a3a3] group-hover:text-[#171717] transition-colors" />
-                  <span className="text-[#525252] group-hover:text-[#171717] transition-colors">Import from Bank</span>
-                </button>
+                </Button>
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <Sparkles className="h-5 w-5" />
+                  Import from Bank
+                </Button>
               </div>
 
               {/* Asset Types Preview */}

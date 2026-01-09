@@ -6,6 +6,7 @@ import { type CreateExpenseInput, type Tag } from '@/@types/expense';
 import { EXPENSE_CATEGORIES } from '@/constants';
 import { tomanToUsd, usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
 import TagInput from '../TagInput';
+import Button from '@components/Button';
 
 interface ExpenseFormProps {
   onExpenseAdded: () => void;
@@ -352,10 +353,11 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
 
         {/* Buttons */}
         <div className="flex gap-3 pt-2">
-          <button
+          <Button
             type="submit"
             disabled={isSubmitting || isFetchingRate || !exchangeRate}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#000000] hover:bg-[#171717] disabled:bg-[#a3a3a3] text-white font-semibold rounded-lg transition-all duration-200 shadow-sm disabled:cursor-not-allowed"
+            variant="primary"
+            className="flex-1"
           >
             {isFetchingRate ? (
               <>
@@ -373,15 +375,15 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
                 {editingExpense ? 'Update / بروزرسانی' : 'Add / افزودن'}
               </>
             )}
-          </button>
+          </Button>
           {editingExpense && (
-            <button
+            <Button
               type="button"
               onClick={handleCancel}
-              className="px-6 py-3 border border-[#d4d4d4] text-[#525252] hover:text-[#171717] hover:bg-[#f5f5f5] font-medium rounded-lg transition-all"
+              variant="outline"
             >
               Cancel / لغو
-            </button>
+            </Button>
           )}
         </div>
       </form>

@@ -1,6 +1,7 @@
 'use client';
 
 import { User, Bell, Lock, Globe, Palette, Database, HelpCircle } from 'lucide-react';
+import Button from '@components/Button';
 
 export default function SettingsPage() {
   return (
@@ -50,12 +51,12 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div className="flex gap-3 pt-2">
-                    <button className="px-4 py-2.5 bg-[#000000] hover:bg-[#171717] rounded-lg text-sm font-semibold text-white transition-all">
+                    <Button variant="primary">
                       Save Changes
-                    </button>
-                    <button className="px-4 py-2.5 border border-[#e5e5e5] hover:bg-[#f5f5f5] rounded-lg text-sm font-medium text-[#525252] transition-all">
+                    </Button>
+                    <Button variant="outline">
                       Cancel
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -113,9 +114,9 @@ export default function SettingsPage() {
               </div>
               <div className="p-6">
                 <div className="max-w-2xl">
-                  <button className="px-4 py-2.5 bg-white hover:bg-[#f5f5f5] border border-[#e5e5e5] rounded-lg text-sm font-medium text-[#525252] transition-all">
+                  <Button variant="outline">
                     Change Password
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -190,12 +191,12 @@ export default function SettingsPage() {
               </div>
               <div className="p-6">
                 <div className="flex flex-col sm:flex-row gap-3 max-w-2xl">
-                  <button className="px-4 py-2.5 bg-white hover:bg-[#f5f5f5] border border-[#e5e5e5] rounded-lg text-sm font-medium text-[#525252] transition-all">
+                  <Button variant="outline">
                     Export Data
-                  </button>
-                  <button className="px-4 py-2.5 bg-white hover:bg-[#fef2f2] border border-[#e5e5e5] hover:border-[#ef4444] rounded-lg text-sm font-medium text-[#525252] hover:text-[#ef4444] transition-all">
+                  </Button>
+                  <Button variant="danger">
                     Delete All Data
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -215,12 +216,12 @@ export default function SettingsPage() {
               </div>
               <div className="p-6">
                 <div className="flex flex-col sm:flex-row gap-3 max-w-2xl">
-                  <button className="px-4 py-2.5 bg-white hover:bg-[#f5f5f5] border border-[#e5e5e5] rounded-lg text-sm font-medium text-[#525252] transition-all">
+                  <Button variant="outline">
                     Documentation
-                  </button>
-                  <button className="px-4 py-2.5 bg-white hover:bg-[#f5f5f5] border border-[#e5e5e5] rounded-lg text-sm font-medium text-[#525252] transition-all">
+                  </Button>
+                  <Button variant="outline">
                     Contact Support
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
