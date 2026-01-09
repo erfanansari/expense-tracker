@@ -16,7 +16,7 @@ interface ExchangeRateData {
   };
 }
 
-export function ExchangeRateIndicator() {
+const ExchangeRateIndicator = () => {
   const [rateData, setRateData] = useState<ExchangeRateData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -115,3 +115,5 @@ export function ExchangeRateIndicator() {
     </div>
   );
 }
+
+export default ExchangeRateIndicator;

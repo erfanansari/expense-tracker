@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { Plus, X, Save, Loader2, DollarSign, Calendar, FileText, Layers, ChevronDown } from 'lucide-react';
 import { type CreateExpenseInput, type Tag } from '@/@types/expense';
 import { EXPENSE_CATEGORIES } from '@/constants';
-import { tomanToUsd, usdToToman } from '@/features/exchange-rate/utils/currency-conversion';
-import { TagInput } from './tag-input';
+import { tomanToUsd, usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
+import TagInput from '../TagInput';
 
 interface ExpenseFormProps {
   onExpenseAdded: () => void;
@@ -13,7 +13,7 @@ interface ExpenseFormProps {
   onCancelEdit?: () => void;
 }
 
-export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFormProps) {
+const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFormProps) => {
   const [formData, setFormData] = useState<CreateExpenseInput>({
     date: new Date().toISOString().split('T')[0],
     category: '',
@@ -388,3 +388,5 @@ export function ExpenseForm({ onExpenseAdded, editingExpense, onCancelEdit }: Ex
     </div>
   );
 }
+
+export default ExpenseForm;

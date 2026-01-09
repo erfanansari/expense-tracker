@@ -1,7 +1,7 @@
 'use client';
 
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, CartesianGrid } from 'recharts';
-import { PieChartIcon, BarChart3, TrendingUp, Sparkles } from 'lucide-react';
+import { PieChartIcon, BarChart3, TrendingUp } from 'lucide-react';
 import { type Expense } from '@/@types/expense';
 import { formatNumber, getCategoryLabel } from '@/utils';
 

@@ -9,7 +9,7 @@ interface TagInputProps {
   onTagsChange: (tags: Tag[]) => void;
 }
 
-export function TagInput({ selectedTags, onTagsChange }: TagInputProps) {
+const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
   const [allTags, setAllTags] = useState<Tag[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
@@ -208,3 +208,5 @@ export function TagInput({ selectedTags, onTagsChange }: TagInputProps) {
     </div>
   );
 }
+
+export default TagInput;

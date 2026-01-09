@@ -13,7 +13,7 @@ interface ExpenseListProps {
 
 const ITEMS_PER_PAGE = 20;
 
-export function ExpenseList({ refreshTrigger, onDelete, onEdit }: ExpenseListProps) {
+const ExpenseList = ({ refreshTrigger, onDelete, onEdit }: ExpenseListProps) => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -299,3 +299,5 @@ export function ExpenseList({ refreshTrigger, onDelete, onEdit }: ExpenseListPro
     </div>
   );
 }
+
+export default ExpenseList;

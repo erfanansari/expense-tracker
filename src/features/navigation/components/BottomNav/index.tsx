@@ -8,7 +8,7 @@ import {
   BarChart3,
   Wallet
 } from 'lucide-react';
-import { MobileUserMenu } from '@/features/auth/components/user-menu';
+import { MobileUserMenu } from '@features/auth/components/UserMenu';
 
 interface NavItem {
   href: string;

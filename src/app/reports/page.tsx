@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import DashboardLayout from '@components/DashboardLayout';
-import { ExpenseCharts } from '@features/expenses/components/expense-charts';
-import { ExpenseStats } from '@features/expenses/components/expense-stats';
+import { ExpenseCharts } from '@features/expenses/components/ExpenseCharts';
 import Loading from '@components/Loading';
-import { DateRangeSelector, type DateRange, filterExpensesByDateRange, getChartGranularity } from '@features/expenses/components/date-range-selector';
+import DateRangeSelector, { type DateRange, filterExpensesByDateRange, getChartGranularity } from '@features/expenses/components/DateRangeSelector';
 import { type Expense } from '@types';
-import { BarChart3, Download, Filter, Sparkles, TrendingUp } from 'lucide-react';
+import { Download, Filter, Sparkles, TrendingUp } from 'lucide-react';
+import ExpenseStats from '@features/expenses/components/ExpenseStats';
 
 export default function ReportsPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);

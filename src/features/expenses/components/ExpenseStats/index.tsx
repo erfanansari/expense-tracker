@@ -8,7 +8,7 @@ interface ExpenseStatsProps {
   expenses: Expense[];
 }
 
-export function ExpenseStats({ expenses }: ExpenseStatsProps) {
+const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
   const totalToman = expenses.reduce((sum, exp) => sum + exp.price_toman, 0);
   const totalUsd = expenses.reduce((sum, exp) => sum + exp.price_usd, 0);
 
@@ -108,3 +108,5 @@ export function ExpenseStats({ expenses }: ExpenseStatsProps) {
     </div>
   );
 }
+
+export default ExpenseStats;

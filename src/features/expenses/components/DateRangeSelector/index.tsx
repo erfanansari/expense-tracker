@@ -9,7 +9,7 @@ interface DateRangeSelectorProps {
   onChange: (range: DateRange) => void;
 }
 
-export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
+const DateRangeSelector = ({ value, onChange }: DateRangeSelectorProps) => {
   const options: { value: DateRange; label: string; labelFa: string }[] = [
     { value: '7D', label: '7 Days', labelFa: '۷ روز' },
     { value: '30D', label: '30 Days', labelFa: '۳۰ روز' },
@@ -121,3 +121,5 @@ export function getChartGranularity(range: DateRange): 'daily' | 'weekly' | 'mon
     return 'monthly';
   }
 }
+
+export default DateRangeSelector;

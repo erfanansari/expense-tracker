@@ -11,7 +11,6 @@ import {
   Settings,
   Zap,
   Bell,
-  User,
   LogOut,
   ChevronUp
 } from 'lucide-react';

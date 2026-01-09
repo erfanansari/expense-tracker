@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import { LogOut, ChevronUp, User } from 'lucide-react';
 
-export function UserMenu() {
+const UserMenu = () => {
   const { user, logout, loading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -180,3 +180,5 @@ export function MobileUserMenu() {
     </div>
   );
 }
+
+export default UserMenu;
