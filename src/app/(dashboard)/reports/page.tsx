@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import DashboardLayout from '@components/DashboardLayout';
 import { ExpenseCharts } from '@features/expenses/components/ExpenseCharts';
 import Loading from '@components/Loading';
 import DateRangeSelector, { type DateRange, filterExpensesByDateRange, getChartGranularity } from '@features/expenses/components/DateRangeSelector';
@@ -39,8 +38,7 @@ export default function ReportsPage() {
   }, [dateRange]);
 
   return (
-    <DashboardLayout>
-      <div className="min-h-screen bg-[#ffffff]">
+    <div className="min-h-screen bg-[#ffffff]">
         <div className="max-w-[1600px] mx-auto px-6 py-8">
           {/* Page Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
@@ -98,7 +96,6 @@ export default function ReportsPage() {
           )}
         </div>
       </div>
-    </DashboardLayout>
   );
 }
 

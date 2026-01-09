@@ -1,12 +1,10 @@
 'use client';
 
-import DashboardLayout from '@components/DashboardLayout';
 import { User, Bell, Lock, Globe, Palette, Database, HelpCircle } from 'lucide-react';
 
 export default function SettingsPage() {
   return (
-    <DashboardLayout>
-      <div className="min-h-screen bg-[#ffffff]">
+    <div className="min-h-screen bg-[#ffffff]">
         <div className="max-w-[1600px] mx-auto px-6 py-8">
           {/* Page Header */}
           <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8">
@@ -229,6 +227,5 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
   );
 }

@@ -114,7 +114,7 @@ Passwords stored as: `salt:hash` (hex-encoded)
 5. Creates user with hashed password
 6. Automatically creates session and logs user in
 7. Sets HTTP-only session cookie
-8. Redirects to dashboard
+8. Redirects to overview
 
 #### Login
 1. User enters email and password
@@ -122,7 +122,7 @@ Passwords stored as: `salt:hash` (hex-encoded)
 3. Verifies password against stored hash
 4. Creates new session
 5. Sets HTTP-only session cookie
-6. Redirects to dashboard
+6. Redirects to overview
 
 #### Forgot Password
 1. User enters email
@@ -167,7 +167,7 @@ npm run dev
 ### 3. Test flow
 1. Go to `http://localhost:3000` - redirects to login
 2. Click "Sign up" and create account
-3. Should be logged in and see dashboard
+3. Should be logged in and see overview
 4. Click user menu and select logout
 5. Should redirect to login
 6. Test login with credentials

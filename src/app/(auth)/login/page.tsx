@@ -29,7 +29,7 @@ export default function LoginPage() {
       }
 
       // Use hard navigation to ensure middleware runs with new cookie
-      window.location.href = '/dashboard';
+      window.location.href = '/overview';
     } catch (err) {
       setError('An error occurred. Please try again.');
       console.error(err);

@@ -11,7 +11,7 @@ A beautiful, bilingual expense tracker built with Next.js. Track your personal e
 - 🌍 **Bilingual Interface** - Full support for English and Persian (Farsi)
 - 📱 **Responsive Design** - Works perfectly on mobile and desktop
 - ✏️ **Full CRUD Operations** - Add, edit, and delete expenses with ease
-- 📈 **Statistics Dashboard** - Total expenses, transaction count, and average daily spending
+- 📈 **Statistics Overview** - Total expenses, transaction count, and average daily spending
 
 ## Tech Stack
 

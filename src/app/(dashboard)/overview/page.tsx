@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import DashboardLayout from '@components/DashboardLayout';
 import DateRangeSelector, { type DateRange, filterExpensesByDateRange } from '@features/expenses/components/DateRangeSelector';
 import type { Expense } from '@types';
 import { TrendingUp, TrendingDown, DollarSign, Hash, BarChart3, Plus,  Minus, Lightbulb } from 'lucide-react';
@@ -189,13 +188,12 @@ export default function DashboardPage() {
   }, [filteredExpenses]);
 
   return (
-    <DashboardLayout>
-      <div className="min-h-screen bg-white overflow-x-hidden relative">
+    <div className="min-h-screen bg-white overflow-x-hidden relative">
         <div className="max-w-[1600px] mx-auto px-6 py-8">
           {/* Page Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
             <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#171717]">Dashboard</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#171717]">Overview</h1>
               <p className="text-xs sm:text-sm text-[#a3a3a3] mt-1">Welcome back! Here's your financial overview.</p>
             </div>
             <div className="flex flex-row items-center gap-2 sm:gap-3">
@@ -294,7 +292,7 @@ export default function DashboardPage() {
 
           </div>
 
-          {/* Insights Dashboard */}
+          {/* Insights Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mb-6 sm:mb-8">
             {/* Top 3 Categories */}
             <div className="relative bg-white rounded-xl p-5 sm:p-6 border border-[#e5e5e5] min-w-0 shadow-sm hover:shadow-md transition-all duration-200">
@@ -705,7 +703,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
   );
 }
 

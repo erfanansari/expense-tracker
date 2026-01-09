@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import DashboardLayout from '@components/DashboardLayout';
 import Loading from '@components/Loading';
 import { Trash2, Edit, Tag, Plus, Loader2, FileText } from 'lucide-react';
 import { type Expense } from '@types';
@@ -120,8 +119,7 @@ export default function TransactionsPage() {
   }, [fetchExpenses]);
 
   return (
-    <DashboardLayout>
-      <div className="min-h-screen bg-[#ffffff]">
+    <div className="min-h-screen bg-[#ffffff]">
         <div className="max-w-[1600px] mx-auto px-6 py-8">
           {/* Page Header */}
           <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8">
@@ -311,7 +309,6 @@ export default function TransactionsPage() {
           )}
         </div>
       </div>
-    </DashboardLayout>
   );
 }
 

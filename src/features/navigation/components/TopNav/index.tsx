@@ -11,7 +11,7 @@ import { useAuth } from '@/features/auth/hooks/use-auth';
 import type { NavItem } from './@types';
 
 const navItems: NavItem[] = [
-  { href: '/dashboard', label: 'Dashboard' },
+  { href: '/overview', label: 'Overview' },
   { href: '/transactions', label: 'Transactions' },
   { href: '/reports', label: 'Reports' },
   { href: '/assets', label: 'Assets' },
@@ -73,12 +73,12 @@ const TopNav: FC = () => {
                   </div>
                   <div className="py-1">
                     <Link
-                      href="/dashboard"
+                      href="/overview"
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#525252] hover:bg-[#f5f5f5] hover:text-[#171717] transition-colors"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       <LayoutDashboard className="h-4 w-4" />
-                      Dashboard
+                      Overview
                     </Link>
                     <Link
                       href="/settings"

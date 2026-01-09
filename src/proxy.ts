@@ -42,7 +42,7 @@ export default async function middleware(request: NextRequest) {
   // Handle root path
   if (pathname === '/') {
     if (isAuthenticated) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      return NextResponse.redirect(new URL('/overview', request.url));
     } else {
       return NextResponse.redirect(new URL('/login', request.url));
     }
@@ -50,7 +50,7 @@ export default async function middleware(request: NextRequest) {
 
   // Redirect authenticated users away from auth pages
   if ((authConfig.routes.auth as readonly string[]).includes(pathname) && isAuthenticated) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(new URL('/overview', request.url));
   }
 
   // Public pages can be accessed without auth
