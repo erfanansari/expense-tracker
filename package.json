@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@libsql/client": "^0.15.15",
+    "@persian-tools/persian-tools": "^4.0.4",
     "@vercel/analytics": "^1.6.1",
     "date-fns": "^4.1.0",
     "jose": "^6.1.3",
