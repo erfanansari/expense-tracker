@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
+import { numberToWords } from '@persian-tools/persian-tools';
 import { Calendar, ChevronDown, DollarSign, FileText, Layers, Loader2, Plus, Save, X } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
 import { tomanToUsd, usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
 
 import Button from '@components/Button';
+import Tooltip from '@components/Tooltip';
 
 import { type CreateExpenseInput, type Tag } from '@/@types/expense';
 import { EXPENSE_CATEGORIES } from '@/constants';
@@ -78,6 +80,11 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
       }
     }
   }, [editingExpense]);
+
+  const numberToPersianWord = useMemo(
+    () => (formData.price_toman > 0 ? `${numberToWords(formData.price_toman)} تومان` : ''),
+    [formData.price_toman]
+  );
 
   const handleTomanChange = (value: number) => {
     setFormData({
@@ -299,16 +306,18 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
               <span className="font-bold text-[#10b981]">T</span>
               Price (Toman) / مبلغ (تومان)
             </label>
-            <input
-              type="number"
-              placeholder="60000"
-              required
-              min="0"
-              step="1"
-              value={formData.price_toman || ''}
-              onChange={(e) => handleTomanChange(parseFloat(e.target.value) || 0)}
-              className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#10b981] focus:outline-none"
-            />
+            <Tooltip content={numberToPersianWord} position="top">
+              <input
+                type="number"
+                placeholder="60000"
+                required
+                min="0"
+                step="1"
+                value={formData.price_toman || ''}
+                onChange={(e) => handleTomanChange(parseFloat(e.target.value) || 0)}
+                className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#10b981] focus:outline-none"
+              />
+            </Tooltip>
           </div>
 
           {/* USD */}
