@@ -5,10 +5,16 @@ import type { ReactElement, ReactNode } from 'react';
 
 import { twMerge } from 'tailwind-merge';
 
+interface ChildProps {
+  onFocus?: (e: React.FocusEvent<HTMLElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLElement>) => void;
+  'aria-describedby'?: string;
+}
+
 interface TooltipProps {
   content: string | ReactNode;
   position?: 'top' | 'bottom' | 'left' | 'right';
-  children: ReactElement;
+  children: ReactElement<ChildProps>;
   className?: string;
 }
 
@@ -39,26 +45,22 @@ const Tooltip = ({ content, position = 'top', children, className }: TooltipProp
       'right-full top-1/2 -translate-y-1/2 border-t-[6px] border-b-[6px] border-r-[6px] border-t-transparent border-b-transparent border-r-[#171717]',
   };
 
+  // Extract original handlers from children props
+  const originalOnFocus = children.props.onFocus;
+  const originalOnBlur = children.props.onBlur;
+
   // Clone the child element and add event handlers
   const childWithHandlers = cloneElement(children, {
-    onFocus: (e: React.FocusEvent<HTMLInputElement>) => {
+    onFocus: (e: React.FocusEvent<HTMLElement>) => {
       setIsFocused(true);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((children.props as any).onFocus) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (children.props as any).onFocus(e);
-      }
+      originalOnFocus?.(e);
     },
-    onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
+    onBlur: (e: React.FocusEvent<HTMLElement>) => {
       setIsFocused(false);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((children.props as any).onBlur) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (children.props as any).onBlur(e);
-      }
+      originalOnBlur?.(e);
     },
     'aria-describedby': hasContent ? 'toman-tooltip' : undefined,
-  } as Partial<React.HTMLAttributes<HTMLElement>>);
+  });
 
   return (
     <div
