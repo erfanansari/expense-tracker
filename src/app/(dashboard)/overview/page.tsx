@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { BarChart3, DollarSign, Hash, Lightbulb, Minus, Plus, TrendingDown, TrendingUp } from 'lucide-react';
+import { BarChart3, DollarSign, Hash, Info, Lightbulb, Minus, Plus, TrendingDown, TrendingUp } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
 import type { Expense } from '@types';
@@ -13,15 +13,23 @@ import DateRangeSelector, {
 } from '@features/expenses/components/DateRangeSelector';
 
 import { getButtonClasses } from '@components/Button';
+import Tooltip from '@components/Tooltip';
 
 import { formatNumber, getCategoryLabel } from '@utils';
 
 // Exchange Rate Card Component
+interface ExchangeRateData {
+  usd?: { value: string; change: number };
+  _meta?: {
+    fetchedAt: string;
+    freshness?: 'fresh' | 'cached' | 'stale';
+    source?: 'navasan' | 'cached' | 'fallback';
+    usage?: { monthly: number; remaining: number; limit: number };
+  };
+}
+
 function ExchangeRateCard() {
-  const [rateData, setRateData] = useState<{
-    usd?: { value: string; change: number };
-    _meta?: { fetchedAt: string };
-  } | null>(null);
+  const [rateData, setRateData] = useState<ExchangeRateData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -61,18 +69,71 @@ function ExchangeRateCard() {
   const { value, change } = rateData.usd;
   const rate = parseInt(value, 10);
   const isZero = change === 0;
+  const freshness = rateData._meta?.freshness || 'cached';
+  const usage = rateData._meta?.usage;
 
+  // Format with date + time
   const lastUpdate = rateData._meta?.fetchedAt
-    ? (() => {
-        const date = new Date(rateData._meta.fetchedAt);
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        const displayHours = hours % 12 || 12;
-        const displayMinutes = minutes.toString().padStart(2, '0');
-        return `${displayHours}:${displayMinutes} ${ampm}`;
-      })()
+    ? new Date(rateData._meta.fetchedAt).toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
     : '';
+
+  const freshnessStyles = {
+    fresh: 'bg-[#ecfdf5] text-[#10b981] border-[#10b981]/20',
+    cached: 'bg-[#fefce8] text-[#ca8a04] border-[#ca8a04]/20',
+    stale: 'bg-[#fef2f2] text-[#ef4444] border-[#ef4444]/20',
+  };
+
+  const freshnessLabels = {
+    fresh: 'Live',
+    cached: 'Cached',
+    stale: 'Old',
+  };
+
+  const sourceLabels = {
+    navasan: 'Navasan API',
+    cached: 'Database',
+    fallback: 'Fallback',
+  };
+
+  const tooltipContent = (
+    <div className="space-y-2 text-xs">
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-zinc-400">Status</span>
+        <span
+          className={twMerge(
+            'font-medium',
+            freshness === 'fresh' ? 'text-green-400' : freshness === 'cached' ? 'text-yellow-400' : 'text-red-400'
+          )}
+        >
+          {freshnessLabels[freshness]}
+        </span>
+      </div>
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-zinc-400">Source</span>
+        <span className="font-medium text-zinc-200">{sourceLabels[rateData._meta?.source || 'cached']}</span>
+      </div>
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-zinc-400">Updated</span>
+        <span className="font-medium text-zinc-200">{lastUpdate}</span>
+      </div>
+      {usage && (
+        <>
+          <div className="my-1.5 border-t border-zinc-700" />
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-zinc-400">API Remaining</span>
+            <span className={twMerge('font-medium', usage.remaining < 10 ? 'text-red-400' : 'text-zinc-200')}>
+              {usage.remaining}/{usage.limit}
+            </span>
+          </div>
+        </>
+      )}
+    </div>
+  );
 
   return (
     <div className="relative min-w-0 rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
@@ -112,7 +173,21 @@ function ExchangeRateCard() {
         <p className="text-2xl font-semibold text-[#171717] tabular-nums sm:text-3xl">
           {formatNumber(rate)} <span className="text-lg text-[#a3a3a3]">تومان</span>
         </p>
-        {lastUpdate && <p className="mt-1.5 text-sm font-medium text-[#525252]">Updated at {lastUpdate}</p>}
+        <div className="flex items-center justify-between gap-2">
+          {lastUpdate && <span className="mt-1.5 text-sm font-medium text-[#525252]">Updated {lastUpdate}</span>}
+          <div className="flex items-center gap-x-2">
+            <span
+              className={twMerge('rounded border px-1.5 py-0.5 text-[10px] font-medium', freshnessStyles[freshness])}
+            >
+              {freshnessLabels[freshness]}
+            </span>
+            <Tooltip content={tooltipContent} position="left">
+              <span className="text-[#a3a3a3] transition-colors hover:text-[#525252]">
+                <Info className="h-3.5 w-3.5" />
+              </span>
+            </Tooltip>
+          </div>
+        </div>
       </div>
     </div>
   );
