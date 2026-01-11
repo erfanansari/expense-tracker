@@ -5,6 +5,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+import Button from '@/components/Button';
+
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,83 +44,81 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 px-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-2xl">
-        <h1 className="mb-2 text-center text-3xl font-bold text-gray-900">Create account</h1>
-        <p className="mb-6 text-center text-gray-600">Join Kharji today</p>
+    <>
+      <h1 className="mb-2 text-center text-2xl font-bold text-[var(--foreground)]">Create account</h1>
+      <p className="mb-6 text-center text-[var(--foreground-secondary)]">Start tracking your expenses today</p>
 
-        {error && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
-        )}
+      {error && (
+        <div className="mb-4 rounded-lg border border-[var(--accent-error)] bg-[var(--accent-error-muted)] p-4 text-sm text-[var(--accent-error)]">
+          {error}
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label htmlFor="email" className="mb-2 block text-sm font-semibold text-gray-800">
-              Email Address
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="you@example.com"
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              disabled={loading}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="mb-2 block text-sm font-semibold text-gray-800">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              disabled={loading}
-            />
-            <p className="mt-2 text-xs text-gray-600">At least 8 characters, 1 uppercase, 1 lowercase, 1 number</p>
-          </div>
-
-          <div>
-            <label htmlFor="passwordConfirm" className="mb-2 block text-sm font-semibold text-gray-800">
-              Confirm password
-            </label>
-            <input
-              id="passwordConfirm"
-              type="password"
-              value={passwordConfirm}
-              onChange={(e) => setPasswordConfirm(e.target.value)}
-              required
-              placeholder="••••••••"
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              disabled={loading}
-            />
-          </div>
-
-          <button
-            type="submit"
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label htmlFor="email" className="mb-2 block text-sm font-medium text-[var(--foreground)]">
+            Email Address
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            placeholder="you@example.com"
+            className="w-full rounded-lg border border-[var(--border-default)] bg-white px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
             disabled={loading}
-            className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition-colors duration-200 hover:bg-blue-700 disabled:bg-gray-400"
-          >
-            {loading ? 'Creating account...' : 'Create account'}
-          </button>
-        </form>
+          />
+        </div>
 
-        <div className="mt-6 text-center text-sm">
-          <p className="text-gray-600">
-            Already have an account?{' '}
-            <Link href="/login" className="font-medium text-blue-600 hover:text-blue-700">
-              Log in here
-            </Link>
+        <div>
+          <label htmlFor="password" className="mb-2 block text-sm font-medium text-[var(--foreground)]">
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            placeholder="Create a password"
+            className="w-full rounded-lg border border-[var(--border-default)] bg-white px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
+            disabled={loading}
+          />
+          <p className="mt-2 text-xs text-[var(--foreground-muted)]">
+            At least 8 characters, 1 uppercase, 1 lowercase, 1 number
           </p>
         </div>
+
+        <div>
+          <label htmlFor="passwordConfirm" className="mb-2 block text-sm font-medium text-[var(--foreground)]">
+            Confirm password
+          </label>
+          <input
+            id="passwordConfirm"
+            type="password"
+            value={passwordConfirm}
+            onChange={(e) => setPasswordConfirm(e.target.value)}
+            required
+            placeholder="Confirm your password"
+            className="w-full rounded-lg border border-[var(--border-default)] bg-white px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
+            disabled={loading}
+          />
+        </div>
+
+        <Button type="submit" disabled={loading} className="w-full py-3">
+          {loading ? 'Creating account...' : 'Create account'}
+        </Button>
+      </form>
+
+      <div className="mt-6 text-center text-sm">
+        <p className="text-[var(--foreground-secondary)]">
+          Already have an account?{' '}
+          <Link href="/login" className="font-medium text-[var(--accent-blue)] hover:text-[var(--accent-blue-hover)]">
+            Log in here
+          </Link>
+        </p>
       </div>
-    </div>
+    </>
   );
 }

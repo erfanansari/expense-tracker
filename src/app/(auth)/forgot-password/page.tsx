@@ -4,6 +4,8 @@ import { useState } from 'react';
 
 import Link from 'next/link';
 
+import Button from '@/components/Button';
+
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -41,57 +43,53 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 px-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-2xl">
-        <h1 className="mb-2 text-center text-3xl font-bold text-gray-900">Reset your password</h1>
-        <p className="mb-6 text-center text-gray-600">
-          Enter your email and we&apos;ll send you a link to reset your password.
-        </p>
+    <>
+      <h1 className="mb-2 text-center text-2xl font-bold text-[var(--foreground)]">Reset your password</h1>
+      <p className="mb-6 text-center text-[var(--foreground-secondary)]">
+        Enter your email and we&apos;ll send you a link to reset your password.
+      </p>
 
-        {error && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
-        )}
-
-        {message && (
-          <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-            {message}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label htmlFor="email" className="mb-2 block text-sm font-semibold text-gray-800">
-              Email Address
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="you@example.com"
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              disabled={loading}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition-colors duration-200 hover:bg-blue-700 disabled:bg-gray-400"
-          >
-            {loading ? 'Sending...' : 'Send reset link'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center text-sm">
-          <p className="text-gray-600">
-            <Link href="/login" className="font-medium text-blue-600 hover:text-blue-700">
-              Back to login
-            </Link>
-          </p>
+      {error && (
+        <div className="mb-4 rounded-lg border border-[var(--accent-error)] bg-[var(--accent-error-muted)] p-4 text-sm text-[var(--accent-error)]">
+          {error}
         </div>
+      )}
+
+      {message && (
+        <div className="mb-4 rounded-lg border border-[var(--accent-success)] bg-[var(--accent-success-muted)] p-4 text-sm text-[var(--accent-success)]">
+          {message}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label htmlFor="email" className="mb-2 block text-sm font-medium text-[var(--foreground)]">
+            Email Address
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            placeholder="you@example.com"
+            className="w-full rounded-lg border border-[var(--border-default)] bg-white px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
+            disabled={loading}
+          />
+        </div>
+
+        <Button type="submit" disabled={loading} className="w-full py-3">
+          {loading ? 'Sending...' : 'Send reset link'}
+        </Button>
+      </form>
+
+      <div className="mt-6 text-center text-sm">
+        <p className="text-[var(--foreground-secondary)]">
+          <Link href="/login" className="font-medium text-[var(--accent-blue)] hover:text-[var(--accent-blue-hover)]">
+            Back to login
+          </Link>
+        </p>
       </div>
-    </div>
+    </>
   );
 }

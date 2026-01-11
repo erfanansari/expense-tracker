@@ -23,6 +23,11 @@
   --accent-primary-hover: #7c3aed;
   --accent-primary-muted: #f5f3ff;
 
+  /* Accent Colors - Blue (Vercel) */
+  --accent-blue: #0070f3;
+  --accent-blue-hover: #0060d0;
+  --accent-blue-muted: #eef6ff;
+
   /* Semantic Colors */
   --accent-success: #10b981;
   --accent-success-muted: #ecfdf5;

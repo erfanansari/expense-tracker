@@ -9,6 +9,8 @@ import { usePathname } from 'next/navigation';
 import { ChevronDown, LayoutDashboard, LogOut, Settings, Zap } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
+import { ROUTES } from '@constants';
+
 import { useAuth } from '@/features/auth/hooks/use-auth';
 
 import type { NavItem } from './@types';
@@ -43,12 +45,12 @@ const TopNav: FC = () => {
         {/* Top row - Logo and actions */}
         <div className="flex items-center justify-between px-6 py-3">
           {/* Logo */}
-          <div className="flex items-center gap-2.5">
+          <Link href={ROUTES.OVERVIEW} className="flex items-center gap-2.5">
             <div className="rounded-md bg-[#000000] p-2">
               <Zap className="h-4 w-4 text-white" />
             </div>
             <span className="text-base font-semibold text-[#171717]">Kharji</span>
-          </div>
+          </Link>
 
           {/* Right side - user menu */}
           <div className="flex items-center gap-3">

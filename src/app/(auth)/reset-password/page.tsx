@@ -5,6 +5,9 @@ import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+import Button from '@/components/Button';
+import Loading from '@/components/Loading';
+
 function ResetPasswordContent() {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
@@ -56,97 +59,90 @@ function ResetPasswordContent() {
 
   if (!tokenValid) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 px-4">
-        <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-2xl">
-          <h1 className="mb-4 text-center text-3xl font-bold text-gray-900">Invalid reset link</h1>
-          <p className="mb-6 text-center text-gray-600">
-            This password reset link is invalid or has expired. Please request a new one.
-          </p>
-          <Link
-            href="/forgot-password"
-            className="block w-full rounded-lg bg-blue-600 py-3 text-center font-semibold text-white hover:bg-blue-700"
-          >
-            Request new reset link
-          </Link>
-        </div>
-      </div>
+      <>
+        <h1 className="mb-4 text-center text-2xl font-bold text-[var(--foreground)]">Invalid reset link</h1>
+        <p className="mb-6 text-center text-[var(--foreground-secondary)]">
+          This password reset link is invalid or has expired. Please request a new one.
+        </p>
+        <Link href="/forgot-password">
+          <Button className="w-full py-3">Request new reset link</Button>
+        </Link>
+      </>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 px-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-2xl">
-        <h1 className="mb-2 text-center text-3xl font-bold text-gray-900">Reset your password</h1>
-        <p className="mb-6 text-center text-gray-600">Create a new password below</p>
+    <>
+      <h1 className="mb-2 text-center text-2xl font-bold text-[var(--foreground)]">Reset your password</h1>
+      <p className="mb-6 text-center text-[var(--foreground-secondary)]">Create a new password below</p>
 
-        {error && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
-        )}
+      {error && (
+        <div className="mb-4 rounded-lg border border-[var(--accent-error)] bg-[var(--accent-error-muted)] p-4 text-sm text-[var(--accent-error)]">
+          {error}
+        </div>
+      )}
 
-        {message && (
-          <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-            {message}
-          </div>
-        )}
+      {message && (
+        <div className="mb-4 rounded-lg border border-[var(--accent-success)] bg-[var(--accent-success-muted)] p-4 text-sm text-[var(--accent-success)]">
+          {message}
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label htmlFor="password" className="mb-2 block text-sm font-semibold text-gray-800">
-              New password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              disabled={loading}
-            />
-            <p className="mt-2 text-xs text-gray-600">At least 8 characters, 1 uppercase, 1 lowercase, 1 number</p>
-          </div>
-
-          <div>
-            <label htmlFor="passwordConfirm" className="mb-2 block text-sm font-semibold text-gray-800">
-              Confirm password
-            </label>
-            <input
-              id="passwordConfirm"
-              type="password"
-              value={passwordConfirm}
-              onChange={(e) => setPasswordConfirm(e.target.value)}
-              required
-              placeholder="••••••••"
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              disabled={loading}
-            />
-          </div>
-
-          <button
-            type="submit"
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label htmlFor="password" className="mb-2 block text-sm font-medium text-[var(--foreground)]">
+            New password
+          </label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            placeholder="Create a new password"
+            className="w-full rounded-lg border border-[var(--border-default)] bg-white px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
             disabled={loading}
-            className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition-colors duration-200 hover:bg-blue-700 disabled:bg-gray-400"
-          >
-            {loading ? 'Resetting...' : 'Reset password'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center text-sm">
-          <p className="text-gray-600">
-            <Link href="/login" className="font-medium text-blue-600 hover:text-blue-700">
-              Back to login
-            </Link>
+          />
+          <p className="mt-2 text-xs text-[var(--foreground-muted)]">
+            At least 8 characters, 1 uppercase, 1 lowercase, 1 number
           </p>
         </div>
+
+        <div>
+          <label htmlFor="passwordConfirm" className="mb-2 block text-sm font-medium text-[var(--foreground)]">
+            Confirm password
+          </label>
+          <input
+            id="passwordConfirm"
+            type="password"
+            value={passwordConfirm}
+            onChange={(e) => setPasswordConfirm(e.target.value)}
+            required
+            placeholder="Confirm your new password"
+            className="w-full rounded-lg border border-[var(--border-default)] bg-white px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
+            disabled={loading}
+          />
+        </div>
+
+        <Button type="submit" disabled={loading} className="w-full py-3">
+          {loading ? 'Resetting...' : 'Reset password'}
+        </Button>
+      </form>
+
+      <div className="mt-6 text-center text-sm">
+        <p className="text-[var(--foreground-secondary)]">
+          <Link href="/login" className="font-medium text-[var(--accent-blue)] hover:text-[var(--accent-blue-hover)]">
+            Back to login
+          </Link>
+        </p>
       </div>
-    </div>
+    </>
   );
 }
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<Loading message="Loading..." />}>
       <ResetPasswordContent />
     </Suspense>
   );
