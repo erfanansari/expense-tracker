@@ -12,7 +12,7 @@ const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days in seconds
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, passwordConfirm } = body;
+    const { name, email, password, passwordConfirm } = body;
 
     // Validation
     if (!email || !password || !passwordConfirm) {
@@ -48,8 +48,8 @@ export async function POST(request: NextRequest) {
 
     // Create user
     const result = await db.execute({
-      sql: 'INSERT INTO users (email, password_hash) VALUES (?, ?)',
-      args: [normalizedEmail, passwordHash],
+      sql: 'INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)',
+      args: [normalizedEmail, passwordHash, name || null],
     });
 
     const userId = Number(result.lastInsertRowid);

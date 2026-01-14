@@ -2,9 +2,7 @@
 
 import { useState } from 'react';
 
-import Link from 'next/link';
-
-import Button from '@/components/Button';
+import { Loader2 } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -44,27 +42,23 @@ export default function ForgotPasswordPage() {
 
   return (
     <>
-      <h1 className="mb-2 text-center text-2xl font-bold text-[var(--foreground)]">Reset your password</h1>
-      <p className="mb-6 text-center text-[var(--foreground-secondary)]">
+      <h1 className="mb-2 text-center text-xl font-bold text-[#171717]">Reset Password</h1>
+      <p className="mb-6 text-center text-sm text-[#6b7280]">
         Enter your email and we&apos;ll send you a link to reset your password.
       </p>
 
       {error && (
-        <div className="mb-4 rounded-lg border border-[var(--accent-error)] bg-[var(--accent-error-muted)] p-4 text-sm text-[var(--accent-error)]">
-          {error}
-        </div>
+        <div className="mb-4 rounded-lg border border-[#ef4444] bg-[#fef2f2] p-3 text-sm text-[#ef4444]">{error}</div>
       )}
 
       {message && (
-        <div className="mb-4 rounded-lg border border-[var(--accent-success)] bg-[var(--accent-success-muted)] p-4 text-sm text-[var(--accent-success)]">
-          {message}
-        </div>
+        <div className="mb-4 rounded-lg border border-[#10b981] bg-[#ecfdf5] p-3 text-sm text-[#10b981]">{message}</div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="mb-2 block text-sm font-medium text-[var(--foreground)]">
-            Email Address
+          <label htmlFor="email" className="mb-2 block text-sm font-medium text-[#171717]">
+            Email
           </label>
           <input
             id="email"
@@ -73,23 +67,26 @@ export default function ForgotPasswordPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
             placeholder="you@example.com"
-            className="w-full rounded-lg border border-[var(--border-default)] bg-white px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
+            className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] placeholder:text-[#a3a3a3] focus:border-[#171717] focus:outline-none"
             disabled={loading}
           />
         </div>
 
-        <Button type="submit" disabled={loading} className="w-full py-3">
-          {loading ? 'Sending...' : 'Send reset link'}
-        </Button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#171717] px-4 py-3 font-medium text-white transition-colors hover:bg-[#404040] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Sending...
+            </>
+          ) : (
+            'Send Reset Link'
+          )}
+        </button>
       </form>
-
-      <div className="mt-6 text-center text-sm">
-        <p className="text-[var(--foreground-secondary)]">
-          <Link href="/login" className="font-medium text-[var(--accent-blue)] hover:text-[var(--accent-blue-hover)]">
-            Back to login
-          </Link>
-        </p>
-      </div>
     </>
   );
 }

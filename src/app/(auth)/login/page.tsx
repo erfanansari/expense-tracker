@@ -4,11 +4,12 @@ import { useState } from 'react';
 
 import Link from 'next/link';
 
-import Button from '@/components/Button';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +32,33 @@ export default function LoginPage() {
         return;
       }
 
-      // Use hard navigation to ensure middleware runs with new cookie
+      window.location.href = '/overview';
+    } catch (err) {
+      setError('An error occurred. Please try again.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDemoLogin() {
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'demo@kharji.app', password: 'demo123' }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Demo login failed');
+        return;
+      }
+
       window.location.href = '/overview';
     } catch (err) {
       setError('An error occurred. Please try again.');
@@ -43,19 +70,17 @@ export default function LoginPage() {
 
   return (
     <>
-      <h1 className="mb-2 text-center text-2xl font-bold text-[var(--foreground)]">Log in</h1>
-      <p className="mb-6 text-center text-[var(--foreground-secondary)]">Welcome back to Kharji</p>
+      <h1 className="mb-2 text-center text-xl font-bold text-[#171717]">Welcome Back</h1>
+      <p className="mb-6 text-center text-sm text-[#6b7280]">Sign in to your account to continue</p>
 
       {error && (
-        <div className="mb-4 rounded-lg border border-[var(--accent-error)] bg-[var(--accent-error-muted)] p-4 text-sm text-[var(--accent-error)]">
-          {error}
-        </div>
+        <div className="mb-4 rounded-lg border border-[#ef4444] bg-[#fef2f2] p-3 text-sm text-[#ef4444]">{error}</div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="mb-2 block text-sm font-medium text-[var(--foreground)]">
-            Email Address
+          <label htmlFor="email" className="mb-2 block text-sm font-medium text-[#171717]">
+            Email
           </label>
           <input
             id="email"
@@ -63,49 +88,77 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            placeholder="you@example.com"
-            className="w-full rounded-lg border border-[var(--border-default)] bg-white px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
+            placeholder="test@example.com"
+            className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] placeholder:text-[#a3a3a3] focus:border-[#171717] focus:outline-none"
             disabled={loading}
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="mb-2 block text-sm font-medium text-[var(--foreground)]">
+          <label htmlFor="password" className="mb-2 block text-sm font-medium text-[#171717]">
             Password
           </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            placeholder="Enter your password"
-            className="w-full rounded-lg border border-[var(--border-default)] bg-white px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
-            disabled={loading}
-          />
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Enter your password"
+              className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 pr-12 text-[#171717] placeholder:text-[#a3a3a3] focus:border-[#171717] focus:outline-none"
+              disabled={loading}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute top-1/2 right-3 -translate-y-1/2 text-[#a3a3a3] hover:text-[#525252]"
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
 
-        <Button type="submit" disabled={loading} className="w-full py-3">
-          {loading ? 'Logging in...' : 'Log in'}
-        </Button>
+        <div className="flex justify-end">
+          <Link href="/forgot-password" className="text-sm font-medium text-[#171717] hover:underline">
+            Forgot password?
+          </Link>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#171717] px-4 py-3 font-medium text-white transition-colors hover:bg-[#404040] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Signing in...
+            </>
+          ) : (
+            'Sign In'
+          )}
+        </button>
       </form>
 
-      <div className="mt-6 space-y-3 text-center text-sm">
-        <p>
-          <Link
-            href="/forgot-password"
-            className="font-medium text-[var(--accent-blue)] hover:text-[var(--accent-blue-hover)]"
-          >
-            Forgot your password?
-          </Link>
-        </p>
-        <p className="text-[var(--foreground-secondary)]">
-          New to Kharji?{' '}
-          <Link href="/signup" className="font-medium text-[var(--accent-blue)] hover:text-[var(--accent-blue-hover)]">
-            Create an account
-          </Link>
-        </p>
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-[#e5e5e5]" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-[#a3a3a3]">OR</span>
+        </div>
       </div>
+
+      <button
+        type="button"
+        onClick={handleDemoLogin}
+        disabled={loading}
+        className="flex w-full items-center justify-center gap-2 rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 font-medium text-[#171717] transition-colors hover:bg-[#fafafa] disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        Continue with Demo Account
+      </button>
     </>
   );
 }
