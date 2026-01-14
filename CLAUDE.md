@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an expense tracker application built with Next.js 16, using the App Router architecture. The stack includes:
+This is a personal finance tracker application built with Next.js 16, using the App Router architecture. The stack includes:
 
 - **Framework**: Next.js 16.0.10 (React 19.2.3)
 - **Language**: TypeScript with strict mode enabled
@@ -12,6 +12,7 @@ This is an expense tracker application built with Next.js 16, using the App Rout
 - **Styling**: Tailwind CSS v4 (using new PostCSS plugin architecture)
 - **Package Manager**: pnpm 10.24.0
 - **Fonts**: Geist Sans and Geist Mono (via next/font)
+- **Charts**: Recharts for data visualization
 
 ## Development Commands
 
@@ -36,118 +37,255 @@ pnpm migrate       # Run database migration
 pnpm db:test       # Test database connection and verify tables
 ```
 
+## Application Features
+
+### Core Features
+
+- **Expenses**: Track daily expenses with categories, descriptions, and dual currency (USD/Toman)
+- **Income**: Track monthly income by type (salary, freelance, investment, gift, other)
+- **Assets**: Track wealth portfolio across 7 categories (cash, crypto, commodity, vehicle, property, bank, investment)
+- **Dashboard**: Overview with financial summaries, income vs expenses charts, asset distribution
+- **Reports**: Spending analysis with charts and heatmaps
+- **Exchange Rate**: Live USD/Toman exchange rate integration
+
+### Asset Categories
+
+Assets are organized into 7 simple categories. Users provide custom names for their assets:
+
+- `cash` - Cash holdings
+- `crypto` - Cryptocurrency (BTC, ETH, etc.)
+- `commodity` - Gold, silver, etc.
+- `vehicle` - Cars, motorcycles, etc.
+- `property` - Real estate
+- `bank` - Bank accounts
+- `investment` - Stocks, bonds, etc.
+
+### Income Types
+
+- `salary` - Regular employment income
+- `freelance` - Contract/freelance work
+- `investment` - Investment returns
+- `gift` - Gifts received
+- `other` - Other income sources
+
 ## Project Structure
 
 ```
-expense-tracker/
-├── app/
-│   ├── api/
-│   │   └── expenses/
-│   │       └── route.ts    # GET and POST endpoints for expenses
-│   ├── layout.tsx          # Root layout with font configuration
-│   ├── page.tsx            # Home page with expense form and list
-│   └── globals.css         # Global Tailwind styles
-├── components/
-│   ├── expense-form.tsx    # Client component for adding expenses
-│   └── expense-list.tsx    # Client component for displaying expenses
-├── lib/
-│   ├── db/
-│   │   ├── client.ts       # Turso database client singleton
-│   │   ├── schema.sql      # Database schema definition
-│   │   ├── migrate.ts      # Migration script
-│   │   └── test-connection.ts  # Database connection test utility
-│   └── types/
-│       └── expense.ts      # TypeScript interfaces for Expense
-├── public/                 # Static assets
-├── .env.local             # Environment variables (Turso credentials)
-└── tsconfig.json          # TypeScript configuration
+kharji/
+├── src/
+│   ├── @types/              # TypeScript type definitions
+│   │   ├── asset.ts         # Asset, AssetCategory types
+│   │   ├── income.ts        # Income, IncomeType types
+│   │   └── index.ts         # Shared types
+│   ├── app/
+│   │   ├── (dashboard)/     # Dashboard route group
+│   │   │   ├── income/      # Income tracking page
+│   │   │   └── overview/    # Dashboard overview
+│   │   ├── api/             # API routes
+│   │   │   ├── assets/      # Asset CRUD endpoints
+│   │   │   ├── incomes/     # Income CRUD endpoints
+│   │   │   ├── expenses/    # Expense CRUD endpoints
+│   │   │   └── summary/     # Financial summary endpoint
+│   │   ├── assets/          # Assets page
+│   │   ├── reports/         # Reports page
+│   │   └── transactions/    # Transactions page
+│   ├── components/          # Shared UI components
+│   ├── constants/           # Centralized constants
+│   │   ├── assets.ts        # ASSET_CATEGORIES, getAssetCategoryLabel()
+│   │   └── income.ts        # INCOME_TYPES, MONTHS, helper functions
+│   ├── core/
+│   │   └── database/
+│   │       ├── client.ts    # Turso database client
+│   │       └── migrations/  # SQL migration files
+│   ├── features/            # Feature-specific components
+│   │   ├── assets/
+│   │   └── income/
+│   └── utils/               # Utility functions
 ```
 
-## Application Features
+## Code Standards
 
-This is a minimal expense tracker with the following functionality:
+### Database Schema - Use camelCase
 
-- Add new expenses with date, category, description, price in Toman, and price in USD
-- View all expenses in a sortable table (sorted by date descending)
-- Form validation for all required fields
-- Real-time UI updates after adding expenses
-- Dark mode support
+All database field names MUST use camelCase (not snake_case):
 
-### Database Schema
+```sql
+-- CORRECT
+CREATE TABLE incomes (
+  id INTEGER PRIMARY KEY,
+  userId INTEGER NOT NULL,
+  amountUsd REAL NOT NULL,
+  amountToman REAL NOT NULL,
+  exchangeRateUsed REAL NOT NULL,
+  incomeType TEXT NOT NULL,
+  createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+);
 
-The `expenses` table has the following structure:
+-- WRONG (don't use snake_case)
+CREATE TABLE incomes (
+  user_id INTEGER,
+  amount_usd REAL,
+  created_at TEXT
+);
+```
 
-- `id`: INTEGER PRIMARY KEY AUTOINCREMENT
-- `date`: TEXT (ISO format date)
-- `category`: TEXT (e.g., Food, Transport, Entertainment)
-- `description`: TEXT (expense details)
-- `price_toman`: REAL (price in Iranian Toman)
-- `price_usd`: REAL (price in US Dollars)
-- `created_at`: TEXT (timestamp, default CURRENT_TIMESTAMP)
+### DRY - Don't Repeat Yourself
 
-An index on the `date` column is created for faster date-based queries.
+**Always use centralized constants** - never duplicate category/type definitions:
 
-### API Routes
+```typescript
+// CORRECT - Import from constants
+import { ASSET_CATEGORIES } from '@/constants/assets';
+import { INCOME_TYPES } from '@/constants/income';
 
-- `GET /api/expenses`: Fetch all expenses (sorted by date DESC)
-- `POST /api/expenses`: Create a new expense
-  - Request body: `{ date, category, description, price_toman, price_usd }`
-  - Validates all required fields and data types
-  - Returns 201 on success, 400 on validation error, 500 on server error
+const validCategories = ASSET_CATEGORIES.map((c) => c.value);
 
-## Configuration Details
+// WRONG - Don't hardcode arrays
+const validCategories = ['cash', 'crypto', 'commodity']; // Never do this!
+```
 
-### TypeScript Configuration
+Constants files:
+
+- `src/constants/assets.ts` - `ASSET_CATEGORIES`, `getAssetCategoryLabel()`
+- `src/constants/income.ts` - `INCOME_TYPES`, `MONTHS`, `getIncomeTypeLabel()`, `getMonthLabel()`
+
+### UI/UX - Table Alignment
+
+Tables MUST use fixed layout with percentage widths for proper column alignment:
+
+```tsx
+<table className="w-full table-fixed border-collapse">
+  <thead>
+    <tr>
+      <th className="w-[35%] ...">Column 1</th>
+      <th className="w-[25%] ...">Column 2</th>
+      <th className="w-[25%] ...">Column 3</th>
+      <th className="w-[15%] ...">Actions</th>
+    </tr>
+  </thead>
+</table>
+```
+
+### Styling with Tailwind
+
+- Use Tailwind utility classes directly
+- Prefer Tailwind classes over inline styles
+- Use consistent color palette: `#171717` (text), `#525252` (muted), `#a3a3a3` (subtle), `#0070f3` (primary), `#10b981` (success), `#ef4444` (error)
+
+## API Routes
+
+### Expenses
+
+- `GET /api/expenses` - List expenses with optional date filters
+- `POST /api/expenses` - Create expense
+- `GET /api/expenses/[id]` - Get single expense
+- `PUT /api/expenses/[id]` - Update expense
+- `DELETE /api/expenses/[id]` - Delete expense
+
+### Incomes
+
+- `GET /api/incomes` - List incomes with optional year/month filters
+- `POST /api/incomes` - Create income entry
+- `GET /api/incomes/[id]` - Get single income
+- `PUT /api/incomes/[id]` - Update income
+- `DELETE /api/incomes/[id]` - Delete income
+
+### Assets
+
+- `GET /api/assets` - List all assets (optionally filter by category)
+- `POST /api/assets` - Create asset (also creates initial valuation snapshot)
+- `GET /api/assets/[id]` - Get asset with valuation history
+- `PUT /api/assets/[id]` - Update asset (creates valuation snapshot if value changed)
+- `DELETE /api/assets/[id]` - Delete asset and valuations
+
+### Summary
+
+- `GET /api/summary` - Financial overview (current month income/expenses, total assets, net worth, charts data)
+
+## Database Schema
+
+### incomes table
+
+```sql
+CREATE TABLE incomes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  userId INTEGER NOT NULL,
+  amountUsd REAL NOT NULL,
+  amountToman REAL NOT NULL,
+  exchangeRateUsed REAL NOT NULL,
+  month INTEGER NOT NULL,
+  year INTEGER NOT NULL,
+  incomeType TEXT NOT NULL,
+  source TEXT,
+  notes TEXT,
+  createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+  updatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### assets table
+
+```sql
+CREATE TABLE assets (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  userId INTEGER NOT NULL,
+  category TEXT NOT NULL,
+  name TEXT NOT NULL,
+  quantity REAL NOT NULL DEFAULT 1,
+  unit TEXT,
+  unitValueUsd REAL,
+  totalValueUsd REAL NOT NULL,
+  totalValueToman REAL NOT NULL,
+  exchangeRateUsed REAL NOT NULL,
+  notes TEXT,
+  lastValuedAt TEXT NOT NULL,
+  createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+  updatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### assetValuations table
+
+```sql
+CREATE TABLE assetValuations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  assetId INTEGER NOT NULL,
+  quantity REAL NOT NULL,
+  unitValueUsd REAL,
+  totalValueUsd REAL NOT NULL,
+  totalValueToman REAL NOT NULL,
+  exchangeRateUsed REAL NOT NULL,
+  valuedAt TEXT NOT NULL,
+  createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+## Configuration
+
+### TypeScript
 
 - Target: ES2017
 - Strict mode: enabled
-- Module resolution: bundler (Next.js optimized)
-- Path alias: `@/*` maps to project root
-- JSX: react-jsx
+- Path alias: `@/*` maps to `src/*`
 
 ### Database (Turso/libSQL)
 
-Database credentials are stored in `.env.local`:
+Environment variables in `.env.local`:
 
-- `TURSO_DATABASE_URL`: Connection URL to Turso database
+- `TURSO_DATABASE_URL`: Connection URL
 - `TURSO_AUTH_TOKEN`: Authentication token
-
-**Database Setup:**
-
-1. Ensure `.env.local` contains valid Turso credentials
-2. Run `pnpm migrate` to create the expenses table
-3. Use `pnpm db:test` to verify the database connection and table setup
-4. The database client is initialized in `lib/db/client.ts` and reused across the application
-
-### Tailwind CSS v4
-
-This project uses Tailwind CSS v4 with the new PostCSS plugin (`@tailwindcss/postcss`). Configuration is in `postcss.config.mjs`.
 
 ### ESLint
 
-Uses Next.js ESLint config with TypeScript support:
-
 - `eslint-config-next/core-web-vitals`
 - `eslint-config-next/typescript`
-- Ignores: `.next/`, `out/`, `build/`, `next-env.d.ts`
-
-## Architecture Notes
-
-### App Router (Next.js 16)
-
-This project uses the App Router (not Pages Router). All routes are defined in the `app/` directory using file-system based routing.
-
-### Font Loading
-
-Custom fonts (Geist Sans and Geist Mono) are loaded via `next/font/google` in `app/layout.tsx` and applied using CSS variables (`--font-geist-sans`, `--font-geist-mono`).
-
-### Styling Approach
-
-Tailwind CSS utility classes are used directly in components. Dark mode support is implemented via Tailwind's `dark:` variant.
 
 ## Important Conventions
 
-- Always use `pnpm` for package management (enforced via `packageManager` field)
-- Follow Next.js 16 App Router conventions (Server Components by default)
-- Environment variables for Turso database must be present in `.env.local`
-- TypeScript strict mode is enabled - all code must pass type checking
+- Always use `pnpm` for package management
+- Follow Next.js 16 App Router conventions
+- TypeScript strict mode - all code must pass type checking
+- Database fields use camelCase
+- Reuse constants from `src/constants/` - never hardcode categories/types
+- Tables use `table-fixed` with percentage widths for alignment
+- Bilingual support: English labels with Persian (Farsi) translations
