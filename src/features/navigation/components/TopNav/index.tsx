@@ -18,6 +18,7 @@ import type { NavItem } from './@types';
 const navItems: NavItem[] = [
   { href: '/overview', label: 'Overview' },
   { href: '/transactions', label: 'Transactions' },
+  { href: '/income', label: 'Income' },
   { href: '/reports', label: 'Reports' },
   { href: '/assets', label: 'Assets' },
   { href: '/settings', label: 'Settings' },
