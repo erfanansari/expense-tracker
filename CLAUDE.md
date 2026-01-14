@@ -78,6 +78,11 @@ kharji/
 │   │   ├── income.ts        # Income, IncomeType types
 │   │   └── index.ts         # Shared types
 │   ├── app/
+│   │   ├── (auth)/          # Auth route group
+│   │   │   ├── login/       # Login page
+│   │   │   ├── signup/      # Signup page
+│   │   │   ├── forgot-password/  # Forgot password page
+│   │   │   └── layout.tsx   # Shared auth layout
 │   │   ├── (dashboard)/     # Dashboard route group
 │   │   │   ├── income/      # Income tracking page
 │   │   │   └── overview/    # Dashboard overview
@@ -166,11 +171,45 @@ Tables MUST use fixed layout with percentage widths for proper column alignment:
 </table>
 ```
 
+### UI/UX - Auth Pages Design
+
+Auth pages (login, signup, forgot-password) follow a consistent design:
+
+- **Logo**: Zap icon in black box (`bg-[#171717]`) with "Kharji" text side by side
+- **Subtitle**: "Personal Finance Tracker" in muted gray
+- **Card**: White background with subtle border and shadow
+- **Inputs**: Rounded corners, `border-[#e5e5e5]`, focus state `border-[#171717]`
+- **Password fields**: Include eye icon toggle for show/hide
+- **Primary buttons**: Black background (`bg-[#171717]`), white text
+- **Secondary buttons**: White with border (outlined style)
+- **Links**: Use `text-[#171717]` with `font-semibold` for dark links, `text-[#6b7280]` for muted text
+- **Footer links**: Placed outside the card (e.g., "Don't have an account? Sign up")
+
+```tsx
+// Logo pattern
+<div className="flex items-center gap-2">
+  <div className="rounded-md bg-[#171717] p-2">
+    <Zap className="h-5 w-5 text-white" />
+  </div>
+  <span className="text-xl font-bold text-[#171717]">Kharji</span>
+</div>
+
+// Black button
+<button className="w-full rounded-lg bg-[#171717] px-4 py-3 font-medium text-white hover:bg-[#404040]">
+  Sign In
+</button>
+
+// Outlined button
+<button className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 font-medium text-[#171717] hover:bg-[#fafafa]">
+  Continue with Demo
+</button>
+```
+
 ### Styling with Tailwind
 
 - Use Tailwind utility classes directly
 - Prefer Tailwind classes over inline styles
-- Use consistent color palette: `#171717` (text), `#525252` (muted), `#a3a3a3` (subtle), `#0070f3` (primary), `#10b981` (success), `#ef4444` (error)
+- Use consistent color palette: `#171717` (text/primary), `#525252` (muted), `#a3a3a3` (subtle), `#6b7280` (gray text), `#0070f3` (blue links), `#10b981` (success), `#ef4444` (error)
 
 ## API Routes
 
@@ -203,6 +242,19 @@ Tables MUST use fixed layout with percentage widths for proper column alignment:
 - `GET /api/summary` - Financial overview (current month income/expenses, total assets, net worth, charts data)
 
 ## Database Schema
+
+### users table
+
+```sql
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  name TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+```
 
 ### incomes table
 
