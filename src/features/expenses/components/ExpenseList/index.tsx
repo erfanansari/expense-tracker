@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Edit, FileText, Tag, Trash2 } from 'lucide-react';
 
 import { type Expense } from '@/@types/expense';
+import TransactionDetailsModal from '@/features/expenses/components/TransactionDetailsModal';
 import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@/utils';
 
 interface ExpenseListProps {
@@ -23,8 +24,20 @@ const ExpenseList = ({ refreshTrigger, onDelete, onEdit }: ExpenseListProps) => 
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
   const isLoadingRef = useRef(false);
+
+  const handleRowClick = (expense: Expense) => {
+    setSelectedExpense(expense);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedExpense(null);
+  };
 
   const fetchExpenses = useCallback(async (cursor: string | null = null, isInitial = false) => {
     // Prevent duplicate requests
@@ -205,7 +218,11 @@ const ExpenseList = ({ refreshTrigger, onDelete, onEdit }: ExpenseListProps) => 
                   const farsiDate = formatToFarsiDate(expense.date);
 
                   return (
-                    <tr key={expense.id} className="group transition-colors hover:bg-[#1a1a28]/50">
+                    <tr
+                      key={expense.id}
+                      onClick={() => handleRowClick(expense)}
+                      className="group cursor-pointer transition-colors hover:bg-[#1a1a28]/50"
+                    >
                       <td className="px-3 py-3 text-sm font-medium text-white sm:px-4 sm:py-4">
                         <div className="flex flex-col gap-1.5">
                           <span>{expense.description}</span>
@@ -258,14 +275,20 @@ const ExpenseList = ({ refreshTrigger, onDelete, onEdit }: ExpenseListProps) => 
                       <td className="px-3 py-3 sm:px-4 sm:py-4">
                         <div className="flex items-center justify-center gap-2">
                           <button
-                            onClick={() => onEdit(expense)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEdit(expense);
+                            }}
                             className="rounded-lg p-2 text-cyan-400 transition-all duration-200 hover:bg-cyan-500/10 hover:text-cyan-300"
                             title="Edit"
                           >
                             <Edit className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => handleDelete(expense.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(expense.id);
+                            }}
                             disabled={deletingId === expense.id}
                             className="rounded-lg p-2 text-rose-400 transition-all duration-200 hover:bg-rose-500/10 hover:text-rose-300 disabled:opacity-50"
                             title="Delete"
@@ -293,6 +316,9 @@ const ExpenseList = ({ refreshTrigger, onDelete, onEdit }: ExpenseListProps) => 
           </div>
         </>
       )}
+
+      {/* Transaction Details Modal */}
+      <TransactionDetailsModal expense={selectedExpense} isOpen={isModalOpen} onClose={handleCloseModal} />
     </div>
   );
 };

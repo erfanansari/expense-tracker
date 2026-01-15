@@ -7,6 +7,7 @@ import { Edit, FileText, Loader2, Plus, Tag, Trash2, X } from 'lucide-react';
 import { type Expense } from '@types';
 
 import ExpenseForm from '@features/expenses/components/ExpenseForm';
+import TransactionDetailsModal from '@features/expenses/components/TransactionDetailsModal';
 
 import Button from '@components/Button';
 import Loading from '@components/Loading';
@@ -25,7 +26,19 @@ export default function TransactionsPage() {
   const [hasMore, setHasMore] = useState(true);
   const [editingExpense, setEditingExpense] = useState<Expense | undefined>(undefined);
   const [showForm, setShowForm] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const isLoadingRef = useRef(false);
+
+  const handleRowClick = (expense: Expense) => {
+    setSelectedExpense(expense);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedExpense(null);
+  };
 
   const fetchExpenses = useCallback(async (cursor: string | null = null, isInitial = false) => {
     if (isLoadingRef.current) {
@@ -221,7 +234,8 @@ export default function TransactionsPage() {
                         return (
                           <tr
                             key={expense.id}
-                            className="group border-t border-[#e5e5e5] transition-colors duration-200 first:border-t-0 hover:bg-[#f5f5f5]"
+                            onClick={() => handleRowClick(expense)}
+                            className="group cursor-pointer border-t border-[#e5e5e5] transition-colors duration-200 first:border-t-0 hover:bg-[#f5f5f5]"
                             style={{ animationDelay: `${index * 20}ms` }}
                           >
                             <td className="px-6 py-4">
@@ -269,14 +283,20 @@ export default function TransactionsPage() {
                             <td className="px-6 py-4">
                               <div className="flex items-center justify-center gap-1">
                                 <button
-                                  onClick={() => handleEdit(expense)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEdit(expense);
+                                  }}
                                   className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#0070f3]/10 hover:text-[#0070f3]"
                                   title="Edit"
                                 >
                                   <Edit className="h-4 w-4" />
                                 </button>
                                 <button
-                                  onClick={() => handleDelete(expense.id)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(expense.id);
+                                  }}
                                   disabled={deletingId === expense.id}
                                   className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#ef4444]/10 hover:text-[#ef4444] disabled:opacity-50"
                                   title="Delete"
@@ -323,6 +343,9 @@ export default function TransactionsPage() {
             </>
           );
         })()}
+
+        {/* Transaction Details Modal */}
+        <TransactionDetailsModal expense={selectedExpense} isOpen={isModalOpen} onClose={handleCloseModal} />
       </div>
     </div>
   );
