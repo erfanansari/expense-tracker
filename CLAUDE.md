@@ -47,6 +47,7 @@ pnpm db:test       # Test database connection and verify tables
 - **Dashboard**: Overview with financial summaries, income vs expenses charts, asset distribution
 - **Reports**: Spending analysis with charts and heatmaps
 - **Exchange Rate**: Live USD/Toman exchange rate integration
+- **Transaction Details Modal**: Click any transaction row to view full details in a modal popup
 
 ### Asset Categories
 
@@ -95,6 +96,10 @@ kharji/
 │   │   ├── reports/         # Reports page
 │   │   └── transactions/    # Transactions page
 │   ├── components/          # Shared UI components
+│   │   ├── Button/          # Button with variants (primary, outline, danger)
+│   │   ├── Modal/           # Reusable modal/dialog component
+│   │   ├── Tooltip/         # Hover tooltip component
+│   │   └── Loading/         # Loading spinner component
 │   ├── constants/           # Centralized constants
 │   │   ├── assets.ts        # ASSET_CATEGORIES, getAssetCategoryLabel()
 │   │   └── income.ts        # INCOME_TYPES, MONTHS, helper functions
@@ -104,6 +109,12 @@ kharji/
 │   │       └── migrations/  # SQL migration files
 │   ├── features/            # Feature-specific components
 │   │   ├── assets/
+│   │   ├── expenses/
+│   │   │   └── components/
+│   │   │       ├── ExpenseForm/            # Add/edit expense form
+│   │   │       ├── ExpenseList/            # Transaction list with infinite scroll
+│   │   │       ├── TransactionDetailsModal/ # Modal for viewing transaction details
+│   │   │       └── TagInput/               # Tag selector/creator
 │   │   └── income/
 │   └── utils/               # Utility functions
 ```
@@ -205,11 +216,101 @@ Auth pages (login, signup, forgot-password) follow a consistent design:
 </button>
 ```
 
+### UI/UX - Modal Component
+
+Use the reusable Modal component (`src/components/Modal/`) for dialogs and popups:
+
+```tsx
+import Modal from '@/components/Modal';
+
+<Modal
+  isOpen={isOpen}
+  onClose={handleClose}
+  title="Modal Title"
+  titleFa="عنوان فارسی" // Optional Farsi subtitle
+>
+  {/* Modal content */}
+</Modal>;
+```
+
+**Modal features:**
+
+- Light theme with white background, `#fafafa` header
+- ESC key to close
+- Click outside (backdrop) to close
+- Focus management (auto-focuses modal on open)
+- Body scroll lock when open
+- Responsive padding (smaller on mobile)
+
+**Creating detail modals (like TransactionDetailsModal):**
+
+- Use a `DetailRow` pattern for consistent item layout
+- Icon box on left with border and subtle background
+- Label (English + Farsi) above the value
+- Use dividers (`border-t border-[#e5e5e5]`) to group related items
+- Handle long text with `break-words`
+
+```tsx
+// DetailRow pattern
+<div className="flex items-start gap-3 sm:gap-4">
+  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#e5e5e5] bg-[#fafafa]">
+    <Icon className="h-4 w-4 text-[#525252]" />
+  </div>
+  <div className="min-w-0 flex-1">
+    <div className="flex items-center gap-2">
+      <span className="text-xs font-medium text-[#a3a3a3]">Label</span>
+      <span className="text-xs text-[#a3a3a3]" dir="rtl">
+        برچسب
+      </span>
+    </div>
+    <div className="mt-1 text-sm font-medium text-[#171717]">{value}</div>
+  </div>
+</div>
+```
+
+### UI/UX - Accessibility
+
+Follow these accessibility patterns:
+
+- **Modals**: Use `role="dialog"`, `aria-modal="true"`, `aria-labelledby` for title
+- **Decorative icons**: Add `aria-hidden="true"` to icons that don't convey meaning
+- **Close buttons**: Include `aria-label="Close modal"`
+- **Focus states**: Use visible focus rings (`focus:ring-2 focus:ring-[#171717] focus:ring-offset-2 focus:outline-none`)
+- **Semantic HTML**: Use `<time>` with `dateTime` attribute, `role="separator"` for dividers
+- **Keyboard navigation**: Support ESC to close modals, Tab for focus navigation
+
+### UI/UX - Mobile Responsiveness
+
+Use responsive Tailwind classes for mobile-first design:
+
+- **Padding**: `px-4 py-3 sm:px-6 sm:py-4` (smaller on mobile)
+- **Gaps**: `gap-3 sm:gap-4` or `gap-5 sm:gap-6`
+- **Text sizes**: `text-base sm:text-lg` for headings
+- **Icon sizes**: `h-9 w-9 sm:h-10 sm:w-10`
+- **Flex wrapping**: `flex-wrap` with `gap-x-2 gap-y-1` for bilingual text
+
+```tsx
+// Responsive pattern example
+<div className="px-4 py-4 sm:px-6 sm:py-5">
+  <h2 className="text-base font-semibold sm:text-lg">Title</h2>
+</div>
+```
+
 ### Styling with Tailwind
 
 - Use Tailwind utility classes directly
 - Prefer Tailwind classes over inline styles
-- Use consistent color palette: `#171717` (text/primary), `#525252` (muted), `#a3a3a3` (subtle), `#6b7280` (gray text), `#0070f3` (blue links), `#10b981` (success), `#ef4444` (error)
+- Use consistent color palette:
+  - `#171717` - Primary text, black buttons
+  - `#525252` - Muted text, secondary content
+  - `#a3a3a3` - Subtle text, labels
+  - `#6b7280` - Gray text
+  - `#e5e5e5` - Borders, dividers
+  - `#fafafa` - Light backgrounds (headers, icon boxes)
+  - `#f5f5f5` - Hover states, tag backgrounds
+  - `#0070f3` - Blue links, primary actions
+  - `#10b981` - Success states
+  - `#ef4444` - Error states, danger actions
 
 ## API Routes
 
