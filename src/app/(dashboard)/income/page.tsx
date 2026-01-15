@@ -244,22 +244,22 @@ export default function IncomePage() {
                   <h2 className="mb-4 text-lg font-semibold text-[#171717]">{year}</h2>
                   <div className="relative overflow-hidden rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
                     <div className="overflow-x-auto">
-                      <table className="w-full table-fixed border-collapse">
+                      <table className="w-full min-w-[600px] border-collapse">
                         <thead>
                           <tr className="bg-[#fafafa]">
-                            <th className="w-[20%] px-6 py-4 text-left text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase">
+                            <th className="min-w-[100px] px-4 py-3 text-left text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
                               Month
                             </th>
-                            <th className="w-[20%] px-6 py-4 text-left text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase">
+                            <th className="min-w-[100px] px-4 py-3 text-left text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
                               Type
                             </th>
-                            <th className="w-[25%] px-6 py-4 text-left text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase">
+                            <th className="min-w-[120px] px-4 py-3 text-left text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
                               Source
                             </th>
-                            <th className="w-[22%] px-6 py-4 text-right text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase">
+                            <th className="min-w-[130px] px-4 py-3 text-right text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
                               Amount
                             </th>
-                            <th className="w-[13%] px-6 py-4 text-center text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase">
+                            <th className="min-w-[80px] px-4 py-3 text-center text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
                               Actions
                             </th>
                           </tr>
@@ -276,7 +276,7 @@ export default function IncomePage() {
                                   key={income.id}
                                   className="group border-t border-[#e5e5e5] transition-colors duration-200 first:border-t-0 hover:bg-[#f5f5f5]"
                                 >
-                                  <td className="px-6 py-4">
+                                  <td className="px-4 py-3 sm:px-6 sm:py-4">
                                     <div className="flex flex-col">
                                       <span className="text-sm font-medium text-[#171717]">{monthLabels.en}</span>
                                       <span className="text-xs text-[#a3a3a3]" dir="rtl">
@@ -284,7 +284,7 @@ export default function IncomePage() {
                                       </span>
                                     </div>
                                   </td>
-                                  <td className="px-6 py-4">
+                                  <td className="px-4 py-3 sm:px-6 sm:py-4">
                                     <div className="flex flex-col">
                                       <span className="text-sm font-medium text-[#171717]">{typeLabels.en}</span>
                                       <span className="text-xs text-[#a3a3a3]" dir="rtl">
@@ -292,10 +292,10 @@ export default function IncomePage() {
                                       </span>
                                     </div>
                                   </td>
-                                  <td className="px-6 py-4">
+                                  <td className="px-4 py-3 sm:px-6 sm:py-4">
                                     <span className="text-sm text-[#525252]">{income.source || '-'}</span>
                                   </td>
-                                  <td className="px-6 py-4 text-right">
+                                  <td className="px-4 py-3 text-right sm:px-6 sm:py-4">
                                     <div className="flex flex-col items-end">
                                       <span className="text-sm font-semibold text-[#10b981]">
                                         ${formatNumber(income.amountUsd)} USD
@@ -305,7 +305,7 @@ export default function IncomePage() {
                                       </span>
                                     </div>
                                   </td>
-                                  <td className="px-6 py-4">
+                                  <td className="px-4 py-3 sm:px-6 sm:py-4">
                                     <div className="flex items-center justify-center gap-1">
                                       <button
                                         onClick={() => handleEdit(income)}

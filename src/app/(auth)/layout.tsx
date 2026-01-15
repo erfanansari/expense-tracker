@@ -32,11 +32,11 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         </div>
 
         {/* Auth Card */}
-        <div className="rounded-xl border border-[#e5e5e5] bg-white p-8 shadow-sm">{children}</div>
+        <div className="rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm sm:p-8">{children}</div>
 
         {/* Footer Link */}
         {isLogin && (
-          <p className="mt-6 text-center text-sm text-[#6b7280]">
+          <p className="mt-4 text-center text-sm text-[#6b7280] sm:mt-6">
             Don&apos;t have an account?{' '}
             <Link href="/signup" className="font-semibold text-[#171717] hover:underline">
               Sign up
@@ -44,7 +44,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           </p>
         )}
         {isSignup && (
-          <p className="mt-6 text-center text-sm text-[#6b7280]">
+          <p className="mt-4 text-center text-sm text-[#6b7280] sm:mt-6">
             Already have an account?{' '}
             <Link href="/login" className="font-semibold text-[#171717] hover:underline">
               Sign in
@@ -52,7 +52,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           </p>
         )}
         {isForgotPassword && (
-          <p className="mt-6 text-center text-sm text-[#6b7280]">
+          <p className="mt-4 text-center text-sm text-[#6b7280] sm:mt-6">
             <Link href="/login" className="font-semibold text-[#171717] hover:underline">
               Back to login
             </Link>

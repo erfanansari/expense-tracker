@@ -304,19 +304,19 @@ export default function AssetsPage() {
                           </div>
                           <div className="relative overflow-hidden rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
                             <div className="overflow-x-auto">
-                              <table className="w-full table-fixed border-collapse">
+                              <table className="w-full min-w-[500px] border-collapse">
                                 <thead>
                                   <tr className="bg-[#fafafa]">
-                                    <th className="w-[35%] px-6 py-4 text-left text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase">
+                                    <th className="min-w-[120px] px-4 py-3 text-left text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
                                       Asset
                                     </th>
-                                    <th className="w-[25%] px-6 py-4 text-left text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase">
+                                    <th className="min-w-[100px] px-4 py-3 text-left text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
                                       Quantity
                                     </th>
-                                    <th className="w-[25%] px-6 py-4 text-right text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase">
+                                    <th className="min-w-[120px] px-4 py-3 text-right text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
                                       Value
                                     </th>
-                                    <th className="w-[15%] px-6 py-4 text-center text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase">
+                                    <th className="min-w-[80px] px-4 py-3 text-center text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
                                       Actions
                                     </th>
                                   </tr>
@@ -327,7 +327,7 @@ export default function AssetsPage() {
                                       key={asset.id}
                                       className="group border-t border-[#e5e5e5] transition-colors duration-200 first:border-t-0 hover:bg-[#f5f5f5]"
                                     >
-                                      <td className="px-6 py-4">
+                                      <td className="px-4 py-3 sm:px-6 sm:py-4">
                                         <div className="flex flex-col">
                                           <span className="text-sm font-medium text-[#171717]">{asset.name}</span>
                                           <span className="text-xs text-[#a3a3a3]">
@@ -335,12 +335,12 @@ export default function AssetsPage() {
                                           </span>
                                         </div>
                                       </td>
-                                      <td className="px-6 py-4">
+                                      <td className="px-4 py-3 sm:px-6 sm:py-4">
                                         <span className="text-sm text-[#525252]">
                                           {asset.quantity} {asset.unit || 'unit'}
                                         </span>
                                       </td>
-                                      <td className="px-6 py-4 text-right">
+                                      <td className="px-4 py-3 text-right sm:px-6 sm:py-4">
                                         <div className="flex flex-col items-end">
                                           <span className="text-sm font-semibold text-[#171717]">
                                             ${formatNumber(asset.totalValueUsd)}
@@ -350,7 +350,7 @@ export default function AssetsPage() {
                                           </span>
                                         </div>
                                       </td>
-                                      <td className="px-6 py-4">
+                                      <td className="px-4 py-3 sm:px-6 sm:py-4">
                                         <div className="flex items-center justify-center gap-1">
                                           <button
                                             onClick={() => handleEdit(asset)}
