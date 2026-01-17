@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Edit, FileText, Loader2, Plus, Tag, Trash2, X } from 'lucide-react';
+import { Edit2, FileText, Loader2, Plus, Tag, Trash2, X } from 'lucide-react';
 
 import { type Expense } from '@types';
 
@@ -290,7 +290,7 @@ export default function TransactionsPage() {
                                   className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#0070f3]/10 hover:text-[#0070f3]"
                                   title="Edit"
                                 >
-                                  <Edit className="h-4 w-4" />
+                                  <Edit2 className="h-4 w-4" />
                                 </button>
                                 <button
                                   onClick={(e) => {
@@ -298,7 +298,7 @@ export default function TransactionsPage() {
                                     handleDelete(expense.id);
                                   }}
                                   disabled={deletingId === expense.id}
-                                  className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#ef4444]/10 hover:text-[#ef4444] disabled:opacity-50"
+                                  className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#ea001d]/10 hover:text-[#ea001d] disabled:opacity-50"
                                   title="Delete"
                                 >
                                   {deletingId === expense.id ? (
