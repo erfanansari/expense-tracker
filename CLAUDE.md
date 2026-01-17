@@ -111,7 +111,8 @@ kharji/
 │   ├── components/          # Shared UI components
 │   │   ├── Button/          # Button with variants (primary, outline, danger)
 │   │   ├── Modal/           # Reusable modal/dialog component
-│   │   ├── DeleteTagModal/  # Reusable delete confirmation modal
+│   │   ├── DeleteConfirmModal/ # Generic delete confirmation modal
+│   │   ├── DeleteTagModal/  # Tag-specific delete confirmation modal
 │   │   ├── Tooltip/         # Hover tooltip component
 │   │   └── Loading/         # Loading spinner component
 │   ├── constants/           # Centralized constants
@@ -126,7 +127,6 @@ kharji/
 │   │   ├── expenses/
 │   │   │   └── components/
 │   │   │       ├── ExpenseForm/            # Add/edit expense form
-│   │   │       ├── ExpenseList/            # Transaction list with infinite scroll
 │   │   │       ├── TransactionDetailsModal/ # Modal for viewing transaction details
 │   │   │       ├── TagInput/               # Tag selector/creator with inline actions
 │   │   │       └── TagManagementList/      # Centralized tag management for Settings
@@ -410,33 +410,93 @@ All action buttons (edit, delete, save, cancel) MUST use this standardized clean
 
 ### UI/UX - Delete Confirmation Pattern
 
-For destructive actions, use `DeleteTagModal` component:
+**IMPORTANT: Never use browser `confirm()` or `alert()` dialogs.** Always use custom modal components for better UX.
+
+For general destructive actions, use the `DeleteConfirmModal` component:
+
+```tsx
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
+
+const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
+const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+const [deletingId, setDeletingId] = useState<number | null>(null);
+
+const openDeleteModal = (item: Item) => {
+  setItemToDelete(item);
+  setIsDeleteModalOpen(true);
+};
+
+const closeDeleteModal = () => {
+  setItemToDelete(null);
+  setIsDeleteModalOpen(false);
+};
+
+const confirmDelete = async () => {
+  if (!itemToDelete) return;
+
+  setDeletingId(itemToDelete.id);
+
+  try {
+    const response = await fetch(`/api/items/${itemToDelete.id}`, { method: 'DELETE' });
+    if (response.ok) {
+      setItems((prev) => prev.filter((item) => item.id !== itemToDelete.id));
+      closeDeleteModal();
+    }
+  } catch {
+    alert('Failed to delete item'); // Only use alert for error messages
+  } finally {
+    setDeletingId(null);
+  }
+};
+
+// In JSX
+<button onClick={() => openDeleteModal(item)}>
+  <Trash2 className="h-4 w-4" />
+</button>
+
+<DeleteConfirmModal
+  isOpen={isDeleteModalOpen}
+  title="Delete item"
+  message="Are you sure you want to delete this item? This action cannot be undone."
+  itemName={itemToDelete?.name}
+  onConfirm={confirmDelete}
+  onCancel={closeDeleteModal}
+  isDeleting={deletingId === itemToDelete?.id}
+/>
+```
+
+**DeleteConfirmModal Props:**
+
+- `isOpen: boolean` - Controls modal visibility
+- `title: string` - Modal title (e.g., "Delete expense")
+- `message: string` - Confirmation message explaining consequences
+- `itemName?: string` - Optional item name to show in title (e.g., "Delete expense 'Groceries'?")
+- `onConfirm: () => void` - Function to call when user confirms deletion
+- `onCancel: () => void` - Function to call when user cancels
+- `isDeleting?: boolean` - Shows loading state during deletion
+
+**For tag-specific deletions** with usage counts, use `DeleteTagModal`:
 
 ```tsx
 import DeleteTagModal from '@/components/DeleteTagModal';
 
-const [deletingItem, setDeletingItem] = useState<Item | null>(null);
-const [isDeleting, setIsDeleting] = useState(false);
-
-const confirmDelete = async () => {
-  setIsDeleting(true);
-  const response = await fetch(`/api/items/${deletingItem.id}`, { method: 'DELETE' });
-  if (response.ok) setItems((prev) => prev.filter((item) => item.id !== deletingItem.id));
-  setIsDeleting(false);
-  setDeletingItem(null);
-};
-
 <DeleteTagModal
-  isOpen={!!deletingItem}
-  tag={deletingItem}
-  usageCount={deletingItem?.usage_count || 0}
+  isOpen={!!deletingTag}
+  tag={deletingTag}
+  usageCount={deletingTag?.usage_count || 0}
   onConfirm={confirmDelete}
-  onCancel={() => setDeletingItem(null)}
+  onCancel={() => setDeletingTag(null)}
   isDeleting={isDeleting}
 />;
 ```
 
-**Guidelines:** Show usage impact, use `#ea001d` color, disable during deletion
+**Guidelines:**
+
+- Always show clear consequences of deletion in the message
+- Use `#ea001d` color for delete buttons
+- Disable modal close during deletion (prevents accidental dismissal)
+- Show loading state in confirmation button during deletion
+- Only use browser `alert()` for error messages, never for confirmations
 
 ### UI/UX - Inline Editing Pattern
 
@@ -666,6 +726,61 @@ Environment variables in `.env.local`:
 - Bilingual support: English labels with Persian (Farsi) translations
 
 ## Component Patterns
+
+### DeleteConfirmModal Component
+
+The `DeleteConfirmModal` component (`src/components/DeleteConfirmModal/`) provides a consistent, accessible way to confirm destructive actions throughout the app.
+
+**Usage Examples:**
+
+```tsx
+// Transactions page
+<DeleteConfirmModal
+  isOpen={isDeleteModalOpen}
+  title="Delete expense"
+  message="Are you sure you want to delete this expense? All associated data will be removed."
+  itemName={expenseToDelete?.description}
+  onConfirm={confirmDelete}
+  onCancel={closeDeleteModal}
+  isDeleting={deletingId === expenseToDelete?.id}
+/>
+
+// Assets page
+<DeleteConfirmModal
+  isOpen={isDeleteModalOpen}
+  title="Delete asset"
+  message="Are you sure you want to delete this asset? All valuation history will be removed."
+  itemName={assetToDelete?.name}
+  onConfirm={confirmDelete}
+  onCancel={closeDeleteModal}
+  isDeleting={deletingId === assetToDelete?.id}
+/>
+
+// Income page (with dynamic itemName)
+<DeleteConfirmModal
+  isOpen={isDeleteModalOpen}
+  title="Delete income"
+  message="Are you sure you want to delete this income entry?"
+  itemName={
+    incomeToDelete
+      ? `${getMonthLabel(incomeToDelete.month).en} ${incomeToDelete.year} - ${getIncomeTypeLabel(incomeToDelete.incomeType).en}`
+      : undefined
+  }
+  onConfirm={confirmDelete}
+  onCancel={closeDeleteModal}
+  isDeleting={deletingId === incomeToDelete?.id}
+/>
+```
+
+**Features:**
+
+- Warning icon with danger color (`#ea001d`)
+- Dynamic title with optional item name
+- Clear consequences message
+- "This action cannot be undone" warning
+- Loading state during deletion
+- Prevents close during deletion
+- Accessible keyboard support
 
 ### Button Component
 
