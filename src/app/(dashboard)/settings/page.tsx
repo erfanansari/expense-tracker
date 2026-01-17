@@ -61,60 +61,21 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Notifications */}
+          {/* Tags */}
           <div className="rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
             <div className="border-b border-[#e5e5e5] p-6">
               <div className="flex items-center gap-3">
                 <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
-                  <Bell className="h-5 w-5 text-[#525252]" />
+                  <Tag className="h-5 w-5 text-[#525252]" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#171717]">Notifications</h2>
-                  <p className="text-sm text-[#a3a3a3]">Manage your notification preferences</p>
+                  <h2 className="text-lg font-semibold text-[#171717]">Tags</h2>
+                  <p className="text-sm text-[#a3a3a3]">Manage your expense tags</p>
                 </div>
               </div>
             </div>
             <div className="p-6">
-              <div className="max-w-2xl space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-[#171717]">Email Notifications</p>
-                    <p className="mt-0.5 text-xs text-[#a3a3a3]">Receive email updates about your expenses</p>
-                  </div>
-                  <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-[#e5e5e5] transition-colors hover:bg-[#d4d4d4]">
-                    <span className="inline-block h-4 w-4 translate-x-1 transform rounded-full bg-white transition-transform" />
-                  </button>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-[#171717]">Weekly Reports</p>
-                    <p className="mt-0.5 text-xs text-[#a3a3a3]">Get weekly expense summaries</p>
-                  </div>
-                  <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-[#0070f3]">
-                    <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition-transform" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Security */}
-          <div className="rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
-            <div className="border-b border-[#e5e5e5] p-6">
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
-                  <Lock className="h-5 w-5 text-[#525252]" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-[#171717]">Security</h2>
-                  <p className="text-sm text-[#a3a3a3]">Manage your password and security settings</p>
-                </div>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="max-w-2xl">
-                <Button variant="outline">Change Password</Button>
-              </div>
+              <TagManagementList />
             </div>
           </div>
 
@@ -183,6 +144,63 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          {/* Notifications */}
+          <div className="rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
+            <div className="border-b border-[#e5e5e5] p-6">
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
+                  <Bell className="h-5 w-5 text-[#525252]" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-[#171717]">Notifications</h2>
+                  <p className="text-sm text-[#a3a3a3]">Manage your notification preferences</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="max-w-2xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-[#171717]">Email Notifications</p>
+                    <p className="mt-0.5 text-xs text-[#a3a3a3]">Receive email updates about your expenses</p>
+                  </div>
+                  <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-[#e5e5e5] transition-colors hover:bg-[#d4d4d4]">
+                    <span className="inline-block h-4 w-4 translate-x-1 transform rounded-full bg-white transition-transform" />
+                  </button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-[#171717]">Weekly Reports</p>
+                    <p className="mt-0.5 text-xs text-[#a3a3a3]">Get weekly expense summaries</p>
+                  </div>
+                  <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-[#0070f3]">
+                    <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition-transform" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Security */}
+          <div className="rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
+            <div className="border-b border-[#e5e5e5] p-6">
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
+                  <Lock className="h-5 w-5 text-[#525252]" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-[#171717]">Security</h2>
+                  <p className="text-sm text-[#a3a3a3]">Manage your password and security settings</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="max-w-2xl">
+                <Button variant="outline">Change Password</Button>
+              </div>
+            </div>
+          </div>
+
           {/* Data Management */}
           <div className="rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
             <div className="border-b border-[#e5e5e5] p-6">
@@ -201,24 +219,6 @@ export default function SettingsPage() {
                 <Button variant="outline">Export Data</Button>
                 <Button variant="danger">Delete All Data</Button>
               </div>
-            </div>
-          </div>
-
-          {/* Tags */}
-          <div className="rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
-            <div className="border-b border-[#e5e5e5] p-6">
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
-                  <Tag className="h-5 w-5 text-[#525252]" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-[#171717]">Tags</h2>
-                  <p className="text-sm text-[#a3a3a3]">Manage your expense tags</p>
-                </div>
-              </div>
-            </div>
-            <div className="p-6">
-              <TagManagementList />
             </div>
           </div>
 
