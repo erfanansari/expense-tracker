@@ -45,10 +45,10 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
         (tag) => tag.name.toLowerCase().includes(search) && !selectedTags.some((selected) => selected.id === tag.id)
       );
       setFilteredTags(filtered);
-      setShowSuggestions(true);
     } else {
-      setFilteredTags([]);
-      setShowSuggestions(false);
+      // Show all unselected tags when input is empty
+      const unselectedTags = allTags.filter((tag) => !selectedTags.some((selected) => selected.id === tag.id));
+      setFilteredTags(unselectedTags);
     }
   }, [inputValue, allTags, selectedTags]);
 
@@ -153,14 +153,14 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          onFocus={() => inputValue && setShowSuggestions(true)}
+          onFocus={() => setShowSuggestions(true)}
           placeholder={selectedTags.length === 0 ? 'Add tags...' : ''}
           className="min-w-[120px] flex-1 bg-transparent text-[#171717] outline-none placeholder:text-[#a3a3a3]"
         />
       </div>
 
       {/* Suggestions Dropdown */}
-      {showSuggestions && (inputValue.trim() || filteredTags.length > 0) && (
+      {showSuggestions && (
         <div
           ref={suggestionsRef}
           className="absolute top-full right-0 left-0 z-20 mt-2 max-h-48 overflow-y-auto rounded-lg border border-[#e5e5e5] bg-white shadow-lg"
@@ -191,7 +191,7 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
           )}
 
           {filteredTags.length === 0 && !inputValue.trim() && (
-            <div className="px-4 py-3 text-sm text-[#a3a3a3]">Start typing to search or create tags...</div>
+            <div className="px-4 py-3 text-sm text-[#a3a3a3]">No tags yet. Start typing to create one...</div>
           )}
         </div>
       )}
