@@ -10,6 +10,7 @@ import ExpenseForm from '@features/expenses/components/ExpenseForm';
 import TransactionDetailsModal from '@features/expenses/components/TransactionDetailsModal';
 
 import Button from '@components/Button';
+import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import Loading from '@components/Loading';
 
 import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@/utils';
@@ -28,6 +29,8 @@ export default function TransactionsPage() {
   const [showForm, setShowForm] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const isLoadingRef = useRef(false);
 
   const handleRowClick = (expense: Expense) => {
@@ -89,20 +92,29 @@ export default function TransactionsPage() {
     }
   }, [hasMore, nextCursor, fetchExpenses]);
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this expense?')) {
-      return;
-    }
+  const openDeleteModal = (expense: Expense) => {
+    setExpenseToDelete(expense);
+    setIsDeleteModalOpen(true);
+  };
 
-    setDeletingId(id);
+  const closeDeleteModal = () => {
+    setExpenseToDelete(null);
+    setIsDeleteModalOpen(false);
+  };
+
+  const confirmDelete = async () => {
+    if (!expenseToDelete) return;
+
+    setDeletingId(expenseToDelete.id);
 
     try {
-      const response = await fetch(`/api/expenses/${id}`, {
+      const response = await fetch(`/api/expenses/${expenseToDelete.id}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        setExpenses(expenses.filter((exp) => exp.id !== id));
+        setExpenses(expenses.filter((exp) => exp.id !== expenseToDelete.id));
+        closeDeleteModal();
       } else {
         alert('Failed to delete expense');
       }
@@ -295,7 +307,7 @@ export default function TransactionsPage() {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleDelete(expense.id);
+                                    openDeleteModal(expense);
                                   }}
                                   disabled={deletingId === expense.id}
                                   className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#ea001d]/10 hover:text-[#ea001d] disabled:opacity-50"
@@ -346,6 +358,17 @@ export default function TransactionsPage() {
 
         {/* Transaction Details Modal */}
         <TransactionDetailsModal expense={selectedExpense} isOpen={isModalOpen} onClose={handleCloseModal} />
+
+        {/* Delete Confirmation Modal */}
+        <DeleteConfirmModal
+          isOpen={isDeleteModalOpen}
+          title="Delete expense"
+          message="Are you sure you want to delete this expense? All associated data will be removed."
+          itemName={expenseToDelete?.description}
+          onConfirm={confirmDelete}
+          onCancel={closeDeleteModal}
+          isDeleting={deletingId === expenseToDelete?.id}
+        />
       </div>
     </div>
   );

@@ -25,6 +25,7 @@ import AssetForm from '@features/assets/components/AssetForm';
 
 import Button from '@components/Button';
 import DashboardLayout from '@components/DashboardLayout';
+import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import Loading from '@components/Loading';
 
 import { getAssetCategoryLabel } from '@/constants/assets';
@@ -57,6 +58,8 @@ export default function AssetsPage() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [editingAsset, setEditingAsset] = useState<Asset | undefined>(undefined);
   const [showForm, setShowForm] = useState(false);
+  const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const fetchAssets = useCallback(async () => {
     setIsLoading(true);
@@ -77,20 +80,29 @@ export default function AssetsPage() {
     }
   }, []);
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this asset?')) {
-      return;
-    }
+  const openDeleteModal = (asset: Asset) => {
+    setAssetToDelete(asset);
+    setIsDeleteModalOpen(true);
+  };
 
-    setDeletingId(id);
+  const closeDeleteModal = () => {
+    setAssetToDelete(null);
+    setIsDeleteModalOpen(false);
+  };
+
+  const confirmDelete = async () => {
+    if (!assetToDelete) return;
+
+    setDeletingId(assetToDelete.id);
 
     try {
-      const response = await fetch(`/api/assets/${id}`, {
+      const response = await fetch(`/api/assets/${assetToDelete.id}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        setAssets(assets.filter((a) => a.id !== id));
+        setAssets(assets.filter((a) => a.id !== assetToDelete.id));
+        closeDeleteModal();
       } else {
         alert('Failed to delete asset');
       }
@@ -360,9 +372,9 @@ export default function AssetsPage() {
                                             <Edit className="h-4 w-4" />
                                           </button>
                                           <button
-                                            onClick={() => handleDelete(asset.id)}
+                                            onClick={() => openDeleteModal(asset)}
                                             disabled={deletingId === asset.id}
-                                            className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#ef4444]/10 hover:text-[#ef4444] disabled:opacity-50"
+                                            className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#ea001d]/10 hover:text-[#ea001d] disabled:opacity-50"
                                             title="Delete"
                                           >
                                             {deletingId === asset.id ? (
@@ -427,6 +439,17 @@ export default function AssetsPage() {
               </div>
             );
           })()}
+
+          {/* Delete Confirmation Modal */}
+          <DeleteConfirmModal
+            isOpen={isDeleteModalOpen}
+            title="Delete asset"
+            message="Are you sure you want to delete this asset? All valuation history will be removed."
+            itemName={assetToDelete?.name}
+            onConfirm={confirmDelete}
+            onCancel={closeDeleteModal}
+            isDeleting={deletingId === assetToDelete?.id}
+          />
         </div>
       </div>
     </DashboardLayout>

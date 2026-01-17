@@ -9,6 +9,7 @@ import type { Income } from '@types';
 import IncomeForm from '@features/income/components/IncomeForm';
 
 import Button from '@components/Button';
+import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import Loading from '@components/Loading';
 
 import { getIncomeTypeLabel, getMonthLabel } from '@/constants/income';
@@ -21,6 +22,8 @@ export default function IncomePage() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [editingIncome, setEditingIncome] = useState<Income | undefined>(undefined);
   const [showForm, setShowForm] = useState(false);
+  const [incomeToDelete, setIncomeToDelete] = useState<Income | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const fetchIncomes = useCallback(async () => {
     setIsLoading(true);
@@ -41,20 +44,29 @@ export default function IncomePage() {
     }
   }, []);
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this income entry?')) {
-      return;
-    }
+  const openDeleteModal = (income: Income) => {
+    setIncomeToDelete(income);
+    setIsDeleteModalOpen(true);
+  };
 
-    setDeletingId(id);
+  const closeDeleteModal = () => {
+    setIncomeToDelete(null);
+    setIsDeleteModalOpen(false);
+  };
+
+  const confirmDelete = async () => {
+    if (!incomeToDelete) return;
+
+    setDeletingId(incomeToDelete.id);
 
     try {
-      const response = await fetch(`/api/incomes/${id}`, {
+      const response = await fetch(`/api/incomes/${incomeToDelete.id}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        setIncomes(incomes.filter((inc) => inc.id !== id));
+        setIncomes(incomes.filter((inc) => inc.id !== incomeToDelete.id));
+        closeDeleteModal();
       } else {
         alert('Failed to delete income');
       }
@@ -315,9 +327,9 @@ export default function IncomePage() {
                                         <Edit className="h-4 w-4" />
                                       </button>
                                       <button
-                                        onClick={() => handleDelete(income.id)}
+                                        onClick={() => openDeleteModal(income)}
                                         disabled={deletingId === income.id}
-                                        className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#ef4444]/10 hover:text-[#ef4444] disabled:opacity-50"
+                                        className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#ea001d]/10 hover:text-[#ea001d] disabled:opacity-50"
                                         title="Delete"
                                       >
                                         {deletingId === income.id ? (
@@ -340,6 +352,21 @@ export default function IncomePage() {
             </div>
           );
         })()}
+
+        {/* Delete Confirmation Modal */}
+        <DeleteConfirmModal
+          isOpen={isDeleteModalOpen}
+          title="Delete income"
+          message="Are you sure you want to delete this income entry?"
+          itemName={
+            incomeToDelete
+              ? `${getMonthLabel(incomeToDelete.month).en} ${incomeToDelete.year} - ${getIncomeTypeLabel(incomeToDelete.incomeType).en}`
+              : undefined
+          }
+          onConfirm={confirmDelete}
+          onCancel={closeDeleteModal}
+          isDeleting={deletingId === incomeToDelete?.id}
+        />
       </div>
     </div>
   );
