@@ -1,8 +1,10 @@
 'use client';
 
-import { Bell, Database, Globe, HelpCircle, Lock, Palette, User } from 'lucide-react';
+import { Bell, Database, Globe, HelpCircle, Lock, Palette, Tag, User } from 'lucide-react';
 
 import Button from '@components/Button';
+
+import TagManagementList from '@/features/expenses/components/TagManagementList';
 
 export default function SettingsPage() {
   return (
@@ -199,6 +201,24 @@ export default function SettingsPage() {
                 <Button variant="outline">Export Data</Button>
                 <Button variant="danger">Delete All Data</Button>
               </div>
+            </div>
+          </div>
+
+          {/* Tags */}
+          <div className="rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
+            <div className="border-b border-[#e5e5e5] p-6">
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
+                  <Tag className="h-5 w-5 text-[#525252]" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-[#171717]">Tags</h2>
+                  <p className="text-sm text-[#a3a3a3]">Manage your expense tags</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6">
+              <TagManagementList />
             </div>
           </div>
 
