@@ -4,6 +4,14 @@ export interface Tag {
   created_at: string;
 }
 
+export interface TagWithUsage extends Tag {
+  usage_count: number;
+}
+
+export interface UpdateTagInput {
+  name: string;
+}
+
 export interface Expense {
   id: number;
   date: string;

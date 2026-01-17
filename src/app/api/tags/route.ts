@@ -4,20 +4,46 @@ import { NextResponse } from 'next/server';
 import { db } from '@/core/database/client';
 import { getCurrentUser } from '@/core/session/session';
 
-// GET /api/tags - Get all tags for current user
-export async function GET() {
+// GET /api/tags - Get all tags for current user with usage counts
+export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const result = await db.execute({
-      sql: 'SELECT * FROM tags WHERE user_id = ? ORDER BY name ASC',
-      args: [user.userId],
-    });
+    // Check if usage counts are requested
+    const { searchParams } = new URL(request.url);
+    const includeUsage = searchParams.get('includeUsage') === 'true';
 
-    return NextResponse.json(result.rows);
+    if (includeUsage) {
+      // Fetch tags with usage counts in a single query
+      const result = await db.execute({
+        sql: `
+          SELECT
+            t.id,
+            t.name,
+            t.created_at,
+            COUNT(et.expense_id) as usage_count
+          FROM tags t
+          LEFT JOIN expense_tags et ON t.id = et.tag_id
+          WHERE t.user_id = ?
+          GROUP BY t.id, t.name, t.created_at
+          ORDER BY t.name ASC
+        `,
+        args: [user.userId],
+      });
+
+      return NextResponse.json(result.rows);
+    } else {
+      // Fetch tags without usage counts (faster for simple cases)
+      const result = await db.execute({
+        sql: 'SELECT id, name, created_at FROM tags WHERE user_id = ? ORDER BY name ASC',
+        args: [user.userId],
+      });
+
+      return NextResponse.json(result.rows);
+    }
   } catch (error) {
     console.error('Failed to fetch tags:', error);
     return NextResponse.json({ error: 'Failed to fetch tags' }, { status: 500 });
