@@ -374,7 +374,6 @@ The app uses a centralized theming system with semantic color tokens. Always use
 1. **NEVER use hardcoded colors** like `bg-[#171717]` or `text-[#ea001d]`
 2. **Always use theme tokens** for all color values
 3. **To add a new color:** Add it to `src/styles/globals.css` first, expose it in `@theme inline`, then use it
-4. **Migration reference:** See `docs/COLOR_MIGRATION_MAP.md` for complete mapping
 
 ### UI/UX - Icon Consistency
 
