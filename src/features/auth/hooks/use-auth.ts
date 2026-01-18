@@ -47,5 +47,9 @@ export function useAuth() {
     }
   }, [router]);
 
-  return { user, loading, error, logout, refetch: fetchUser };
+  const updateUser = useCallback((updates: Partial<User>) => {
+    setUser((prev) => (prev ? { ...prev, ...updates } : null));
+  }, []);
+
+  return { user, loading, error, logout, refetch: fetchUser, updateUser };
 }

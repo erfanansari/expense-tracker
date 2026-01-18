@@ -2,20 +2,20 @@
 
 import { useEffect, useState } from 'react';
 
-import { Bell, Database, Globe, HelpCircle, Lock, Palette, Tag, User } from 'lucide-react';
+import { Bell, Database, Globe, HelpCircle, Loader2, Lock, Palette, Tag, User } from 'lucide-react';
 
 import Button from '@components/Button';
 
 import packageJson from '@/../package.json';
+import { useToast } from '@/components/Toast/ToastProvider';
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import TagManagementList from '@/features/expenses/components/TagManagementList';
 
 export default function SettingsPage() {
-  const { user, refetch } = useAuth();
+  const { user, refetch, updateUser } = useAuth();
+  const { showToast } = useToast();
   const [name, setName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState('');
-  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Initialize name when user data is loaded
   useEffect(() => {
@@ -25,13 +25,22 @@ export default function SettingsPage() {
   }, [user]);
 
   const handleSave = async () => {
-    setSaveError('');
-    setSaveSuccess(false);
-
     if (!name.trim()) {
-      setSaveError('Name cannot be empty');
+      showToast('Name cannot be empty', 'error');
       return;
     }
+
+    // If name hasn't changed, do nothing
+    if (name.trim() === user?.name) {
+      showToast('No changes to save', 'info');
+      return;
+    }
+
+    const trimmedName = name.trim();
+    const previousName = user?.name;
+
+    // Optimistic update - update UI immediately
+    updateUser({ name: trimmedName });
 
     setIsSaving(true);
 
@@ -39,20 +48,23 @@ export default function SettingsPage() {
       const response = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim() }),
+        body: JSON.stringify({ name: trimmedName }),
       });
 
       if (!response.ok) {
         const data = await response.json();
-        setSaveError(data.error || 'Failed to update profile');
+        // Revert optimistic update on error
+        updateUser({ name: previousName });
+        showToast(data.error || 'Failed to update profile', 'error');
         return;
       }
 
-      setSaveSuccess(true);
-      await refetch(); // Refresh user data
-      setTimeout(() => setSaveSuccess(false), 3000);
+      showToast('Profile updated successfully!', 'success');
+      await refetch(); // Refresh to ensure consistency
     } catch {
-      setSaveError('Failed to update profile');
+      // Revert optimistic update on error
+      updateUser({ name: previousName });
+      showToast('Failed to update profile', 'error');
     } finally {
       setIsSaving(false);
     }
@@ -60,8 +72,6 @@ export default function SettingsPage() {
 
   const handleCancel = () => {
     setName(user?.name || '');
-    setSaveError('');
-    setSaveSuccess(false);
   };
   return (
     <div className="bg-background min-h-screen">
@@ -112,13 +122,10 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                {/* Error/Success Messages */}
-                {saveError && <p className="text-danger text-sm">{saveError}</p>}
-                {saveSuccess && <p className="text-success text-sm">Profile updated successfully!</p>}
-
                 {/* Action Buttons */}
                 <div className="flex gap-3 pt-2">
                   <Button variant="primary" onClick={handleSave} disabled={isSaving}>
+                    {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
                     {isSaving ? 'Saving...' : 'Save Changes'}
                   </Button>
                   <Button variant="outline" onClick={handleCancel} disabled={isSaving}>

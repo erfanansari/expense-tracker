@@ -854,6 +854,56 @@ import Button from '@/components/Button';
 </Button>
 ```
 
+### Toast Component
+
+The `Toast` component (`src/components/Toast/`) provides a Vercel-inspired notification system for displaying success, error, warning, and info messages to users.
+
+**Usage:**
+
+```tsx
+import { useToast } from '@/components/Toast/ToastProvider';
+
+function MyComponent() {
+  const { showToast } = useToast();
+
+  const handleAction = async () => {
+    try {
+      await someAction();
+      showToast('Action completed successfully!', 'success');
+    } catch {
+      showToast('Something went wrong', 'error');
+    }
+  };
+
+  return <button onClick={handleAction}>Do Something</button>;
+}
+```
+
+**Toast Types:**
+
+- `success` - Green toast with CheckCircle icon
+- `error` - Red toast with XCircle icon
+- `warning` - Orange toast with AlertTriangle icon
+- `info` - Blue toast with Info icon
+
+**Features:**
+
+- Auto-dismisses after 5 seconds
+- Manual close button (X icon)
+- Slide-up animation from bottom-right
+- Responsive positioning
+- Stacks multiple toasts vertically
+- Accessible keyboard support
+
+**Guidelines:**
+
+- Use `success` for completed actions (profile updated, item created)
+- Use `error` for failures (validation errors, server errors)
+- Use `warning` for non-blocking issues (deprecated features, warnings)
+- Use `info` for informational messages (no changes detected)
+- Keep messages concise (1-2 sentences max)
+- Always wrap app with `ToastProvider` in root layout
+
 ### Next.js 16 API Route Patterns
 
 In Next.js 16, route `params` are now async and must be awaited:
