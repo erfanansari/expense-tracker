@@ -1,13 +1,68 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 import { Bell, Database, Globe, HelpCircle, Lock, Palette, Tag, User } from 'lucide-react';
 
 import Button from '@components/Button';
 
 import packageJson from '@/../package.json';
+import { useAuth } from '@/features/auth/hooks/use-auth';
 import TagManagementList from '@/features/expenses/components/TagManagementList';
 
 export default function SettingsPage() {
+  const { user, refetch } = useAuth();
+  const [name, setName] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Initialize name when user data is loaded
+  useEffect(() => {
+    if (user?.name) {
+      setName(user.name);
+    }
+  }, [user]);
+
+  const handleSave = async () => {
+    setSaveError('');
+    setSaveSuccess(false);
+
+    if (!name.trim()) {
+      setSaveError('Name cannot be empty');
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim() }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        setSaveError(data.error || 'Failed to update profile');
+        return;
+      }
+
+      setSaveSuccess(true);
+      await refetch(); // Refresh user data
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch {
+      setSaveError('Failed to update profile');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setName(user?.name || '');
+    setSaveError('');
+    setSaveSuccess(false);
+  };
   return (
     <div className="bg-background min-h-screen">
       <div className="mx-auto max-w-[1600px] px-6 py-8">
@@ -36,27 +91,39 @@ export default function SettingsPage() {
             </div>
             <div className="p-6">
               <div className="grid max-w-2xl gap-4">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="text-text-secondary mb-2 block text-sm font-medium">Username</label>
-                    <input
-                      type="text"
-                      defaultValue="erfanansari"
-                      className="border-border-subtle bg-background text-text-primary focus:border-blue w-full rounded-lg border px-4 py-2.5 transition-all focus:outline-none"
-                    />
+                {/* Email - Read Only */}
+                <div>
+                  <label className="text-text-secondary mb-2 block text-sm font-medium">Email</label>
+                  <div className="border-border-subtle bg-background-secondary text-text-muted w-full rounded-lg border px-4 py-2.5">
+                    {user?.email || 'Loading...'}
                   </div>
-                  <div>
-                    <label className="text-text-secondary mb-2 block text-sm font-medium">Email</label>
-                    <input
-                      type="email"
-                      defaultValue="dev.erfanansari@gmail.com"
-                      className="border-border-subtle bg-background text-text-primary focus:border-blue w-full rounded-lg border px-4 py-2.5 transition-all focus:outline-none"
-                    />
-                  </div>
+                  <p className="text-text-muted mt-1 text-xs">Your email cannot be changed</p>
                 </div>
+
+                {/* Name - Editable */}
+                <div>
+                  <label className="text-text-secondary mb-2 block text-sm font-medium">Name</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter your name"
+                    className="border-border-subtle bg-background text-text-primary focus:border-blue w-full rounded-lg border px-4 py-2.5 transition-all focus:outline-none"
+                  />
+                </div>
+
+                {/* Error/Success Messages */}
+                {saveError && <p className="text-danger text-sm">{saveError}</p>}
+                {saveSuccess && <p className="text-success text-sm">Profile updated successfully!</p>}
+
+                {/* Action Buttons */}
                 <div className="flex gap-3 pt-2">
-                  <Button variant="primary">Save Changes</Button>
-                  <Button variant="outline">Cancel</Button>
+                  <Button variant="primary" onClick={handleSave} disabled={isSaving}>
+                    {isSaving ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                  <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
+                    Cancel
+                  </Button>
                 </div>
               </div>
             </div>

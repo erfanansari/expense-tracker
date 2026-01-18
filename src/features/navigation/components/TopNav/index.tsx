@@ -26,7 +26,7 @@ const navItems: NavItem[] = [
 
 const TopNav: FC = () => {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -63,7 +63,7 @@ const TopNav: FC = () => {
               >
                 <div className="relative">
                   <div className="bg-button-primary-bg flex h-7 w-7 items-center justify-center rounded-lg text-xs font-semibold text-white">
-                    E
+                    {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
                   </div>
                   <div className="bg-success absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border-2 border-white" />
                 </div>
@@ -79,8 +79,10 @@ const TopNav: FC = () => {
               {isUserMenuOpen && (
                 <div className="border-border-subtle bg-background absolute top-full right-0 mt-2 w-56 overflow-hidden rounded-lg border shadow-lg">
                   <div className="border-border-subtle border-b p-3">
-                    <p className="text-text-primary text-sm font-semibold">erfanansari</p>
-                    <p className="text-text-muted truncate text-xs">dev.erfanansari@gmail.com</p>
+                    <p className="text-text-primary text-sm font-semibold">
+                      {user?.name || user?.email?.split('@')[0] || 'User'}
+                    </p>
+                    <p className="text-text-muted truncate text-xs">{user?.email || ''}</p>
                   </div>
                   <div className="py-1">
                     <Link
