@@ -100,7 +100,7 @@ function ResetPasswordContent() {
             onChange={(e) => setPassword(e.target.value)}
             required
             placeholder="Create a new password"
-            className="w-full rounded-lg border border-[var(--border-default)] bg-white px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
+            className="bg-background w-full rounded-lg border border-[var(--border-default)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
             disabled={loading}
           />
           <p className="mt-2 text-xs text-[var(--foreground-muted)]">
@@ -119,7 +119,7 @@ function ResetPasswordContent() {
             onChange={(e) => setPasswordConfirm(e.target.value)}
             required
             placeholder="Confirm your new password"
-            className="w-full rounded-lg border border-[var(--border-default)] bg-white px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
+            className="bg-background w-full rounded-lg border border-[var(--border-default)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
             disabled={loading}
           />
         </div>

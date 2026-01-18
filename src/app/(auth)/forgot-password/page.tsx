@@ -42,26 +42,26 @@ export default function ForgotPasswordPage() {
 
   return (
     <>
-      <h1 className="mb-1.5 text-center text-lg font-bold text-[#171717] sm:mb-2 sm:text-xl">Reset Password</h1>
-      <p className="mb-5 text-center text-xs text-[#6b7280] sm:mb-6 sm:text-sm">
+      <h1 className="text-text-primary mb-1.5 text-center text-lg font-bold sm:mb-2 sm:text-xl">Reset Password</h1>
+      <p className="text-text-tertiary mb-5 text-center text-xs sm:mb-6 sm:text-sm">
         Enter your email and we&apos;ll send you a link to reset your password.
       </p>
 
       {error && (
-        <div className="mb-3 rounded-lg border border-[#ef4444] bg-[#fef2f2] p-2.5 text-xs text-[#ef4444] sm:mb-4 sm:p-3 sm:text-sm">
+        <div className="border-danger bg-danger-light text-danger mb-3 rounded-lg border p-2.5 text-xs sm:mb-4 sm:p-3 sm:text-sm">
           {error}
         </div>
       )}
 
       {message && (
-        <div className="mb-3 rounded-lg border border-[#10b981] bg-[#ecfdf5] p-2.5 text-xs text-[#10b981] sm:mb-4 sm:p-3 sm:text-sm">
+        <div className="border-success bg-success-light text-success mb-3 rounded-lg border p-2.5 text-xs sm:mb-4 sm:p-3 sm:text-sm">
           {message}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
         <div>
-          <label htmlFor="email" className="mb-1.5 block text-xs font-medium text-[#171717] sm:mb-2 sm:text-sm">
+          <label htmlFor="email" className="text-text-primary mb-1.5 block text-xs font-medium sm:mb-2 sm:text-sm">
             Email
           </label>
           <input
@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
             placeholder="you@example.com"
-            className="w-full rounded-lg border border-[#e5e5e5] bg-white px-3 py-2.5 text-sm text-[#171717] placeholder:text-[#a3a3a3] focus:border-[#171717] focus:outline-none sm:px-4 sm:py-3 sm:text-base"
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-primary w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none sm:px-4 sm:py-3 sm:text-base"
             disabled={loading}
           />
         </div>
@@ -79,7 +79,7 @@ export default function ForgotPasswordPage() {
         <button
           type="submit"
           disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#171717] px-3 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#404040] disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 sm:py-3 sm:text-base"
+          className="bg-primary hover:bg-button-primary-bg-hover flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 sm:py-3 sm:text-base"
         >
           {loading ? (
             <>

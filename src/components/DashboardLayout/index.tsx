@@ -8,9 +8,9 @@ import type { DashboardLayoutProps } from './@types';
 
 const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen bg-[#ffffff]">
+    <div className="bg-background min-h-screen">
       <TopNav />
-      <main className="bg-[#ffffff]">{children}</main>
+      <main className="bg-background">{children}</main>
     </div>
   );
 };

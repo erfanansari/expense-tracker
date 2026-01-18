@@ -36,65 +36,65 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
   return (
     <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-3">
       {/* Total Expenses */}
-      <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
+      <div className="border-border-subtle bg-background relative rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
         <div className="mb-4 flex items-center justify-between">
-          <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-            <TrendingUp className="h-5 w-5 text-[#0070f3]" />
+          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+            <TrendingUp className="text-blue h-5 w-5" />
           </div>
-          <div className="flex items-center gap-1 rounded-md border border-[#10b981]/20 bg-[#ecfdf5] px-2 py-1 text-xs font-medium text-[#10b981]">
+          <div className="border-success/20 bg-success-light text-success flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium">
             <ArrowUpRight className="h-3 w-3" />
             <span>12.5%</span>
           </div>
         </div>
 
         <div>
-          <p className="mb-2 text-xs font-medium tracking-wider text-[#a3a3a3] uppercase">Total Expenses</p>
-          <p className="text-2xl font-bold text-[#171717] tabular-nums sm:text-3xl" dir="rtl">
-            {formatNumber(totalToman)} <span className="text-lg text-[#a3a3a3]">تومان</span>
+          <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Expenses</p>
+          <p className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl" dir="rtl">
+            {formatNumber(totalToman)} <span className="text-text-muted text-lg">تومان</span>
           </p>
-          <p className="mt-1.5 text-sm font-medium text-[#525252]">${totalUsd.toFixed(2)} USD</p>
+          <p className="text-text-secondary mt-1.5 text-sm font-medium">${totalUsd.toFixed(2)} USD</p>
         </div>
       </div>
 
       {/* Number of Transactions */}
-      <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
+      <div className="border-border-subtle bg-background relative rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
         <div className="mb-4 flex items-center justify-between">
-          <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-            <Hash className="h-5 w-5 text-[#10b981]" />
+          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+            <Hash className="text-success h-5 w-5" />
           </div>
-          <div className="flex items-center gap-1 rounded-md border border-[#0070f3]/20 bg-[#0070f3]/10 px-2 py-1 text-xs font-medium text-[#0070f3]">
+          <div className="border-blue/20 bg-blue/10 text-blue flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium">
             <Sparkles className="h-3 w-3" />
             <span>Active</span>
           </div>
         </div>
 
         <div>
-          <p className="mb-2 text-xs font-medium tracking-wider text-[#a3a3a3] uppercase">Transactions</p>
-          <p className="text-2xl font-bold text-[#171717] tabular-nums sm:text-3xl">{expenses.length}</p>
-          <p className="mt-1.5 text-sm font-medium text-[#525252]" dir="rtl">
+          <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Transactions</p>
+          <p className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl">{expenses.length}</p>
+          <p className="text-text-secondary mt-1.5 text-sm font-medium" dir="rtl">
             تعداد تراکنش
           </p>
         </div>
       </div>
 
       {/* Average Daily Spending */}
-      <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
+      <div className="border-border-subtle bg-background relative rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
         <div className="mb-4 flex items-center justify-between">
-          <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-            <BarChart3 className="h-5 w-5 text-[#525252]" />
+          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+            <BarChart3 className="text-text-secondary h-5 w-5" />
           </div>
-          <div className="flex items-center gap-1 rounded-md border border-[#ef4444]/20 bg-[#fef2f2] px-2 py-1 text-xs font-medium text-[#ef4444]">
+          <div className="border-danger/20 bg-danger-light text-danger flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium">
             <ArrowDownRight className="h-3 w-3" />
             <span>3.2%</span>
           </div>
         </div>
 
         <div>
-          <p className="mb-2 text-xs font-medium tracking-wider text-[#a3a3a3] uppercase">Daily Average</p>
-          <p className="text-2xl font-bold text-[#171717] tabular-nums sm:text-3xl" dir="rtl">
-            {formatNumber(avgDailyToman)} <span className="text-lg text-[#a3a3a3]">تومان</span>
+          <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Daily Average</p>
+          <p className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl" dir="rtl">
+            {formatNumber(avgDailyToman)} <span className="text-text-muted text-lg">تومان</span>
           </p>
-          <p className="mt-1.5 text-sm font-medium text-[#525252]">${avgDailyUsd.toFixed(2)} USD</p>
+          <p className="text-text-secondary mt-1.5 text-sm font-medium">${avgDailyUsd.toFixed(2)} USD</p>
         </div>
       </div>
     </div>

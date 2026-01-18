@@ -208,18 +208,18 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
   return (
     <div className="relative">
       {/* Selected Tags + Input */}
-      <div className="flex min-h-[48px] flex-wrap items-center gap-2 rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 transition-all focus-within:border-[#0070f3]">
+      <div className="border-border-subtle bg-background focus-within:border-blue flex min-h-[48px] flex-wrap items-center gap-2 rounded-lg border px-4 py-3 transition-all">
         {selectedTags.map((tag) => (
           <div
             key={tag.id}
-            className="group flex items-center gap-1.5 rounded-md border border-[#e5e5e5] bg-[#f5f5f5] px-2.5 py-1 text-sm font-medium text-[#525252] transition-all hover:border-[#d4d4d4]"
+            className="group border-border-subtle bg-background-elevated text-text-secondary hover:border-border-default flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-sm font-medium transition-all"
           >
             <TagIcon className="h-3.5 w-3.5" />
             <span>{tag.name}</span>
             <button
               type="button"
               onClick={() => unselectTag(tag.id)}
-              className="ml-0.5 rounded p-0.5 transition-colors hover:bg-[#e5e5e5]"
+              className="hover:bg-border-subtle ml-0.5 rounded p-0.5 transition-colors"
               aria-label={`Remove ${tag.name} tag`}
             >
               <X className="h-3 w-3" />
@@ -235,7 +235,7 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
           onKeyDown={handleKeyDown}
           onFocus={() => setShowSuggestions(true)}
           placeholder={selectedTags.length === 0 ? 'Add tags...' : ''}
-          className="min-w-[120px] flex-1 bg-transparent text-[#171717] outline-none placeholder:text-[#a3a3a3]"
+          className="text-text-primary placeholder:text-text-muted min-w-[120px] flex-1 bg-transparent outline-none"
         />
       </div>
 
@@ -243,16 +243,16 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
       {showSuggestions && (
         <div
           ref={suggestionsRef}
-          className="absolute top-full right-0 left-0 z-20 mt-2 max-h-48 overflow-y-auto rounded-lg border border-[#e5e5e5] bg-white shadow-lg"
+          className="border-border-subtle bg-background absolute top-full right-0 left-0 z-20 mt-2 max-h-48 overflow-y-auto rounded-lg border shadow-lg"
         >
           {filteredTags.map((tag) => (
             <div
               key={tag.id}
-              className="group flex items-center gap-2.5 border-b border-[#e5e5e5] px-4 py-2.5 transition-colors first:rounded-t-lg last:border-0 hover:bg-[#f5f5f5]"
+              className="group border-border-subtle hover:bg-background-elevated flex items-center gap-2.5 border-b px-4 py-2.5 transition-colors first:rounded-t-lg last:border-0"
             >
               {editingTagId === tag.id ? (
                 <>
-                  <TagIcon className="h-4 w-4 shrink-0 text-[#a3a3a3]" />
+                  <TagIcon className="text-text-muted h-4 w-4 shrink-0" />
                   <div className="min-w-0 flex-1">
                     <input
                       ref={editInputRef}
@@ -262,15 +262,15 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
                       onKeyDown={(e) => handleEditKeyDown(e, tag.id)}
                       onClick={(e) => e.stopPropagation()}
                       autoFocus
-                      className="w-full rounded border border-[#0070f3] bg-white px-2 py-1 text-sm text-[#171717] outline-none"
+                      className="border-blue bg-background text-text-primary w-full rounded border px-2 py-1 text-sm outline-none"
                     />
-                    {editError && <p className="mt-1 text-xs text-[#ea001d]">{editError}</p>}
+                    {editError && <p className="text-danger mt-1 text-xs">{editError}</p>}
                   </div>
                   <div className="flex shrink-0 gap-1">
                     <button
                       onClick={(e) => saveEditInDropdown(tag.id, e)}
                       disabled={isSaving}
-                      className="flex h-7 w-7 items-center justify-center rounded border border-[#e5e5e5] bg-white text-[#10b981] transition-colors hover:bg-[#f0fdf4] disabled:opacity-50"
+                      className="border-border-subtle bg-background text-success hover:bg-success-light flex h-7 w-7 items-center justify-center rounded border transition-colors disabled:opacity-50"
                       aria-label="Save changes"
                     >
                       {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
@@ -278,7 +278,7 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
                     <button
                       onClick={cancelEditInDropdown}
                       disabled={isSaving}
-                      className="flex h-7 w-7 items-center justify-center rounded border border-[#e5e5e5] bg-white text-[#525252] transition-colors hover:bg-[#f5f5f5] disabled:opacity-50"
+                      className="border-border-subtle bg-background text-text-secondary hover:bg-background-elevated flex h-7 w-7 items-center justify-center rounded border transition-colors disabled:opacity-50"
                       aria-label="Cancel editing"
                     >
                       <X className="h-3.5 w-3.5" />
@@ -292,12 +292,12 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
                     onClick={() => selectTag(tag)}
                     className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
                   >
-                    <TagIcon className="h-4 w-4 shrink-0 text-[#a3a3a3]" />
-                    <span className="truncate text-sm text-[#171717]">{tag.name}</span>
+                    <TagIcon className="text-text-muted h-4 w-4 shrink-0" />
+                    <span className="text-text-primary truncate text-sm">{tag.name}</span>
                   </button>
                   <button
                     onClick={(e) => startEditInDropdown(tag, e)}
-                    className="shrink-0 rounded p-1.5 text-[#a3a3a3] opacity-0 transition-all group-hover:opacity-100 hover:bg-white hover:text-[#171717]"
+                    className="text-text-muted hover:bg-background hover:text-text-primary shrink-0 rounded p-1.5 opacity-0 transition-all group-hover:opacity-100"
                     aria-label={`Rename tag ${tag.name}`}
                   >
                     <Edit2 className="h-3.5 w-3.5" />
@@ -313,7 +313,7 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
               type="button"
               onClick={() => createTag(inputValue)}
               disabled={isCreating}
-              className="flex w-full items-center gap-2.5 border-t border-[#e5e5e5] px-4 py-2.5 text-left text-sm text-[#0070f3] transition-colors last:rounded-b-lg hover:bg-[#0070f3]/10 disabled:opacity-50"
+              className="border-border-subtle text-blue hover:bg-blue/10 flex w-full items-center gap-2.5 border-t px-4 py-2.5 text-left text-sm transition-colors last:rounded-b-lg disabled:opacity-50"
             >
               {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               {isCreating ? 'Creating...' : `Create "${inputValue}"`}
@@ -321,7 +321,7 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
           )}
 
           {filteredTags.length === 0 && !inputValue.trim() && (
-            <div className="px-4 py-3 text-sm text-[#a3a3a3]">No tags yet. Start typing to create one...</div>
+            <div className="text-text-muted px-4 py-3 text-sm">No tags yet. Start typing to create one...</div>
           )}
         </div>
       )}

@@ -28,19 +28,21 @@ const DeleteConfirmModal = ({
     <Modal isOpen={isOpen} onClose={isDeleting ? () => {} : onCancel} showCloseButton={false}>
       <div className="text-center">
         {/* Warning Icon */}
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#ea001d]/10">
-          <AlertTriangle className="h-6 w-6 text-[#ea001d]" aria-hidden="true" />
+        <div className="bg-danger/10 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+          <AlertTriangle className="text-danger h-6 w-6" aria-hidden="true" />
         </div>
 
         {/* Title */}
         <div className="mt-4">
-          <h3 className="text-lg font-semibold text-[#171717]">{itemName ? `${title} "${itemName}"?` : `${title}?`}</h3>
+          <h3 className="text-text-primary text-lg font-semibold">
+            {itemName ? `${title} "${itemName}"?` : `${title}?`}
+          </h3>
         </div>
 
         {/* Message */}
         <div className="mt-3 space-y-2">
-          <p className="text-sm text-[#525252]">{message}</p>
-          <p className="text-sm font-medium text-[#525252]">This action cannot be undone.</p>
+          <p className="text-text-secondary text-sm">{message}</p>
+          <p className="text-text-secondary text-sm font-medium">This action cannot be undone.</p>
         </div>
 
         {/* Actions */}
@@ -52,7 +54,7 @@ const DeleteConfirmModal = ({
             variant="primary"
             onClick={onConfirm}
             disabled={isDeleting}
-            className="flex-1 bg-[#ea001d] hover:bg-[#AE292E]"
+            className="bg-button-danger-bg hover:bg-button-danger-bg-hover flex-1"
           >
             {isDeleting ? (
               <>

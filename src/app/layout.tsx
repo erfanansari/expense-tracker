@@ -21,7 +21,7 @@ const persianFont = Vazirmatn({
 });
 
 export const metadata: Metadata = {
-  title: 'Kharji / خرجی',
+  title: 'Kharji',
   description: 'Track your personal expenses',
 };
 
@@ -37,11 +37,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="bg-white">
+    <html lang="en" className="bg-background">
       <head>
         <meta name="color-scheme" content="light" />
       </head>
-      <body className={twMerge(geistSans.variable, persianFont.variable, 'bg-white antialiased')}>
+      <body className={twMerge(geistSans.variable, persianFont.variable, 'bg-background antialiased')}>
         {children}
         <Analytics />
       </body>

@@ -1,64 +1,213 @@
 @import 'tailwindcss';
 
 :root {
-  /* Base Colors - Light Theme */
-  --background: #ffffff;
-  --background-secondary: #fafafa;
-  --background-card: #fafafa;
-  --background-elevated: #f5f5f5;
-  --background-hover: #f0f0f0;
+  /* ===================================
+     BASE COLORS - LIGHT THEME
+     =================================== */
+
+  /* Backgrounds */
+  --color-background: #ffffff;
+  --color-background-secondary: #fafafa;
+  --color-background-elevated: #f5f5f5;
+  --color-background-hover: #f0f0f0;
 
   /* Borders */
-  --border-subtle: #e5e5e5;
-  --border-default: #d4d4d4;
-  --border-strong: #a3a3a3;
+  --color-border-subtle: #e5e5e5;
+  --color-border-default: #d4d4d4;
+  --color-border-strong: #a3a3a3;
 
   /* Text Colors */
-  --foreground: #171717;
-  --foreground-secondary: #525252;
-  --foreground-muted: #a3a3a3;
+  --color-text-primary: #171717;
+  --color-text-secondary: #525252;
+  --color-text-tertiary: #6b7280;
+  --color-text-muted: #a3a3a3;
 
-  /* Accent Colors - Violet */
-  --accent-primary: #8b5cf6;
-  --accent-primary-hover: #7c3aed;
-  --accent-primary-muted: #f5f3ff;
+  /* ===================================
+     SEMANTIC COLORS
+     =================================== */
 
-  /* Accent Colors - Blue (Vercel) */
-  --accent-blue: #0070f3;
-  --accent-blue-hover: #0060d0;
-  --accent-blue-muted: #eef6ff;
+  /* Primary (Black) */
+  --color-primary: #171717;
+  --color-primary-hover: #404040;
 
-  /* Semantic Colors */
-  --accent-success: #10b981;
-  --accent-success-muted: #ecfdf5;
+  /* Blue (Links, Primary Actions) */
+  --color-blue: #0070f3;
+  --color-blue-hover: #0060d0;
+  --color-blue-light: #eef6ff;
 
-  --accent-error: #ef4444;
-  --accent-error-muted: #fef2f2;
+  /* Success (Green) */
+  --color-success: #10b981;
+  --color-success-hover: #0e9f6e;
+  --color-success-light: #ecfdf5;
 
-  --accent-warning: #f59e0b;
-  --accent-warning-muted: #fffbeb;
+  /* Danger (Red) */
+  --color-danger: #ea001d;
+  --color-danger-hover: #ae292e;
+  --color-danger-light: #fef2f2;
 
-  /* Shadows */
+  /* Warning (Orange/Yellow) */
+  --color-warning: #f59e0b;
+  --color-warning-hover: #d97706;
+  --color-warning-light: #fffbeb;
+
+  /* Info (Violet) */
+  --color-info: #8b5cf6;
+  --color-info-hover: #7c3aed;
+  --color-info-light: #f5f3ff;
+
+  /* ===================================
+     COMPONENT-SPECIFIC COLORS
+     =================================== */
+
+  /* Button Colors */
+  --color-button-primary-bg: #171717;
+  --color-button-primary-bg-hover: #404040;
+  --color-button-primary-text: #ffffff;
+
+  --color-button-outline-border: #e5e5e5;
+  --color-button-outline-bg-hover: #f5f5f5;
+  --color-button-outline-text: #525252;
+  --color-button-outline-text-hover: #171717;
+
+  --color-button-danger-bg: #ea001d;
+  --color-button-danger-bg-hover: #ae292e;
+  --color-button-danger-text: #ffffff;
+
+  /* Action Button Colors (Edit, Delete, etc.) */
+  --color-action-default: #a3a3a3;
+  --color-action-edit-bg-hover: rgba(0, 112, 243, 0.1);
+  --color-action-edit-text-hover: #0070f3;
+  --color-action-delete-bg-hover: rgba(234, 0, 29, 0.1);
+  --color-action-delete-text-hover: #ea001d;
+  --color-action-save-bg-hover: rgba(16, 185, 129, 0.1);
+  --color-action-save-text-hover: #10b981;
+  --color-action-cancel-bg-hover: #f5f5f5;
+  --color-action-cancel-text-hover: #525252;
+
+  /* Input Colors */
+  --color-input-bg: #ffffff;
+  --color-input-text: #171717;
+  --color-input-border: #e5e5e5;
+  --color-input-border-focus: #0070f3;
+  --color-input-placeholder: #a3a3a3;
+
+  /* Tag Colors */
+  --color-tag-bg: #f5f5f5;
+  --color-tag-text: #525252;
+  --color-tag-border: #e5e5e5;
+
+  /* Card/Modal Colors */
+  --color-card-bg: #ffffff;
+  --color-card-header-bg: #fafafa;
+  --color-card-border: #e5e5e5;
+
+  /* Icon Box Colors */
+  --color-icon-box-bg: #fafafa;
+  --color-icon-box-border: #e5e5e5;
+
+  /* ===================================
+     SHADOWS
+     =================================== */
+
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.07);
 
-  /* Spacing */
+  /* ===================================
+     SPACING & BORDERS
+     =================================== */
+
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Expose theme colors as Tailwind utilities */
+
+  /* Background colors */
+  --color-background: var(--color-background);
+  --color-background-secondary: var(--color-background-secondary);
+  --color-background-elevated: var(--color-background-elevated);
+  --color-background-hover: var(--color-background-hover);
+
+  /* Border colors */
+  --color-border-subtle: var(--color-border-subtle);
+  --color-border-default: var(--color-border-default);
+  --color-border-strong: var(--color-border-strong);
+
+  /* Text colors */
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-tertiary: var(--color-text-tertiary);
+  --color-text-muted: var(--color-text-muted);
+
+  /* Semantic colors */
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-blue: var(--color-blue);
+  --color-blue-hover: var(--color-blue-hover);
+  --color-blue-light: var(--color-blue-light);
+  --color-success: var(--color-success);
+  --color-success-hover: var(--color-success-hover);
+  --color-success-light: var(--color-success-light);
+  --color-danger: var(--color-danger);
+  --color-danger-hover: var(--color-danger-hover);
+  --color-danger-light: var(--color-danger-light);
+  --color-warning: var(--color-warning);
+  --color-warning-hover: var(--color-warning-hover);
+  --color-warning-light: var(--color-warning-light);
+  --color-info: var(--color-info);
+  --color-info-hover: var(--color-info-hover);
+  --color-info-light: var(--color-info-light);
+
+  /* Component-specific colors */
+  --color-button-primary-bg: var(--color-button-primary-bg);
+  --color-button-primary-bg-hover: var(--color-button-primary-bg-hover);
+  --color-button-primary-text: var(--color-button-primary-text);
+  --color-button-outline-border: var(--color-button-outline-border);
+  --color-button-outline-bg-hover: var(--color-button-outline-bg-hover);
+  --color-button-outline-text: var(--color-button-outline-text);
+  --color-button-outline-text-hover: var(--color-button-outline-text-hover);
+  --color-button-danger-bg: var(--color-button-danger-bg);
+  --color-button-danger-bg-hover: var(--color-button-danger-bg-hover);
+  --color-button-danger-text: var(--color-button-danger-text);
+
+  --color-action-default: var(--color-action-default);
+  --color-action-edit-bg-hover: var(--color-action-edit-bg-hover);
+  --color-action-edit-text-hover: var(--color-action-edit-text-hover);
+  --color-action-delete-bg-hover: var(--color-action-delete-bg-hover);
+  --color-action-delete-text-hover: var(--color-action-delete-text-hover);
+  --color-action-save-bg-hover: var(--color-action-save-bg-hover);
+  --color-action-save-text-hover: var(--color-action-save-text-hover);
+  --color-action-cancel-bg-hover: var(--color-action-cancel-bg-hover);
+  --color-action-cancel-text-hover: var(--color-action-cancel-text-hover);
+
+  --color-input-bg: var(--color-input-bg);
+  --color-input-text: var(--color-input-text);
+  --color-input-border: var(--color-input-border);
+  --color-input-border-focus: var(--color-input-border-focus);
+  --color-input-placeholder: var(--color-input-placeholder);
+
+  --color-tag-bg: var(--color-tag-bg);
+  --color-tag-text: var(--color-tag-text);
+  --color-tag-border: var(--color-tag-border);
+
+  --color-card-bg: var(--color-card-bg);
+  --color-card-header-bg: var(--color-card-header-bg);
+  --color-card-border: var(--color-card-border);
+
+  --color-icon-box-bg: var(--color-icon-box-bg);
+  --color-icon-box-border: var(--color-icon-box-border);
+
+  /* Font family */
   --font-sans: var(--font-persian);
 }
 
 /* Light theme */
 html {
   color-scheme: light;
-  background: #ffffff;
+  background: var(--color-background);
 }
 
 /* Fix iOS viewport height issue */
@@ -76,8 +225,8 @@ html {
 }
 
 body {
-  background: #ffffff;
-  color: var(--foreground);
+  background: var(--color-background);
+  color: var(--color-text-primary);
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -85,15 +234,15 @@ body {
 
 /* Card base styles */
 .card {
-  background: var(--background-card);
-  border: 1px solid var(--border-subtle);
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
 }
 
 .card-elevated {
-  background: var(--background-elevated);
-  border: 1px solid var(--border-default);
+  background: var(--color-background-elevated);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
 }
@@ -107,9 +256,9 @@ input[type='password'],
 select,
 textarea {
   font-family: var(--font-geist-sans), sans-serif !important;
-  background: #ffffff !important;
-  background-color: #ffffff !important;
-  color: #171717 !important;
+  background: var(--color-input-bg) !important;
+  background-color: var(--color-input-bg) !important;
+  color: var(--color-input-text) !important;
   transition: all 0.2s ease;
   color-scheme: light !important;
 }
@@ -121,7 +270,7 @@ input[type='email']:focus,
 input[type='password']:focus,
 select:focus,
 textarea:focus {
-  border-color: #0070f3 !important;
+  border-color: var(--color-input-border-focus) !important;
   box-shadow: none !important;
   outline: none !important;
 }
@@ -151,8 +300,8 @@ select {
 
 /* Force light backgrounds on select dropdowns */
 select option {
-  background-color: #ffffff !important;
-  color: #171717 !important;
+  background-color: var(--color-background) !important;
+  color: var(--color-text-primary) !important;
 }
 
 /* Scrollbar styling */
@@ -162,17 +311,17 @@ select option {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--background-secondary);
+  background: var(--color-background-secondary);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-default);
+  background: var(--color-border-default);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--border-strong);
+  background: var(--color-border-strong);
 }
 
 /* Hide scrollbar utility */
@@ -187,8 +336,8 @@ select option {
 
 /* Button base */
 .btn-primary {
-  background: var(--accent-primary);
-  color: white;
+  background: var(--color-button-primary-bg);
+  color: var(--color-button-primary-text);
   font-weight: 500;
   padding: 10px 20px;
   border-radius: var(--radius-md);
@@ -199,7 +348,7 @@ select option {
 }
 
 .btn-primary:hover {
-  background: var(--accent-primary-hover);
+  background: var(--color-button-primary-bg-hover);
   box-shadow: var(--shadow-md);
 }
 
@@ -224,33 +373,33 @@ select option {
 }
 
 .badge-primary {
-  background: var(--accent-primary-muted);
-  color: var(--accent-primary);
-  border: 1px solid var(--border-subtle);
+  background: var(--color-info-light);
+  color: var(--color-info);
+  border: 1px solid var(--color-border-subtle);
 }
 
 .badge-success {
-  background: var(--accent-success-muted);
-  color: var(--accent-success);
-  border: 1px solid var(--border-subtle);
+  background: var(--color-success-light);
+  color: var(--color-success);
+  border: 1px solid var(--color-border-subtle);
 }
 
 .badge-warning {
-  background: var(--accent-warning-muted);
-  color: var(--accent-warning);
-  border: 1px solid var(--border-subtle);
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+  border: 1px solid var(--color-border-subtle);
 }
 
 .badge-error {
-  background: var(--accent-error-muted);
-  color: var(--accent-error);
-  border: 1px solid var(--border-subtle);
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+  border: 1px solid var(--color-border-subtle);
 }
 
 .badge-neutral {
-  background: var(--background-elevated);
-  color: var(--foreground-secondary);
-  border: 1px solid var(--border-subtle);
+  background: var(--color-background-elevated);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-subtle);
 }
 
 /* Table hover rows */
@@ -259,7 +408,7 @@ select option {
 }
 
 .table-row-hover:hover {
-  background: var(--background-hover);
+  background: var(--color-background-hover);
 }
 
 /* Animations */

@@ -22,19 +22,19 @@ interface DetailRowProps {
 const DetailRow = ({ icon, label, labelFa, value }: DetailRowProps) => (
   <div className="flex items-start gap-3 sm:gap-4">
     <div
-      className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-[#e5e5e5] bg-[#fafafa] sm:h-10 sm:w-10"
+      className="border-border-subtle bg-background-secondary flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border sm:h-10 sm:w-10"
       aria-hidden="true"
     >
       {icon}
     </div>
     <div className="min-w-0 flex-1 pt-0.5">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-        <span className="text-xs font-medium text-[#a3a3a3]">{label}</span>
-        <span className="text-xs text-[#a3a3a3]" dir="rtl">
+        <span className="text-text-muted text-xs font-medium">{label}</span>
+        <span className="text-text-muted text-xs" dir="rtl">
           {labelFa}
         </span>
       </div>
-      <div className="mt-1 text-sm font-medium text-[#171717] sm:text-base">{value}</div>
+      <div className="text-text-primary mt-1 text-sm font-medium sm:text-base">{value}</div>
     </div>
   </div>
 );
@@ -53,7 +53,7 @@ const TransactionDetailsModal = ({ expense, isOpen, onClose }: TransactionDetail
       <div className="flex flex-col gap-5 sm:gap-6">
         {/* Description */}
         <DetailRow
-          icon={<FileText className="h-4 w-4 text-[#525252]" />}
+          icon={<FileText className="text-text-secondary h-4 w-4" />}
           label="Description"
           labelFa="توضیحات"
           value={<span className="break-words">{expense.description}</span>}
@@ -61,13 +61,13 @@ const TransactionDetailsModal = ({ expense, isOpen, onClose }: TransactionDetail
 
         {/* Category */}
         <DetailRow
-          icon={<FolderOpen className="h-4 w-4 text-[#525252]" />}
+          icon={<FolderOpen className="text-text-secondary h-4 w-4" />}
           label="Category"
           labelFa="دسته‌بندی"
           value={
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <span>{categoryLabels.en}</span>
-              <span className="text-[#a3a3a3]" dir="rtl">
+              <span className="text-text-muted" dir="rtl">
                 ({categoryLabels.fa})
               </span>
             </div>
@@ -76,13 +76,13 @@ const TransactionDetailsModal = ({ expense, isOpen, onClose }: TransactionDetail
 
         {/* Date */}
         <DetailRow
-          icon={<Calendar className="h-4 w-4 text-[#525252]" />}
+          icon={<Calendar className="text-text-secondary h-4 w-4" />}
           label="Date"
           labelFa="تاریخ"
           value={
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <span>{expense.date}</span>
-              <span className="text-[#a3a3a3]" dir="rtl">
+              <span className="text-text-muted" dir="rtl">
                 ({farsiDate})
               </span>
             </div>
@@ -90,15 +90,15 @@ const TransactionDetailsModal = ({ expense, isOpen, onClose }: TransactionDetail
         />
 
         {/* Divider */}
-        <div className="border-t border-[#e5e5e5]" role="separator" />
+        <div className="border-border-subtle border-t" role="separator" />
 
         {/* Amount in Toman */}
         <DetailRow
-          icon={<DollarSign className="h-4 w-4 text-[#525252]" />}
+          icon={<DollarSign className="text-text-secondary h-4 w-4" />}
           label="Amount (Toman)"
           labelFa="مبلغ (تومان)"
           value={
-            <span className="font-semibold text-[#171717] tabular-nums" dir="rtl">
+            <span className="text-text-primary font-semibold tabular-nums" dir="rtl">
               {formatNumber(expense.price_toman)} تومان
             </span>
           }
@@ -106,28 +106,28 @@ const TransactionDetailsModal = ({ expense, isOpen, onClose }: TransactionDetail
 
         {/* Amount in USD */}
         <DetailRow
-          icon={<DollarSign className="h-4 w-4 text-[#525252]" />}
+          icon={<DollarSign className="text-text-secondary h-4 w-4" />}
           label="Amount (USD)"
           labelFa="مبلغ (دلار)"
-          value={<span className="text-[#171717] tabular-nums">${expense.price_usd.toFixed(2)} USD</span>}
+          value={<span className="text-text-primary tabular-nums">${expense.price_usd.toFixed(2)} USD</span>}
         />
 
         {/* Exchange Rate */}
         <DetailRow
-          icon={<ArrowLeftRight className="h-4 w-4 text-[#525252]" />}
+          icon={<ArrowLeftRight className="text-text-secondary h-4 w-4" />}
           label="Exchange Rate"
           labelFa="نرخ ارز"
-          value={<span className="text-[#525252] tabular-nums">{formatNumber(exchangeRate)} Toman/USD</span>}
+          value={<span className="text-text-secondary tabular-nums">{formatNumber(exchangeRate)} Toman/USD</span>}
         />
 
         {/* Tags */}
         {expense.tags && expense.tags.length > 0 && (
           <>
             {/* Divider */}
-            <div className="border-t border-[#e5e5e5]" role="separator" />
+            <div className="border-border-subtle border-t" role="separator" />
 
             <DetailRow
-              icon={<Tag className="h-4 w-4 text-[#525252]" />}
+              icon={<Tag className="text-text-secondary h-4 w-4" />}
               label="Tags"
               labelFa="برچسب‌ها"
               value={
@@ -135,7 +135,7 @@ const TransactionDetailsModal = ({ expense, isOpen, onClose }: TransactionDetail
                   {expense.tags.map((tag) => (
                     <span
                       key={tag.id}
-                      className="inline-flex items-center gap-1 rounded-md border border-[#e5e5e5] bg-[#f5f5f5] px-2 py-1 text-xs font-medium text-[#525252]"
+                      className="border-border-subtle bg-background-elevated text-text-secondary inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium"
                     >
                       <Tag className="h-3 w-3" aria-hidden="true" />
                       {tag.name}
@@ -148,15 +148,15 @@ const TransactionDetailsModal = ({ expense, isOpen, onClose }: TransactionDetail
         )}
 
         {/* Divider */}
-        <div className="border-t border-[#e5e5e5]" role="separator" />
+        <div className="border-border-subtle border-t" role="separator" />
 
         {/* Created At */}
         <DetailRow
-          icon={<Clock className="h-4 w-4 text-[#525252]" />}
+          icon={<Clock className="text-text-secondary h-4 w-4" />}
           label="Created At"
           labelFa="تاریخ ثبت"
           value={
-            <time dateTime={expense.created_at} className="text-[#525252]">
+            <time dateTime={expense.created_at} className="text-text-secondary">
               {new Date(expense.created_at).toLocaleString()}
             </time>
           }

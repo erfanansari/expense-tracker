@@ -22,29 +22,29 @@ const DeleteTagModal = ({ isOpen, tag, usageCount, onConfirm, onCancel, isDeleti
     <Modal isOpen={isOpen} onClose={isDeleting ? () => {} : onCancel} showCloseButton={false}>
       <div className="text-center">
         {/* Warning Icon */}
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#ea001d]/10">
-          <AlertTriangle className="h-6 w-6 text-[#ea001d]" aria-hidden="true" />
+        <div className="bg-danger/10 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+          <AlertTriangle className="text-danger h-6 w-6" aria-hidden="true" />
         </div>
 
         {/* Title */}
         <div className="mt-4">
-          <h3 className="text-lg font-semibold text-[#171717]">Delete tag &ldquo;{tag.name}&rdquo;?</h3>
+          <h3 className="text-text-primary text-lg font-semibold">Delete tag &ldquo;{tag.name}&rdquo;?</h3>
         </div>
 
         {/* Message */}
         <div className="mt-3 space-y-2">
           {usageCount > 0 ? (
             <>
-              <p className="text-sm text-[#525252]">
+              <p className="text-text-secondary text-sm">
                 This tag is used in <span className="font-semibold">{usageCount}</span>{' '}
                 {usageCount === 1 ? 'expense' : 'expenses'}.
               </p>
-              <p className="text-sm text-[#525252]">It will be removed from all of them.</p>
+              <p className="text-text-secondary text-sm">It will be removed from all of them.</p>
             </>
           ) : (
-            <p className="text-sm text-[#525252]">This tag is not currently used in any expenses.</p>
+            <p className="text-text-secondary text-sm">This tag is not currently used in any expenses.</p>
           )}
-          <p className="text-sm font-medium text-[#525252]">This action cannot be undone.</p>
+          <p className="text-text-secondary text-sm font-medium">This action cannot be undone.</p>
         </div>
 
         {/* Actions */}
@@ -56,7 +56,7 @@ const DeleteTagModal = ({ isOpen, tag, usageCount, onConfirm, onCancel, isDeleti
             variant="primary"
             onClick={onConfirm}
             disabled={isDeleting}
-            className="flex-1 bg-[#ea001d] hover:bg-[#AE292E]"
+            className="bg-danger hover:bg-danger-hover flex-1"
           >
             {isDeleting ? (
               <>

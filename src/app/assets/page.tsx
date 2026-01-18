@@ -173,12 +173,12 @@ export default function AssetsPage() {
     if (active && payload && payload.length) {
       const data = payload[0];
       return (
-        <div className="rounded-lg border border-[#e5e5e5] bg-white p-4 shadow-lg">
-          <p className="text-lg font-bold text-[#171717]" dir="rtl">
+        <div className="border-border-subtle bg-background rounded-lg border p-4 shadow-lg">
+          <p className="text-text-primary text-lg font-bold" dir="rtl">
             {formatNumber(data.payload.tomanValue)} تومان
           </p>
-          <p className="mt-1.5 text-sm font-medium text-[#a3a3a3]">${formatNumber(data.value)} USD</p>
-          <p className="mt-2 text-sm font-medium text-[#0070f3]" dir="rtl">
+          <p className="text-text-muted mt-1.5 text-sm font-medium">${formatNumber(data.value)} USD</p>
+          <p className="text-blue mt-2 text-sm font-medium" dir="rtl">
             {data.payload.nameFa}
           </p>
         </div>
@@ -189,13 +189,13 @@ export default function AssetsPage() {
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-[#ffffff]">
+      <div className="bg-background min-h-screen">
         <div className="mx-auto max-w-[1600px] px-6 py-8">
           {/* Page Header */}
           <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl font-bold text-[#171717] sm:text-2xl md:text-3xl">Assets</h1>
-              <p className="mt-1 text-xs text-[#a3a3a3] sm:text-sm">Track your wealth portfolio</p>
+              <h1 className="text-text-primary text-xl font-bold sm:text-2xl md:text-3xl">Assets</h1>
+              <p className="text-text-muted mt-1 text-xs sm:text-sm">Track your wealth portfolio</p>
             </div>
             {showForm ? (
               <Button variant="outline" onClick={handleCancelEdit} className="shrink-0">
@@ -219,15 +219,15 @@ export default function AssetsPage() {
           {/* Summary Cards */}
           <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
             {/* Total Value */}
-            <div className="relative min-w-0 rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm">
+            <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
-                <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-                  <TrendingUp className="h-5 w-5 text-[#0070f3]" />
+                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                  <TrendingUp className="text-blue h-5 w-5" />
                 </div>
               </div>
-              <p className="mb-2 text-xs font-medium tracking-wider text-[#a3a3a3] uppercase">Net Worth</p>
-              <p className="text-2xl font-semibold text-[#171717] tabular-nums">${formatNumber(totalValueUsd)}</p>
-              <p className="mt-1.5 text-sm font-medium text-[#525252]" dir="rtl">
+              <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Net Worth</p>
+              <p className="text-text-primary text-2xl font-semibold tabular-nums">${formatNumber(totalValueUsd)}</p>
+              <p className="text-text-secondary mt-1.5 text-sm font-medium" dir="rtl">
                 {formatNumber(totalValueToman)} تومان
               </p>
             </div>
@@ -244,16 +244,18 @@ export default function AssetsPage() {
                 return (
                   <div
                     key={category}
-                    className="relative min-w-0 rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm"
+                    className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm"
                   >
                     <div className="mb-4 flex items-center justify-between">
-                      <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
+                      <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
                         <Icon className="h-5 w-5" style={{ color }} />
                       </div>
                     </div>
-                    <p className="mb-2 text-xs font-medium tracking-wider text-[#a3a3a3] uppercase">{labels.en}</p>
-                    <p className="text-2xl font-semibold text-[#171717] tabular-nums">${formatNumber(data.totalUsd)}</p>
-                    <p className="mt-1.5 text-sm font-medium text-[#525252]">
+                    <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{labels.en}</p>
+                    <p className="text-text-primary text-2xl font-semibold tabular-nums">
+                      ${formatNumber(data.totalUsd)}
+                    </p>
+                    <p className="text-text-secondary mt-1.5 text-sm font-medium">
                       {data.assets.length} asset{data.assets.length !== 1 ? 's' : ''}
                     </p>
                   </div>
@@ -275,22 +277,22 @@ export default function AssetsPage() {
             }
             if (error && assets.length === 0) {
               return (
-                <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-16 text-center shadow-sm">
-                  <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border border-[#ef4444] bg-[#fef2f2]">
-                    <Wallet className="h-8 w-8 text-[#ef4444]" />
+                <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
+                  <div className="border-danger bg-danger-light mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
+                    <Wallet className="text-danger h-8 w-8" />
                   </div>
-                  <p className="font-medium text-[#ef4444]">{error}</p>
+                  <p className="text-danger font-medium">{error}</p>
                 </div>
               );
             }
             if (assets.length === 0) {
               return (
-                <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-16 text-center shadow-sm">
-                  <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border border-[#e5e5e5] bg-[#fafafa]">
-                    <Wallet className="h-8 w-8 text-[#a3a3a3]" />
+                <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
+                  <div className="border-border-subtle bg-background-secondary mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
+                    <Wallet className="text-text-muted h-8 w-8" />
                   </div>
-                  <p className="font-medium text-[#525252]">No assets recorded yet</p>
-                  <p className="mt-1 text-sm text-[#a3a3a3]">Add your first asset above!</p>
+                  <p className="text-text-secondary font-medium">No assets recorded yet</p>
+                  <p className="text-text-muted mt-1 text-sm">Add your first asset above!</p>
                 </div>
               );
             }
@@ -309,26 +311,26 @@ export default function AssetsPage() {
                         <div key={category}>
                           <div className="mb-4 flex items-center gap-2">
                             <Icon className="h-5 w-5" style={{ color }} />
-                            <h2 className="text-lg font-semibold text-[#171717]">{labels.en}</h2>
-                            <span className="text-sm text-[#a3a3a3]" dir="rtl">
+                            <h2 className="text-text-primary text-lg font-semibold">{labels.en}</h2>
+                            <span className="text-text-muted text-sm" dir="rtl">
                               {labels.fa}
                             </span>
                           </div>
-                          <div className="relative overflow-hidden rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
+                          <div className="border-border-subtle bg-background relative overflow-hidden rounded-xl border shadow-sm">
                             <div className="overflow-x-auto">
                               <table className="w-full min-w-[500px] border-collapse">
                                 <thead>
-                                  <tr className="bg-[#fafafa]">
-                                    <th className="min-w-[120px] px-4 py-3 text-left text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
+                                  <tr className="bg-background-secondary">
+                                    <th className="text-text-muted min-w-[120px] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
                                       Asset
                                     </th>
-                                    <th className="min-w-[100px] px-4 py-3 text-left text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
+                                    <th className="text-text-muted min-w-[100px] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
                                       Quantity
                                     </th>
-                                    <th className="min-w-[120px] px-4 py-3 text-right text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
+                                    <th className="text-text-muted min-w-[120px] px-4 py-3 text-right text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
                                       Value
                                     </th>
-                                    <th className="min-w-[80px] px-4 py-3 text-center text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
+                                    <th className="text-text-muted min-w-[80px] px-4 py-3 text-center text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
                                       Actions
                                     </th>
                                   </tr>
@@ -337,27 +339,27 @@ export default function AssetsPage() {
                                   {data.assets.map((asset) => (
                                     <tr
                                       key={asset.id}
-                                      className="group border-t border-[#e5e5e5] transition-colors duration-200 first:border-t-0 hover:bg-[#f5f5f5]"
+                                      className="group border-border-subtle hover:bg-background-elevated border-t transition-colors duration-200 first:border-t-0"
                                     >
                                       <td className="px-4 py-3 sm:px-6 sm:py-4">
                                         <div className="flex flex-col">
-                                          <span className="text-sm font-medium text-[#171717]">{asset.name}</span>
-                                          <span className="text-xs text-[#a3a3a3]">
+                                          <span className="text-text-primary text-sm font-medium">{asset.name}</span>
+                                          <span className="text-text-muted text-xs">
                                             {getAssetCategoryLabel(asset.category).en}
                                           </span>
                                         </div>
                                       </td>
                                       <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                        <span className="text-sm text-[#525252]">
+                                        <span className="text-text-secondary text-sm">
                                           {asset.quantity} {asset.unit || 'unit'}
                                         </span>
                                       </td>
                                       <td className="px-4 py-3 text-right sm:px-6 sm:py-4">
                                         <div className="flex flex-col items-end">
-                                          <span className="text-sm font-semibold text-[#171717]">
+                                          <span className="text-text-primary text-sm font-semibold">
                                             ${formatNumber(asset.totalValueUsd)}
                                           </span>
-                                          <span className="text-xs text-[#a3a3a3]" dir="rtl">
+                                          <span className="text-text-muted text-xs" dir="rtl">
                                             {formatNumber(asset.totalValueToman)} ت
                                           </span>
                                         </div>
@@ -366,7 +368,7 @@ export default function AssetsPage() {
                                         <div className="flex items-center justify-center gap-1">
                                           <button
                                             onClick={() => handleEdit(asset)}
-                                            className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#0070f3]/10 hover:text-[#0070f3]"
+                                            className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
                                             title="Update Value"
                                           >
                                             <Edit className="h-4 w-4" />
@@ -374,7 +376,7 @@ export default function AssetsPage() {
                                           <button
                                             onClick={() => openDeleteModal(asset)}
                                             disabled={deletingId === asset.id}
-                                            className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#ea001d]/10 hover:text-[#ea001d] disabled:opacity-50"
+                                            className="text-text-muted hover:bg-danger/10 hover:text-danger rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
                                             title="Delete"
                                           >
                                             {deletingId === asset.id ? (
@@ -398,8 +400,8 @@ export default function AssetsPage() {
 
                 {/* Distribution Chart */}
                 <div className="lg:col-span-1">
-                  <div className="sticky top-24 rounded-xl border border-[#e5e5e5] bg-white p-6 shadow-sm">
-                    <h3 className="mb-4 text-lg font-semibold text-[#171717]">Asset Distribution</h3>
+                  <div className="border-border-subtle bg-background sticky top-24 rounded-xl border p-6 shadow-sm">
+                    <h3 className="text-text-primary mb-4 text-lg font-semibold">Asset Distribution</h3>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
@@ -426,9 +428,9 @@ export default function AssetsPage() {
                         <div key={entry.name} className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <div className="h-3 w-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                            <span className="text-sm text-[#525252]">{entry.name}</span>
+                            <span className="text-text-secondary text-sm">{entry.name}</span>
                           </div>
-                          <span className="text-sm font-medium text-[#171717]">
+                          <span className="text-text-primary text-sm font-medium">
                             {totalValueUsd > 0 ? ((entry.value / totalValueUsd) * 100).toFixed(1) : 0}%
                           </span>
                         </div>

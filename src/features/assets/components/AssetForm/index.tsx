@@ -186,18 +186,22 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit }: AssetFormProps)
   };
 
   return (
-    <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-6 shadow-sm">
+    <div className="border-border-subtle bg-background relative rounded-xl border p-6 shadow-sm">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-            {editingAsset ? <Save className="h-5 w-5 text-[#525252]" /> : <Plus className="h-5 w-5 text-[#525252]" />}
+          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+            {editingAsset ? (
+              <Save className="text-text-secondary h-5 w-5" />
+            ) : (
+              <Plus className="text-text-secondary h-5 w-5" />
+            )}
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-[#171717]">
+            <h2 className="text-text-primary text-lg font-semibold">
               {editingAsset ? 'Update Asset Value' : 'Add New Asset'}
             </h2>
-            <p className="text-sm text-[#a3a3a3]" dir="rtl">
+            <p className="text-text-muted text-sm" dir="rtl">
               {editingAsset ? 'بروزرسانی ارزش دارایی' : 'افزودن دارایی جدید'}
             </p>
           </div>
@@ -205,7 +209,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit }: AssetFormProps)
         {editingAsset && (
           <button
             onClick={handleCancel}
-            className="rounded-lg p-2 text-[#a3a3a3] transition-all hover:bg-[#f5f5f5] hover:text-[#171717]"
+            className="text-text-muted hover:bg-background-elevated hover:text-text-primary rounded-lg p-2 transition-all"
           >
             <X className="h-5 w-5" />
           </button>
@@ -218,8 +222,8 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit }: AssetFormProps)
           className={twMerge(
             'mb-6 rounded-lg border p-4',
             message.type === 'success'
-              ? 'border-[#10b981] bg-[#ecfdf5] text-[#10b981]'
-              : 'border-[#ef4444] bg-[#fef2f2] text-[#ef4444]'
+              ? 'border-success bg-success-light text-success'
+              : 'border-danger bg-danger-light text-danger'
           )}
         >
           {message.text}
@@ -231,8 +235,8 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit }: AssetFormProps)
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {/* Category */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <Package className="h-4 w-4 text-[#a3a3a3]" />
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <Package className="text-text-muted h-4 w-4" />
               Category / دسته‌بندی
             </label>
             <div className="relative">
@@ -240,7 +244,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit }: AssetFormProps)
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value as AssetCategory })}
                 required
-                className="w-full cursor-pointer appearance-none rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 pr-10 text-[#171717] transition-all focus:border-[#0070f3] focus:outline-none"
+                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-3 pr-10 transition-all focus:outline-none"
               >
                 {ASSET_CATEGORIES.map((cat) => (
                   <option key={cat.value} value={cat.value}>
@@ -248,14 +252,14 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit }: AssetFormProps)
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-[#a3a3a3]" />
+              <ChevronDown className="text-text-muted pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2" />
             </div>
           </div>
 
           {/* Name */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <FileText className="h-4 w-4 text-[#a3a3a3]" />
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <FileText className="text-text-muted h-4 w-4" />
               Name / نام
             </label>
             <input
@@ -264,7 +268,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit }: AssetFormProps)
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#0070f3] focus:outline-none"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
             />
           </div>
         </div>
@@ -272,8 +276,8 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit }: AssetFormProps)
         {/* Row 2: Quantity and Unit */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <Package className="h-4 w-4 text-[#a3a3a3]" />
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <Package className="text-text-muted h-4 w-4" />
               Quantity / مقدار
             </label>
             <input
@@ -284,12 +288,12 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit }: AssetFormProps)
               step="any"
               value={formData.quantity || ''}
               onChange={(e) => handleQuantityChange(parseFloat(e.target.value) || 0)}
-              className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#0070f3] focus:outline-none"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
             />
           </div>
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <span className="text-[#a3a3a3]">U</span>
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <span className="text-text-muted">U</span>
               Unit / واحد (Optional)
             </label>
             <input
@@ -297,12 +301,12 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit }: AssetFormProps)
               placeholder="e.g., BTC, gram, unit..."
               value={formData.unit || ''}
               onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-              className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#0070f3] focus:outline-none"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
             />
           </div>
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <DollarSign className="h-4 w-4 text-[#0070f3]" />
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <DollarSign className="text-blue h-4 w-4" />
               Unit Value (USD)
             </label>
             <input
@@ -312,7 +316,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit }: AssetFormProps)
               step="0.01"
               value={formData.unitValueUsd || ''}
               onChange={(e) => handleUnitValueChange(parseFloat(e.target.value) || 0)}
-              className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#0070f3] focus:outline-none"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
             />
           </div>
         </div>
@@ -321,8 +325,8 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit }: AssetFormProps)
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {/* Total USD */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <DollarSign className="h-4 w-4 text-[#0070f3]" />
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <DollarSign className="text-blue h-4 w-4" />
               Total Value (USD)
             </label>
             <input
@@ -333,14 +337,14 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit }: AssetFormProps)
               step="0.01"
               value={formData.totalValueUsd || ''}
               onChange={(e) => handleTotalValueChange(parseFloat(e.target.value) || 0)}
-              className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#0070f3] focus:outline-none"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
             />
           </div>
 
           {/* Total Toman */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <span className="font-bold text-[#10b981]">T</span>
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <span className="text-success font-bold">T</span>
               Total (Toman)
             </label>
             <Tooltip content={numberToPersianWord} position="top">
@@ -352,17 +356,17 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit }: AssetFormProps)
                 step="1"
                 value={formData.totalValueToman || ''}
                 readOnly
-                className="w-full rounded-lg border border-[#e5e5e5] bg-[#fafafa] px-4 py-3 text-[#525252] transition-all"
+                className="border-border-subtle bg-background-secondary text-text-secondary w-full rounded-lg border px-4 py-3 transition-all"
               />
             </Tooltip>
           </div>
 
           {/* Exchange Rate */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <span className="text-[#a3a3a3]">↔</span>
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <span className="text-text-muted">↔</span>
               Rate / نرخ
-              {isFetchingRate && <Loader2 className="h-3 w-3 animate-spin text-[#a3a3a3]" />}
+              {isFetchingRate && <Loader2 className="text-text-muted h-3 w-3 animate-spin" />}
             </label>
             <input
               type="number"
@@ -373,15 +377,15 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit }: AssetFormProps)
               value={exchangeRate || ''}
               onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
               disabled={isFetchingRate}
-              className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#0070f3] focus:outline-none disabled:cursor-wait disabled:opacity-50"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
             />
           </div>
         </div>
 
         {/* Notes */}
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-            <FileText className="h-4 w-4 text-[#a3a3a3]" />
+          <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+            <FileText className="text-text-muted h-4 w-4" />
             Notes / یادداشت (Optional)
           </label>
           <textarea
@@ -389,7 +393,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit }: AssetFormProps)
             rows={2}
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            className="w-full resize-none rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#0070f3] focus:outline-none"
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full resize-none rounded-lg border px-4 py-3 transition-all focus:outline-none"
           />
         </div>
 

@@ -201,7 +201,7 @@ const TagManagementList = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-[#a3a3a3]" />
+        <Loader2 className="text-text-muted h-6 w-6 animate-spin" />
       </div>
     );
   }
@@ -209,10 +209,10 @@ const TagManagementList = () => {
   if (tags.length === 0) {
     return (
       <div className="py-12 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#f5f5f5]">
-          <TagIcon className="h-6 w-6 text-[#a3a3a3]" />
+        <div className="bg-background-elevated mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
+          <TagIcon className="text-text-muted h-6 w-6" />
         </div>
-        <p className="text-sm text-[#a3a3a3]">No tags yet. Create tags while adding expenses.</p>
+        <p className="text-text-muted text-sm">No tags yet. Create tags while adding expenses.</p>
       </div>
     );
   }
@@ -223,7 +223,7 @@ const TagManagementList = () => {
       <div className="space-y-2">
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <TagIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#a3a3a3]" />
+            <TagIcon className="text-text-muted absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Create new tag..."
@@ -231,46 +231,46 @@ const TagManagementList = () => {
               onChange={(e) => setNewTagName(e.target.value)}
               onKeyDown={handleCreateKeyDown}
               disabled={isCreating}
-              className="w-full rounded-lg border border-[#e5e5e5] bg-white py-2.5 pr-4 pl-10 text-sm text-[#171717] transition-all outline-none placeholder:text-[#a3a3a3] focus:border-[#0070f3] disabled:cursor-not-allowed disabled:opacity-50"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border py-2.5 pr-4 pl-10 text-sm transition-all outline-none disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
           <button
             onClick={createTag}
             disabled={isCreating || !newTagName.trim()}
-            className="flex items-center gap-2 rounded-lg bg-[#171717] px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#404040] disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-primary hover:bg-button-primary-bg-hover flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-all disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
             {isCreating ? 'Creating...' : 'Create'}
           </button>
         </div>
-        {createError && <p className="text-xs text-[#ea001d]">{createError}</p>}
+        {createError && <p className="text-danger text-xs">{createError}</p>}
       </div>
 
       {/* Search Input */}
       <div className="relative">
-        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#a3a3a3]" />
+        <Search className="text-text-muted absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <input
           type="search"
           placeholder="Search tags..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full rounded-lg border border-[#e5e5e5] bg-white py-2.5 pr-4 pl-10 text-sm text-[#171717] transition-all outline-none placeholder:text-[#a3a3a3] focus:border-[#0070f3]"
+          className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border py-2.5 pr-4 pl-10 text-sm transition-all outline-none"
         />
       </div>
 
       {/* Tags List */}
       <div className="space-y-2">
         {filteredTags.length === 0 ? (
-          <p className="py-8 text-center text-sm text-[#a3a3a3]">No tags found matching &ldquo;{searchQuery}&rdquo;</p>
+          <p className="text-text-muted py-8 text-center text-sm">No tags found matching &ldquo;{searchQuery}&rdquo;</p>
         ) : (
           filteredTags.map((tag) => (
             <div
               key={tag.id}
-              className="flex items-center gap-3 rounded-lg border border-[#e5e5e5] bg-white p-3 transition-all hover:border-[#d4d4d4] sm:p-4"
+              className="border-border-subtle bg-background hover:border-border-default flex items-center gap-3 rounded-lg border p-3 transition-all sm:p-4"
             >
               {/* Tag Icon */}
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#e5e5e5] bg-[#f5f5f5]">
-                <TagIcon className="h-4 w-4 text-[#525252]" />
+              <div className="border-border-subtle bg-background-elevated flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
+                <TagIcon className="text-text-secondary h-4 w-4" />
               </div>
 
               {/* Tag Info */}
@@ -283,14 +283,14 @@ const TagManagementList = () => {
                       onChange={(e) => setEditingName(e.target.value)}
                       onKeyDown={(e) => handleEditKeyDown(e, tag.id)}
                       autoFocus
-                      className="w-full rounded border border-[#0070f3] bg-white px-2 py-1 text-sm font-medium text-[#171717] outline-none"
+                      className="border-blue bg-background text-text-primary w-full rounded border px-2 py-1 text-sm font-medium outline-none"
                     />
-                    {editError && <p className="text-xs text-[#ea001d]">{editError}</p>}
+                    {editError && <p className="text-danger text-xs">{editError}</p>}
                   </div>
                 ) : (
                   <>
-                    <p className="truncate text-sm font-medium text-[#171717]">{tag.name}</p>
-                    <p className="text-xs text-[#a3a3a3]">
+                    <p className="text-text-primary truncate text-sm font-medium">{tag.name}</p>
+                    <p className="text-text-muted text-xs">
                       Used in {tag.usage_count} {tag.usage_count === 1 ? 'expense' : 'expenses'}
                     </p>
                   </>
@@ -304,7 +304,7 @@ const TagManagementList = () => {
                     <button
                       onClick={() => saveEdit(tag.id)}
                       disabled={isSaving}
-                      className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#10b981]/10 hover:text-[#10b981] disabled:opacity-50"
+                      className="text-text-muted hover:bg-success/10 hover:text-success rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
                       aria-label="Save changes"
                       title="Save"
                     >
@@ -313,7 +313,7 @@ const TagManagementList = () => {
                     <button
                       onClick={cancelEdit}
                       disabled={isSaving}
-                      className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#f5f5f5] hover:text-[#525252] disabled:opacity-50"
+                      className="text-text-muted hover:bg-background-elevated hover:text-text-secondary rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
                       aria-label="Cancel editing"
                       title="Cancel"
                     >
@@ -324,7 +324,7 @@ const TagManagementList = () => {
                   <>
                     <button
                       onClick={() => startEdit(tag)}
-                      className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#0070f3]/10 hover:text-[#0070f3]"
+                      className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
                       aria-label={`Rename tag ${tag.name}`}
                       title="Edit"
                     >
@@ -332,7 +332,7 @@ const TagManagementList = () => {
                     </button>
                     <button
                       onClick={() => openDeleteModal(tag)}
-                      className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#ea001d]/10 hover:text-[#ea001d]"
+                      className="text-text-muted hover:bg-danger/10 hover:text-danger rounded-lg p-2 transition-all duration-200"
                       aria-label={`Delete tag ${tag.name}`}
                       title="Delete"
                     >

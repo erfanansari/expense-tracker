@@ -15,12 +15,12 @@ const baseStyles =
   'px-3 sm:px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer';
 
 const variantStyles = {
-  primary: 'bg-[#000000] hover:bg-[#171717] text-white',
-  outline: 'bg-white hover:bg-[#f5f5f5] border border-[#e5e5e5] text-[#525252] hover:text-[#171717]',
+  primary: 'bg-button-primary-bg hover:bg-button-primary-bg-hover text-button-primary-text',
+  outline:
+    'bg-background hover:bg-button-outline-bg-hover border border-button-outline-border text-button-outline-text hover:text-button-outline-text-hover',
   danger:
-    'bg-white hover:bg-[#ea001d]/10 border border-[#e5e5e5] hover:border-[#ea001d] text-[#525252] hover:text-[#ea001d]',
+    'bg-background hover:bg-danger/10 border border-button-outline-border hover:border-danger text-button-outline-text hover:text-danger',
 };
-// <button className="px-4 py-2.5 border border-[#e5e5e5] hover:bg-[#f5f5f5] rounded-lg text-sm font-medium text-[#525252] transition-all"></button>
 
 export const getButtonClasses = (variant: 'primary' | 'outline' | 'danger' = 'primary', className = '') => {
   return twMerge(baseStyles, variantStyles[variant], className);

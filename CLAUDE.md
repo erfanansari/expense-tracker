@@ -326,19 +326,55 @@ Use responsive Tailwind classes for mobile-first design:
 
 ### Styling with Tailwind
 
-- Use Tailwind utility classes directly
-- Prefer Tailwind classes over inline styles
-- Use consistent color palette:
-  - `#171717` - Primary text, black buttons
-  - `#525252` - Muted text, secondary content
-  - `#a3a3a3` - Subtle text, labels
-  - `#6b7280` - Gray text
-  - `#e5e5e5` - Borders, dividers
-  - `#fafafa` - Light backgrounds (headers, icon boxes)
-  - `#f5f5f5` - Hover states, tag backgrounds
-  - `#0070f3` - Blue links, primary actions
-  - `#10b981` - Success states
-  - `#ea001d` - Error states, danger actions (use `#AE292E` for hover)
+**IMPORTANT: ALL colors must use theme tokens from `src/styles/globals.css`. NEVER use hardcoded hex colors.**
+
+#### Theme Token Usage
+
+The app uses a centralized theming system with semantic color tokens. Always use these Tailwind classes:
+
+**Background Colors:**
+
+- `bg-background` - Main page background (#ffffff)
+- `bg-background-secondary` - Headers, secondary backgrounds (#fafafa)
+- `bg-background-elevated` - Hover states, elevated surfaces (#f5f5f5)
+- `bg-background-hover` - Subtle hover states (#f0f0f0)
+
+**Border Colors:**
+
+- `border-border-subtle` - Default borders (#e5e5e5)
+- `border-border-default` - Medium borders (#d4d4d4)
+- `border-border-strong` - Strong borders (#a3a3a3)
+
+**Text Colors:**
+
+- `text-text-primary` - Primary text, headings (#171717)
+- `text-text-secondary` - Secondary text (#525252)
+- `text-text-tertiary` - Tertiary text (#6b7280)
+- `text-text-muted` - Muted/subtle text, labels (#a3a3a3)
+
+**Semantic Colors:**
+
+- `bg-primary` / `text-primary` - Primary black color (#171717)
+- `bg-blue` / `text-blue` - Links, primary actions (#0070f3)
+- `bg-success` / `text-success` - Success states (#10b981)
+- `bg-danger` / `text-danger` - Error/danger states (#ea001d)
+- `bg-warning` / `text-warning` - Warning states (#f59e0b)
+- `bg-info` / `text-info` - Info states (#8b5cf6)
+
+**Component-Specific Tokens:**
+
+- Buttons: `bg-button-primary-bg`, `hover:bg-button-primary-bg-hover`, etc.
+- Actions: `text-action-default`, `hover:bg-action-edit-bg-hover`, `hover:text-action-delete-text-hover`
+- Inputs: `bg-input-bg`, `border-input-border`, `focus:border-input-border-focus`
+- Tags: `bg-tag-bg`, `text-tag-text`, `border-tag-border`
+- Cards: `bg-card-bg`, `bg-card-header-bg`, `border-card-border`
+
+**Rules:**
+
+1. **NEVER use hardcoded colors** like `bg-[#171717]` or `text-[#ea001d]`
+2. **Always use theme tokens** for all color values
+3. **To add a new color:** Add it to `src/styles/globals.css` first, expose it in `@theme inline`, then use it
+4. **Migration reference:** See `docs/COLOR_MIGRATION_MAP.md` for complete mapping
 
 ### UI/UX - Icon Consistency
 
@@ -360,38 +396,38 @@ import { Check, Edit2, Loader2, Plus, Trash2, X } from 'lucide-react';
 All action buttons (edit, delete, save, cancel) MUST use this standardized clean style:
 
 ```tsx
-// Edit button (blue hover)
+// Edit button (blue hover) - uses theme tokens
 <button
   onClick={handleEdit}
-  className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#0070f3]/10 hover:text-[#0070f3]"
+  className="rounded-lg p-2 text-action-default transition-all duration-200 hover:bg-action-edit-bg-hover hover:text-action-edit-text-hover"
   title="Edit"
 >
   <Edit2 className="h-4 w-4" />
 </button>
 
-// Delete button (red hover)
+// Delete button (red hover) - uses theme tokens
 <button
   onClick={handleDelete}
-  className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#ea001d]/10 hover:text-[#ea001d]"
+  className="rounded-lg p-2 text-action-default transition-all duration-200 hover:bg-action-delete-bg-hover hover:text-action-delete-text-hover"
   title="Delete"
 >
   <Trash2 className="h-4 w-4" />
 </button>
 
-// Save button (green hover)
+// Save button (green hover) - uses theme tokens
 <button
   onClick={handleSave}
   disabled={isSaving}
-  className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#10b981]/10 hover:text-[#10b981] disabled:opacity-50"
+  className="rounded-lg p-2 text-action-default transition-all duration-200 hover:bg-action-save-bg-hover hover:text-action-save-text-hover disabled:opacity-50"
   title="Save"
 >
   {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
 </button>
 
-// Cancel button (gray hover)
+// Cancel button (gray hover) - uses theme tokens
 <button
   onClick={handleCancel}
-  className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#f5f5f5] hover:text-[#525252]"
+  className="rounded-lg p-2 text-action-default transition-all duration-200 hover:bg-action-cancel-bg-hover hover:text-action-cancel-text-hover"
   title="Cancel"
 >
   <X className="h-4 w-4" />

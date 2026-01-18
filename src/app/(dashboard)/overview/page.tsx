@@ -51,16 +51,16 @@ function ExchangeRateCard() {
 
   if (isLoading || !rateData?.usd) {
     return (
-      <div className="relative min-w-0 rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm sm:p-6">
+      <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm sm:p-6">
         <div className="mb-4 flex items-center justify-between">
-          <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-            <DollarSign className="h-5 w-5 text-[#525252]" />
+          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+            <DollarSign className="text-text-secondary h-5 w-5" />
           </div>
         </div>
-        <p className="mb-2 text-xs font-medium tracking-wider text-[#a3a3a3] uppercase">Exchange Rate</p>
+        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Exchange Rate</p>
         <div className="flex items-center gap-2">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#e5e5e5] border-t-[#8b5cf6]" />
-          <p className="text-sm text-[#a3a3a3]">Loading...</p>
+          <div className="border-border-subtle border-t-info h-5 w-5 animate-spin rounded-full border-2" />
+          <p className="text-text-muted text-sm">Loading...</p>
         </div>
       </div>
     );
@@ -83,9 +83,9 @@ function ExchangeRateCard() {
     : '';
 
   const freshnessStyles = {
-    fresh: 'bg-[#ecfdf5] text-[#10b981] border-[#10b981]/20',
-    cached: 'bg-[#fefce8] text-[#ca8a04] border-[#ca8a04]/20',
-    stale: 'bg-[#fef2f2] text-[#ef4444] border-[#ef4444]/20',
+    fresh: 'bg-success-light text-success border-success/20',
+    cached: 'bg-warning-light text-warning border-warning/20',
+    stale: 'bg-danger-light text-danger border-danger/20',
   };
 
   const freshnessLabels = {
@@ -136,18 +136,18 @@ function ExchangeRateCard() {
   );
 
   return (
-    <div className="relative min-w-0 rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
+    <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
       <div className="mb-4 flex items-center justify-between">
-        <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-          <DollarSign className="h-5 w-5 text-[#525252]" />
+        <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+          <DollarSign className="text-text-secondary h-5 w-5" />
         </div>
         <div
           className={twMerge(
             'flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold',
             (() => {
-              if (isZero) return 'border-[#e5e5e5] bg-[#fafafa] text-[#a3a3a3]';
-              if (change > 0) return 'border-[#e5e5e5] bg-[#ecfdf5] text-[#10b981]';
-              return 'border-[#e5e5e5] bg-[#fef2f2] text-[#ef4444]';
+              if (isZero) return 'border-border-subtle bg-background-secondary text-text-muted';
+              if (change > 0) return 'border-border-subtle bg-success-light text-success';
+              return 'border-border-subtle bg-danger-light text-danger';
             })()
           )}
         >
@@ -169,12 +169,12 @@ function ExchangeRateCard() {
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-medium tracking-wider text-[#a3a3a3] uppercase">Exchange Rate</p>
-        <p className="text-2xl font-semibold text-[#171717] tabular-nums sm:text-3xl">
-          {formatNumber(rate)} <span className="text-lg text-[#a3a3a3]">تومان</span>
+        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Exchange Rate</p>
+        <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl">
+          {formatNumber(rate)} <span className="text-text-muted text-lg">تومان</span>
         </p>
         <div className="flex items-center justify-between gap-2">
-          {lastUpdate && <span className="mt-1.5 text-sm font-medium text-[#525252]">Updated {lastUpdate}</span>}
+          {lastUpdate && <span className="text-text-secondary mt-1.5 text-sm font-medium">Updated {lastUpdate}</span>}
           <div className="flex items-center gap-x-2">
             <span
               className={twMerge('rounded border px-1.5 py-0.5 text-[10px] font-medium', freshnessStyles[freshness])}
@@ -182,7 +182,7 @@ function ExchangeRateCard() {
               {freshnessLabels[freshness]}
             </span>
             <Tooltip content={tooltipContent} position="left">
-              <span className="text-[#a3a3a3] transition-colors hover:text-[#525252]">
+              <span className="text-text-muted hover:text-text-secondary transition-colors">
                 <Info className="h-3.5 w-3.5" />
               </span>
             </Tooltip>
@@ -290,13 +290,15 @@ export default function DashboardPage() {
   }, [filteredExpenses]);
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-white">
+    <div className="bg-background relative min-h-screen overflow-x-hidden">
       <div className="mx-auto max-w-[1600px] px-6 py-8">
         {/* Page Header */}
         <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <h1 className="text-xl font-bold text-[#171717] sm:text-2xl md:text-3xl">Overview</h1>
-            <p className="mt-1 text-xs text-[#a3a3a3] sm:text-sm">Welcome back! Here&apos;s your financial overview.</p>
+            <h1 className="text-text-primary text-xl font-bold sm:text-2xl md:text-3xl">Overview</h1>
+            <p className="text-text-muted mt-1 text-xs sm:text-sm">
+              Welcome back! Here&apos;s your financial overview.
+            </p>
           </div>
           <div className="flex flex-row items-center gap-2 sm:gap-3">
             <DateRangeSelector value={dateRange} onChange={setDateRange} />
@@ -310,52 +312,52 @@ export default function DashboardPage() {
         {/* Key Metrics */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
           {/* Total Expenses */}
-          <div className="relative min-w-0 rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
+          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
             <div className="mb-4 flex items-center justify-between">
-              <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-                <DollarSign className="h-5 w-5 text-[#525252]" />
+              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                <DollarSign className="text-text-secondary h-5 w-5" />
               </div>
             </div>
 
             <div>
-              <p className="mb-2 text-xs font-medium tracking-wider text-[#a3a3a3] uppercase">Total Expenses</p>
-              <p className="text-2xl font-semibold text-[#171717] tabular-nums sm:text-3xl" dir="rtl">
-                {formatNumber(totalToman)} <span className="text-lg text-[#a3a3a3]">تومان</span>
+              <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Expenses</p>
+              <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl" dir="rtl">
+                {formatNumber(totalToman)} <span className="text-text-muted text-lg">تومان</span>
               </p>
-              <p className="mt-1.5 text-sm font-medium text-[#525252]">${totalUsd.toFixed(2)} USD</p>
+              <p className="text-text-secondary mt-1.5 text-sm font-medium">${totalUsd.toFixed(2)} USD</p>
             </div>
           </div>
 
           {/* Transaction Count */}
-          <div className="relative min-w-0 rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
+          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
             <div className="mb-4 flex items-center justify-between">
-              <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-                <Hash className="h-5 w-5 text-[#525252]" />
+              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                <Hash className="text-text-secondary h-5 w-5" />
               </div>
             </div>
 
             <div>
-              <p className="mb-2 text-xs font-medium tracking-wider text-[#a3a3a3] uppercase">Transactions</p>
-              <p className="text-2xl font-semibold text-[#171717] tabular-nums sm:text-3xl">{transactionCount}</p>
-              <p className="mt-1.5 text-sm font-medium text-[#525252]" dir="rtl">
+              <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Transactions</p>
+              <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl">{transactionCount}</p>
+              <p className="text-text-secondary mt-1.5 text-sm font-medium" dir="rtl">
                 تعداد تراکنش
               </p>
             </div>
           </div>
 
           {/* Average Daily Spending */}
-          <div className="relative min-w-0 rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
+          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
             <div className="mb-4 flex items-center justify-between">
-              <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-                <BarChart3 className="h-5 w-5 text-[#525252]" />
+              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                <BarChart3 className="text-text-secondary h-5 w-5" />
               </div>
               {lastMonthTotal > 0 && (
                 <div
                   className={twMerge(
                     'flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold',
                     monthOverMonthChange >= 0
-                      ? 'border-[#e5e5e5] bg-[#fef2f2] text-[#ef4444]'
-                      : 'border-[#e5e5e5] bg-[#ecfdf5] text-[#10b981]'
+                      ? 'border-border-subtle bg-danger-light text-danger'
+                      : 'border-border-subtle bg-success-light text-success'
                   )}
                 >
                   {monthOverMonthChange >= 0 ? (
@@ -369,7 +371,7 @@ export default function DashboardPage() {
             </div>
 
             <div>
-              <p className="mb-2 text-xs font-medium tracking-wider text-[#a3a3a3] uppercase">Daily Average</p>
+              <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Daily Average</p>
               {(() => {
                 const dates = filteredExpenses.map((exp) => new Date(exp.date).getTime());
                 const firstDate = dates.length > 0 ? new Date(Math.min(...dates)) : new Date();
@@ -381,10 +383,10 @@ export default function DashboardPage() {
                 const avgDailyUsd = totalDays > 0 ? totalUsd / totalDays : 0;
                 return (
                   <>
-                    <p className="text-2xl font-semibold text-[#171717] tabular-nums sm:text-3xl" dir="rtl">
-                      {formatNumber(avgDailyToman)} <span className="text-lg text-[#a3a3a3]">تومان</span>
+                    <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl" dir="rtl">
+                      {formatNumber(avgDailyToman)} <span className="text-text-muted text-lg">تومان</span>
                     </p>
-                    <p className="mt-1.5 text-sm font-medium text-[#525252]">${avgDailyUsd.toFixed(2)} USD</p>
+                    <p className="text-text-secondary mt-1.5 text-sm font-medium">${avgDailyUsd.toFixed(2)} USD</p>
                   </>
                 );
               })()}
@@ -398,13 +400,13 @@ export default function DashboardPage() {
         {/* Insights Overview */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {/* Top 3 Categories */}
-          <div className="relative min-w-0 rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
+          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
             <div className="mb-4 flex items-center justify-between">
-              <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-                <Lightbulb className="h-5 w-5 text-[#525252]" />
+              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                <Lightbulb className="text-text-secondary h-5 w-5" />
               </div>
             </div>
-            <p className="mb-3 text-xs font-medium tracking-wider text-[#a3a3a3] uppercase">Top Categories</p>
+            <p className="text-text-muted mb-3 text-xs font-medium tracking-wider uppercase">Top Categories</p>
             {(() => {
               const now = new Date();
               const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -439,45 +441,45 @@ export default function DashboardPage() {
 
               return topThree.length > 0 ? (
                 <div className="space-y-3">
-                  <p className="text-xs font-medium text-[#a3a3a3]">
+                  <p className="text-text-muted text-xs font-medium">
                     {thisMonthExpenses.length > 0 ? 'This Month' : 'Overall'}
                   </p>
                   {topThree.map((cat, index) => (
                     <div
                       key={cat.category}
-                      className="flex items-center justify-between rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5 transition-colors hover:border-[#d4d4d4]"
+                      className="border-border-subtle bg-background-secondary hover:border-border-default flex items-center justify-between rounded-lg border p-2.5 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[#0070f3] text-xs font-semibold text-white">
+                        <span className="bg-blue flex h-6 w-6 items-center justify-center rounded-md text-xs font-semibold text-white">
                           {index + 1}
                         </span>
                         <div className="flex min-w-0 flex-col">
-                          <span className="truncate text-sm font-medium text-[#171717]">{cat.name}</span>
-                          <span className="truncate text-xs text-[#a3a3a3]" dir="rtl">
+                          <span className="text-text-primary truncate text-sm font-medium">{cat.name}</span>
+                          <span className="text-text-muted truncate text-xs" dir="rtl">
                             {cat.nameFa}
                           </span>
                         </div>
                       </div>
-                      <span className="text-sm font-semibold whitespace-nowrap text-[#171717] tabular-nums">
+                      <span className="text-text-primary text-sm font-semibold whitespace-nowrap tabular-nums">
                         {formatNumber(cat.value)}
                       </span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-[#a3a3a3]">No expense data available</p>
+                <p className="text-text-muted text-sm">No expense data available</p>
               );
             })()}
           </div>
 
           {/* Highest Single Expense */}
-          <div className="relative min-w-0 rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
+          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
             <div className="mb-4 flex items-center justify-between">
-              <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-                <TrendingUp className="h-5 w-5 text-[#525252]" />
+              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                <TrendingUp className="text-text-secondary h-5 w-5" />
               </div>
             </div>
-            <p className="mb-3 text-xs font-medium tracking-wider text-[#a3a3a3] uppercase">Highest Expense</p>
+            <p className="text-text-muted mb-3 text-xs font-medium tracking-wider uppercase">Highest Expense</p>
             {(() => {
               const highestExpense = filteredExpenses.reduce(
                 (max, exp) => (exp.price_toman > max.price_toman ? exp : max),
@@ -486,118 +488,124 @@ export default function DashboardPage() {
 
               return highestExpense ? (
                 <>
-                  <p className="text-2xl font-semibold text-[#171717] tabular-nums sm:text-3xl" dir="rtl">
-                    {formatNumber(highestExpense.price_toman)} <span className="text-lg text-[#a3a3a3]">تومان</span>
+                  <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl" dir="rtl">
+                    {formatNumber(highestExpense.price_toman)} <span className="text-text-muted text-lg">تومان</span>
                   </p>
-                  <p className="mt-1.5 text-sm font-medium text-[#525252]">
+                  <p className="text-text-secondary mt-1.5 text-sm font-medium">
                     ${highestExpense.price_usd.toFixed(2)} USD
                   </p>
-                  <div className="mt-3 border-t border-[#e5e5e5] pt-3">
-                    <p className="mb-1 text-xs text-[#a3a3a3]">
+                  <div className="border-border-subtle mt-3 border-t pt-3">
+                    <p className="text-text-muted mb-1 text-xs">
                       {new Date(highestExpense.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
                     </p>
-                    <p className="text-sm font-medium text-[#171717]">{getCategoryLabel(highestExpense.category).en}</p>
+                    <p className="text-text-primary text-sm font-medium">
+                      {getCategoryLabel(highestExpense.category).en}
+                    </p>
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-[#a3a3a3]">No expenses yet</p>
+                <p className="text-text-muted text-sm">No expenses yet</p>
               );
             })()}
           </div>
 
           {/* Month over Month Change */}
-          <div className="relative min-w-0 rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
+          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
             <div className="mb-4 flex items-center justify-between">
               <div
                 className={twMerge(
                   'rounded-lg border p-2.5',
-                  monthOverMonthChange >= 0 ? 'border-[#e5e5e5] bg-[#fef2f2]' : 'border-[#e5e5e5] bg-[#ecfdf5]'
+                  monthOverMonthChange >= 0
+                    ? 'border-border-subtle bg-danger-light'
+                    : 'border-border-subtle bg-success-light'
                 )}
               >
                 {monthOverMonthChange >= 0 ? (
-                  <TrendingUp className="h-5 w-5 text-[#ef4444]" />
+                  <TrendingUp className="text-danger h-5 w-5" />
                 ) : (
-                  <TrendingDown className="h-5 w-5 text-[#10b981]" />
+                  <TrendingDown className="text-success h-5 w-5" />
                 )}
               </div>
             </div>
-            <p className="mb-3 text-xs font-medium tracking-wider text-[#a3a3a3] uppercase">vs Last Month</p>
+            <p className="text-text-muted mb-3 text-xs font-medium tracking-wider uppercase">vs Last Month</p>
             {lastMonthTotal > 0 ? (
               <>
                 <p
                   className={twMerge(
                     'text-2xl font-semibold tabular-nums sm:text-3xl',
-                    monthOverMonthChange >= 0 ? 'text-[#ef4444]' : 'text-[#10b981]'
+                    monthOverMonthChange >= 0 ? 'text-danger' : 'text-success'
                   )}
                 >
                   {monthOverMonthChange >= 0 ? '+' : ''}
                   {monthOverMonthChange.toFixed(1)}%
                 </p>
-                <p className="mt-1.5 text-sm font-medium text-[#525252]">
+                <p className="text-text-secondary mt-1.5 text-sm font-medium">
                   Spending{' '}
                   <span
-                    className={twMerge(
-                      'font-semibold',
-                      monthOverMonthChange >= 0 ? 'text-[#ef4444]' : 'text-[#10b981]'
-                    )}
+                    className={twMerge('font-semibold', monthOverMonthChange >= 0 ? 'text-danger' : 'text-success')}
                   >
                     {monthOverMonthChange >= 0 ? 'more' : 'less'}
                   </span>{' '}
                   than last month
                 </p>
-                <div className="mt-3 space-y-1 border-t border-[#e5e5e5] pt-3">
+                <div className="border-border-subtle mt-3 space-y-1 border-t pt-3">
                   <div className="flex justify-between text-xs">
-                    <span className="text-[#a3a3a3]">This Month</span>
-                    <span className="font-medium text-[#171717] tabular-nums">
+                    <span className="text-text-muted">This Month</span>
+                    <span className="text-text-primary font-medium tabular-nums">
                       {formatNumber(thisMonthTotalToman)} ت
                     </span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className="text-[#a3a3a3]">Last Month</span>
-                    <span className="text-[#525252] tabular-nums">{formatNumber(lastMonthTotalToman)} ت</span>
+                    <span className="text-text-muted">Last Month</span>
+                    <span className="text-text-secondary tabular-nums">{formatNumber(lastMonthTotalToman)} ت</span>
                   </div>
                 </div>
               </>
             ) : (
-              <p className="text-sm text-[#a3a3a3]">Not enough data to compare</p>
+              <p className="text-text-muted text-sm">Not enough data to compare</p>
             )}
           </div>
         </div>
 
         {/* Expenses by Category - Full Width */}
         {categoryData.length > 0 && (
-          <div className="relative mb-6 overflow-hidden rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm sm:mb-8 sm:p-6">
+          <div className="border-border-subtle bg-background relative mb-6 overflow-hidden rounded-xl border p-5 shadow-sm sm:mb-8 sm:p-6">
             <div className="mb-6 flex items-center gap-3">
-              <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
-                <BarChart3 className="h-4 w-4 text-[#525252]" />
+              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
+                <BarChart3 className="text-text-secondary h-4 w-4" />
               </div>
-              <h2 className="text-lg font-semibold text-[#171717]">Expenses by Category</h2>
+              <h2 className="text-text-primary text-lg font-semibold">Expenses by Category</h2>
             </div>
 
             <div className="space-y-3">
               {categoryData.map((cat, _index) => (
                 <div
                   key={cat.category}
-                  className="group flex min-w-0 items-center gap-3 rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-3 transition-colors hover:border-[#d4d4d4] sm:gap-4 sm:p-4"
+                  className="group border-border-subtle bg-background-secondary hover:border-border-default flex min-w-0 items-center gap-3 rounded-lg border p-3 transition-colors sm:gap-4 sm:p-4"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="mb-2 flex items-center justify-between gap-2">
                       <div className="flex min-w-0 flex-1 flex-col">
-                        <span className="truncate text-sm font-semibold text-[#171717]">{cat.name}</span>
-                        <span className="truncate text-xs text-[#a3a3a3]" dir="rtl">
+                        <span className="text-text-primary truncate text-sm font-semibold">{cat.name}</span>
+                        <span className="text-text-muted truncate text-xs" dir="rtl">
                           {cat.nameFa}
                         </span>
                       </div>
                       <div className="flex shrink-0 flex-col items-end">
-                        <span className="text-sm font-semibold whitespace-nowrap text-[#171717] tabular-nums" dir="rtl">
+                        <span
+                          className="text-text-primary text-sm font-semibold whitespace-nowrap tabular-nums"
+                          dir="rtl"
+                        >
                           {formatNumber(cat.value)} تومان
                         </span>
-                        <span className="text-xs whitespace-nowrap text-[#a3a3a3]">${cat.usdValue.toFixed(2)} USD</span>
+                        <span className="text-text-muted text-xs whitespace-nowrap">
+                          ${cat.usdValue.toFixed(2)} USD
+                        </span>
                       </div>
                     </div>
-                    <div className="h-2 w-full rounded-full bg-[#e5e5e5]">
+                    <div className="bg-border-subtle h-2 w-full rounded-full">
                       <div
-                        className="h-full rounded-full bg-[#0070f3] transition-all duration-500"
+                        className="bg-blue h-full rounded-full transition-all duration-500"
                         style={{
                           width: `${totalToman > 0 ? (cat.value / totalToman) * 100 : 0}%`,
                         }}
@@ -613,22 +621,22 @@ export default function DashboardPage() {
         {/* Enhanced Charts */}
         <div className="mb-8">
           <div className="mb-6 flex items-center gap-3">
-            <h2 className="text-xl font-semibold text-[#171717]">Enhanced Analytics</h2>
-            <span className="text-sm text-[#a3a3a3]" dir="rtl">
+            <h2 className="text-text-primary text-xl font-semibold">Enhanced Analytics</h2>
+            <span className="text-text-muted text-sm" dir="rtl">
               نمودارهای پیشرفته
             </span>
           </div>
 
           <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-2">
             {/* Comparison Chart - This Month vs Last Month */}
-            <div className="relative overflow-hidden rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
+            <div className="border-border-subtle bg-background relative overflow-hidden rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
               <div className="mb-6 flex items-center gap-3">
-                <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-                  <BarChart3 className="h-5 w-5 text-[#525252]" />
+                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                  <BarChart3 className="text-text-secondary h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-[#171717]">Month Comparison</h3>
-                  <p className="text-xs text-[#a3a3a3]" dir="rtl">
+                  <h3 className="text-text-primary text-lg font-semibold">Month Comparison</h3>
+                  <p className="text-text-muted text-xs" dir="rtl">
                     مقایسه ماهانه
                   </p>
                 </div>
@@ -638,16 +646,16 @@ export default function DashboardPage() {
                 {/* This Month Bar */}
                 <div>
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="text-sm font-medium text-[#171717]">
+                    <span className="text-text-primary text-sm font-medium">
                       {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                     </span>
-                    <span className="text-sm font-semibold text-[#171717] tabular-nums">
+                    <span className="text-text-primary text-sm font-semibold tabular-nums">
                       {formatNumber(thisMonthTotalToman)} ت
                     </span>
                   </div>
-                  <div className="h-3 w-full rounded-full bg-[#e5e5e5]">
+                  <div className="bg-border-subtle h-3 w-full rounded-full">
                     <div
-                      className="h-full rounded-full bg-[#0070f3] transition-all duration-500"
+                      className="bg-blue h-full rounded-full transition-all duration-500"
                       style={{
                         width: `${Math.max(thisMonthTotalToman, lastMonthTotalToman) > 0 ? (thisMonthTotalToman / Math.max(thisMonthTotalToman, lastMonthTotalToman)) * 100 : 0}%`,
                       }}
@@ -658,19 +666,19 @@ export default function DashboardPage() {
                 {/* Last Month Bar */}
                 <div>
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="text-sm font-medium text-[#525252]">
+                    <span className="text-text-secondary text-sm font-medium">
                       {new Date(new Date().getFullYear(), new Date().getMonth() - 1).toLocaleDateString('en-US', {
                         month: 'long',
                         year: 'numeric',
                       })}
                     </span>
-                    <span className="text-sm font-semibold text-[#525252] tabular-nums">
+                    <span className="text-text-secondary text-sm font-semibold tabular-nums">
                       {formatNumber(lastMonthTotalToman)} ت
                     </span>
                   </div>
-                  <div className="h-3 w-full rounded-full bg-[#e5e5e5]">
+                  <div className="bg-border-subtle h-3 w-full rounded-full">
                     <div
-                      className="h-full rounded-full bg-[#d4d4d4] transition-all duration-500"
+                      className="bg-border-default h-full rounded-full transition-all duration-500"
                       style={{
                         width: `${Math.max(thisMonthTotalToman, lastMonthTotalToman) > 0 ? (lastMonthTotalToman / Math.max(thisMonthTotalToman, lastMonthTotalToman)) * 100 : 0}%`,
                       }}
@@ -679,20 +687,20 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Difference */}
-                <div className="border-t border-[#e5e5e5] pt-4">
+                <div className="border-border-subtle border-t pt-4">
                   {thisMonthTotalToman > 0 && lastMonthTotalToman > 0 ? (
-                    <div className="flex items-center justify-between rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-3">
-                      <span className="text-sm text-[#525252]">Difference</span>
+                    <div className="border-border-subtle bg-background-secondary flex items-center justify-between rounded-lg border p-3">
+                      <span className="text-text-secondary text-sm">Difference</span>
                       <div className="flex items-center gap-2">
                         {thisMonthTotalToman > lastMonthTotalToman ? (
-                          <TrendingUp className="h-4 w-4 text-[#ef4444]" />
+                          <TrendingUp className="text-danger h-4 w-4" />
                         ) : (
-                          <TrendingDown className="h-4 w-4 text-[#10b981]" />
+                          <TrendingDown className="text-success h-4 w-4" />
                         )}
                         <span
                           className={twMerge(
                             'text-sm font-semibold tabular-nums',
-                            thisMonthTotalToman > lastMonthTotalToman ? 'text-[#ef4444]' : 'text-[#10b981]'
+                            thisMonthTotalToman > lastMonthTotalToman ? 'text-danger' : 'text-success'
                           )}
                         >
                           {formatNumber(Math.abs(thisMonthTotalToman - lastMonthTotalToman))} ت
@@ -700,7 +708,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   ) : (
-                    <p className="text-sm text-[#a3a3a3]">
+                    <p className="text-text-muted text-sm">
                       {thisMonthTotalToman === 0 && lastMonthTotalToman > 0
                         ? `No spending recorded in ${new Date().toLocaleDateString('en-US', { month: 'long' })} yet`
                         : 'No data to compare'}
@@ -711,14 +719,14 @@ export default function DashboardPage() {
             </div>
 
             {/* Spending Heatmap Calendar */}
-            <div className="relative overflow-hidden rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
+            <div className="border-border-subtle bg-background relative overflow-hidden rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
               <div className="mb-6 flex items-center gap-3">
-                <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-                  <BarChart3 className="h-5 w-5 text-[#525252]" />
+                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                  <BarChart3 className="text-text-secondary h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-[#171717]">Spending Heatmap</h3>
-                  <p className="text-xs text-[#a3a3a3]" dir="rtl">
+                  <h3 className="text-text-primary text-lg font-semibold">Spending Heatmap</h3>
+                  <p className="text-text-muted text-xs" dir="rtl">
                     نقشه حرارتی هزینه
                   </p>
                 </div>
@@ -788,7 +796,7 @@ export default function DashboardPage() {
                 return (
                   <div>
                     {/* Month label */}
-                    <p className="mb-4 text-sm font-medium text-[#171717]">
+                    <p className="text-text-primary mb-4 text-sm font-medium">
                       {new Date(displayYear, displayMonth).toLocaleDateString('en-US', {
                         month: 'long',
                         year: 'numeric',
@@ -799,7 +807,7 @@ export default function DashboardPage() {
                     <div className="mb-3 grid grid-cols-7 gap-1.5 sm:gap-2">
                       {dayLabels.map((label) => (
                         <div key={label} className="text-center">
-                          <p className="text-[10px] font-semibold tracking-wide text-[#a3a3a3] uppercase">{label}</p>
+                          <p className="text-text-muted text-[10px] font-semibold tracking-wide uppercase">{label}</p>
                         </div>
                       ))}
                     </div>
@@ -810,7 +818,7 @@ export default function DashboardPage() {
                         <div key={idx} className="group relative">
                           {day.date ? (
                             <div
-                              className="aspect-square cursor-pointer rounded-lg border border-[#e5e5e5] transition-all hover:scale-105 hover:ring-2 hover:ring-[#0070f3]"
+                              className="border-border-subtle hover:ring-blue aspect-square cursor-pointer rounded-lg border transition-all hover:scale-105 hover:ring-2"
                               style={{
                                 backgroundColor: getHeatmapColor(day.total),
                               }}
@@ -820,7 +828,7 @@ export default function DashboardPage() {
                                 <span
                                   className={twMerge(
                                     'text-xs font-semibold sm:text-sm',
-                                    day.total > 0 ? 'text-white' : 'text-[#a3a3a3]'
+                                    day.total > 0 ? 'text-white' : 'text-text-muted'
                                   )}
                                 >
                                   {day.date}
@@ -833,11 +841,11 @@ export default function DashboardPage() {
 
                           {/* Tooltip on hover */}
                           {day.date && (
-                            <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 transform rounded-lg border border-[#e5e5e5] bg-white px-3 py-2 text-xs whitespace-nowrap text-[#171717] opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
-                              <p className="font-semibold text-[#171717]">
+                            <div className="border-border-subtle bg-background text-text-primary pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 transform rounded-lg border px-3 py-2 text-xs whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                              <p className="text-text-primary font-semibold">
                                 {day.count} {day.count === 1 ? 'transaction' : 'transactions'}
                               </p>
-                              <p className="font-medium text-[#0070f3]">{formatNumber(day.total)} ت</p>
+                              <p className="text-blue font-medium">{formatNumber(day.total)} ت</p>
                             </div>
                           )}
                         </div>
@@ -845,37 +853,37 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Legend */}
-                    <div className="mt-5 border-t border-[#e5e5e5] pt-4">
-                      <p className="mb-3 text-xs font-medium text-[#a3a3a3]">Spending Intensity</p>
+                    <div className="border-border-subtle mt-5 border-t pt-4">
+                      <p className="text-text-muted mb-3 text-xs font-medium">Spending Intensity</p>
                       <div className="flex items-center gap-3 text-xs">
-                        <span className="text-[#a3a3a3]">Less</span>
+                        <span className="text-text-muted">Less</span>
                         <div className="flex gap-1.5">
                           <div
-                            className="h-4 w-4 rounded-md border border-[#e5e5e5]"
+                            className="border-border-subtle h-4 w-4 rounded-md border"
                             style={{ backgroundColor: '#f5f5f5' }}
                           />
                           <div
-                            className="h-4 w-4 rounded-md border border-[#e5e5e5]"
+                            className="border-border-subtle h-4 w-4 rounded-md border"
                             style={{ backgroundColor: '#cce5ff' }}
                           />
                           <div
-                            className="h-4 w-4 rounded-md border border-[#e5e5e5]"
+                            className="border-border-subtle h-4 w-4 rounded-md border"
                             style={{ backgroundColor: '#99ccff' }}
                           />
                           <div
-                            className="h-4 w-4 rounded-md border border-[#e5e5e5]"
+                            className="border-border-subtle h-4 w-4 rounded-md border"
                             style={{ backgroundColor: '#66b3ff' }}
                           />
                           <div
-                            className="h-4 w-4 rounded-md border border-[#e5e5e5]"
+                            className="border-border-subtle h-4 w-4 rounded-md border"
                             style={{ backgroundColor: '#3b9aff' }}
                           />
                           <div
-                            className="h-4 w-4 rounded-md border border-[#e5e5e5]"
+                            className="border-border-subtle h-4 w-4 rounded-md border"
                             style={{ backgroundColor: '#0070f3' }}
                           />
                         </div>
-                        <span className="text-[#a3a3a3]">More</span>
+                        <span className="text-text-muted">More</span>
                       </div>
                     </div>
                   </div>

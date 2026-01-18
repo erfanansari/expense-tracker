@@ -8,28 +8,28 @@ import TagManagementList from '@/features/expenses/components/TagManagementList'
 
 export default function SettingsPage() {
   return (
-    <div className="min-h-screen bg-[#ffffff]">
+    <div className="bg-background min-h-screen">
       <div className="mx-auto max-w-[1600px] px-6 py-8">
         {/* Page Header */}
         <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-bold text-[#171717] sm:text-2xl md:text-3xl">Settings</h1>
-            <p className="mt-1 text-xs text-[#a3a3a3] sm:text-sm">Manage your account and preferences</p>
+            <h1 className="text-text-primary text-xl font-bold sm:text-2xl md:text-3xl">Settings</h1>
+            <p className="text-text-muted mt-1 text-xs sm:text-sm">Manage your account and preferences</p>
           </div>
         </div>
 
         {/* Settings Sections */}
         <div className="grid gap-6">
           {/* Profile Settings */}
-          <div className="rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
-            <div className="border-b border-[#e5e5e5] p-6">
+          <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
+            <div className="border-border-subtle border-b p-6">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
-                  <User className="h-5 w-5 text-[#525252]" />
+                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
+                  <User className="text-text-secondary h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#171717]">Profile</h2>
-                  <p className="text-sm text-[#a3a3a3]">Update your personal information</p>
+                  <h2 className="text-text-primary text-lg font-semibold">Profile</h2>
+                  <p className="text-text-muted text-sm">Update your personal information</p>
                 </div>
               </div>
             </div>
@@ -37,19 +37,19 @@ export default function SettingsPage() {
               <div className="grid max-w-2xl gap-4">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-[#525252]">Username</label>
+                    <label className="text-text-secondary mb-2 block text-sm font-medium">Username</label>
                     <input
                       type="text"
                       defaultValue="erfanansari"
-                      className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-2.5 text-[#171717] transition-all focus:border-[#0070f3] focus:outline-none"
+                      className="border-border-subtle bg-background text-text-primary focus:border-blue w-full rounded-lg border px-4 py-2.5 transition-all focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-[#525252]">Email</label>
+                    <label className="text-text-secondary mb-2 block text-sm font-medium">Email</label>
                     <input
                       type="email"
                       defaultValue="dev.erfanansari@gmail.com"
-                      className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-2.5 text-[#171717] transition-all focus:border-[#0070f3] focus:outline-none"
+                      className="border-border-subtle bg-background text-text-primary focus:border-blue w-full rounded-lg border px-4 py-2.5 transition-all focus:outline-none"
                     />
                   </div>
                 </div>
@@ -62,15 +62,15 @@ export default function SettingsPage() {
           </div>
 
           {/* Tags */}
-          <div className="rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
-            <div className="border-b border-[#e5e5e5] p-6">
+          <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
+            <div className="border-border-subtle border-b p-6">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
-                  <Tag className="h-5 w-5 text-[#525252]" />
+                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
+                  <Tag className="text-text-secondary h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#171717]">Tags</h2>
-                  <p className="text-sm text-[#a3a3a3]">Manage your expense tags</p>
+                  <h2 className="text-text-primary text-lg font-semibold">Tags</h2>
+                  <p className="text-text-muted text-sm">Manage your expense tags</p>
                 </div>
               </div>
             </div>
@@ -82,26 +82,26 @@ export default function SettingsPage() {
           {/* Preferences */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* Language */}
-            <div className="rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
-              <div className="border-b border-[#e5e5e5] p-6">
+            <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
+              <div className="border-border-subtle border-b p-6">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
-                    <Globe className="h-5 w-5 text-[#525252]" />
+                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
+                    <Globe className="text-text-secondary h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-[#171717]">Language</h2>
-                    <p className="text-sm text-[#a3a3a3]">Select your preferred language</p>
+                    <h2 className="text-text-primary text-lg font-semibold">Language</h2>
+                    <p className="text-text-muted text-sm">Select your preferred language</p>
                   </div>
                 </div>
               </div>
               <div className="p-6">
                 <div className="relative">
-                  <select className="w-full cursor-pointer appearance-none rounded-lg border border-[#e5e5e5] bg-white px-4 py-2.5 pr-10 text-[#171717] transition-all focus:border-[#0070f3] focus:outline-none">
+                  <select className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-2.5 pr-10 transition-all focus:outline-none">
                     <option>English</option>
                     <option>فارسی (Persian)</option>
                   </select>
                   <svg
-                    className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-[#a3a3a3]"
+                    className="text-text-muted pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -113,26 +113,26 @@ export default function SettingsPage() {
             </div>
 
             {/* Appearance */}
-            <div className="rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
-              <div className="border-b border-[#e5e5e5] p-6">
+            <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
+              <div className="border-border-subtle border-b p-6">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
-                    <Palette className="h-5 w-5 text-[#525252]" />
+                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
+                    <Palette className="text-text-secondary h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-[#171717]">Appearance</h2>
-                    <p className="text-sm text-[#a3a3a3]">Customize the look and feel</p>
+                    <h2 className="text-text-primary text-lg font-semibold">Appearance</h2>
+                    <p className="text-text-muted text-sm">Customize the look and feel</p>
                   </div>
                 </div>
               </div>
               <div className="p-6">
                 <div className="relative">
-                  <select className="w-full cursor-pointer appearance-none rounded-lg border border-[#e5e5e5] bg-white px-4 py-2.5 pr-10 text-[#171717] transition-all focus:border-[#0070f3] focus:outline-none">
+                  <select className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-2.5 pr-10 transition-all focus:outline-none">
                     <option>Light Mode</option>
                     <option disabled>Dark Mode (Coming Soon)</option>
                   </select>
                   <svg
-                    className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-[#a3a3a3]"
+                    className="text-text-muted pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -145,15 +145,15 @@ export default function SettingsPage() {
           </div>
 
           {/* Notifications */}
-          <div className="rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
-            <div className="border-b border-[#e5e5e5] p-6">
+          <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
+            <div className="border-border-subtle border-b p-6">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
-                  <Bell className="h-5 w-5 text-[#525252]" />
+                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
+                  <Bell className="text-text-secondary h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#171717]">Notifications</h2>
-                  <p className="text-sm text-[#a3a3a3]">Manage your notification preferences</p>
+                  <h2 className="text-text-primary text-lg font-semibold">Notifications</h2>
+                  <p className="text-text-muted text-sm">Manage your notification preferences</p>
                 </div>
               </div>
             </div>
@@ -161,20 +161,20 @@ export default function SettingsPage() {
               <div className="max-w-2xl space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-[#171717]">Email Notifications</p>
-                    <p className="mt-0.5 text-xs text-[#a3a3a3]">Receive email updates about your expenses</p>
+                    <p className="text-text-primary text-sm font-medium">Email Notifications</p>
+                    <p className="text-text-muted mt-0.5 text-xs">Receive email updates about your expenses</p>
                   </div>
-                  <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-[#e5e5e5] transition-colors hover:bg-[#d4d4d4]">
-                    <span className="inline-block h-4 w-4 translate-x-1 transform rounded-full bg-white transition-transform" />
+                  <button className="bg-border-subtle hover:bg-border-default relative inline-flex h-6 w-11 items-center rounded-full transition-colors">
+                    <span className="bg-background inline-block h-4 w-4 translate-x-1 transform rounded-full transition-transform" />
                   </button>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-[#171717]">Weekly Reports</p>
-                    <p className="mt-0.5 text-xs text-[#a3a3a3]">Get weekly expense summaries</p>
+                    <p className="text-text-primary text-sm font-medium">Weekly Reports</p>
+                    <p className="text-text-muted mt-0.5 text-xs">Get weekly expense summaries</p>
                   </div>
-                  <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-[#0070f3]">
-                    <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition-transform" />
+                  <button className="bg-blue relative inline-flex h-6 w-11 items-center rounded-full">
+                    <span className="bg-background inline-block h-4 w-4 translate-x-6 transform rounded-full transition-transform" />
                   </button>
                 </div>
               </div>
@@ -182,15 +182,15 @@ export default function SettingsPage() {
           </div>
 
           {/* Security */}
-          <div className="rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
-            <div className="border-b border-[#e5e5e5] p-6">
+          <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
+            <div className="border-border-subtle border-b p-6">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
-                  <Lock className="h-5 w-5 text-[#525252]" />
+                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
+                  <Lock className="text-text-secondary h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#171717]">Security</h2>
-                  <p className="text-sm text-[#a3a3a3]">Manage your password and security settings</p>
+                  <h2 className="text-text-primary text-lg font-semibold">Security</h2>
+                  <p className="text-text-muted text-sm">Manage your password and security settings</p>
                 </div>
               </div>
             </div>
@@ -202,15 +202,15 @@ export default function SettingsPage() {
           </div>
 
           {/* Data Management */}
-          <div className="rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
-            <div className="border-b border-[#e5e5e5] p-6">
+          <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
+            <div className="border-border-subtle border-b p-6">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
-                  <Database className="h-5 w-5 text-[#525252]" />
+                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
+                  <Database className="text-text-secondary h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#171717]">Data Management</h2>
-                  <p className="text-sm text-[#a3a3a3]">Export or delete your data</p>
+                  <h2 className="text-text-primary text-lg font-semibold">Data Management</h2>
+                  <p className="text-text-muted text-sm">Export or delete your data</p>
                 </div>
               </div>
             </div>
@@ -223,15 +223,15 @@ export default function SettingsPage() {
           </div>
 
           {/* Help & Support */}
-          <div className="rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
-            <div className="border-b border-[#e5e5e5] p-6">
+          <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
+            <div className="border-border-subtle border-b p-6">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2">
-                  <HelpCircle className="h-5 w-5 text-[#525252]" />
+                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
+                  <HelpCircle className="text-text-secondary h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#171717]">Help & Support</h2>
-                  <p className="text-sm text-[#a3a3a3]">Get help or send feedback</p>
+                  <h2 className="text-text-primary text-lg font-semibold">Help & Support</h2>
+                  <p className="text-text-muted text-sm">Get help or send feedback</p>
                 </div>
               </div>
             </div>

@@ -48,13 +48,13 @@ const CustomTooltip = ({
     const data = payload[0];
     const usdValue = data.payload.usdValue || 0;
     return (
-      <div className="rounded-lg border border-[#e5e5e5] bg-white p-4 shadow-lg">
-        <p className="text-lg font-bold text-[#171717]" dir="rtl">
+      <div className="border-border-subtle bg-background rounded-lg border p-4 shadow-lg">
+        <p className="text-text-primary text-lg font-bold" dir="rtl">
           {formatNumber(data.value)} تومان
         </p>
-        <p className="mt-1.5 text-sm font-medium text-[#a3a3a3]">${usdValue.toFixed(2)} USD</p>
+        <p className="text-text-muted mt-1.5 text-sm font-medium">${usdValue.toFixed(2)} USD</p>
         {data.payload.nameFa && (
-          <p className="mt-2 text-sm font-medium text-[#0070f3]" dir="rtl">
+          <p className="text-blue mt-2 text-sm font-medium" dir="rtl">
             {data.payload.nameFa}
           </p>
         )}
@@ -144,14 +144,14 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       {/* Pie Chart */}
-      <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-6 shadow-sm">
+      <div className="border-border-subtle bg-background relative rounded-xl border p-6 shadow-sm">
         <div className="mb-6 flex items-center gap-3">
-          <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-            <PieChartIcon className="h-5 w-5 text-[#0070f3]" />
+          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+            <PieChartIcon className="text-blue h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-[#171717]">By Category</h3>
-            <p className="text-sm text-[#a3a3a3]" dir="rtl">
+            <h3 className="text-text-primary text-lg font-bold">By Category</h3>
+            <p className="text-text-muted text-sm" dir="rtl">
               بر اساس دسته‌بندی
             </p>
           </div>
@@ -186,7 +186,7 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
           {categoryTotals.map((cat, index) => (
             <div
               key={cat.category}
-              className="flex cursor-default items-center gap-2.5 rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5 transition-all duration-200 hover:bg-[#f5f5f5]"
+              className="border-border-subtle bg-background-secondary hover:bg-background-elevated flex cursor-default items-center gap-2.5 rounded-lg border p-2.5 transition-all duration-200"
             >
               <div
                 className="h-3 w-3 shrink-0 rounded-full"
@@ -194,21 +194,21 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
                   backgroundColor: COLORS[index % COLORS.length],
                 }}
               />
-              <span className="truncate text-sm font-medium text-[#525252]">{cat.name}</span>
+              <span className="text-text-secondary truncate text-sm font-medium">{cat.name}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Bar Chart */}
-      <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-6 shadow-sm">
+      <div className="border-border-subtle bg-background relative rounded-xl border p-6 shadow-sm">
         <div className="mb-6 flex items-center gap-3">
-          <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-            <BarChart3 className="h-5 w-5 text-[#10b981]" />
+          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+            <BarChart3 className="text-success h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-[#171717]">Category Comparison</h3>
-            <p className="text-sm text-[#a3a3a3]" dir="rtl">
+            <h3 className="text-text-primary text-lg font-bold">Category Comparison</h3>
+            <p className="text-text-muted text-sm" dir="rtl">
               مقایسه دسته‌بندی
             </p>
           </div>
@@ -246,18 +246,18 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
       </div>
 
       {/* Area Chart - Spending Trend */}
-      <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-6 shadow-sm lg:col-span-2">
+      <div className="border-border-subtle bg-background relative rounded-xl border p-6 shadow-sm lg:col-span-2">
         <div className="mb-6 flex items-center gap-3">
-          <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-            <TrendingUp className="h-5 w-5 text-[#0070f3]" />
+          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+            <TrendingUp className="text-blue h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-[#171717]">
+            <h3 className="text-text-primary text-lg font-bold">
               {granularity === 'daily' && 'Daily Spending Trend'}
               {granularity === 'weekly' && 'Weekly Spending Trend'}
               {granularity === 'monthly' && 'Monthly Spending Trend'}
             </h3>
-            <p className="text-sm text-[#a3a3a3]" dir="rtl">
+            <p className="text-text-muted text-sm" dir="rtl">
               {granularity === 'daily' && 'روند هزینه روزانه'}
               {granularity === 'weekly' && 'روند هزینه هفتگی'}
               {granularity === 'monthly' && 'روند هزینه ماهانه'}

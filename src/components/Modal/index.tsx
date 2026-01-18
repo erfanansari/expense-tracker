@@ -79,21 +79,21 @@ const Modal = ({ isOpen, onClose, title, titleFa, children, className, showClose
         ref={modalRef}
         tabIndex={-1}
         className={twMerge(
-          'relative max-h-[90vh] w-full max-w-lg overflow-hidden rounded-xl border border-[#e5e5e5] bg-white shadow-xl',
+          'border-border-subtle bg-background relative max-h-[90vh] w-full max-w-lg overflow-hidden rounded-xl border shadow-xl',
           'transform transition-all duration-200',
           className
         )}
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between border-b border-[#e5e5e5] bg-[#fafafa] px-4 py-3 sm:px-6 sm:py-4">
+          <div className="border-border-subtle bg-background-secondary flex items-center justify-between border-b px-4 py-3 sm:px-6 sm:py-4">
             {title ? (
               <div className="min-w-0 flex-1">
-                <h2 id="modal-title" className="truncate text-base font-semibold text-[#171717] sm:text-lg">
+                <h2 id="modal-title" className="text-text-primary truncate text-base font-semibold sm:text-lg">
                   {title}
                 </h2>
                 {titleFa && (
-                  <p className="mt-0.5 text-xs text-[#a3a3a3]" dir="rtl">
+                  <p className="text-text-muted mt-0.5 text-xs" dir="rtl">
                     {titleFa}
                   </p>
                 )}
@@ -104,7 +104,7 @@ const Modal = ({ isOpen, onClose, title, titleFa, children, className, showClose
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="-mr-1 ml-4 flex-shrink-0 rounded-lg p-2 text-[#a3a3a3] transition-colors duration-200 hover:bg-[#f5f5f5] hover:text-[#171717] focus:ring-2 focus:ring-[#171717] focus:ring-offset-2 focus:outline-none"
+                className="text-text-muted hover:bg-background-elevated hover:text-text-primary focus:ring-primary -mr-1 ml-4 flex-shrink-0 rounded-lg p-2 transition-colors duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none"
                 aria-label="Close modal"
               >
                 <X className="h-5 w-5" />

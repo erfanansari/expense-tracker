@@ -188,18 +188,22 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
   };
 
   return (
-    <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-6 shadow-sm">
+    <div className="border-border-subtle bg-background relative rounded-xl border p-6 shadow-sm">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-            {editingExpense ? <Save className="h-5 w-5 text-[#525252]" /> : <Plus className="h-5 w-5 text-[#525252]" />}
+          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+            {editingExpense ? (
+              <Save className="text-text-secondary h-5 w-5" />
+            ) : (
+              <Plus className="text-text-secondary h-5 w-5" />
+            )}
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-[#171717]">
+            <h2 className="text-text-primary text-lg font-semibold">
               {editingExpense ? 'Edit Expense' : 'Add New Expense'}
             </h2>
-            <p className="text-sm text-[#a3a3a3]" dir="rtl">
+            <p className="text-text-muted text-sm" dir="rtl">
               {editingExpense ? 'ویرایش هزینه' : 'افزودن هزینه جدید'}
             </p>
           </div>
@@ -207,7 +211,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
         {editingExpense && (
           <button
             onClick={handleCancel}
-            className="rounded-lg p-2 text-[#a3a3a3] transition-all hover:bg-[#f5f5f5] hover:text-[#171717]"
+            className="text-text-muted hover:bg-background-elevated hover:text-text-primary rounded-lg p-2 transition-all"
           >
             <X className="h-5 w-5" />
           </button>
@@ -220,8 +224,8 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
           className={twMerge(
             'mb-6 rounded-lg border p-4',
             message.type === 'success'
-              ? 'border-[#10b981] bg-[#ecfdf5] text-[#10b981]'
-              : 'border-[#ef4444] bg-[#fef2f2] text-[#ef4444]'
+              ? 'border-success bg-success-light text-success'
+              : 'border-danger bg-danger-light text-danger'
           )}
         >
           {message.text}
@@ -233,8 +237,8 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {/* Category */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <Layers className="h-4 w-4 text-[#a3a3a3]" />
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <Layers className="text-text-muted h-4 w-4" />
               Category / دسته‌بندی
             </label>
             <div className="relative">
@@ -242,25 +246,25 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 required
-                className="w-full cursor-pointer appearance-none rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 pr-10 text-[#171717] transition-all focus:border-[#0070f3] focus:outline-none"
+                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-3 pr-10 transition-all focus:outline-none"
               >
-                <option value="" className="bg-white">
+                <option value="" className="bg-background">
                   Select category...
                 </option>
                 {EXPENSE_CATEGORIES.map((cat) => (
-                  <option key={cat.value} value={cat.value} className="bg-white">
+                  <option key={cat.value} value={cat.value} className="bg-background">
                     {cat.label} / {cat.labelFa}
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-[#a3a3a3]" />
+              <ChevronDown className="text-text-muted pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2" />
             </div>
           </div>
 
           {/* Date */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <Calendar className="h-4 w-4 text-[#a3a3a3]" />
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <Calendar className="text-text-muted h-4 w-4" />
               Date / تاریخ
             </label>
             <input
@@ -268,15 +272,15 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
               required
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all focus:border-[#0070f3] focus:outline-none"
+              className="border-border-subtle bg-background text-text-primary focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
             />
           </div>
         </div>
 
         {/* Description */}
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-            <FileText className="h-4 w-4 text-[#a3a3a3]" />
+          <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+            <FileText className="text-text-muted h-4 w-4" />
             Description / توضیحات
           </label>
           <textarea
@@ -285,14 +289,14 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
             rows={3}
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full resize-none rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#0070f3] focus:outline-none"
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full resize-none rounded-lg border px-4 py-3 transition-all focus:outline-none"
           />
         </div>
 
         {/* Tags */}
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-            <span className="text-[#a3a3a3]">#</span>
+          <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+            <span className="text-text-muted">#</span>
             Tags / برچسب‌ها
           </label>
           <TagInput selectedTags={selectedTags} onTagsChange={setSelectedTags} />
@@ -302,8 +306,8 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {/* Toman */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <span className="font-bold text-[#10b981]">T</span>
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <span className="text-success font-bold">T</span>
               Price (Toman) / مبلغ (تومان)
             </label>
             <Tooltip content={numberToPersianWord} position="top">
@@ -315,15 +319,15 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
                 step="1"
                 value={formData.price_toman || ''}
                 onChange={(e) => handleTomanChange(parseFloat(e.target.value) || 0)}
-                className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#10b981] focus:outline-none"
+                className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-success w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
               />
             </Tooltip>
           </div>
 
           {/* USD */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <DollarSign className="h-4 w-4 text-[#0070f3]" />
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <DollarSign className="text-blue h-4 w-4" />
               Price (USD) / مبلغ (دلار)
             </label>
             <input
@@ -334,16 +338,16 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
               step="0.01"
               value={formData.price_usd || ''}
               onChange={(e) => handleUsdChange(parseFloat(e.target.value) || 0)}
-              className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#0070f3] focus:outline-none"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
             />
           </div>
 
           {/* Exchange Rate */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <span className="text-[#a3a3a3]">↔</span>
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <span className="text-text-muted">↔</span>
               Rate (Toman/USD) / نرخ
-              {isFetchingRate && <Loader2 className="h-3 w-3 animate-spin text-[#a3a3a3]" />}
+              {isFetchingRate && <Loader2 className="text-text-muted h-3 w-3 animate-spin" />}
             </label>
             <input
               type="number"
@@ -354,7 +358,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
               value={exchangeRate || ''}
               onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
               disabled={isFetchingRate}
-              className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#0070f3] focus:outline-none disabled:cursor-wait disabled:opacity-50"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
             />
           </div>
         </div>

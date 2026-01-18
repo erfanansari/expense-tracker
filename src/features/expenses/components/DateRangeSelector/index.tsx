@@ -21,12 +21,12 @@ const DateRangeSelector = ({ value, onChange }: DateRangeSelectorProps) => {
 
   return (
     <div className="group relative">
-      <div className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#e5e5e5] bg-white px-4 py-2.5 shadow-sm transition-all duration-200 hover:border-[#0070f3]">
-        <Calendar className="h-4 w-4 text-[#0070f3]" />
+      <div className="border-border-subtle bg-background hover:border-blue flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2.5 shadow-sm transition-all duration-200">
+        <Calendar className="text-blue h-4 w-4" />
         <select
           value={value}
           onChange={(e) => onChange(e.target.value as DateRange)}
-          className="cursor-pointer appearance-none border-none bg-transparent pr-6 text-sm font-semibold text-[#171717] outline-none focus:ring-0 focus:outline-none"
+          className="text-text-primary cursor-pointer appearance-none border-none bg-transparent pr-6 text-sm font-semibold outline-none focus:ring-0 focus:outline-none"
           style={{
             background: 'transparent',
             outline: 'none',
@@ -38,14 +38,14 @@ const DateRangeSelector = ({ value, onChange }: DateRangeSelectorProps) => {
             <option
               key={option.value}
               value={option.value}
-              className="bg-white text-[#171717]"
+              className="bg-background text-text-primary"
               style={{ background: '#ffffff', color: '#171717' }}
             >
               {option.label}
             </option>
           ))}
         </select>
-        <ChevronDown className="pointer-events-none absolute right-3 h-4 w-4 text-[#a3a3a3] transition-colors group-hover:text-[#0070f3]" />
+        <ChevronDown className="text-text-muted group-hover:text-blue pointer-events-none absolute right-3 h-4 w-4 transition-colors" />
       </div>
     </div>
   );

@@ -130,13 +130,13 @@ export default function IncomePage() {
     .sort((a, b) => b - a);
 
   return (
-    <div className="min-h-screen bg-[#ffffff]">
+    <div className="bg-background min-h-screen">
       <div className="mx-auto max-w-[1600px] px-6 py-8">
         {/* Page Header */}
         <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-bold text-[#171717] sm:text-2xl md:text-3xl">Income</h1>
-            <p className="mt-1 text-xs text-[#a3a3a3] sm:text-sm">Track your monthly earnings</p>
+            <h1 className="text-text-primary text-xl font-bold sm:text-2xl md:text-3xl">Income</h1>
+            <p className="text-text-muted mt-1 text-xs sm:text-sm">Track your monthly earnings</p>
           </div>
           {showForm ? (
             <Button variant="outline" onClick={handleCancelEdit} className="shrink-0">
@@ -160,55 +160,55 @@ export default function IncomePage() {
         {/* Summary Cards */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
           {/* Total Income (All Time) */}
-          <div className="relative min-w-0 rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm">
+          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
-              <div className="rounded-lg border border-[#10b981]/20 bg-[#ecfdf5] p-2.5">
-                <Banknote className="h-5 w-5 text-[#10b981]" />
+              <div className="border-success/20 bg-success-light rounded-lg border p-2.5">
+                <Banknote className="text-success h-5 w-5" />
               </div>
             </div>
-            <p className="mb-2 text-xs font-medium tracking-wider text-[#a3a3a3] uppercase">Total Income</p>
-            <p className="text-2xl font-semibold text-[#10b981] tabular-nums">${formatNumber(totalIncomeAllTime)}</p>
-            <p className="mt-1.5 text-sm font-medium text-[#525252]" dir="rtl">
+            <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Income</p>
+            <p className="text-success text-2xl font-semibold tabular-nums">${formatNumber(totalIncomeAllTime)}</p>
+            <p className="text-text-secondary mt-1.5 text-sm font-medium" dir="rtl">
               {formatNumber(totalIncomeAllTimeToman)} تومان
             </p>
           </div>
 
           {/* YTD Income */}
-          <div className="relative min-w-0 rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm">
+          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
-              <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-                <TrendingUp className="h-5 w-5 text-[#0070f3]" />
+              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                <TrendingUp className="text-blue h-5 w-5" />
               </div>
             </div>
-            <p className="mb-2 text-xs font-medium tracking-wider text-[#a3a3a3] uppercase">YTD Income</p>
-            <p className="text-2xl font-semibold text-[#171717] tabular-nums">${formatNumber(ytdIncome)}</p>
-            <p className="mt-1.5 text-sm font-medium text-[#525252]">{currentYear}</p>
+            <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">YTD Income</p>
+            <p className="text-text-primary text-2xl font-semibold tabular-nums">${formatNumber(ytdIncome)}</p>
+            <p className="text-text-secondary mt-1.5 text-sm font-medium">{currentYear}</p>
           </div>
 
           {/* Current Month */}
-          <div className="relative min-w-0 rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm">
+          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
-              <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-                <DollarSign className="h-5 w-5 text-[#525252]" />
+              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                <DollarSign className="text-text-secondary h-5 w-5" />
               </div>
             </div>
-            <p className="mb-2 text-xs font-medium tracking-wider text-[#a3a3a3] uppercase">This Month</p>
-            <p className="text-2xl font-semibold text-[#171717] tabular-nums">${formatNumber(currentMonthIncome)}</p>
-            <p className="mt-1.5 text-sm font-medium text-[#525252]">{getMonthLabel(currentMonth).en}</p>
+            <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">This Month</p>
+            <p className="text-text-primary text-2xl font-semibold tabular-nums">${formatNumber(currentMonthIncome)}</p>
+            <p className="text-text-secondary mt-1.5 text-sm font-medium">{getMonthLabel(currentMonth).en}</p>
           </div>
 
           {/* Average Monthly */}
-          <div className="relative min-w-0 rounded-xl border border-[#e5e5e5] bg-white p-5 shadow-sm">
+          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
-              <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-                <TrendingUp className="h-5 w-5 text-[#525252]" />
+              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                <TrendingUp className="text-text-secondary h-5 w-5" />
               </div>
             </div>
-            <p className="mb-2 text-xs font-medium tracking-wider text-[#a3a3a3] uppercase">Avg Monthly</p>
-            <p className="text-2xl font-semibold text-[#171717] tabular-nums">
+            <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Avg Monthly</p>
+            <p className="text-text-primary text-2xl font-semibold tabular-nums">
               ${formatNumber(Math.round(avgMonthlyIncome))}
             </p>
-            <p className="mt-1.5 text-sm font-medium text-[#525252]">per entry</p>
+            <p className="text-text-secondary mt-1.5 text-sm font-medium">per entry</p>
           </div>
         </div>
 
@@ -230,22 +230,22 @@ export default function IncomePage() {
           }
           if (error && incomes.length === 0) {
             return (
-              <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-16 text-center shadow-sm">
-                <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border border-[#ef4444] bg-[#fef2f2]">
-                  <FileText className="h-8 w-8 text-[#ef4444]" />
+              <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
+                <div className="border-danger bg-danger-light mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
+                  <FileText className="text-danger h-8 w-8" />
                 </div>
-                <p className="font-medium text-[#ef4444]">{error}</p>
+                <p className="text-danger font-medium">{error}</p>
               </div>
             );
           }
           if (incomes.length === 0) {
             return (
-              <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-16 text-center shadow-sm">
-                <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border border-[#e5e5e5] bg-[#fafafa]">
-                  <DollarSign className="h-8 w-8 text-[#a3a3a3]" />
+              <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
+                <div className="border-border-subtle bg-background-secondary mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
+                  <DollarSign className="text-text-muted h-8 w-8" />
                 </div>
-                <p className="font-medium text-[#525252]">No income recorded yet</p>
-                <p className="mt-1 text-sm text-[#a3a3a3]">Add your first income entry above!</p>
+                <p className="text-text-secondary font-medium">No income recorded yet</p>
+                <p className="text-text-muted mt-1 text-sm">Add your first income entry above!</p>
               </div>
             );
           }
@@ -253,25 +253,25 @@ export default function IncomePage() {
             <div className="space-y-6">
               {sortedYears.map((year) => (
                 <div key={year}>
-                  <h2 className="mb-4 text-lg font-semibold text-[#171717]">{year}</h2>
-                  <div className="relative overflow-hidden rounded-xl border border-[#e5e5e5] bg-white shadow-sm">
+                  <h2 className="text-text-primary mb-4 text-lg font-semibold">{year}</h2>
+                  <div className="border-border-subtle bg-background relative overflow-hidden rounded-xl border shadow-sm">
                     <div className="overflow-x-auto">
                       <table className="w-full min-w-[600px] border-collapse">
                         <thead>
-                          <tr className="bg-[#fafafa]">
-                            <th className="min-w-[100px] px-4 py-3 text-left text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
+                          <tr className="bg-background-secondary">
+                            <th className="text-text-muted min-w-[100px] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
                               Month
                             </th>
-                            <th className="min-w-[100px] px-4 py-3 text-left text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
+                            <th className="text-text-muted min-w-[100px] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
                               Type
                             </th>
-                            <th className="min-w-[120px] px-4 py-3 text-left text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
+                            <th className="text-text-muted min-w-[120px] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
                               Source
                             </th>
-                            <th className="min-w-[130px] px-4 py-3 text-right text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
+                            <th className="text-text-muted min-w-[130px] px-4 py-3 text-right text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
                               Amount
                             </th>
-                            <th className="min-w-[80px] px-4 py-3 text-center text-xs font-semibold tracking-wider text-[#a3a3a3] uppercase sm:px-6 sm:py-4">
+                            <th className="text-text-muted min-w-[80px] px-4 py-3 text-center text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
                               Actions
                             </th>
                           </tr>
@@ -286,33 +286,33 @@ export default function IncomePage() {
                               return (
                                 <tr
                                   key={income.id}
-                                  className="group border-t border-[#e5e5e5] transition-colors duration-200 first:border-t-0 hover:bg-[#f5f5f5]"
+                                  className="group border-border-subtle hover:bg-background-elevated border-t transition-colors duration-200 first:border-t-0"
                                 >
                                   <td className="px-4 py-3 sm:px-6 sm:py-4">
                                     <div className="flex flex-col">
-                                      <span className="text-sm font-medium text-[#171717]">{monthLabels.en}</span>
-                                      <span className="text-xs text-[#a3a3a3]" dir="rtl">
+                                      <span className="text-text-primary text-sm font-medium">{monthLabels.en}</span>
+                                      <span className="text-text-muted text-xs" dir="rtl">
                                         {monthLabels.fa}
                                       </span>
                                     </div>
                                   </td>
                                   <td className="px-4 py-3 sm:px-6 sm:py-4">
                                     <div className="flex flex-col">
-                                      <span className="text-sm font-medium text-[#171717]">{typeLabels.en}</span>
-                                      <span className="text-xs text-[#a3a3a3]" dir="rtl">
+                                      <span className="text-text-primary text-sm font-medium">{typeLabels.en}</span>
+                                      <span className="text-text-muted text-xs" dir="rtl">
                                         {typeLabels.fa}
                                       </span>
                                     </div>
                                   </td>
                                   <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                    <span className="text-sm text-[#525252]">{income.source || '-'}</span>
+                                    <span className="text-text-secondary text-sm">{income.source || '-'}</span>
                                   </td>
                                   <td className="px-4 py-3 text-right sm:px-6 sm:py-4">
                                     <div className="flex flex-col items-end">
-                                      <span className="text-sm font-semibold text-[#10b981]">
+                                      <span className="text-success text-sm font-semibold">
                                         ${formatNumber(income.amountUsd)} USD
                                       </span>
-                                      <span className="text-xs text-[#a3a3a3]" dir="rtl">
+                                      <span className="text-text-muted text-xs" dir="rtl">
                                         {formatNumber(income.amountToman)} تومان
                                       </span>
                                     </div>
@@ -321,7 +321,7 @@ export default function IncomePage() {
                                     <div className="flex items-center justify-center gap-1">
                                       <button
                                         onClick={() => handleEdit(income)}
-                                        className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#0070f3]/10 hover:text-[#0070f3]"
+                                        className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
                                         title="Edit"
                                       >
                                         <Edit className="h-4 w-4" />
@@ -329,7 +329,7 @@ export default function IncomePage() {
                                       <button
                                         onClick={() => openDeleteModal(income)}
                                         disabled={deletingId === income.id}
-                                        className="rounded-lg p-2 text-[#a3a3a3] transition-all duration-200 hover:bg-[#ea001d]/10 hover:text-[#ea001d] disabled:opacity-50"
+                                        className="text-text-muted hover:bg-danger/10 hover:text-danger rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
                                         title="Delete"
                                       >
                                         {deletingId === income.id ? (

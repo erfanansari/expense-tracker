@@ -178,16 +178,22 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
   }
 
   return (
-    <div className="relative rounded-xl border border-[#e5e5e5] bg-white p-6 shadow-sm">
+    <div className="border-border-subtle bg-background relative rounded-xl border p-6 shadow-sm">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg border border-[#e5e5e5] bg-[#fafafa] p-2.5">
-            {editingIncome ? <Save className="h-5 w-5 text-[#525252]" /> : <Plus className="h-5 w-5 text-[#525252]" />}
+          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+            {editingIncome ? (
+              <Save className="text-text-secondary h-5 w-5" />
+            ) : (
+              <Plus className="text-text-secondary h-5 w-5" />
+            )}
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-[#171717]">{editingIncome ? 'Edit Income' : 'Add New Income'}</h2>
-            <p className="text-sm text-[#a3a3a3]" dir="rtl">
+            <h2 className="text-text-primary text-lg font-semibold">
+              {editingIncome ? 'Edit Income' : 'Add New Income'}
+            </h2>
+            <p className="text-text-muted text-sm" dir="rtl">
               {editingIncome ? 'ویرایش درآمد' : 'افزودن درآمد جدید'}
             </p>
           </div>
@@ -195,7 +201,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
         {editingIncome && (
           <button
             onClick={handleCancel}
-            className="rounded-lg p-2 text-[#a3a3a3] transition-all hover:bg-[#f5f5f5] hover:text-[#171717]"
+            className="text-text-muted hover:bg-background-elevated hover:text-text-primary rounded-lg p-2 transition-all"
           >
             <X className="h-5 w-5" />
           </button>
@@ -208,8 +214,8 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
           className={twMerge(
             'mb-6 rounded-lg border p-4',
             message.type === 'success'
-              ? 'border-[#10b981] bg-[#ecfdf5] text-[#10b981]'
-              : 'border-[#ef4444] bg-[#fef2f2] text-[#ef4444]'
+              ? 'border-success bg-success-light text-success'
+              : 'border-danger bg-danger-light text-danger'
           )}
         >
           {message.text}
@@ -221,8 +227,8 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {/* Income Type */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <Briefcase className="h-4 w-4 text-[#a3a3a3]" />
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <Briefcase className="text-text-muted h-4 w-4" />
               Type / نوع
             </label>
             <div className="relative">
@@ -232,7 +238,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
                   setFormData({ ...formData, incomeType: e.target.value as CreateIncomeInput['incomeType'] })
                 }
                 required
-                className="w-full cursor-pointer appearance-none rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 pr-10 text-[#171717] transition-all focus:border-[#0070f3] focus:outline-none"
+                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-3 pr-10 transition-all focus:outline-none"
               >
                 {INCOME_TYPES.map((type) => (
                   <option key={type.value} value={type.value}>
@@ -240,14 +246,14 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-[#a3a3a3]" />
+              <ChevronDown className="text-text-muted pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2" />
             </div>
           </div>
 
           {/* Month */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <Calendar className="h-4 w-4 text-[#a3a3a3]" />
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <Calendar className="text-text-muted h-4 w-4" />
               Month / ماه
             </label>
             <div className="relative">
@@ -255,7 +261,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
                 value={formData.month}
                 onChange={(e) => setFormData({ ...formData, month: parseInt(e.target.value, 10) })}
                 required
-                className="w-full cursor-pointer appearance-none rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 pr-10 text-[#171717] transition-all focus:border-[#0070f3] focus:outline-none"
+                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-3 pr-10 transition-all focus:outline-none"
               >
                 {MONTHS.map((month) => (
                   <option key={month.value} value={month.value}>
@@ -263,14 +269,14 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-[#a3a3a3]" />
+              <ChevronDown className="text-text-muted pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2" />
             </div>
           </div>
 
           {/* Year */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <Calendar className="h-4 w-4 text-[#a3a3a3]" />
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <Calendar className="text-text-muted h-4 w-4" />
               Year / سال
             </label>
             <div className="relative">
@@ -278,7 +284,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
                 value={formData.year}
                 onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value, 10) })}
                 required
-                className="w-full cursor-pointer appearance-none rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 pr-10 text-[#171717] transition-all focus:border-[#0070f3] focus:outline-none"
+                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-3 pr-10 transition-all focus:outline-none"
               >
                 {yearOptions.map((year) => (
                   <option key={year} value={year}>
@@ -286,15 +292,15 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-[#a3a3a3]" />
+              <ChevronDown className="text-text-muted pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2" />
             </div>
           </div>
         </div>
 
         {/* Source */}
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-            <Briefcase className="h-4 w-4 text-[#a3a3a3]" />
+          <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+            <Briefcase className="text-text-muted h-4 w-4" />
             Source / منبع (Optional)
           </label>
           <input
@@ -302,14 +308,14 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
             placeholder="e.g., Company Name, Client..."
             value={formData.source}
             onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-            className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#0070f3] focus:outline-none"
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
           />
         </div>
 
         {/* Notes */}
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-            <FileText className="h-4 w-4 text-[#a3a3a3]" />
+          <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+            <FileText className="text-text-muted h-4 w-4" />
             Notes / یادداشت (Optional)
           </label>
           <textarea
@@ -317,7 +323,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
             rows={2}
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            className="w-full resize-none rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#0070f3] focus:outline-none"
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full resize-none rounded-lg border px-4 py-3 transition-all focus:outline-none"
           />
         </div>
 
@@ -325,8 +331,8 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {/* USD */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <DollarSign className="h-4 w-4 text-[#0070f3]" />
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <DollarSign className="text-blue h-4 w-4" />
               Amount (USD) / مبلغ (دلار)
             </label>
             <input
@@ -337,14 +343,14 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
               step="0.01"
               value={formData.amountUsd || ''}
               onChange={(e) => handleUsdChange(parseFloat(e.target.value) || 0)}
-              className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#0070f3] focus:outline-none"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
             />
           </div>
 
           {/* Toman */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <span className="font-bold text-[#10b981]">T</span>
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <span className="text-success font-bold">T</span>
               Amount (Toman) / مبلغ (تومان)
             </label>
             <Tooltip content={numberToPersianWord} position="top">
@@ -356,17 +362,17 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
                 step="1"
                 value={formData.amountToman || ''}
                 onChange={(e) => handleTomanChange(parseFloat(e.target.value) || 0)}
-                className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#10b981] focus:outline-none"
+                className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-success w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
               />
             </Tooltip>
           </div>
 
           {/* Exchange Rate */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-[#525252]">
-              <span className="text-[#a3a3a3]">↔</span>
+            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+              <span className="text-text-muted">↔</span>
               Rate (Toman/USD) / نرخ
-              {isFetchingRate && <Loader2 className="h-3 w-3 animate-spin text-[#a3a3a3]" />}
+              {isFetchingRate && <Loader2 className="text-text-muted h-3 w-3 animate-spin" />}
             </label>
             <input
               type="number"
@@ -377,7 +383,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
               value={exchangeRate || ''}
               onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
               disabled={isFetchingRate}
-              className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 text-[#171717] transition-all placeholder:text-[#a3a3a3] focus:border-[#0070f3] focus:outline-none disabled:cursor-wait disabled:opacity-50"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
             />
           </div>
         </div>
