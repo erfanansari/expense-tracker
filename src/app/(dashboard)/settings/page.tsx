@@ -4,6 +4,7 @@ import { Bell, Database, Globe, HelpCircle, Lock, Palette, Tag, User } from 'luc
 
 import Button from '@components/Button';
 
+import packageJson from '@/../package.json';
 import TagManagementList from '@/features/expenses/components/TagManagementList';
 
 export default function SettingsPage() {
@@ -302,7 +303,7 @@ export default function SettingsPage() {
 
                 {/* App Information */}
                 <div className="flex items-center justify-between pt-4 text-xs">
-                  <span className="text-text-muted">Version 1.0.0 (MVP)</span>
+                  <span className="text-text-muted">Version {packageJson.version}</span>
                   <span className="text-text-muted">© {new Date().getFullYear()} Kharji. All rights reserved.</span>
                 </div>
               </div>
