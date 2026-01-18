@@ -16,6 +16,7 @@ export default function SettingsPage() {
   const { showToast } = useToast();
   const [name, setName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Initialize name when user data is loaded
   useEffect(() => {
@@ -24,15 +25,19 @@ export default function SettingsPage() {
     }
   }, [user]);
 
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
   const handleSave = async () => {
     if (!name.trim()) {
       showToast('Name cannot be empty', 'error');
       return;
     }
 
-    // If name hasn't changed, do nothing
+    // If name hasn't changed, just exit edit mode
     if (name.trim() === user?.name) {
-      showToast('No changes to save', 'info');
+      setIsEditing(false);
       return;
     }
 
@@ -60,6 +65,7 @@ export default function SettingsPage() {
       }
 
       showToast('Profile updated successfully!', 'success');
+      setIsEditing(false); // Exit edit mode on success
       await refetch(); // Refresh to ensure consistency
     } catch {
       // Revert optimistic update on error
@@ -72,6 +78,7 @@ export default function SettingsPage() {
 
   const handleCancel = () => {
     setName(user?.name || '');
+    setIsEditing(false);
   };
   return (
     <div className="bg-background min-h-screen">
@@ -118,19 +125,28 @@ export default function SettingsPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter your name"
-                    className="border-border-subtle bg-background text-text-primary focus:border-blue w-full rounded-lg border px-4 py-2.5 transition-all focus:outline-none"
+                    disabled={!isEditing}
+                    className="border-border-subtle bg-background text-text-primary focus:border-blue w-full rounded-lg border px-4 py-2.5 transition-[opacity,border-color] duration-200 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                   />
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3 pt-2">
-                  <Button variant="primary" onClick={handleSave} disabled={isSaving}>
-                    {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-                    {isSaving ? 'Saving...' : 'Save Changes'}
-                  </Button>
-                  <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
-                    Cancel
-                  </Button>
+                <div className="flex min-h-[42px] gap-3 pt-2">
+                  {!isEditing ? (
+                    <Button variant="outline" onClick={handleEdit}>
+                      Edit Profile
+                    </Button>
+                  ) : (
+                    <>
+                      <Button variant="primary" onClick={handleSave} disabled={isSaving}>
+                        {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+                        {isSaving ? 'Saving...' : 'Save Changes'}
+                      </Button>
+                      <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
+                        Cancel
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
