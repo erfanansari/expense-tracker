@@ -13,6 +13,7 @@ import Tooltip from '@components/Tooltip';
 
 import type { CreateIncomeInput, Income } from '@/@types/income';
 import { INCOME_TYPES, MONTHS } from '@/constants/income';
+import { getJalaliMonthName } from '@/utils';
 
 interface IncomeFormProps {
   onIncomeAdded: () => void;
@@ -265,7 +266,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
               >
                 {MONTHS.map((month) => (
                   <option key={month.value} value={month.value}>
-                    {month.label} / {month.labelFa}
+                    {month.label} / {getJalaliMonthName(month.value, formData.year)}
                   </option>
                 ))}
               </select>

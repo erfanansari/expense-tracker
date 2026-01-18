@@ -13,7 +13,7 @@ import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import Loading from '@components/Loading';
 
 import { getIncomeTypeLabel, getMonthLabel } from '@/constants/income';
-import { formatNumber } from '@/utils';
+import { formatNumber, getJalaliMonthName } from '@/utils';
 
 export default function IncomePage() {
   const [incomes, setIncomes] = useState<Income[]>([]);
@@ -194,7 +194,9 @@ export default function IncomePage() {
             </div>
             <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">This Month</p>
             <p className="text-text-primary text-2xl font-semibold tabular-nums">${formatNumber(currentMonthIncome)}</p>
-            <p className="text-text-secondary mt-1.5 text-sm font-medium">{getMonthLabel(currentMonth).en}</p>
+            <p className="text-text-secondary mt-1.5 text-sm font-medium">
+              {getMonthLabel(currentMonth).en} - <span dir="rtl">{getJalaliMonthName(currentMonth, currentYear)}</span>
+            </p>
           </div>
 
           {/* Average Monthly */}
@@ -282,6 +284,7 @@ export default function IncomePage() {
                             .map((income) => {
                               const typeLabels = getIncomeTypeLabel(income.incomeType);
                               const monthLabels = getMonthLabel(income.month);
+                              const jalaliMonth = getJalaliMonthName(income.month, income.year);
 
                               return (
                                 <tr
@@ -292,7 +295,7 @@ export default function IncomePage() {
                                     <div className="flex flex-col">
                                       <span className="text-text-primary text-sm font-medium">{monthLabels.en}</span>
                                       <span className="text-text-muted text-xs" dir="rtl">
-                                        {monthLabels.fa}
+                                        {jalaliMonth}
                                       </span>
                                     </div>
                                   </td>
@@ -360,7 +363,7 @@ export default function IncomePage() {
           message="Are you sure you want to delete this income entry?"
           itemName={
             incomeToDelete
-              ? `${getMonthLabel(incomeToDelete.month).en} ${incomeToDelete.year} - ${getIncomeTypeLabel(incomeToDelete.incomeType).en}`
+              ? `${getMonthLabel(incomeToDelete.month).en} (${getJalaliMonthName(incomeToDelete.month, incomeToDelete.year)}) ${incomeToDelete.year} - ${getIncomeTypeLabel(incomeToDelete.incomeType).en}`
               : undefined
           }
           onConfirm={confirmDelete}

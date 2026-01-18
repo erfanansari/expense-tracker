@@ -13,3 +13,13 @@ export function formatToFarsiDate(dateStr: string): string {
   });
   return formatter.format(date);
 }
+
+// Get Jalali month name for a Gregorian month/year
+export function getJalaliMonthName(gregorianMonth: number, gregorianYear: number): string {
+  // Create a date in the middle of the Gregorian month to get the correct Jalali month
+  const date = new Date(gregorianYear, gregorianMonth - 1, 15);
+  const formatter = new Intl.DateTimeFormat('fa-IR', {
+    month: 'long',
+  });
+  return formatter.format(date);
+}
