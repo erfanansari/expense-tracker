@@ -72,15 +72,18 @@ const Modal = ({ isOpen, onClose, title, titleFa, children, className, showClose
       aria-labelledby={title ? 'modal-title' : undefined}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" aria-hidden="true" />
+      <div
+        className="animate-in fade-in absolute inset-0 bg-black/20 backdrop-blur-[2px] transition-all duration-300"
+        aria-hidden="true"
+      />
 
       {/* Modal content */}
       <div
         ref={modalRef}
         tabIndex={-1}
         className={twMerge(
-          'border-border-subtle bg-background relative max-h-[90vh] w-full max-w-lg overflow-hidden rounded-xl border shadow-xl',
-          'transform transition-all duration-200',
+          'border-border-subtle bg-background relative max-h-[90vh] w-full max-w-lg overflow-hidden rounded-xl border shadow-2xl',
+          'animate-in fade-in zoom-in-95 duration-300',
           className
         )}
       >
