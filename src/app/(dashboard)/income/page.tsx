@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { Banknote, DollarSign, Edit, FileText, Loader2, Plus, Trash2, TrendingUp, X } from 'lucide-react';
+import { Banknote, DollarSign, Edit, FileText, Loader2, Plus, Trash2, TrendingUp } from 'lucide-react';
 
 import type { Income } from '@types';
 
@@ -10,6 +10,8 @@ import IncomeForm from '@features/income/components/IncomeForm';
 
 import Button from '@components/Button';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
+import FormDrawer from '@components/FormDrawer';
+import useDrawer from '@components/FormDrawer/useDrawer';
 import Loading from '@components/Loading';
 
 import { getIncomeTypeLabel, getMonthLabel } from '@/constants/income';
@@ -21,9 +23,9 @@ export default function IncomePage() {
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [editingIncome, setEditingIncome] = useState<Income | undefined>(undefined);
-  const [showForm, setShowForm] = useState(false);
   const [incomeToDelete, setIncomeToDelete] = useState<Income | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const { isOpen: isDrawerOpen, isDirty, openDrawer, closeDrawer, setIsDirty } = useDrawer();
 
   const fetchIncomes = useCallback(async () => {
     setIsLoading(true);
@@ -77,22 +79,24 @@ export default function IncomePage() {
     }
   };
 
-  const handleIncomeChange = () => {
+  const handleIncomeChange = useCallback(() => {
     fetchIncomes();
     setEditingIncome(undefined);
-    setShowForm(false);
-  };
+    closeDrawer();
+  }, [fetchIncomes, closeDrawer]);
 
-  const handleEdit = (income: Income) => {
-    setEditingIncome(income);
-    setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const handleEdit = useCallback(
+    (income: Income) => {
+      setEditingIncome(income);
+      openDrawer();
+    },
+    [openDrawer]
+  );
 
-  const handleCancelEdit = () => {
+  const handleAddIncome = useCallback(() => {
     setEditingIncome(undefined);
-    setShowForm(false);
-  };
+    openDrawer();
+  }, [openDrawer]);
 
   useEffect(() => {
     fetchIncomes();
@@ -138,23 +142,10 @@ export default function IncomePage() {
             <h1 className="text-text-primary text-xl font-bold sm:text-2xl md:text-3xl">Income</h1>
             <p className="text-text-muted mt-1 text-xs sm:text-sm">Track your monthly earnings</p>
           </div>
-          {showForm ? (
-            <Button variant="outline" onClick={handleCancelEdit} className="shrink-0">
-              <X className="h-4 w-4" />
-              <span className="hidden sm:inline">Cancel</span>
-            </Button>
-          ) : (
-            <Button
-              variant="primary"
-              onClick={() => {
-                setShowForm(true);
-                setEditingIncome(undefined);
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add Income</span>
-            </Button>
-          )}
+          <Button variant="primary" onClick={handleAddIncome} className="shrink-0">
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Add Income</span>
+          </Button>
         </div>
 
         {/* Summary Cards */}
@@ -213,17 +204,6 @@ export default function IncomePage() {
             <p className="text-text-secondary mt-1.5 text-sm font-medium">per entry</p>
           </div>
         </div>
-
-        {/* Income Form */}
-        {showForm && (
-          <div className="animate-in slide-in-from-top-4 mb-6 duration-300">
-            <IncomeForm
-              onIncomeAdded={handleIncomeChange}
-              editingIncome={editingIncome}
-              onCancelEdit={handleCancelEdit}
-            />
-          </div>
-        )}
 
         {/* Income List */}
         {(() => {
@@ -371,6 +351,22 @@ export default function IncomePage() {
           isDeleting={deletingId === incomeToDelete?.id}
         />
       </div>
+
+      {/* Income Form Drawer */}
+      <FormDrawer
+        isOpen={isDrawerOpen}
+        onClose={closeDrawer}
+        title={editingIncome ? 'Edit Income' : 'Add New Income'}
+        titleFa={editingIncome ? 'ویرایش درآمد' : 'افزودن درآمد جدید'}
+        isDirty={isDirty}
+      >
+        <IncomeForm
+          onIncomeAdded={handleIncomeChange}
+          editingIncome={editingIncome}
+          onCancelEdit={closeDrawer}
+          setIsDirty={setIsDirty}
+        />
+      </FormDrawer>
     </div>
   );
 }

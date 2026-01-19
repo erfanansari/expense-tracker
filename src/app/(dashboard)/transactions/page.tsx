@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Edit2, FileText, Loader2, Plus, Tag, Trash2, X } from 'lucide-react';
+import { Edit2, FileText, Loader2, Plus, Tag, Trash2 } from 'lucide-react';
 
 import { type Expense } from '@types';
 
@@ -11,6 +11,8 @@ import TransactionDetailsModal from '@features/expenses/components/TransactionDe
 
 import Button from '@components/Button';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
+import FormDrawer from '@components/FormDrawer';
+import useDrawer from '@components/FormDrawer/useDrawer';
 import Loading from '@components/Loading';
 
 import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@/utils';
@@ -26,12 +28,12 @@ export default function TransactionsPage() {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [editingExpense, setEditingExpense] = useState<Expense | undefined>(undefined);
-  const [showForm, setShowForm] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const isLoadingRef = useRef(false);
+  const { isOpen: isDrawerOpen, isDirty, openDrawer, closeDrawer, setIsDirty } = useDrawer();
 
   const handleRowClick = (expense: Expense) => {
     setSelectedExpense(expense);
@@ -125,25 +127,27 @@ export default function TransactionsPage() {
     }
   };
 
-  const handleExpenseChange = () => {
+  const handleExpenseChange = useCallback(() => {
     setExpenses([]);
     setNextCursor(null);
     setHasMore(true);
     fetchExpenses(null, true);
     setEditingExpense(undefined);
-    setShowForm(false);
-  };
+    closeDrawer();
+  }, [fetchExpenses, closeDrawer]);
 
-  const handleEdit = (expense: Expense) => {
-    setEditingExpense(expense);
-    setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const handleEdit = useCallback(
+    (expense: Expense) => {
+      setEditingExpense(expense);
+      openDrawer();
+    },
+    [openDrawer]
+  );
 
-  const handleCancelEdit = () => {
+  const handleAddExpense = useCallback(() => {
     setEditingExpense(undefined);
-    setShowForm(false);
-  };
+    openDrawer();
+  }, [openDrawer]);
 
   useEffect(() => {
     fetchExpenses(null, true);
@@ -158,35 +162,11 @@ export default function TransactionsPage() {
             <h1 className="text-text-primary text-xl font-bold sm:text-2xl md:text-3xl">Transactions</h1>
             <p className="text-text-muted mt-1 text-xs sm:text-sm">Manage and track all your expenses</p>
           </div>
-          {showForm ? (
-            <Button variant="outline" onClick={handleCancelEdit} className="shrink-0">
-              <X className="h-4 w-4" />
-              <span className="hidden sm:inline">Cancel</span>
-            </Button>
-          ) : (
-            <Button
-              variant="primary"
-              onClick={() => {
-                setShowForm(!showForm);
-                setEditingExpense(undefined);
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add Transaction</span>
-            </Button>
-          )}
+          <Button variant="primary" onClick={handleAddExpense} className="shrink-0">
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Add Transaction</span>
+          </Button>
         </div>
-
-        {/* Expense Form */}
-        {showForm && (
-          <div className="animate-in slide-in-from-top-4 mb-6 duration-300">
-            <ExpenseForm
-              onExpenseAdded={handleExpenseChange}
-              editingExpense={editingExpense}
-              onCancelEdit={handleCancelEdit}
-            />
-          </div>
-        )}
 
         {/* Transactions Card */}
         {(() => {
@@ -370,6 +350,22 @@ export default function TransactionsPage() {
           isDeleting={deletingId === expenseToDelete?.id}
         />
       </div>
+
+      {/* Expense Form Drawer */}
+      <FormDrawer
+        isOpen={isDrawerOpen}
+        onClose={closeDrawer}
+        title={editingExpense ? 'Edit Expense' : 'Add New Expense'}
+        titleFa={editingExpense ? 'ویرایش هزینه' : 'افزودن هزینه جدید'}
+        isDirty={isDirty}
+      >
+        <ExpenseForm
+          onExpenseAdded={handleExpenseChange}
+          editingExpense={editingExpense}
+          onCancelEdit={closeDrawer}
+          setIsDirty={setIsDirty}
+        />
+      </FormDrawer>
     </div>
   );
 }

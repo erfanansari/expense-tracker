@@ -15,7 +15,6 @@ import {
   Trash2,
   TrendingUp,
   Wallet,
-  X,
 } from 'lucide-react';
 import { Cell, Pie, PieChart, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 
@@ -26,6 +25,8 @@ import AssetForm from '@features/assets/components/AssetForm';
 import Button from '@components/Button';
 import DashboardLayout from '@components/DashboardLayout';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
+import FormDrawer from '@components/FormDrawer';
+import useDrawer from '@components/FormDrawer/useDrawer';
 import Loading from '@components/Loading';
 
 import { getAssetCategoryLabel } from '@/constants/assets';
@@ -57,9 +58,9 @@ export default function AssetsPage() {
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [editingAsset, setEditingAsset] = useState<Asset | undefined>(undefined);
-  const [showForm, setShowForm] = useState(false);
   const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const { isOpen: isDrawerOpen, isDirty, openDrawer, closeDrawer, setIsDirty } = useDrawer();
 
   const fetchAssets = useCallback(async () => {
     setIsLoading(true);
@@ -113,22 +114,24 @@ export default function AssetsPage() {
     }
   };
 
-  const handleAssetChange = () => {
+  const handleAssetChange = useCallback(() => {
     fetchAssets();
     setEditingAsset(undefined);
-    setShowForm(false);
-  };
+    closeDrawer();
+  }, [fetchAssets, closeDrawer]);
 
-  const handleEdit = (asset: Asset) => {
-    setEditingAsset(asset);
-    setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const handleEdit = useCallback(
+    (asset: Asset) => {
+      setEditingAsset(asset);
+      openDrawer();
+    },
+    [openDrawer]
+  );
 
-  const handleCancelEdit = () => {
+  const handleAddAsset = useCallback(() => {
     setEditingAsset(undefined);
-    setShowForm(false);
-  };
+    openDrawer();
+  }, [openDrawer]);
 
   useEffect(() => {
     fetchAssets();
@@ -197,23 +200,10 @@ export default function AssetsPage() {
               <h1 className="text-text-primary text-xl font-bold sm:text-2xl md:text-3xl">Assets</h1>
               <p className="text-text-muted mt-1 text-xs sm:text-sm">Track your wealth portfolio</p>
             </div>
-            {showForm ? (
-              <Button variant="outline" onClick={handleCancelEdit} className="shrink-0">
-                <X className="h-4 w-4" />
-                <span className="hidden sm:inline">Cancel</span>
-              </Button>
-            ) : (
-              <Button
-                variant="primary"
-                onClick={() => {
-                  setShowForm(true);
-                  setEditingAsset(undefined);
-                }}
-              >
-                <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Add Asset</span>
-              </Button>
-            )}
+            <Button variant="primary" onClick={handleAddAsset} className="shrink-0">
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Add Asset</span>
+            </Button>
           </div>
 
           {/* Summary Cards */}
@@ -262,13 +252,6 @@ export default function AssetsPage() {
                 );
               })}
           </div>
-
-          {/* Asset Form */}
-          {showForm && (
-            <div className="animate-in slide-in-from-top-4 mb-6 duration-300">
-              <AssetForm onAssetAdded={handleAssetChange} editingAsset={editingAsset} onCancelEdit={handleCancelEdit} />
-            </div>
-          )}
 
           {/* Main Content */}
           {(() => {
@@ -453,6 +436,22 @@ export default function AssetsPage() {
             isDeleting={deletingId === assetToDelete?.id}
           />
         </div>
+
+        {/* Asset Form Drawer */}
+        <FormDrawer
+          isOpen={isDrawerOpen}
+          onClose={closeDrawer}
+          title={editingAsset ? 'Edit Asset' : 'Add New Asset'}
+          titleFa={editingAsset ? 'ویرایش دارایی' : 'افزودن دارایی جدید'}
+          isDirty={isDirty}
+        >
+          <AssetForm
+            onAssetAdded={handleAssetChange}
+            editingAsset={editingAsset}
+            onCancelEdit={closeDrawer}
+            setIsDirty={setIsDirty}
+          />
+        </FormDrawer>
       </div>
     </DashboardLayout>
   );

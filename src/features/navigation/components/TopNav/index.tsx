@@ -6,11 +6,12 @@ import type { FC } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { ChevronDown, LayoutDashboard, LogOut, Settings, Zap } from 'lucide-react';
+import { ChevronDown, CommandIcon, LayoutDashboard, LogOut, Settings, Zap } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
 import { ROUTES } from '@constants';
 
+import { useCommandPalette } from '@/components/CommandPalette/CommandPaletteProvider';
 import { useAuth } from '@/features/auth/hooks/use-auth';
 
 import type { NavItem } from './@types';
@@ -27,6 +28,7 @@ const navItems: NavItem[] = [
 const TopNav: FC = () => {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const { toggle: toggleCommandPalette } = useCommandPalette();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -101,6 +103,21 @@ const TopNav: FC = () => {
                       <Settings className="h-4 w-4" />
                       Settings
                     </Link>
+                    <button
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
+                        toggleCommandPalette();
+                      }}
+                      className="text-text-secondary hover:bg-background-elevated hover:text-text-primary flex w-full items-center justify-between px-4 py-2.5 text-sm transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <CommandIcon className="h-4 w-4" />
+                        Command Menu
+                      </div>
+                      <kbd className="border-border-subtle text-text-muted rounded border px-1.5 py-0.5 font-mono text-xs">
+                        ⌘ K
+                      </kbd>
+                    </button>
                   </div>
                   <div className="border-border-subtle border-t">
                     <button

@@ -451,3 +451,14 @@ select option {
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
+
+/* ===================================
+   DRAWER & COMMAND PALETTE ANIMATIONS
+   =================================== */
+
+/* Z-index layers */
+:root {
+  --z-drawer: 50;
+  --z-command-palette: 60;
+  --z-toast: 9999;
+}
