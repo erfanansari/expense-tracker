@@ -9,6 +9,7 @@ import { twMerge } from 'tailwind-merge';
 import { tomanToUsd, usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
 
 import Button from '@components/Button';
+import { useToast } from '@components/Toast/ToastProvider';
 import Tooltip from '@components/Tooltip';
 
 import { type CreateExpenseInput, type Tag } from '@/@types/expense';
@@ -20,9 +21,11 @@ interface ExpenseFormProps {
   onExpenseAdded: () => void;
   editingExpense?: { id: number; tags?: Tag[] } & CreateExpenseInput;
   onCancelEdit?: () => void;
+  setIsDirty?: (dirty: boolean) => void;
 }
 
-const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFormProps) => {
+const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty }: ExpenseFormProps) => {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState<CreateExpenseInput>({
     date: new Date().toISOString().split('T')[0],
     category: '',
@@ -37,6 +40,8 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isFetchingRate, setIsFetchingRate] = useState(true);
+  const [initialFormData, setInitialFormData] = useState<CreateExpenseInput | null>(null);
+  const [initialTags, setInitialTags] = useState<Tag[]>([]);
 
   // Fetch latest exchange rate on mount
   useEffect(() => {
@@ -65,21 +70,59 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
   // Load editing expense data
   useEffect(() => {
     if (editingExpense) {
-      setFormData({
+      const initialData = {
         date: editingExpense.date,
         category: editingExpense.category,
         description: editingExpense.description,
         price_toman: editingExpense.price_toman,
         price_usd: editingExpense.price_usd,
         tagIds: editingExpense.tags?.map((t) => t.id) || [],
-      });
-      setSelectedTags(editingExpense.tags || []);
+      };
+      const tags = editingExpense.tags || [];
+      setFormData(initialData);
+      setInitialFormData(initialData);
+      setSelectedTags(tags);
+      setInitialTags(tags);
       // Calculate rate from existing data (full Toman value)
       if (editingExpense.price_toman && editingExpense.price_usd) {
         setExchangeRate(Math.round(editingExpense.price_toman / editingExpense.price_usd));
       }
     }
   }, [editingExpense]);
+
+  // Set initial form data when exchange rate is loaded (for new expenses)
+  useEffect(() => {
+    if (!editingExpense && exchangeRate > 0 && !initialFormData) {
+      setInitialFormData({
+        date: new Date().toISOString().split('T')[0],
+        category: '',
+        description: '',
+        price_toman: 0,
+        price_usd: 0,
+        tagIds: [],
+      });
+      setInitialTags([]);
+    }
+  }, [editingExpense, exchangeRate, initialFormData]);
+
+  // Track form changes and update dirty state
+  useEffect(() => {
+    if (!initialFormData || !setIsDirty) return;
+
+    const tagIdsChanged =
+      (formData.tagIds?.length || 0) !== (initialFormData.tagIds?.length || 0) ||
+      (formData.tagIds || []).some((id, idx) => id !== initialFormData.tagIds?.[idx]);
+
+    const isDirty =
+      formData.date !== initialFormData.date ||
+      formData.category !== initialFormData.category ||
+      formData.description !== initialFormData.description ||
+      formData.price_toman !== initialFormData.price_toman ||
+      formData.price_usd !== initialFormData.price_usd ||
+      tagIdsChanged;
+
+    setIsDirty(isDirty);
+  }, [formData, initialFormData, setIsDirty]);
 
   const numberToPersianWord = useMemo(
     () => (formData.price_toman > 0 ? `${numberToWords(formData.price_toman)} تومان` : ''),
@@ -144,9 +187,11 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
       });
 
       if (response.ok) {
+        const successMessage = editingExpense ? 'Expense updated successfully!' : 'Expense added successfully!';
+        showToast(successMessage, 'success');
         setMessage({
           type: 'success',
-          text: editingExpense ? 'Expense updated successfully!' : 'Expense added successfully!',
+          text: successMessage,
         });
         setFormData({
           date: new Date().toISOString().split('T')[0],
@@ -164,10 +209,14 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
         }
       } else {
         const error = await response.json();
-        setMessage({ type: 'error', text: error.error || 'Failed to save expense' });
+        const errorMessage = error.error || 'Failed to save expense';
+        showToast(errorMessage, 'error');
+        setMessage({ type: 'error', text: errorMessage });
       }
     } catch {
-      setMessage({ type: 'error', text: 'Failed to save expense' });
+      const errorMessage = 'Failed to save expense';
+      showToast(errorMessage, 'error');
+      setMessage({ type: 'error', text: errorMessage });
     } finally {
       setIsSubmitting(false);
     }
@@ -190,7 +239,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
   return (
     <div className="border-border-subtle bg-background relative rounded-xl border p-6 shadow-sm">
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
             {editingExpense ? (
@@ -232,9 +281,9 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Row 1: Category and Date */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8">
           {/* Category */}
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
@@ -302,8 +351,8 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
           <TagInput selectedTags={selectedTags} onTagsChange={setSelectedTags} />
         </div>
 
-        {/* Prices and Rate */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {/* Prices - 2 columns */}
+        <div className="grid grid-cols-1 gap-5">
           {/* Toman */}
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
@@ -341,26 +390,26 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }: ExpenseFo
               className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
             />
           </div>
+        </div>
 
-          {/* Exchange Rate */}
-          <div className="space-y-2">
-            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
-              <span className="text-text-muted">↔</span>
-              Rate (Toman/USD) / نرخ
-              {isFetchingRate && <Loader2 className="text-text-muted h-3 w-3 animate-spin" />}
-            </label>
-            <input
-              type="number"
-              placeholder="130100"
-              required
-              min="1"
-              step="1"
-              value={exchangeRate || ''}
-              onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
-              disabled={isFetchingRate}
-              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
-            />
-          </div>
+        {/* Exchange Rate - separate row */}
+        <div className="space-y-2">
+          <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+            <span className="text-text-muted">↔</span>
+            Rate (Toman/USD) / نرخ
+            {isFetchingRate && <Loader2 className="text-text-muted h-3 w-3 animate-spin" />}
+          </label>
+          <input
+            type="number"
+            placeholder="130100"
+            required
+            min="1"
+            step="1"
+            value={exchangeRate || ''}
+            onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
+            disabled={isFetchingRate}
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
+          />
         </div>
 
         {/* Buttons */}

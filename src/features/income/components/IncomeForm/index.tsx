@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react';
 
 import { numberToWords } from '@persian-tools/persian-tools';
-import { Briefcase, Calendar, ChevronDown, DollarSign, FileText, Loader2, Plus, Save, X } from 'lucide-react';
+import { Briefcase, Calendar, ChevronDown, DollarSign, FileText, Loader2, Plus, Save } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
 import { tomanToUsd, usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
 
 import Button from '@components/Button';
+import { useToast } from '@components/Toast/ToastProvider';
 import Tooltip from '@components/Tooltip';
 
 import type { CreateIncomeInput, Income } from '@/@types/income';
@@ -19,9 +20,11 @@ interface IncomeFormProps {
   onIncomeAdded: () => void;
   editingIncome?: Income;
   onCancelEdit?: () => void;
+  setIsDirty?: (dirty: boolean) => void;
 }
 
-const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormProps) => {
+const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: IncomeFormProps) => {
+  const { showToast } = useToast();
   const currentDate = new Date();
   const [formData, setFormData] = useState<CreateIncomeInput>({
     amountUsd: 0,
@@ -38,6 +41,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isFetchingRate, setIsFetchingRate] = useState(true);
+  const [initialFormData, setInitialFormData] = useState<CreateIncomeInput | null>(null);
 
   // Fetch latest exchange rate on mount
   useEffect(() => {
@@ -63,7 +67,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
   // Load editing income data
   useEffect(() => {
     if (editingIncome) {
-      setFormData({
+      const initialData = {
         amountUsd: editingIncome.amountUsd,
         amountToman: editingIncome.amountToman,
         exchangeRateUsed: editingIncome.exchangeRateUsed,
@@ -72,10 +76,45 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
         incomeType: editingIncome.incomeType,
         source: editingIncome.source || '',
         notes: editingIncome.notes || '',
-      });
+      };
+      setFormData(initialData);
+      setInitialFormData(initialData);
       setExchangeRate(editingIncome.exchangeRateUsed);
     }
   }, [editingIncome]);
+
+  // Set initial form data when exchange rate is loaded (for new incomes)
+  useEffect(() => {
+    if (!editingIncome && exchangeRate > 0 && !initialFormData) {
+      setInitialFormData({
+        amountUsd: 0,
+        amountToman: 0,
+        exchangeRateUsed: exchangeRate,
+        month: currentDate.getMonth() + 1,
+        year: currentDate.getFullYear(),
+        incomeType: 'salary',
+        source: '',
+        notes: '',
+      });
+    }
+  }, [editingIncome, exchangeRate, initialFormData, currentDate]);
+
+  // Track form changes and update dirty state
+  useEffect(() => {
+    if (!initialFormData || !setIsDirty) return;
+
+    const isDirty =
+      formData.amountUsd !== initialFormData.amountUsd ||
+      formData.amountToman !== initialFormData.amountToman ||
+      formData.month !== initialFormData.month ||
+      formData.year !== initialFormData.year ||
+      formData.incomeType !== initialFormData.incomeType ||
+      formData.source !== initialFormData.source ||
+      formData.notes !== initialFormData.notes ||
+      exchangeRate !== initialFormData.exchangeRateUsed;
+
+    setIsDirty(isDirty);
+  }, [formData, exchangeRate, initialFormData, setIsDirty]);
 
   const numberToPersianWord = formData.amountToman > 0 ? `${numberToWords(formData.amountToman)} تومان` : '';
 
@@ -127,9 +166,11 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
       });
 
       if (response.ok) {
+        const successMessage = editingIncome ? 'Income updated successfully!' : 'Income added successfully!';
+        showToast(successMessage, 'success');
         setMessage({
           type: 'success',
-          text: editingIncome ? 'Income updated successfully!' : 'Income added successfully!',
+          text: successMessage,
         });
         setFormData({
           amountUsd: 0,
@@ -147,10 +188,14 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
         }
       } else {
         const error = await response.json();
-        setMessage({ type: 'error', text: error.error || 'Failed to save income' });
+        const errorMessage = error.error || 'Failed to save income';
+        showToast(errorMessage, 'error');
+        setMessage({ type: 'error', text: errorMessage });
       }
     } catch {
-      setMessage({ type: 'error', text: 'Failed to save income' });
+      const errorMessage = 'Failed to save income';
+      showToast(errorMessage, 'error');
+      setMessage({ type: 'error', text: errorMessage });
     } finally {
       setIsSubmitting(false);
     }
@@ -179,36 +224,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
   }
 
   return (
-    <div className="border-border-subtle bg-background relative rounded-xl border p-6 shadow-sm">
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-            {editingIncome ? (
-              <Save className="text-text-secondary h-5 w-5" />
-            ) : (
-              <Plus className="text-text-secondary h-5 w-5" />
-            )}
-          </div>
-          <div>
-            <h2 className="text-text-primary text-lg font-semibold">
-              {editingIncome ? 'Edit Income' : 'Add New Income'}
-            </h2>
-            <p className="text-text-muted text-sm" dir="rtl">
-              {editingIncome ? 'ویرایش درآمد' : 'افزودن درآمد جدید'}
-            </p>
-          </div>
-        </div>
-        {editingIncome && (
-          <button
-            onClick={handleCancel}
-            className="text-text-muted hover:bg-background-elevated hover:text-text-primary rounded-lg p-2 transition-all"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        )}
-      </div>
-
+    <>
       {/* Message */}
       {message && (
         <div
@@ -223,7 +239,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Row 1: Income Type, Month, Year */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {/* Income Type */}
@@ -239,7 +255,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
                   setFormData({ ...formData, incomeType: e.target.value as CreateIncomeInput['incomeType'] })
                 }
                 required
-                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-3 pr-10 transition-all focus:outline-none"
+                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-3 pr-10 text-sm transition-all focus:outline-none"
               >
                 {INCOME_TYPES.map((type) => (
                   <option key={type.value} value={type.value}>
@@ -262,7 +278,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
                 value={formData.month}
                 onChange={(e) => setFormData({ ...formData, month: parseInt(e.target.value, 10) })}
                 required
-                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-3 pr-10 transition-all focus:outline-none"
+                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-3 pr-10 text-sm transition-all focus:outline-none"
               >
                 {MONTHS.map((month) => (
                   <option key={month.value} value={month.value}>
@@ -285,7 +301,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
                 value={formData.year}
                 onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value, 10) })}
                 required
-                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-3 pr-10 transition-all focus:outline-none"
+                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-3 pr-10 text-sm transition-all focus:outline-none"
               >
                 {yearOptions.map((year) => (
                   <option key={year} value={year}>
@@ -328,27 +344,9 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
           />
         </div>
 
-        {/* Amounts and Rate */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {/* USD */}
-          <div className="space-y-2">
-            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
-              <DollarSign className="text-blue h-4 w-4" />
-              Amount (USD) / مبلغ (دلار)
-            </label>
-            <input
-              type="number"
-              placeholder="3000"
-              required
-              min="0"
-              step="0.01"
-              value={formData.amountUsd || ''}
-              onChange={(e) => handleUsdChange(parseFloat(e.target.value) || 0)}
-              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
-            />
-          </div>
-
-          {/* Toman */}
+        {/* Amounts - 2 columns */}
+        <div className="grid grid-cols-1 gap-4">
+          {/* Toman (on left) */}
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <span className="text-success font-bold">T</span>
@@ -368,25 +366,43 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
             </Tooltip>
           </div>
 
-          {/* Exchange Rate */}
+          {/* USD (on right) */}
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
-              <span className="text-text-muted">↔</span>
-              Rate (Toman/USD) / نرخ
-              {isFetchingRate && <Loader2 className="text-text-muted h-3 w-3 animate-spin" />}
+              <DollarSign className="text-blue h-4 w-4" />
+              Amount (USD) / مبلغ (دلار)
             </label>
             <input
               type="number"
-              placeholder="130000"
+              placeholder="3000"
               required
-              min="1"
-              step="1"
-              value={exchangeRate || ''}
-              onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
-              disabled={isFetchingRate}
-              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
+              min="0"
+              step="0.01"
+              value={formData.amountUsd || ''}
+              onChange={(e) => handleUsdChange(parseFloat(e.target.value) || 0)}
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
             />
           </div>
+        </div>
+
+        {/* Exchange Rate - separate row */}
+        <div className="space-y-2">
+          <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+            <span className="text-text-muted">↔</span>
+            Exchange Rate / نرخ تبدیل
+            {isFetchingRate && <Loader2 className="text-text-muted h-3 w-3 animate-spin" />}
+          </label>
+          <input
+            type="number"
+            placeholder="130000"
+            required
+            min="1"
+            step="1"
+            value={exchangeRate || ''}
+            onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
+            disabled={isFetchingRate}
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
+          />
         </div>
 
         {/* Buttons */}
@@ -429,7 +445,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit }: IncomeFormPr
           )}
         </div>
       </form>
-    </div>
+    </>
   );
 };
 
