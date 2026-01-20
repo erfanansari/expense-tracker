@@ -45,9 +45,9 @@ export default async function middleware(request: NextRequest) {
   if (pathname === '/') {
     if (isAuthenticated) {
       return NextResponse.redirect(new URL('/overview', request.url));
-    } else {
-      return NextResponse.redirect(new URL('/login', request.url));
     }
+    // Allow unauthenticated users to view landing page
+    return NextResponse.next();
   }
 
   // Redirect authenticated users away from auth pages
