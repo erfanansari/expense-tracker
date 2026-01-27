@@ -1,7 +1,5 @@
+import { Drawer } from 'vaul';
+
 export default function DragHandle() {
-  return (
-    <div className="flex h-11 items-center justify-center">
-      <div className="bg-border-default h-1 w-8 rounded-full" />
-    </div>
-  );
+  return <Drawer.Handle className="flex cursor-grab items-center justify-center pt-3 active:cursor-grabbing" />;
 }

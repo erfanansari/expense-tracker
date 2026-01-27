@@ -462,3 +462,11 @@ select option {
   --z-command-palette: 60;
   --z-toast: 9999;
 }
+
+/* Prevent drawer content from auto-scrolling to focused inputs */
+[data-vaul-drawer] input:focus,
+[data-vaul-drawer] textarea:focus,
+[data-vaul-drawer] select:focus {
+  scroll-margin: 0;
+  scroll-padding: 0;
+}
