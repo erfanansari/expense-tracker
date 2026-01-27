@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
+import Link from 'next/link';
+
 import { BarChart3, DollarSign, Hash, Info, Lightbulb, Minus, Plus, TrendingDown, TrendingUp } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
@@ -302,10 +304,10 @@ export default function DashboardPage() {
           </div>
           <div className="flex flex-row items-center gap-2 sm:gap-3">
             <DateRangeSelector value={dateRange} onChange={setDateRange} />
-            <a href="/transactions" className={getButtonClasses('primary', 'shrink-0')}>
+            <Link href="/transactions" className={getButtonClasses('primary', 'shrink-0')}>
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">Add Transaction</span>
-            </a>
+            </Link>
           </div>
         </div>
 
