@@ -208,20 +208,8 @@
 html {
   color-scheme: light;
   background: var(--color-background);
-}
-
-/* Fix iOS viewport height issue */
-@supports (-webkit-touch-callout: none) {
-  .min-h-screen {
-    min-height: -webkit-fill-available;
-  }
-}
-
-/* Use dvh where supported for better mobile viewport handling */
-@supports (min-height: 100dvh) {
-  .min-h-screen {
-    min-height: 100dvh;
-  }
+  min-height: 100%;
+  min-height: 100dvh;
 }
 
 body {
@@ -230,6 +218,16 @@ body {
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100%;
+  min-height: 100dvh;
+  /* Handle iOS safe areas */
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Fix min-h-screen for iOS */
+.min-h-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* Card base styles */
