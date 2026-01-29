@@ -18,7 +18,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   const isForgotPassword = pathname === '/forgot-password';
 
   return (
-    <div className="bg-background flex min-h-screen flex-col items-center justify-center px-4 py-8">
+    <div className="bg-background-content flex min-h-screen flex-col items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         {/* Branding */}
         <div className="mb-4 flex flex-col items-center">
