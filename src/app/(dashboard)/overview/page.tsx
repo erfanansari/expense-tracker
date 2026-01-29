@@ -655,13 +655,16 @@ export default function DashboardPage() {
               <div className="space-y-5">
                 {/* This Month Bar */}
                 <div>
-                  <div className="mb-2 flex items-center justify-between">
+                  <div className="mb-2 flex items-start justify-between">
                     <span className="text-text-primary text-sm font-medium">
                       {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                     </span>
-                    <span className="text-text-primary text-sm font-semibold tabular-nums">
-                      {formatNumber(thisMonthTotalToman)} ت
-                    </span>
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span className="text-text-primary text-sm font-semibold tabular-nums" dir="rtl">
+                        {formatNumber(thisMonthTotalToman)} تومان
+                      </span>
+                      <span className="text-text-muted text-xs tabular-nums">${thisMonthTotal.toFixed(2)}</span>
+                    </div>
                   </div>
                   <div className="bg-border-subtle h-3 w-full rounded-full">
                     <div
@@ -675,16 +678,19 @@ export default function DashboardPage() {
 
                 {/* Last Month Bar */}
                 <div>
-                  <div className="mb-2 flex items-center justify-between">
+                  <div className="mb-2 flex items-start justify-between">
                     <span className="text-text-secondary text-sm font-medium">
                       {new Date(new Date().getFullYear(), new Date().getMonth() - 1).toLocaleDateString('en-US', {
                         month: 'long',
                         year: 'numeric',
                       })}
                     </span>
-                    <span className="text-text-secondary text-sm font-semibold tabular-nums">
-                      {formatNumber(lastMonthTotalToman)} ت
-                    </span>
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span className="text-text-secondary text-sm font-semibold tabular-nums" dir="rtl">
+                        {formatNumber(lastMonthTotalToman)} تومان
+                      </span>
+                      <span className="text-text-muted text-xs tabular-nums">${lastMonthTotal.toFixed(2)}</span>
+                    </div>
                   </div>
                   <div className="bg-border-subtle h-3 w-full rounded-full">
                     <div
@@ -701,19 +707,25 @@ export default function DashboardPage() {
                   {thisMonthTotalToman > 0 && lastMonthTotalToman > 0 ? (
                     <div className="border-border-subtle bg-background-secondary flex items-center justify-between rounded-lg border p-3">
                       <span className="text-text-secondary text-sm">Difference</span>
-                      <div className="flex items-center gap-2">
-                        {thisMonthTotalToman > lastMonthTotalToman ? (
-                          <TrendingUp className="text-danger h-4 w-4" />
-                        ) : (
-                          <TrendingDown className="text-success h-4 w-4" />
-                        )}
-                        <span
-                          className={twMerge(
-                            'text-sm font-semibold tabular-nums',
-                            thisMonthTotalToman > lastMonthTotalToman ? 'text-danger' : 'text-success'
+                      <div className="flex flex-col items-end gap-0.5">
+                        <div className="flex items-center gap-2">
+                          {thisMonthTotalToman > lastMonthTotalToman ? (
+                            <TrendingUp className="text-danger h-4 w-4" />
+                          ) : (
+                            <TrendingDown className="text-success h-4 w-4" />
                           )}
-                        >
-                          {formatNumber(Math.abs(thisMonthTotalToman - lastMonthTotalToman))} ت
+                          <span
+                            className={twMerge(
+                              'text-sm font-semibold tabular-nums',
+                              thisMonthTotalToman > lastMonthTotalToman ? 'text-danger' : 'text-success'
+                            )}
+                            dir="rtl"
+                          >
+                            {formatNumber(Math.abs(thisMonthTotalToman - lastMonthTotalToman))} تومان
+                          </span>
+                        </div>
+                        <span className="text-text-muted text-xs tabular-nums">
+                          ${Math.abs(thisMonthTotal - lastMonthTotal).toFixed(2)}
                         </span>
                       </div>
                     </div>
