@@ -15,7 +15,8 @@
     "prepare": "husky",
     "migrate": "tsx src/core/database/migrate.ts",
     "db:seed": "tsx src/core/database/seed-user.ts",
-    "db:test": "tsx src/core/database/test-connection.ts"
+    "db:test": "tsx src/core/database/test-connection.ts",
+    "db:seed-demo": "tsx src/core/database/seed-demo.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.15.15",
