@@ -292,7 +292,7 @@ export default function DashboardPage() {
   }, [filteredExpenses]);
 
   return (
-    <div className="bg-background relative min-h-screen overflow-x-hidden">
+    <div className="relative min-h-screen overflow-x-hidden">
       <div className="mx-auto max-w-[1600px] px-6 py-8">
         {/* Page Header */}
         <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">

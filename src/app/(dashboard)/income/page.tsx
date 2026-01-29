@@ -134,7 +134,7 @@ export default function IncomePage() {
     .sort((a, b) => b - a);
 
   return (
-    <div className="bg-background min-h-screen">
+    <div className="min-h-screen">
       <div className="mx-auto max-w-[1600px] px-6 py-8">
         {/* Page Header */}
         <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">

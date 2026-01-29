@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
+import Footer from '@/components/Footer';
 import FeaturesSection from '@/components/LandingPage/FeaturesSection';
-import Footer from '@/components/LandingPage/Footer';
 import Header from '@/components/LandingPage/Header';
 import Hero from '@/components/LandingPage/Hero';
 
@@ -13,9 +13,9 @@ export const metadata: Metadata = {
 
 export default function LandingPage() {
   return (
-    <div className="bg-background min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <Header />
-      <main>
+      <main className="bg-background-content flex-1">
         <Hero />
         <FeaturesSection />
       </main>

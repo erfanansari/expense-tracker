@@ -8,6 +8,7 @@
   /* Backgrounds */
   --color-background: #ffffff;
   --color-background-secondary: #fafafa;
+  --color-background-content: #fafafa;
   --color-background-elevated: #f5f5f5;
   --color-background-hover: #f0f0f0;
 
@@ -128,6 +129,7 @@
   /* Background colors */
   --color-background: var(--color-background);
   --color-background-secondary: var(--color-background-secondary);
+  --color-background-content: var(--color-background-content);
   --color-background-elevated: var(--color-background-elevated);
   --color-background-hover: var(--color-background-hover);
 
