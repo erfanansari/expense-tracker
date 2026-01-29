@@ -5,8 +5,6 @@ import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react';
 import { Drawer } from 'vaul';
 
-import DragHandle from './DragHandle';
-
 interface FormDrawerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -71,7 +69,6 @@ export default function FormDrawer({ isOpen, onClose, title, titleFa, children, 
       dismissible={!isDirty}
       shouldScaleBackground={false}
       repositionInputs={false}
-      handleOnly={isMobile}
     >
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 z-50 bg-black/20 backdrop-blur-[2px]" />
@@ -81,17 +78,25 @@ export default function FormDrawer({ isOpen, onClose, title, titleFa, children, 
               ? 'bg-background fixed right-0 bottom-0 left-0 z-50 flex h-[85dvh] max-h-[85dvh] flex-col rounded-t-2xl shadow-2xl outline-none'
               : 'bg-background fixed top-0 bottom-0 left-0 z-50 flex w-[520px] flex-col shadow-2xl outline-none'
           }
-          aria-labelledby="drawer-title"
         >
+          {/* Accessibility: Title must be direct child for screen readers */}
+          <Drawer.Title className="sr-only">{title}</Drawer.Title>
+
           {/* Header with drag handle */}
           <div className="border-border-subtle shrink-0 border-b">
             {/* Drag handle - only on mobile */}
-            <div className="bg-background-secondary rounded-t-2xl py-2">{isMobile && <DragHandle />}</div>
+            {isMobile && (
+              <div className="bg-background-secondary flex justify-center rounded-t-2xl py-3">
+                <div className="bg-border-strong h-1 w-10 rounded-full" />
+              </div>
+            )}
 
             {/* Title bar */}
-            <div className="bg-background-secondary flex items-center justify-between px-4 pb-4 md:px-6 md:pb-5">
+            <div
+              className={`bg-background-secondary flex items-center justify-between px-4 pb-4 md:px-6 md:pb-5 ${!isMobile ? 'pt-4 md:pt-5' : ''}`}
+            >
               <div className="min-w-0 flex-1">
-                <Drawer.Title className="text-text-primary text-base font-semibold sm:text-lg">{title}</Drawer.Title>
+                <h2 className="text-text-primary text-base font-semibold sm:text-lg">{title}</h2>
                 {titleFa && (
                   <p className="text-text-muted mt-1 text-xs" dir="rtl">
                     {titleFa}

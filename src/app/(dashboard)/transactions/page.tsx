@@ -7,7 +7,7 @@ import { Edit2, FileText, Loader2, Plus, Tag, Trash2 } from 'lucide-react';
 import { type Expense } from '@types';
 
 import ExpenseForm from '@features/expenses/components/ExpenseForm';
-import TransactionDetailsModal from '@features/expenses/components/TransactionDetailsModal';
+import TransactionDetailsDrawer from '@features/expenses/components/TransactionDetailsDrawer';
 
 import Button from '@components/Button';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
@@ -336,8 +336,8 @@ export default function TransactionsPage() {
           );
         })()}
 
-        {/* Transaction Details Modal */}
-        <TransactionDetailsModal expense={selectedExpense} isOpen={isModalOpen} onClose={handleCloseModal} />
+        {/* Transaction Details Drawer */}
+        <TransactionDetailsDrawer expense={selectedExpense} isOpen={isModalOpen} onClose={handleCloseModal} />
 
         {/* Delete Confirmation Modal */}
         <DeleteConfirmModal
