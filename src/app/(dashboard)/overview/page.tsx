@@ -550,16 +550,24 @@ export default function DashboardPage() {
                   </span>{' '}
                   than last month
                 </p>
-                <div className="border-border-subtle mt-3 space-y-1 border-t pt-3">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-text-muted">This Month</span>
-                    <span className="text-text-primary font-medium tabular-nums">
-                      {formatNumber(thisMonthTotalToman)} ت
-                    </span>
+                <div className="border-border-subtle mt-3 space-y-3 border-t pt-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-text-muted text-xs">This Month</span>
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span className="text-text-primary text-sm font-semibold tabular-nums" dir="rtl">
+                        {formatNumber(thisMonthTotalToman)} تومان
+                      </span>
+                      <span className="text-text-muted text-xs tabular-nums">${thisMonthTotal.toFixed(2)}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-text-muted">Last Month</span>
-                    <span className="text-text-secondary tabular-nums">{formatNumber(lastMonthTotalToman)} ت</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-text-muted text-xs">Last Month</span>
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span className="text-text-secondary text-sm tabular-nums" dir="rtl">
+                        {formatNumber(lastMonthTotalToman)} تومان
+                      </span>
+                      <span className="text-text-muted text-xs tabular-nums">${lastMonthTotal.toFixed(2)}</span>
+                    </div>
                   </div>
                 </div>
               </>
