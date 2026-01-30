@@ -390,12 +390,6 @@ export default function SettingsPage() {
                     Contact Support
                   </a>
                 </div>
-
-                {/* App Information */}
-                <div className="flex items-center justify-between pt-4 text-xs">
-                  <span className="text-text-muted">Version {packageJson.version}</span>
-                  <span className="text-text-muted">© {new Date().getFullYear()} Kharji. All rights reserved.</span>
-                </div>
               </div>
             </div>
           </div>
