@@ -25,6 +25,8 @@ interface SummaryResponse {
   current_month_income_toman: number;
   current_month_expenses_usd: number;
   current_month_expenses_toman: number;
+  total_income_usd: number;
+  total_income_toman: number;
   total_assets_usd: number;
   total_assets_toman: number;
   net_worth_usd: number;
@@ -55,6 +57,17 @@ export async function GET() {
 
     const currentMonthIncomeUsd = (currentIncomeResult.rows[0]?.totalUsd as number) || 0;
     const currentMonthIncomeToman = (currentIncomeResult.rows[0]?.totalToman as number) || 0;
+
+    // Get total income (all-time)
+    const totalIncomeResult = await db.execute({
+      sql: `SELECT COALESCE(SUM(amountUsd), 0) as totalUsd, COALESCE(SUM(amountToman), 0) as totalToman
+            FROM incomes
+            WHERE userId = ?`,
+      args: [user.userId],
+    });
+
+    const totalIncomeUsd = (totalIncomeResult.rows[0]?.totalUsd as number) || 0;
+    const totalIncomeToman = (totalIncomeResult.rows[0]?.totalToman as number) || 0;
 
     // Get current month expenses
     const startOfMonth = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
@@ -152,6 +165,8 @@ export async function GET() {
       current_month_income_toman: currentMonthIncomeToman,
       current_month_expenses_usd: currentMonthExpensesUsd,
       current_month_expenses_toman: currentMonthExpensesToman,
+      total_income_usd: totalIncomeUsd,
+      total_income_toman: totalIncomeToman,
       total_assets_usd: totalAssetsUsd,
       total_assets_toman: totalAssetsToman,
       net_worth_usd: netWorthUsd,

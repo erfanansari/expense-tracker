@@ -4,7 +4,30 @@ import { useEffect, useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
-import { BarChart3, DollarSign, Hash, Info, Lightbulb, Minus, Plus, TrendingDown, TrendingUp } from 'lucide-react';
+import {
+  ArrowRight,
+  Banknote,
+  DollarSign,
+  Info,
+  Minus,
+  PieChartIcon,
+  Plus,
+  Tag,
+  TrendingDown,
+  TrendingUp,
+} from 'lucide-react';
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { twMerge } from 'tailwind-merge';
 
 import type { Expense } from '@types';
@@ -12,14 +35,125 @@ import type { Expense } from '@types';
 import DateRangeSelector, {
   type DateRange,
   filterExpensesByDateRange,
+  getChartGranularity,
 } from '@features/expenses/components/DateRangeSelector';
 
 import { getButtonClasses } from '@components/Button';
 import Tooltip from '@components/Tooltip';
 
-import { formatNumber, getCategoryLabel } from '@utils';
+import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@utils';
 
-// Exchange Rate Card Component
+// ─── Pie palette – matches ExpenseCharts exactly ───────────────────────────────
+const COLORS = [
+  '#0070f3', // Vercel blue
+  '#525252', // dark gray
+  '#737373', // medium gray
+  '#10b981', // emerald (success)
+  '#3b82f6', // blue
+  '#a3a3a3', // light gray
+  '#2563eb', // darker blue
+  '#171717', // black
+];
+
+// ─── Skeleton ───────────────────────────────────────────────────────────────────
+function Pulse({ className }: { className?: string }) {
+  return <div className={twMerge('bg-background-elevated animate-pulse rounded-lg', className)} />;
+}
+
+function OverviewSkeleton() {
+  return (
+    <>
+      {/* 4 card skeletons */}
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="border-border-subtle bg-background rounded-xl border p-5 shadow-sm sm:p-6">
+            <Pulse className="mb-4 h-10 w-10" />
+            <Pulse className="mb-3 h-3 w-24" />
+            <Pulse className="mb-2 h-8 w-3/4" />
+            <Pulse className="h-4 w-1/3" />
+          </div>
+        ))}
+      </div>
+
+      {/* Charts row */}
+      <div className="mb-6 grid grid-cols-1 gap-5 sm:mb-8 sm:gap-6 lg:grid-cols-3">
+        {/* Area chart skeleton */}
+        <div className="border-border-subtle bg-background rounded-xl border p-5 shadow-sm sm:p-6 lg:col-span-2">
+          <div className="mb-5 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Pulse className="h-10 w-10" />
+              <Pulse className="h-5 w-36" />
+            </div>
+            <Pulse className="h-9 w-32" />
+          </div>
+          <Pulse className="h-[300px] w-full" />
+        </div>
+
+        {/* Donut skeleton */}
+        <div className="border-border-subtle bg-background rounded-xl border p-5 shadow-sm sm:p-6">
+          <div className="mb-5 flex items-center gap-3">
+            <Pulse className="h-10 w-10" />
+            <div>
+              <Pulse className="mb-1 h-5 w-28" />
+              <Pulse className="h-3 w-20" />
+            </div>
+          </div>
+          <div className="flex h-[220px] items-center justify-center">
+            <div className="relative flex h-44 w-44 items-center justify-center">
+              <Pulse className="absolute h-44 w-44 rounded-full" />
+              <div className="bg-background relative z-10 h-[118px] w-[118px] rounded-full" />
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            {[...Array(4)].map((_, i) => (
+              <Pulse key={i} className="h-[42px]" />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Table skeleton */}
+      <div className="border-border-subtle bg-background overflow-hidden rounded-xl border shadow-sm">
+        <div className="flex items-center justify-between px-6 py-5">
+          <Pulse className="h-5 w-44" />
+          <Pulse className="h-5 w-16" />
+        </div>
+        <div className="bg-background-secondary px-6 py-3.5">
+          <div className="flex items-center justify-between">
+            <Pulse className="h-3 w-24" />
+            <Pulse className="h-3 w-20" />
+            <Pulse className="h-3 w-16" />
+            <Pulse className="h-3 w-20" />
+          </div>
+        </div>
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="border-border-subtle border-t px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-1.5">
+                <Pulse className="h-4 w-36" />
+                <Pulse className="h-3 w-20" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <Pulse className="h-4 w-20" />
+                <Pulse className="h-3 w-16" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <Pulse className="h-4 w-24" />
+                <Pulse className="h-3 w-14" />
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                <Pulse className="h-4 w-28" />
+                <Pulse className="h-3 w-16" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+// ─── Exchange Rate Card ─────────────────────────────────────────────────────────
 interface ExchangeRateData {
   usd?: { value: string; change: number };
   _meta?: {
@@ -74,7 +208,6 @@ function ExchangeRateCard() {
   const freshness = rateData._meta?.freshness || 'cached';
   const usage = rateData._meta?.usage;
 
-  // Format with date + time
   const lastUpdate = rateData._meta?.fetchedAt
     ? new Date(rateData._meta.fetchedAt).toLocaleString('en-US', {
         month: 'short',
@@ -195,79 +328,163 @@ function ExchangeRateCard() {
   );
 }
 
-const _COLORS = [
-  '#ef4444',
-  '#f97316',
-  '#3b82f6',
-  '#8b5cf6',
-  '#ec4899',
-  '#14b8a6',
-  '#22c55e',
-  '#eab308',
-  '#6366f1',
-  '#64748b',
-];
+// ─── Summary API shape ──────────────────────────────────────────────────────────
+interface SummaryData {
+  current_month_income_usd: number;
+  current_month_income_toman: number;
+  current_month_expenses_usd: number;
+  current_month_expenses_toman: number;
+  total_income_usd: number;
+  total_income_toman: number;
+  net_worth_usd: number;
+  net_worth_toman: number;
+}
 
+// ─── Custom recharts tooltips ───────────────────────────────────────────────────
+function SpendingTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: Array<{ value: number; payload: { usdValue?: number } }>;
+  label?: string;
+}) {
+  if (!active || !payload?.length) return null;
+  const usdValue = payload[0]?.payload?.usdValue || 0;
+  return (
+    <div className="border-border-subtle bg-background rounded-lg border p-4 shadow-lg">
+      <p className="text-text-primary text-lg font-bold" dir="rtl">
+        {formatNumber(payload[0].value)} تومان
+      </p>
+      <p className="text-text-muted mt-1.5 text-sm font-medium">${usdValue.toFixed(2)} USD</p>
+      {label && <p className="text-blue mt-2 text-sm font-medium">{label}</p>}
+    </div>
+  );
+}
+
+function CategoryTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: Array<{ value: number; payload: { nameFa?: string; usdValue?: number } }>;
+}) {
+  if (!active || !payload?.length) return null;
+  const data = payload[0];
+  const usdValue = data.payload.usdValue || 0;
+  return (
+    <div className="border-border-subtle bg-background rounded-lg border p-4 shadow-lg">
+      <p className="text-text-primary text-lg font-bold" dir="rtl">
+        {formatNumber(data.value)} تومان
+      </p>
+      <p className="text-text-muted mt-1.5 text-sm font-medium">${usdValue.toFixed(2)} USD</p>
+      {data.payload.nameFa && (
+        <p className="text-blue mt-2 text-sm font-medium" dir="rtl">
+          {data.payload.nameFa}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ─── Aggregation helpers (same logic as ExpenseCharts) ─────────────────────────
+function getWeekKey(date: Date): string {
+  const year = date.getFullYear();
+  const firstDayOfYear = new Date(year, 0, 1);
+  const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
+  const weekNum = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+  return `${year}-W${weekNum.toString().padStart(2, '0')}`;
+}
+
+function getMonthKey(date: Date): string {
+  return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+}
+
+// ─── Main page ──────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
+  const [summary, setSummary] = useState<SummaryData | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [dateRange, setDateRange] = useState<DateRange>('ALL_TIME');
+  const [isLoading, setIsLoading] = useState(true);
+  const [dateRange, setDateRange] = useState<DateRange>('30D');
 
   useEffect(() => {
-    const fetchExpenses = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/expenses');
-        if (response.ok) {
-          const data = await response.json();
+        const [summaryRes, expensesRes] = await Promise.all([fetch('/api/summary'), fetch('/api/expenses')]);
+        if (summaryRes.ok) setSummary(await summaryRes.json());
+        if (expensesRes.ok) {
+          const data = await expensesRes.json();
           setExpenses(Array.isArray(data) ? data : data.expenses || []);
         }
       } catch (error) {
-        console.error('Failed to fetch expenses:', error);
+        console.error('Failed to fetch overview data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
-    fetchExpenses();
+    fetchData();
   }, []);
 
-  const filteredExpenses = useMemo(() => {
-    return filterExpensesByDateRange(expenses, dateRange);
-  }, [expenses, dateRange]);
-
-  // Calculate real metrics from expenses
-  const totalToman = filteredExpenses.reduce((sum, exp) => sum + exp.price_toman, 0);
-  const totalUsd = filteredExpenses.reduce((sum, exp) => sum + exp.price_usd, 0);
-  const transactionCount = filteredExpenses.length;
-
-  // Calculate expenses this month vs last month for trend (using ALL expenses, not filtered)
-  const thisMonthExpenses = useMemo(() => {
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    return expenses.filter((exp) => {
-      const expDate = new Date(exp.date);
-      return expDate >= startOfMonth;
-    });
+  // ── Derived data ──────────────────────────────────────────────────────────────
+  /** Last 5 expenses, newest first */
+  const recentTransactions = useMemo(() => {
+    return [...expenses]
+      .sort((a, b) => {
+        if (a.date !== b.date) return new Date(b.date).getTime() - new Date(a.date).getTime();
+        return b.id - a.id;
+      })
+      .slice(0, 5);
   }, [expenses]);
 
-  const lastMonthExpenses = useMemo(() => {
-    const now = new Date();
-    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-    endOfLastMonth.setHours(23, 59, 59, 999);
-    return expenses.filter((exp) => {
-      const expDate = new Date(exp.date);
-      expDate.setHours(0, 0, 0, 0);
-      startOfLastMonth.setHours(0, 0, 0, 0);
-      return expDate >= startOfLastMonth && expDate <= endOfLastMonth;
+  /** Expenses filtered by the selected date range (for spending trend chart) */
+  const filteredExpenses = useMemo(() => filterExpensesByDateRange(expenses, dateRange), [expenses, dateRange]);
+  const granularity = useMemo(() => getChartGranularity(dateRange), [dateRange]);
+
+  /** Aggregated spending trend for area chart */
+  const spendingTrend = useMemo(() => {
+    if (filteredExpenses.length === 0) return [];
+
+    const aggregated = new Map<string, { amount: number; usdValue: number }>();
+
+    filteredExpenses.forEach((exp) => {
+      const date = new Date(`${exp.date}T00:00:00`);
+      let key: string;
+
+      switch (granularity) {
+        case 'weekly':
+          key = getWeekKey(date);
+          break;
+        case 'monthly':
+          key = getMonthKey(date);
+          break;
+        case 'daily':
+        default:
+          key = exp.date;
+          break;
+      }
+
+      const existing = aggregated.get(key);
+      if (existing) {
+        existing.amount += exp.price_toman;
+        existing.usdValue += exp.price_usd;
+      } else {
+        aggregated.set(key, { amount: exp.price_toman, usdValue: exp.price_usd });
+      }
     });
-  }, [expenses]);
 
-  const thisMonthTotal = thisMonthExpenses.reduce((sum, exp) => sum + exp.price_usd, 0);
-  const lastMonthTotal = lastMonthExpenses.reduce((sum, exp) => sum + exp.price_usd, 0);
-  const thisMonthTotalToman = thisMonthExpenses.reduce((sum, exp) => sum + exp.price_toman, 0);
-  const lastMonthTotalToman = lastMonthExpenses.reduce((sum, exp) => sum + exp.price_toman, 0);
-  const monthOverMonthChange = lastMonthTotal > 0 ? ((thisMonthTotal - lastMonthTotal) / lastMonthTotal) * 100 : 0;
+    return Array.from(aggregated.entries())
+      .map(([date, data]) => ({ date, ...data }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }, [filteredExpenses, granularity]);
 
-  // Calculate category breakdown for cashflow
-  const categoryData = useMemo(() => {
-    const categoryTotals = filteredExpenses.reduce(
+  /** This month's expenses grouped by category (for donut chart) */
+  const categorySplit = useMemo(() => {
+    const now = new Date();
+    const startOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+    const monthExps = expenses.filter((exp) => exp.date >= startOfMonth);
+
+    const totals = monthExps.reduce(
       (acc, exp) => {
         const existing = acc.find((item) => item.category === exp.category);
         if (existing) {
@@ -287,14 +504,30 @@ export default function DashboardPage() {
       },
       [] as Array<{ category: string; name: string; nameFa: string; value: number; usdValue: number }>
     );
+    return totals.sort((a, b) => b.value - a.value);
+  }, [expenses]);
 
-    return categoryTotals.sort((a, b) => b.value - a.value);
-  }, [filteredExpenses]);
+  /** Month-over-month expense change (null when no last-month data) */
+  const momExpenseChange = useMemo(() => {
+    const now = new Date();
+    const thisMonthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonthStart = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}-01`;
 
+    const thisTotal = expenses.filter((e) => e.date >= thisMonthStart).reduce((s, e) => s + e.price_toman, 0);
+    const lastTotal = expenses
+      .filter((e) => e.date >= lastMonthStart && e.date < thisMonthStart)
+      .reduce((s, e) => s + e.price_toman, 0);
+
+    if (lastTotal === 0) return null;
+    return ((thisTotal - lastTotal) / lastTotal) * 100;
+  }, [expenses]);
+
+  // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       <div className="mx-auto max-w-[1600px] px-6 py-8">
-        {/* Page Header */}
+        {/* Header */}
         <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <h1 className="text-text-primary text-xl font-bold sm:text-2xl md:text-3xl">Overview</h1>
@@ -302,618 +535,322 @@ export default function DashboardPage() {
               Welcome back! Here&apos;s your financial overview.
             </p>
           </div>
-          <div className="flex flex-row items-center gap-2 sm:gap-3">
-            <DateRangeSelector value={dateRange} onChange={setDateRange} />
-            <Link href="/transactions" className={getButtonClasses('primary', 'shrink-0')}>
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add Transaction</span>
-            </Link>
-          </div>
+          <Link href="/transactions" className={getButtonClasses('primary', 'shrink-0')}>
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Add Transaction</span>
+          </Link>
         </div>
 
-        {/* Key Metrics */}
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
-          {/* Total Expenses */}
-          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-                <DollarSign className="text-text-secondary h-5 w-5" />
-              </div>
-            </div>
-
-            <div>
-              <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Expenses</p>
-              <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl" dir="rtl">
-                {formatNumber(totalToman)} <span className="text-text-muted text-lg">تومان</span>
-              </p>
-              <p className="text-text-secondary mt-1.5 text-sm font-medium">${totalUsd.toFixed(2)} USD</p>
-            </div>
-          </div>
-
-          {/* Transaction Count */}
-          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-                <Hash className="text-text-secondary h-5 w-5" />
-              </div>
-            </div>
-
-            <div>
-              <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Transactions</p>
-              <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl">{transactionCount}</p>
-              <p className="text-text-secondary mt-1.5 text-sm font-medium" dir="rtl">
-                تعداد تراکنش
-              </p>
-            </div>
-          </div>
-
-          {/* Average Daily Spending */}
-          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-                <BarChart3 className="text-text-secondary h-5 w-5" />
-              </div>
-              {lastMonthTotal > 0 && (
-                <div
-                  className={twMerge(
-                    'flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold',
-                    monthOverMonthChange >= 0
-                      ? 'border-border-subtle bg-danger-light text-danger'
-                      : 'border-border-subtle bg-success-light text-success'
-                  )}
-                >
-                  {monthOverMonthChange >= 0 ? (
-                    <TrendingUp className="h-3 w-3" />
-                  ) : (
-                    <TrendingDown className="h-3 w-3" />
-                  )}
-                  <span>{Math.abs(monthOverMonthChange).toFixed(1)}%</span>
-                </div>
-              )}
-            </div>
-
-            <div>
-              <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Daily Average</p>
-              {(() => {
-                const dates = filteredExpenses.map((exp) => new Date(exp.date).getTime());
-                const firstDate = dates.length > 0 ? new Date(Math.min(...dates)) : new Date();
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                firstDate.setHours(0, 0, 0, 0);
-                const totalDays = Math.ceil((today.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-                const avgDailyToman = totalDays > 0 ? totalToman / totalDays : 0;
-                const avgDailyUsd = totalDays > 0 ? totalUsd / totalDays : 0;
-                return (
-                  <>
-                    <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl" dir="rtl">
-                      {formatNumber(avgDailyToman)} <span className="text-text-muted text-lg">تومان</span>
-                    </p>
-                    <p className="text-text-secondary mt-1.5 text-sm font-medium">${avgDailyUsd.toFixed(2)} USD</p>
-                  </>
-                );
-              })()}
-            </div>
-          </div>
-
-          {/* Exchange Rate */}
-          <ExchangeRateCard />
-        </div>
-
-        {/* Insights Overview */}
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
-          {/* Top 3 Categories */}
-          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-                <Lightbulb className="text-text-secondary h-5 w-5" />
-              </div>
-            </div>
-            <p className="text-text-muted mb-3 text-xs font-medium tracking-wider uppercase">Top Categories</p>
-            {(() => {
-              const now = new Date();
-              const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-              const thisMonthExpenses = filteredExpenses.filter((exp) => {
-                const expDate = new Date(exp.date);
-                return expDate >= startOfMonth;
-              });
-
-              // Use this month's expenses if available, otherwise use all filtered expenses
-              const dataToUse = thisMonthExpenses.length > 0 ? thisMonthExpenses : filteredExpenses;
-
-              const monthCategoryTotals = dataToUse.reduce(
-                (acc, exp) => {
-                  const existing = acc.find((item) => item.category === exp.category);
-                  if (existing) {
-                    existing.value += exp.price_toman;
-                  } else {
-                    const labels = getCategoryLabel(exp.category);
-                    acc.push({
-                      category: exp.category,
-                      name: labels.en,
-                      nameFa: labels.fa,
-                      value: exp.price_toman,
-                    });
-                  }
-                  return acc;
-                },
-                [] as Array<{ category: string; name: string; nameFa: string; value: number }>
-              );
-
-              const topThree = monthCategoryTotals.sort((a, b) => b.value - a.value).slice(0, 3);
-
-              return topThree.length > 0 ? (
-                <div className="space-y-3">
-                  <p className="text-text-muted text-xs font-medium">
-                    {thisMonthExpenses.length > 0 ? 'This Month' : 'Overall'}
-                  </p>
-                  {topThree.map((cat, index) => (
-                    <div
-                      key={cat.category}
-                      className="border-border-subtle bg-background-secondary hover:border-border-default flex items-center justify-between rounded-lg border p-2.5 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="bg-blue flex h-6 w-6 items-center justify-center rounded-md text-xs font-semibold text-white">
-                          {index + 1}
-                        </span>
-                        <div className="flex min-w-0 flex-col">
-                          <span className="text-text-primary truncate text-sm font-medium">{cat.name}</span>
-                          <span className="text-text-muted truncate text-xs" dir="rtl">
-                            {cat.nameFa}
-                          </span>
-                        </div>
-                      </div>
-                      <span className="text-text-primary text-sm font-semibold whitespace-nowrap tabular-nums">
-                        {formatNumber(cat.value)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-text-muted text-sm">No expense data available</p>
-              );
-            })()}
-          </div>
-
-          {/* Highest Single Expense */}
-          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-                <TrendingUp className="text-text-secondary h-5 w-5" />
-              </div>
-            </div>
-            <p className="text-text-muted mb-3 text-xs font-medium tracking-wider uppercase">Highest Expense</p>
-            {(() => {
-              const highestExpense = filteredExpenses.reduce(
-                (max, exp) => (exp.price_toman > max.price_toman ? exp : max),
-                filteredExpenses[0]
-              );
-
-              return highestExpense ? (
-                <>
-                  <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl" dir="rtl">
-                    {formatNumber(highestExpense.price_toman)} <span className="text-text-muted text-lg">تومان</span>
-                  </p>
-                  <p className="text-text-secondary mt-1.5 text-sm font-medium">
-                    ${highestExpense.price_usd.toFixed(2)} USD
-                  </p>
-                  <div className="border-border-subtle mt-3 border-t pt-3">
-                    <p className="text-text-muted mb-1 text-xs">
-                      {new Date(highestExpense.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-                    </p>
-                    <p className="text-text-primary text-sm font-medium">
-                      {getCategoryLabel(highestExpense.category).en}
-                    </p>
+        {isLoading ? (
+          <OverviewSkeleton />
+        ) : (
+          <>
+            {/* ── 4 Summary Cards ───────────────────────────────────────────────── */}
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
+              {/* Net Worth */}
+              <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                    <Banknote className="text-success h-5 w-5" />
                   </div>
-                </>
-              ) : (
-                <p className="text-text-muted text-sm">No expenses yet</p>
-              );
-            })()}
-          </div>
-
-          {/* Month over Month Change */}
-          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <div
-                className={twMerge(
-                  'rounded-lg border p-2.5',
-                  monthOverMonthChange >= 0
-                    ? 'border-border-subtle bg-danger-light'
-                    : 'border-border-subtle bg-success-light'
-                )}
-              >
-                {monthOverMonthChange >= 0 ? (
-                  <TrendingUp className="text-danger h-5 w-5" />
-                ) : (
-                  <TrendingDown className="text-success h-5 w-5" />
-                )}
-              </div>
-            </div>
-            <p className="text-text-muted mb-3 text-xs font-medium tracking-wider uppercase">vs Last Month</p>
-            {lastMonthTotal > 0 ? (
-              <>
-                <p
-                  className={twMerge(
-                    'text-2xl font-semibold tabular-nums sm:text-3xl',
-                    monthOverMonthChange >= 0 ? 'text-danger' : 'text-success'
-                  )}
-                >
-                  {monthOverMonthChange >= 0 ? '+' : ''}
-                  {monthOverMonthChange.toFixed(1)}%
+                </div>
+                <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Net Worth</p>
+                <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl" dir="rtl">
+                  {formatNumber(summary?.net_worth_toman ?? 0)} <span className="text-text-muted text-lg">تومان</span>
                 </p>
                 <p className="text-text-secondary mt-1.5 text-sm font-medium">
-                  Spending{' '}
-                  <span
-                    className={twMerge('font-semibold', monthOverMonthChange >= 0 ? 'text-danger' : 'text-success')}
-                  >
-                    {monthOverMonthChange >= 0 ? 'more' : 'less'}
-                  </span>{' '}
-                  than last month
+                  ${(summary?.net_worth_usd ?? 0).toFixed(2)} USD
                 </p>
-                <div className="border-border-subtle mt-3 space-y-3 border-t pt-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-text-muted text-xs">This Month</span>
-                    <div className="flex flex-col items-end gap-0.5">
-                      <span className="text-text-primary text-sm font-semibold tabular-nums" dir="rtl">
-                        {formatNumber(thisMonthTotalToman)} تومان
-                      </span>
-                      <span className="text-text-muted text-xs tabular-nums">${thisMonthTotal.toFixed(2)}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-text-muted text-xs">Last Month</span>
-                    <div className="flex flex-col items-end gap-0.5">
-                      <span className="text-text-secondary text-sm tabular-nums" dir="rtl">
-                        {formatNumber(lastMonthTotalToman)} تومان
-                      </span>
-                      <span className="text-text-muted text-xs tabular-nums">${lastMonthTotal.toFixed(2)}</span>
-                    </div>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <p className="text-text-muted text-sm">Not enough data to compare</p>
-            )}
-          </div>
-        </div>
-
-        {/* Expenses by Category - Full Width */}
-        {categoryData.length > 0 && (
-          <div className="border-border-subtle bg-background relative mb-6 overflow-hidden rounded-xl border p-5 shadow-sm sm:mb-8 sm:p-6">
-            <div className="mb-6 flex items-center gap-3">
-              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-                <BarChart3 className="text-text-secondary h-4 w-4" />
-              </div>
-              <h2 className="text-text-primary text-lg font-semibold">Expenses by Category</h2>
-            </div>
-
-            <div className="space-y-3">
-              {categoryData.map((cat, _index) => (
-                <div
-                  key={cat.category}
-                  className="group border-border-subtle bg-background-secondary hover:border-border-default flex min-w-0 items-center gap-3 rounded-lg border p-3 transition-colors sm:gap-4 sm:p-4"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-2 flex items-center justify-between gap-2">
-                      <div className="flex min-w-0 flex-1 flex-col">
-                        <span className="text-text-primary truncate text-sm font-semibold">{cat.name}</span>
-                        <span className="text-text-muted truncate text-xs" dir="rtl">
-                          {cat.nameFa}
-                        </span>
-                      </div>
-                      <div className="flex shrink-0 flex-col items-end">
-                        <span
-                          className="text-text-primary text-sm font-semibold whitespace-nowrap tabular-nums"
-                          dir="rtl"
-                        >
-                          {formatNumber(cat.value)} تومان
-                        </span>
-                        <span className="text-text-muted text-xs whitespace-nowrap">
-                          ${cat.usdValue.toFixed(2)} USD
-                        </span>
-                      </div>
-                    </div>
-                    <div className="bg-border-subtle h-2 w-full rounded-full">
-                      <div
-                        className="bg-blue h-full rounded-full transition-all duration-500"
-                        style={{
-                          width: `${totalToman > 0 ? (cat.value / totalToman) * 100 : 0}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Enhanced Charts */}
-        <div className="mb-8">
-          <div className="mb-6 flex items-center gap-3">
-            <h2 className="text-text-primary text-xl font-semibold">Enhanced Analytics</h2>
-            <span className="text-text-muted text-sm" dir="rtl">
-              نمودارهای پیشرفته
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-2">
-            {/* Comparison Chart - This Month vs Last Month */}
-            <div className="border-border-subtle bg-background relative overflow-hidden rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
-              <div className="mb-6 flex items-center gap-3">
-                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-                  <BarChart3 className="text-text-secondary h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-text-primary text-lg font-semibold">Month Comparison</h3>
-                  <p className="text-text-muted text-xs" dir="rtl">
-                    مقایسه ماهانه
-                  </p>
-                </div>
               </div>
 
-              <div className="space-y-5">
-                {/* This Month Bar */}
-                <div>
-                  <div className="mb-2 flex items-start justify-between">
-                    <span className="text-text-primary text-sm font-medium">
-                      {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                    </span>
-                    <div className="flex flex-col items-end gap-0.5">
-                      <span className="text-text-primary text-sm font-semibold tabular-nums" dir="rtl">
-                        {formatNumber(thisMonthTotalToman)} تومان
-                      </span>
-                      <span className="text-text-muted text-xs tabular-nums">${thisMonthTotal.toFixed(2)}</span>
-                    </div>
-                  </div>
-                  <div className="bg-border-subtle h-3 w-full rounded-full">
-                    <div
-                      className="bg-blue h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${Math.max(thisMonthTotalToman, lastMonthTotalToman) > 0 ? (thisMonthTotalToman / Math.max(thisMonthTotalToman, lastMonthTotalToman)) * 100 : 0}%`,
-                      }}
-                    />
+              {/* Total Income – all time */}
+              <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                    <TrendingUp className="text-success h-5 w-5" />
                   </div>
                 </div>
+                <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Income</p>
+                <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl" dir="rtl">
+                  {formatNumber(summary?.total_income_toman ?? 0)}{' '}
+                  <span className="text-text-muted text-lg">تومان</span>
+                </p>
+                <p className="text-text-secondary mt-1.5 text-sm font-medium">
+                  ${(summary?.total_income_usd ?? 0).toFixed(2)} USD
+                </p>
+              </div>
 
-                {/* Last Month Bar */}
-                <div>
-                  <div className="mb-2 flex items-start justify-between">
-                    <span className="text-text-secondary text-sm font-medium">
-                      {new Date(new Date().getFullYear(), new Date().getMonth() - 1).toLocaleDateString('en-US', {
-                        month: 'long',
-                        year: 'numeric',
-                      })}
-                    </span>
-                    <div className="flex flex-col items-end gap-0.5">
-                      <span className="text-text-secondary text-sm font-semibold tabular-nums" dir="rtl">
-                        {formatNumber(lastMonthTotalToman)} تومان
-                      </span>
-                      <span className="text-text-muted text-xs tabular-nums">${lastMonthTotal.toFixed(2)}</span>
-                    </div>
+              {/* Total Expenses – this month + MoM badge */}
+              <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                    <TrendingDown className="text-danger h-5 w-5" />
                   </div>
-                  <div className="bg-border-subtle h-3 w-full rounded-full">
+                  {momExpenseChange !== null && (
                     <div
-                      className="bg-border-default h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${Math.max(thisMonthTotalToman, lastMonthTotalToman) > 0 ? (lastMonthTotalToman / Math.max(thisMonthTotalToman, lastMonthTotalToman)) * 100 : 0}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Difference */}
-                <div className="border-border-subtle border-t pt-4">
-                  {thisMonthTotalToman > 0 && lastMonthTotalToman > 0 ? (
-                    <div className="border-border-subtle bg-background-secondary flex items-center justify-between rounded-lg border p-3">
-                      <span className="text-text-secondary text-sm">Difference</span>
-                      <div className="flex flex-col items-end gap-0.5">
-                        <div className="flex items-center gap-2">
-                          {thisMonthTotalToman > lastMonthTotalToman ? (
-                            <TrendingUp className="text-danger h-4 w-4" />
-                          ) : (
-                            <TrendingDown className="text-success h-4 w-4" />
-                          )}
-                          <span
-                            className={twMerge(
-                              'text-sm font-semibold tabular-nums',
-                              thisMonthTotalToman > lastMonthTotalToman ? 'text-danger' : 'text-success'
-                            )}
-                            dir="rtl"
-                          >
-                            {formatNumber(Math.abs(thisMonthTotalToman - lastMonthTotalToman))} تومان
-                          </span>
-                        </div>
-                        <span className="text-text-muted text-xs tabular-nums">
-                          ${Math.abs(thisMonthTotal - lastMonthTotal).toFixed(2)}
-                        </span>
-                      </div>
+                      className={twMerge(
+                        'flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold',
+                        momExpenseChange >= 0
+                          ? 'border-border-subtle bg-danger-light text-danger'
+                          : 'border-border-subtle bg-success-light text-success'
+                      )}
+                    >
+                      {momExpenseChange >= 0 ? (
+                        <TrendingUp className="h-3 w-3" />
+                      ) : (
+                        <TrendingDown className="h-3 w-3" />
+                      )}
+                      <span>
+                        {momExpenseChange >= 0 ? '+' : ''}
+                        {momExpenseChange.toFixed(1)}%
+                      </span>
                     </div>
-                  ) : (
-                    <p className="text-text-muted text-sm">
-                      {thisMonthTotalToman === 0 && lastMonthTotalToman > 0
-                        ? `No spending recorded in ${new Date().toLocaleDateString('en-US', { month: 'long' })} yet`
-                        : 'No data to compare'}
-                    </p>
                   )}
                 </div>
+                <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Expenses</p>
+                <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl" dir="rtl">
+                  {formatNumber(summary?.current_month_expenses_toman ?? 0)}{' '}
+                  <span className="text-text-muted text-lg">تومان</span>
+                </p>
+                <p className="text-text-secondary mt-1.5 text-sm font-medium">
+                  ${(summary?.current_month_expenses_usd ?? 0).toFixed(2)} USD
+                </p>
               </div>
+
+              {/* Exchange Rate (self-fetching card) */}
+              <ExchangeRateCard />
             </div>
 
-            {/* Spending Heatmap Calendar */}
-            <div className="border-border-subtle bg-background relative overflow-hidden rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
-              <div className="mb-6 flex items-center gap-3">
-                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-                  <BarChart3 className="text-text-secondary h-5 w-5" />
+            {/* ── Charts row: Spending Trend (2 cols) + Category Split (1 col) ─── */}
+            <div className="mb-6 grid grid-cols-1 gap-5 sm:mb-8 sm:gap-6 lg:grid-cols-3">
+              {/* Spending Trend – area chart with DateRangeSelector */}
+              <div className="border-border-subtle bg-background relative rounded-xl border p-5 shadow-sm sm:p-6 lg:col-span-2">
+                <div className="mb-5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                      <TrendingUp className="text-blue h-5 w-5" />
+                    </div>
+                    <h2 className="text-text-primary text-lg font-semibold">Spending Trend</h2>
+                  </div>
+                  <DateRangeSelector value={dateRange} onChange={setDateRange} />
                 </div>
-                <div>
-                  <h3 className="text-text-primary text-lg font-semibold">Spending Heatmap</h3>
-                  <p className="text-text-muted text-xs" dir="rtl">
-                    نقشه حرارتی هزینه
-                  </p>
+
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                    <AreaChart data={spendingTrend} margin={{ left: 0, right: 20, top: 10, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#0070f3" stopOpacity={0.2} />
+                          <stop offset="50%" stopColor="#0070f3" stopOpacity={0.1} />
+                          <stop offset="100%" stopColor="#0070f3" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" opacity={0.5} vertical={false} />
+                      <XAxis
+                        dataKey="date"
+                        stroke="#e5e5e5"
+                        tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
+                        axisLine={{ stroke: '#e5e5e5' }}
+                        tickLine={{ stroke: '#e5e5e5' }}
+                        tickFormatter={(value: string) => {
+                          if (granularity === 'monthly') return value.slice(5);
+                          if (granularity === 'weekly') return value.split('-W')[1];
+                          return value.slice(5);
+                        }}
+                      />
+                      <YAxis
+                        stroke="#e5e5e5"
+                        tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
+                        axisLine={{ stroke: '#e5e5e5' }}
+                        tickLine={{ stroke: '#e5e5e5' }}
+                        tickFormatter={(v: number) =>
+                          v >= 1_000_000
+                            ? `${(v / 1_000_000).toFixed(0)}M`
+                            : v >= 1_000
+                              ? `${(v / 1_000).toFixed(0)}K`
+                              : `${v}`
+                        }
+                      />
+                      <RechartsTooltip
+                        content={<SpendingTooltip />}
+                        cursor={{ stroke: '#0070f3', strokeWidth: 1, strokeDasharray: '4 4' }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="amount"
+                        stroke="#0070f3"
+                        strokeWidth={2}
+                        fillOpacity={1}
+                        fill="url(#colorAmount)"
+                        animationDuration={1000}
+                        animationEasing="ease-out"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
 
-              {(() => {
-                // Determine which month to display based on dateRange
-                let displayYear = new Date().getFullYear();
-                let displayMonth = new Date().getMonth();
-
-                if (dateRange === 'THIS_MONTH') {
-                  // Current month
-                  displayMonth = new Date().getMonth();
-                  displayYear = new Date().getFullYear();
-                } else if (dateRange === 'LAST_MONTH') {
-                  // Last month
-                  const lastMonth = new Date();
-                  lastMonth.setMonth(lastMonth.getMonth() - 1);
-                  displayMonth = lastMonth.getMonth();
-                  displayYear = lastMonth.getFullYear();
-                } else {
-                  // For other ranges (7D, 30D, YTD, ALL_TIME), show current month
-                  displayMonth = new Date().getMonth();
-                  displayYear = new Date().getFullYear();
-                }
-
-                // Get all days in display month
-                const firstDay = new Date(displayYear, displayMonth, 1);
-                const lastDay = new Date(displayYear, displayMonth + 1, 0);
-                const daysInMonth = lastDay.getDate();
-                const startingDayOfWeek = firstDay.getDay();
-
-                // Build calendar with spending data from filteredExpenses
-                const calendarDays = [];
-                for (let i = 0; i < startingDayOfWeek; i++) {
-                  calendarDays.push({ date: null, total: 0, count: 0 });
-                }
-
-                for (let day = 1; day <= daysInMonth; day++) {
-                  const dateStr = `${displayYear}-${String(displayMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                  const dayExpenses = filteredExpenses.filter((exp) => exp.date === dateStr);
-                  const dayTotal = dayExpenses.reduce((sum, exp) => sum + exp.price_toman, 0);
-                  calendarDays.push({
-                    date: day,
-                    dateStr,
-                    total: dayTotal,
-                    count: dayExpenses.length,
-                  });
-                }
-
-                // Find max spending for color scaling
-                const maxSpending = Math.max(...calendarDays.filter((d) => d.date).map((d) => d.total), 1);
-
-                // Get color based on spending intensity
-                const getHeatmapColor = (total: number) => {
-                  if (total === 0) return '#f5f5f5';
-                  const intensity = total / maxSpending;
-                  if (intensity > 0.8) return '#0070f3';
-                  if (intensity > 0.6) return '#3b9aff';
-                  if (intensity > 0.4) return '#66b3ff';
-                  if (intensity > 0.2) return '#99ccff';
-                  return '#cce5ff';
-                };
-
-                const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-                return (
+              {/* Category Split – donut chart matching ExpenseCharts */}
+              <div className="border-border-subtle bg-background relative rounded-xl border p-5 shadow-sm sm:p-6">
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                    <PieChartIcon className="text-blue h-5 w-5" />
+                  </div>
                   <div>
-                    {/* Month label */}
-                    <p className="text-text-primary mb-4 text-sm font-medium">
-                      {new Date(displayYear, displayMonth).toLocaleDateString('en-US', {
-                        month: 'long',
-                        year: 'numeric',
-                      })}
+                    <h3 className="text-text-primary text-lg font-semibold">Category Split</h3>
+                    <p className="text-text-muted text-sm" dir="rtl">
+                      بر اساس دسته‌بندی
                     </p>
+                  </div>
+                </div>
 
-                    {/* Day labels */}
-                    <div className="mb-3 grid grid-cols-7 gap-1.5 sm:gap-2">
-                      {dayLabels.map((label) => (
-                        <div key={label} className="text-center">
-                          <p className="text-text-muted text-[10px] font-semibold tracking-wide uppercase">{label}</p>
+                {categorySplit.length > 0 ? (
+                  <>
+                    <div className="h-[220px]">
+                      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                        <PieChart>
+                          <Pie
+                            data={categorySplit}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={95}
+                            paddingAngle={4}
+                            dataKey="value"
+                            stroke="#ffffff"
+                            strokeWidth={2}
+                            animationDuration={800}
+                            animationEasing="ease-out"
+                          >
+                            {categorySplit.map((_, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <RechartsTooltip content={<CategoryTooltip />} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+
+                    {/* Legend – pill style matching ExpenseCharts */}
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      {categorySplit.map((cat, index) => (
+                        <div
+                          key={cat.category}
+                          className="border-border-subtle bg-background-secondary hover:bg-background-elevated flex cursor-default items-center gap-2.5 rounded-lg border p-2.5 transition-all duration-200"
+                        >
+                          <div
+                            className="h-3 w-3 shrink-0 rounded-full"
+                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                          />
+                          <span className="text-text-secondary truncate text-sm font-medium">{cat.name}</span>
                         </div>
                       ))}
                     </div>
+                  </>
+                ) : (
+                  <div className="flex h-[220px] flex-col items-center justify-center">
+                    <p className="text-text-muted text-sm">No expenses this month</p>
+                  </div>
+                )}
+              </div>
+            </div>
 
-                    {/* Heatmap grid */}
-                    <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
-                      {calendarDays.map((day, idx) => (
-                        <div key={idx} className="group relative">
-                          {day.date ? (
-                            <div
-                              className="border-border-subtle hover:ring-blue aspect-square cursor-pointer rounded-lg border transition-all hover:scale-105 hover:ring-2"
-                              style={{
-                                backgroundColor: getHeatmapColor(day.total),
-                              }}
-                              title={`${day.date} - ${day.count} transactions - ${formatNumber(day.total)} ت`}
-                            >
-                              <div className="flex h-full items-center justify-center">
-                                <span
-                                  className={twMerge(
-                                    'text-xs font-semibold sm:text-sm',
-                                    day.total > 0 ? 'text-white' : 'text-text-muted'
-                                  )}
-                                >
-                                  {day.date}
+            {/* ── Recent Transactions ─────────────────────────────────────────── */}
+            <div className="border-border-subtle bg-background overflow-hidden rounded-xl border shadow-sm">
+              <div className="flex items-center justify-between px-6 py-5">
+                <h2 className="text-text-primary text-lg font-semibold">Recent Transactions</h2>
+                <Link
+                  href="/transactions"
+                  className="text-blue flex items-center gap-1 text-sm font-medium hover:underline"
+                >
+                  View all
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+
+              {recentTransactions.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full" style={{ borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr className="bg-background-secondary">
+                        <th className="text-text-muted px-6 py-4 text-left text-xs font-semibold tracking-wider uppercase">
+                          Description
+                        </th>
+                        <th className="text-text-muted px-6 py-4 text-left text-xs font-semibold tracking-wider uppercase">
+                          Category
+                        </th>
+                        <th className="text-text-muted px-6 py-4 text-left text-xs font-semibold tracking-wider uppercase">
+                          Date
+                        </th>
+                        <th className="text-text-muted px-6 py-4 text-right text-xs font-semibold tracking-wider uppercase">
+                          Amount
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recentTransactions.map((expense) => {
+                        const categoryLabels = getCategoryLabel(expense.category);
+                        const farsiDate = formatToFarsiDate(expense.date);
+
+                        return (
+                          <tr
+                            key={expense.id}
+                            className="border-border-subtle hover:bg-background-elevated border-t transition-colors duration-200 first:border-t-0"
+                          >
+                            <td className="px-6 py-4">
+                              <div className="flex flex-col gap-2">
+                                <span className="text-text-primary text-sm font-medium">{expense.description}</span>
+                                {expense.tags && expense.tags.length > 0 && (
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {expense.tags.map((tag) => (
+                                      <div
+                                        key={tag.id}
+                                        className="border-border-subtle bg-background-elevated text-text-secondary flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium"
+                                      >
+                                        <Tag className="h-3 w-3" />
+                                        <span>{tag.name}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-col">
+                                <span className="text-text-primary text-sm font-medium">{categoryLabels.en}</span>
+                                <span className="text-text-muted text-xs" dir="rtl">
+                                  {categoryLabels.fa}
                                 </span>
                               </div>
-                            </div>
-                          ) : (
-                            <div className="aspect-square rounded-lg bg-transparent" />
-                          )}
-
-                          {/* Tooltip on hover */}
-                          {day.date && (
-                            <div className="border-border-subtle bg-background text-text-primary pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 transform rounded-lg border px-3 py-2 text-xs whitespace-nowrap opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
-                              <p className="text-text-primary font-semibold">
-                                {day.count} {day.count === 1 ? 'transaction' : 'transactions'}
-                              </p>
-                              <p className="text-blue font-medium">{formatNumber(day.total)} ت</p>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Legend */}
-                    <div className="border-border-subtle mt-5 border-t pt-4">
-                      <p className="text-text-muted mb-3 text-xs font-medium">Spending Intensity</p>
-                      <div className="flex items-center gap-3 text-xs">
-                        <span className="text-text-muted">Less</span>
-                        <div className="flex gap-1.5">
-                          <div
-                            className="border-border-subtle h-4 w-4 rounded-md border"
-                            style={{ backgroundColor: '#f5f5f5' }}
-                          />
-                          <div
-                            className="border-border-subtle h-4 w-4 rounded-md border"
-                            style={{ backgroundColor: '#cce5ff' }}
-                          />
-                          <div
-                            className="border-border-subtle h-4 w-4 rounded-md border"
-                            style={{ backgroundColor: '#99ccff' }}
-                          />
-                          <div
-                            className="border-border-subtle h-4 w-4 rounded-md border"
-                            style={{ backgroundColor: '#66b3ff' }}
-                          />
-                          <div
-                            className="border-border-subtle h-4 w-4 rounded-md border"
-                            style={{ backgroundColor: '#3b9aff' }}
-                          />
-                          <div
-                            className="border-border-subtle h-4 w-4 rounded-md border"
-                            style={{ backgroundColor: '#0070f3' }}
-                          />
-                        </div>
-                        <span className="text-text-muted">More</span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-col">
+                                <span className="text-text-primary text-sm">{expense.date}</span>
+                                <span className="text-text-muted text-xs" dir="rtl">
+                                  {farsiDate}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex flex-col items-end">
+                                <span className="text-text-primary text-sm font-semibold" dir="rtl">
+                                  {formatNumber(expense.price_toman)} تومان
+                                </span>
+                                <span className="text-text-muted text-xs">${expense.price_usd.toFixed(2)} USD</span>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-text-muted px-6 py-8 text-center text-sm">No transactions yet</p>
+              )}
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </div>
   );
