@@ -336,6 +336,8 @@ interface SummaryData {
   current_month_expenses_toman: number;
   total_income_usd: number;
   total_income_toman: number;
+  total_expenses_usd: number;
+  total_expenses_toman: number;
   net_worth_usd: number;
   net_worth_toman: number;
 }
@@ -507,22 +509,6 @@ export default function DashboardPage() {
     return totals.sort((a, b) => b.value - a.value);
   }, [expenses]);
 
-  /** Month-over-month expense change (null when no last-month data) */
-  const momExpenseChange = useMemo(() => {
-    const now = new Date();
-    const thisMonthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const lastMonthStart = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}-01`;
-
-    const thisTotal = expenses.filter((e) => e.date >= thisMonthStart).reduce((s, e) => s + e.price_toman, 0);
-    const lastTotal = expenses
-      .filter((e) => e.date >= lastMonthStart && e.date < thisMonthStart)
-      .reduce((s, e) => s + e.price_toman, 0);
-
-    if (lastTotal === 0) return null;
-    return ((thisTotal - lastTotal) / lastTotal) * 100;
-  }, [expenses]);
-
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <div className="relative min-h-screen overflow-x-hidden">
@@ -580,40 +566,20 @@ export default function DashboardPage() {
                 </p>
               </div>
 
-              {/* Total Expenses – this month + MoM badge */}
+              {/* Total Expenses – all time */}
               <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
                 <div className="mb-4 flex items-center justify-between">
                   <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
                     <TrendingDown className="text-danger h-5 w-5" />
                   </div>
-                  {momExpenseChange !== null && (
-                    <div
-                      className={twMerge(
-                        'flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold',
-                        momExpenseChange >= 0
-                          ? 'border-border-subtle bg-danger-light text-danger'
-                          : 'border-border-subtle bg-success-light text-success'
-                      )}
-                    >
-                      {momExpenseChange >= 0 ? (
-                        <TrendingUp className="h-3 w-3" />
-                      ) : (
-                        <TrendingDown className="h-3 w-3" />
-                      )}
-                      <span>
-                        {momExpenseChange >= 0 ? '+' : ''}
-                        {momExpenseChange.toFixed(1)}%
-                      </span>
-                    </div>
-                  )}
                 </div>
                 <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Expenses</p>
                 <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl" dir="rtl">
-                  {formatNumber(summary?.current_month_expenses_toman ?? 0)}{' '}
+                  {formatNumber(summary?.total_expenses_toman ?? 0)}{' '}
                   <span className="text-text-muted text-lg">تومان</span>
                 </p>
                 <p className="text-text-secondary mt-1.5 text-sm font-medium">
-                  ${(summary?.current_month_expenses_usd ?? 0).toFixed(2)} USD
+                  ${(summary?.total_expenses_usd ?? 0).toFixed(2)} USD
                 </p>
               </div>
 

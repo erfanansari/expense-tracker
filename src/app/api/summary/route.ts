@@ -27,6 +27,8 @@ interface SummaryResponse {
   current_month_expenses_toman: number;
   total_income_usd: number;
   total_income_toman: number;
+  total_expenses_usd: number;
+  total_expenses_toman: number;
   total_assets_usd: number;
   total_assets_toman: number;
   net_worth_usd: number;
@@ -83,6 +85,17 @@ export async function GET() {
 
     const currentMonthExpensesUsd = (currentExpensesResult.rows[0]?.totalUsd as number) || 0;
     const currentMonthExpensesToman = (currentExpensesResult.rows[0]?.totalToman as number) || 0;
+
+    // Get total expenses (all-time)
+    const totalExpensesResult = await db.execute({
+      sql: `SELECT COALESCE(SUM(price_usd), 0) as totalUsd, COALESCE(SUM(price_toman), 0) as totalToman
+            FROM expenses
+            WHERE user_id = ?`,
+      args: [user.userId],
+    });
+
+    const totalExpensesUsd = (totalExpensesResult.rows[0]?.totalUsd as number) || 0;
+    const totalExpensesToman = (totalExpensesResult.rows[0]?.totalToman as number) || 0;
 
     // Get total assets
     const assetsResult = await db.execute({
@@ -167,6 +180,8 @@ export async function GET() {
       current_month_expenses_toman: currentMonthExpensesToman,
       total_income_usd: totalIncomeUsd,
       total_income_toman: totalIncomeToman,
+      total_expenses_usd: totalExpensesUsd,
+      total_expenses_toman: totalExpensesToman,
       total_assets_usd: totalAssetsUsd,
       total_assets_toman: totalAssetsToman,
       net_worth_usd: netWorthUsd,
