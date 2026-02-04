@@ -57,7 +57,7 @@ const COLORS = [
 
 // ─── Skeleton ───────────────────────────────────────────────────────────────────
 function Pulse({ className }: { className?: string }) {
-  return <div className={twMerge('bg-background-elevated animate-pulse rounded-lg', className)} />;
+  return <div className={twMerge('animate-pulse rounded-lg bg-gray-200', className)} />;
 }
 
 function OverviewSkeleton() {
