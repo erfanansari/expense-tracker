@@ -59,7 +59,7 @@ function AssetsSkeleton() {
   return (
     <>
       {/* 4 card skeletons */}
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:mb-8 sm:gap-5 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
           <div key={i} className="border-border-subtle bg-background rounded-xl border p-4 shadow-sm sm:p-5">
             <Pulse className="mb-3 h-9 w-9 rounded-lg sm:mb-4 sm:h-10 sm:w-10" />
@@ -384,88 +384,81 @@ export default function AssetsPage() {
                               <div className="mb-4 flex items-center gap-2">
                                 <Icon className="h-5 w-5" style={{ color }} />
                                 <h2 className="text-text-primary text-lg font-semibold">{labels.en}</h2>
-                                <span className="text-text-muted text-sm" dir="rtl">
-                                  {labels.fa}
-                                </span>
                               </div>
                               <div className="border-border-subtle bg-background relative overflow-hidden rounded-xl border shadow-sm">
-                                <div className="overflow-x-auto">
-                                  <table className="w-full min-w-[500px] border-collapse">
-                                    <thead>
-                                      <tr className="bg-background-secondary">
-                                        <th className="text-text-muted min-w-[120px] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                                          Asset
-                                        </th>
-                                        <th className="text-text-muted min-w-[100px] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                                          Quantity
-                                        </th>
-                                        <th className="text-text-muted min-w-[120px] px-4 py-3 text-right text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                                          Value
-                                        </th>
-                                        <th className="text-text-muted min-w-[80px] px-4 py-3 text-center text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                                          Actions
-                                        </th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {data.assets.map((asset) => (
-                                        <tr
-                                          key={asset.id}
-                                          className="group border-border-subtle hover:bg-background-elevated border-t transition-colors duration-200 first:border-t-0"
-                                        >
-                                          <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                            <div className="flex flex-col">
-                                              <span className="text-text-primary text-sm font-medium">
-                                                {asset.name}
-                                              </span>
-                                              <span className="text-text-muted text-xs">
-                                                {getAssetCategoryLabel(asset.category).en}
-                                              </span>
-                                            </div>
-                                          </td>
-                                          <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                            <span className="text-text-secondary text-sm">
-                                              {asset.quantity} {asset.unit || 'unit'}
+                                <table className="w-full table-fixed border-collapse">
+                                  <thead>
+                                    <tr className="bg-background-secondary">
+                                      <th className="text-text-muted w-[40%] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
+                                        Asset
+                                      </th>
+                                      <th className="text-text-muted w-[20%] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
+                                        Quantity
+                                      </th>
+                                      <th className="text-text-muted w-[25%] px-4 py-3 text-right text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
+                                        Value
+                                      </th>
+                                      <th className="text-text-muted w-[15%] px-4 py-3 text-center text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
+                                        Actions
+                                      </th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {data.assets.map((asset) => (
+                                      <tr
+                                        key={asset.id}
+                                        className="group border-border-subtle hover:bg-background-elevated border-t transition-colors duration-200 first:border-t-0"
+                                      >
+                                        <td className="px-4 py-3 sm:px-6 sm:py-4">
+                                          <div className="flex flex-col">
+                                            <span className="text-text-primary text-sm font-medium">{asset.name}</span>
+                                            <span className="text-text-muted text-xs">
+                                              {getAssetCategoryLabel(asset.category).en}
                                             </span>
-                                          </td>
-                                          <td className="px-4 py-3 text-right sm:px-6 sm:py-4">
-                                            <div className="flex flex-col items-end">
-                                              <span className="text-text-primary text-sm font-semibold">
-                                                ${formatNumber(asset.totalValueUsd)}
-                                              </span>
-                                              <span className="text-text-muted text-xs" dir="rtl">
-                                                {formatNumber(asset.totalValueToman)} ت
-                                              </span>
-                                            </div>
-                                          </td>
-                                          <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                            <div className="flex items-center justify-center gap-1">
-                                              <button
-                                                onClick={() => handleEdit(asset)}
-                                                className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
-                                                title="Update Value"
-                                              >
-                                                <Edit className="h-4 w-4" />
-                                              </button>
-                                              <button
-                                                onClick={() => openDeleteModal(asset)}
-                                                disabled={deletingId === asset.id}
-                                                className="text-text-muted hover:bg-danger/10 hover:text-danger rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
-                                                title="Delete"
-                                              >
-                                                {deletingId === asset.id ? (
-                                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                                ) : (
-                                                  <Trash2 className="h-4 w-4" />
-                                                )}
-                                              </button>
-                                            </div>
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                </div>
+                                          </div>
+                                        </td>
+                                        <td className="px-4 py-3 sm:px-6 sm:py-4">
+                                          <span className="text-text-secondary text-sm">
+                                            {asset.quantity} {asset.unit || 'unit'}
+                                          </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-right sm:px-6 sm:py-4">
+                                          <div className="flex flex-col items-end">
+                                            <span className="text-text-primary text-sm font-semibold">
+                                              ${formatNumber(asset.totalValueUsd)}
+                                            </span>
+                                            <span className="text-text-muted text-xs" dir="rtl">
+                                              {formatNumber(asset.totalValueToman)} ت
+                                            </span>
+                                          </div>
+                                        </td>
+                                        <td className="px-4 py-3 sm:px-6 sm:py-4">
+                                          <div className="flex items-center justify-center gap-1">
+                                            <button
+                                              onClick={() => handleEdit(asset)}
+                                              className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
+                                              title="Update Value"
+                                            >
+                                              <Edit className="h-4 w-4" />
+                                            </button>
+                                            <button
+                                              onClick={() => openDeleteModal(asset)}
+                                              disabled={deletingId === asset.id}
+                                              className="text-text-muted hover:bg-danger/10 hover:text-danger rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
+                                              title="Delete"
+                                            >
+                                              {deletingId === asset.id ? (
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                              ) : (
+                                                <Trash2 className="h-4 w-4" />
+                                              )}
+                                            </button>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
                               </div>
                             </div>
                           );
