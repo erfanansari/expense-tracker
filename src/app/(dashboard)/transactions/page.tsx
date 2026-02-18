@@ -13,11 +13,56 @@ import Button from '@components/Button';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import FormDrawer from '@components/FormDrawer';
 import useDrawer from '@components/FormDrawer/useDrawer';
-import Loading from '@components/Loading';
 
 import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@/utils';
 
 const ITEMS_PER_PAGE = 20;
+
+function Pulse({ className = '' }: { className?: string }) {
+  return <div className={`animate-pulse rounded-sm bg-zinc-300 ${className}`} aria-label="Loading" />;
+}
+
+function TransactionsSkeleton() {
+  return (
+    <div className="border-border-subtle bg-background overflow-hidden rounded-xl border shadow-sm">
+      <div className="bg-background-secondary px-4 py-3.5 sm:px-6">
+        <div className="flex items-center justify-between gap-4">
+          <Pulse className="h-3 w-24" />
+          <Pulse className="hidden h-3 w-20 sm:block" />
+          <Pulse className="hidden h-3 w-16 sm:block" />
+          <Pulse className="h-3 w-16" />
+          <Pulse className="hidden h-3 w-14 sm:block" />
+        </div>
+      </div>
+      {[...Array(8)].map((_, i) => (
+        <div key={i} className="border-border-subtle border-t px-4 py-4 sm:px-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+              <Pulse className="h-4 w-40" />
+              <Pulse className="h-3 w-24" />
+            </div>
+            <div className="hidden flex-col gap-1 sm:flex">
+              <Pulse className="h-4 w-20" />
+              <Pulse className="h-3 w-16" />
+            </div>
+            <div className="hidden flex-col gap-1 sm:flex">
+              <Pulse className="h-4 w-24" />
+              <Pulse className="h-3 w-14" />
+            </div>
+            <div className="flex shrink-0 flex-col items-end gap-1">
+              <Pulse className="h-4 w-24" />
+              <Pulse className="h-3 w-16" />
+            </div>
+            <div className="hidden items-center justify-center gap-1 sm:flex">
+              <Pulse className="h-8 w-8 rounded-lg" />
+              <Pulse className="h-8 w-8 rounded-lg" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function TransactionsPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -171,7 +216,7 @@ export default function TransactionsPage() {
         {/* Transactions Card */}
         {(() => {
           if (isLoading && expenses.length === 0) {
-            return <Loading message="Loading transactions..." />;
+            return <TransactionsSkeleton />;
           }
           if (error && expenses.length === 0) {
             return (

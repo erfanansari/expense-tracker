@@ -27,7 +27,6 @@ import DashboardLayout from '@components/DashboardLayout';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import FormDrawer from '@components/FormDrawer';
 import useDrawer from '@components/FormDrawer/useDrawer';
-import Loading from '@components/Loading';
 
 import { getAssetCategoryLabel } from '@/constants/assets';
 import { formatNumber } from '@/utils';
@@ -51,6 +50,93 @@ const CATEGORY_COLORS: Record<AssetCategory, string> = {
   bank: '#8b5cf6',
   investment: '#ec4899',
 };
+
+function Pulse({ className = '' }: { className?: string }) {
+  return <div className={`animate-pulse rounded-sm bg-zinc-300 ${className}`} aria-label="Loading" />;
+}
+
+function AssetsSkeleton() {
+  return (
+    <>
+      {/* 4 card skeletons */}
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:mb-8 sm:gap-5 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="border-border-subtle bg-background rounded-xl border p-4 shadow-sm sm:p-5">
+            <Pulse className="mb-3 h-9 w-9 rounded-lg sm:mb-4 sm:h-10 sm:w-10" />
+            <Pulse className="mb-2 h-3 w-20 sm:mb-3 sm:w-24" />
+            <Pulse className="mb-2 h-6 w-3/4 sm:h-8" />
+            <Pulse className="h-3 w-1/3 sm:h-4" />
+          </div>
+        ))}
+      </div>
+
+      {/* Main content: asset tables + distribution chart */}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+        {/* Asset tables (2/3 width) */}
+        <div className="space-y-6 lg:col-span-2">
+          {[...Array(2)].map((_, i) => (
+            <div key={i}>
+              {/* Category heading */}
+              <div className="mb-4 flex items-center gap-2">
+                <Pulse className="h-5 w-5 rounded-sm" />
+                <Pulse className="h-5 w-24" />
+              </div>
+              <div className="border-border-subtle bg-background overflow-hidden rounded-xl border shadow-sm">
+                {/* Table header */}
+                <div className="bg-background-secondary px-4 py-3 sm:px-6 sm:py-4">
+                  <div className="flex items-center justify-between">
+                    <Pulse className="h-3 w-14" />
+                    <Pulse className="h-3 w-16" />
+                    <Pulse className="h-3 w-12" />
+                  </div>
+                </div>
+                {/* Table rows */}
+                {[...Array(3)].map((_, j) => (
+                  <div key={j} className="border-border-subtle border-t px-4 py-3.5 sm:px-6 sm:py-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col gap-1.5">
+                        <Pulse className="h-4 w-28" />
+                        <Pulse className="h-3 w-16" />
+                      </div>
+                      <Pulse className="h-4 w-16" />
+                      <div className="flex flex-col items-end gap-1.5">
+                        <Pulse className="h-4 w-20" />
+                        <Pulse className="h-3 w-14" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Distribution chart (1/3 width) */}
+        <div className="lg:col-span-1">
+          <div className="border-border-subtle bg-background rounded-xl border p-6 shadow-sm">
+            <Pulse className="mb-6 h-5 w-36" />
+            {/* Donut */}
+            <div className="flex h-64 items-center justify-center">
+              <div className="relative flex h-40 w-40 items-center justify-center">
+                <Pulse className="absolute h-40 w-40 rounded-full" />
+                <div className="bg-background relative z-10 h-[88px] w-[88px] rounded-full" />
+              </div>
+            </div>
+            {/* Legend */}
+            <div className="mt-4 space-y-2.5">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-center justify-between">
+                  <Pulse className="h-4 w-24" />
+                  <Pulse className="h-4 w-8" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
 
 export default function AssetsPage() {
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -206,224 +292,231 @@ export default function AssetsPage() {
             </Button>
           </div>
 
-          {/* Summary Cards */}
-          <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
-            {/* Total Value */}
-            <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
-              <div className="mb-4 flex items-center justify-between">
-                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-                  <TrendingUp className="text-blue h-5 w-5" />
+          {isLoading && assets.length === 0 ? (
+            <AssetsSkeleton />
+          ) : (
+            <>
+              {/* Summary Cards */}
+              <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
+                {/* Total Value */}
+                <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                      <TrendingUp className="text-blue h-5 w-5" />
+                    </div>
+                  </div>
+                  <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Net Worth</p>
+                  <p className="text-text-primary text-2xl font-semibold tabular-nums">
+                    ${formatNumber(totalValueUsd)}
+                  </p>
+                  <p className="text-text-secondary mt-1.5 text-sm font-medium" dir="rtl">
+                    {formatNumber(totalValueToman)} تومان
+                  </p>
                 </div>
+
+                {/* Top 3 Categories */}
+                {Object.entries(assetsByCategory)
+                  .sort(([, a], [, b]) => b.totalUsd - a.totalUsd)
+                  .slice(0, 3)
+                  .map(([category, data]) => {
+                    const Icon = CATEGORY_ICONS[category as AssetCategory] || Wallet;
+                    const labels = getAssetCategoryLabel(category);
+                    const color = CATEGORY_COLORS[category as AssetCategory] || '#525252';
+
+                    return (
+                      <div
+                        key={category}
+                        className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm"
+                      >
+                        <div className="mb-4 flex items-center justify-between">
+                          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                            <Icon className="h-5 w-5" style={{ color }} />
+                          </div>
+                        </div>
+                        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{labels.en}</p>
+                        <p className="text-text-primary text-2xl font-semibold tabular-nums">
+                          ${formatNumber(data.totalUsd)}
+                        </p>
+                        <p className="text-text-secondary mt-1.5 text-sm font-medium">
+                          {data.assets.length} asset{data.assets.length !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    );
+                  })}
               </div>
-              <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Net Worth</p>
-              <p className="text-text-primary text-2xl font-semibold tabular-nums">${formatNumber(totalValueUsd)}</p>
-              <p className="text-text-secondary mt-1.5 text-sm font-medium" dir="rtl">
-                {formatNumber(totalValueToman)} تومان
-              </p>
-            </div>
 
-            {/* Top 3 Categories */}
-            {Object.entries(assetsByCategory)
-              .sort(([, a], [, b]) => b.totalUsd - a.totalUsd)
-              .slice(0, 3)
-              .map(([category, data]) => {
-                const Icon = CATEGORY_ICONS[category as AssetCategory] || Wallet;
-                const labels = getAssetCategoryLabel(category);
-                const color = CATEGORY_COLORS[category as AssetCategory] || '#525252';
-
+              {/* Main Content */}
+              {(() => {
+                if (error && assets.length === 0) {
+                  return (
+                    <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
+                      <div className="border-danger bg-danger-light mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
+                        <Wallet className="text-danger h-8 w-8" />
+                      </div>
+                      <p className="text-danger font-medium">{error}</p>
+                    </div>
+                  );
+                }
+                if (assets.length === 0) {
+                  return (
+                    <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
+                      <div className="border-border-subtle bg-background-secondary mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
+                        <Wallet className="text-text-muted h-8 w-8" />
+                      </div>
+                      <p className="text-text-secondary font-medium">No assets recorded yet</p>
+                      <p className="text-text-muted mt-1 text-sm">Add your first asset above!</p>
+                    </div>
+                  );
+                }
                 return (
-                  <div
-                    key={category}
-                    className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm"
-                  >
-                    <div className="mb-4 flex items-center justify-between">
-                      <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-                        <Icon className="h-5 w-5" style={{ color }} />
+                  <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+                    {/* Asset List */}
+                    <div className="space-y-6 lg:col-span-2">
+                      {Object.entries(assetsByCategory)
+                        .sort(([, a], [, b]) => b.totalUsd - a.totalUsd)
+                        .map(([category, data]) => {
+                          const Icon = CATEGORY_ICONS[category as AssetCategory] || Wallet;
+                          const labels = getAssetCategoryLabel(category);
+                          const color = CATEGORY_COLORS[category as AssetCategory] || '#525252';
+
+                          return (
+                            <div key={category}>
+                              <div className="mb-4 flex items-center gap-2">
+                                <Icon className="h-5 w-5" style={{ color }} />
+                                <h2 className="text-text-primary text-lg font-semibold">{labels.en}</h2>
+                                <span className="text-text-muted text-sm" dir="rtl">
+                                  {labels.fa}
+                                </span>
+                              </div>
+                              <div className="border-border-subtle bg-background relative overflow-hidden rounded-xl border shadow-sm">
+                                <div className="overflow-x-auto">
+                                  <table className="w-full min-w-[500px] border-collapse">
+                                    <thead>
+                                      <tr className="bg-background-secondary">
+                                        <th className="text-text-muted min-w-[120px] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
+                                          Asset
+                                        </th>
+                                        <th className="text-text-muted min-w-[100px] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
+                                          Quantity
+                                        </th>
+                                        <th className="text-text-muted min-w-[120px] px-4 py-3 text-right text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
+                                          Value
+                                        </th>
+                                        <th className="text-text-muted min-w-[80px] px-4 py-3 text-center text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
+                                          Actions
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {data.assets.map((asset) => (
+                                        <tr
+                                          key={asset.id}
+                                          className="group border-border-subtle hover:bg-background-elevated border-t transition-colors duration-200 first:border-t-0"
+                                        >
+                                          <td className="px-4 py-3 sm:px-6 sm:py-4">
+                                            <div className="flex flex-col">
+                                              <span className="text-text-primary text-sm font-medium">
+                                                {asset.name}
+                                              </span>
+                                              <span className="text-text-muted text-xs">
+                                                {getAssetCategoryLabel(asset.category).en}
+                                              </span>
+                                            </div>
+                                          </td>
+                                          <td className="px-4 py-3 sm:px-6 sm:py-4">
+                                            <span className="text-text-secondary text-sm">
+                                              {asset.quantity} {asset.unit || 'unit'}
+                                            </span>
+                                          </td>
+                                          <td className="px-4 py-3 text-right sm:px-6 sm:py-4">
+                                            <div className="flex flex-col items-end">
+                                              <span className="text-text-primary text-sm font-semibold">
+                                                ${formatNumber(asset.totalValueUsd)}
+                                              </span>
+                                              <span className="text-text-muted text-xs" dir="rtl">
+                                                {formatNumber(asset.totalValueToman)} ت
+                                              </span>
+                                            </div>
+                                          </td>
+                                          <td className="px-4 py-3 sm:px-6 sm:py-4">
+                                            <div className="flex items-center justify-center gap-1">
+                                              <button
+                                                onClick={() => handleEdit(asset)}
+                                                className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
+                                                title="Update Value"
+                                              >
+                                                <Edit className="h-4 w-4" />
+                                              </button>
+                                              <button
+                                                onClick={() => openDeleteModal(asset)}
+                                                disabled={deletingId === asset.id}
+                                                className="text-text-muted hover:bg-danger/10 hover:text-danger rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
+                                                title="Delete"
+                                              >
+                                                {deletingId === asset.id ? (
+                                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                                ) : (
+                                                  <Trash2 className="h-4 w-4" />
+                                                )}
+                                              </button>
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+
+                    {/* Distribution Chart */}
+                    <div className="lg:col-span-1">
+                      <div className="border-border-subtle bg-background sticky top-24 rounded-xl border p-6 shadow-sm">
+                        <h3 className="text-text-primary mb-4 text-lg font-semibold">Asset Distribution</h3>
+                        <div className="h-64">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={chartData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={80}
+                                paddingAngle={2}
+                                dataKey="value"
+                              >
+                                {chartData.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                              </Pie>
+                              <RechartsTooltip content={<CustomChartTooltip />} />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                        {/* Legend */}
+                        <div className="mt-4 space-y-2">
+                          {chartData.map((entry) => (
+                            <div key={entry.name} className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: entry.color }} />
+                                <span className="text-text-secondary text-sm">{entry.name}</span>
+                              </div>
+                              <span className="text-text-primary text-sm font-medium">
+                                {totalValueUsd > 0 ? ((entry.value / totalValueUsd) * 100).toFixed(1) : 0}%
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                    <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{labels.en}</p>
-                    <p className="text-text-primary text-2xl font-semibold tabular-nums">
-                      ${formatNumber(data.totalUsd)}
-                    </p>
-                    <p className="text-text-secondary mt-1.5 text-sm font-medium">
-                      {data.assets.length} asset{data.assets.length !== 1 ? 's' : ''}
-                    </p>
                   </div>
                 );
-              })}
-          </div>
-
-          {/* Main Content */}
-          {(() => {
-            if (isLoading && assets.length === 0) {
-              return <Loading message="Loading assets..." />;
-            }
-            if (error && assets.length === 0) {
-              return (
-                <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
-                  <div className="border-danger bg-danger-light mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
-                    <Wallet className="text-danger h-8 w-8" />
-                  </div>
-                  <p className="text-danger font-medium">{error}</p>
-                </div>
-              );
-            }
-            if (assets.length === 0) {
-              return (
-                <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
-                  <div className="border-border-subtle bg-background-secondary mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
-                    <Wallet className="text-text-muted h-8 w-8" />
-                  </div>
-                  <p className="text-text-secondary font-medium">No assets recorded yet</p>
-                  <p className="text-text-muted mt-1 text-sm">Add your first asset above!</p>
-                </div>
-              );
-            }
-            return (
-              <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-                {/* Asset List */}
-                <div className="space-y-6 lg:col-span-2">
-                  {Object.entries(assetsByCategory)
-                    .sort(([, a], [, b]) => b.totalUsd - a.totalUsd)
-                    .map(([category, data]) => {
-                      const Icon = CATEGORY_ICONS[category as AssetCategory] || Wallet;
-                      const labels = getAssetCategoryLabel(category);
-                      const color = CATEGORY_COLORS[category as AssetCategory] || '#525252';
-
-                      return (
-                        <div key={category}>
-                          <div className="mb-4 flex items-center gap-2">
-                            <Icon className="h-5 w-5" style={{ color }} />
-                            <h2 className="text-text-primary text-lg font-semibold">{labels.en}</h2>
-                            <span className="text-text-muted text-sm" dir="rtl">
-                              {labels.fa}
-                            </span>
-                          </div>
-                          <div className="border-border-subtle bg-background relative overflow-hidden rounded-xl border shadow-sm">
-                            <div className="overflow-x-auto">
-                              <table className="w-full min-w-[500px] border-collapse">
-                                <thead>
-                                  <tr className="bg-background-secondary">
-                                    <th className="text-text-muted min-w-[120px] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                                      Asset
-                                    </th>
-                                    <th className="text-text-muted min-w-[100px] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                                      Quantity
-                                    </th>
-                                    <th className="text-text-muted min-w-[120px] px-4 py-3 text-right text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                                      Value
-                                    </th>
-                                    <th className="text-text-muted min-w-[80px] px-4 py-3 text-center text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                                      Actions
-                                    </th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {data.assets.map((asset) => (
-                                    <tr
-                                      key={asset.id}
-                                      className="group border-border-subtle hover:bg-background-elevated border-t transition-colors duration-200 first:border-t-0"
-                                    >
-                                      <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                        <div className="flex flex-col">
-                                          <span className="text-text-primary text-sm font-medium">{asset.name}</span>
-                                          <span className="text-text-muted text-xs">
-                                            {getAssetCategoryLabel(asset.category).en}
-                                          </span>
-                                        </div>
-                                      </td>
-                                      <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                        <span className="text-text-secondary text-sm">
-                                          {asset.quantity} {asset.unit || 'unit'}
-                                        </span>
-                                      </td>
-                                      <td className="px-4 py-3 text-right sm:px-6 sm:py-4">
-                                        <div className="flex flex-col items-end">
-                                          <span className="text-text-primary text-sm font-semibold">
-                                            ${formatNumber(asset.totalValueUsd)}
-                                          </span>
-                                          <span className="text-text-muted text-xs" dir="rtl">
-                                            {formatNumber(asset.totalValueToman)} ت
-                                          </span>
-                                        </div>
-                                      </td>
-                                      <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                        <div className="flex items-center justify-center gap-1">
-                                          <button
-                                            onClick={() => handleEdit(asset)}
-                                            className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
-                                            title="Update Value"
-                                          >
-                                            <Edit className="h-4 w-4" />
-                                          </button>
-                                          <button
-                                            onClick={() => openDeleteModal(asset)}
-                                            disabled={deletingId === asset.id}
-                                            className="text-text-muted hover:bg-danger/10 hover:text-danger rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
-                                            title="Delete"
-                                          >
-                                            {deletingId === asset.id ? (
-                                              <Loader2 className="h-4 w-4 animate-spin" />
-                                            ) : (
-                                              <Trash2 className="h-4 w-4" />
-                                            )}
-                                          </button>
-                                        </div>
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-
-                {/* Distribution Chart */}
-                <div className="lg:col-span-1">
-                  <div className="border-border-subtle bg-background sticky top-24 rounded-xl border p-6 shadow-sm">
-                    <h3 className="text-text-primary mb-4 text-lg font-semibold">Asset Distribution</h3>
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={chartData}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={80}
-                            paddingAngle={2}
-                            dataKey="value"
-                          >
-                            {chartData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <RechartsTooltip content={<CustomChartTooltip />} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                    {/* Legend */}
-                    <div className="mt-4 space-y-2">
-                      {chartData.map((entry) => (
-                        <div key={entry.name} className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="h-3 w-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                            <span className="text-text-secondary text-sm">{entry.name}</span>
-                          </div>
-                          <span className="text-text-primary text-sm font-medium">
-                            {totalValueUsd > 0 ? ((entry.value / totalValueUsd) * 100).toFixed(1) : 0}%
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
+              })()}
+            </>
+          )}
 
           {/* Delete Confirmation Modal */}
           <DeleteConfirmModal

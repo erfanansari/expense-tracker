@@ -12,10 +12,69 @@ import Button from '@components/Button';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import FormDrawer from '@components/FormDrawer';
 import useDrawer from '@components/FormDrawer/useDrawer';
-import Loading from '@components/Loading';
 
 import { getIncomeTypeLabel, getMonthLabel } from '@/constants/income';
 import { formatNumber, getJalaliMonthName } from '@/utils';
+
+function Pulse({ className = '' }: { className?: string }) {
+  return <div className={`animate-pulse rounded-sm bg-zinc-300 ${className}`} aria-label="Loading" />;
+}
+
+function IncomeSkeleton() {
+  return (
+    <>
+      {/* 4 card skeletons */}
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:mb-8 sm:gap-5 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="border-border-subtle bg-background rounded-xl border p-4 shadow-sm sm:p-5">
+            <Pulse className="mb-3 h-9 w-9 rounded-lg sm:mb-4 sm:h-10 sm:w-10" />
+            <Pulse className="mb-2 h-3 w-20 sm:mb-3 sm:w-24" />
+            <Pulse className="mb-2 h-6 w-3/4 sm:h-8" />
+            <Pulse className="h-3 w-1/2 sm:h-4" />
+          </div>
+        ))}
+      </div>
+
+      {/* Year heading + table skeleton */}
+      <div className="space-y-6">
+        <div>
+          <Pulse className="mb-4 h-6 w-12 rounded-md" />
+          <div className="border-border-subtle bg-background overflow-hidden rounded-xl border shadow-sm">
+            <div className="bg-background-secondary px-4 py-3 sm:px-6 sm:py-4">
+              <div className="flex items-center justify-between">
+                <Pulse className="h-3 w-16" />
+                <Pulse className="hidden h-3 w-14 sm:block" />
+                <Pulse className="hidden h-3 w-20 sm:block" />
+                <Pulse className="h-3 w-16" />
+                <Pulse className="hidden h-3 w-12 sm:block" />
+              </div>
+            </div>
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="border-border-subtle border-t px-4 py-3 sm:px-6 sm:py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-1">
+                    <Pulse className="h-4 w-20" />
+                    <Pulse className="h-3 w-16" />
+                  </div>
+                  <Pulse className="hidden h-4 w-16 sm:block" />
+                  <Pulse className="hidden h-4 w-24 sm:block" />
+                  <div className="flex flex-col items-end gap-1">
+                    <Pulse className="h-4 w-24" />
+                    <Pulse className="h-3 w-20" />
+                  </div>
+                  <div className="hidden items-center justify-center gap-1 sm:flex">
+                    <Pulse className="h-8 w-8 rounded-lg" />
+                    <Pulse className="h-8 w-8 rounded-lg" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
 
 export default function IncomePage() {
   const [incomes, setIncomes] = useState<Income[]>([]);
@@ -148,193 +207,201 @@ export default function IncomePage() {
           </Button>
         </div>
 
-        {/* Summary Cards */}
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
-          {/* Total Income (All Time) */}
-          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="border-success/20 bg-success-light rounded-lg border p-2.5">
-                <Banknote className="text-success h-5 w-5" />
-              </div>
-            </div>
-            <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Income</p>
-            <p className="text-success text-2xl font-semibold tabular-nums">${formatNumber(totalIncomeAllTime)}</p>
-            <p className="text-text-secondary mt-1.5 text-sm font-medium" dir="rtl">
-              {formatNumber(totalIncomeAllTimeToman)} تومان
-            </p>
-          </div>
-
-          {/* YTD Income */}
-          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-                <TrendingUp className="text-blue h-5 w-5" />
-              </div>
-            </div>
-            <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">YTD Income</p>
-            <p className="text-text-primary text-2xl font-semibold tabular-nums">${formatNumber(ytdIncome)}</p>
-            <p className="text-text-secondary mt-1.5 text-sm font-medium">{currentYear}</p>
-          </div>
-
-          {/* Current Month */}
-          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-                <DollarSign className="text-text-secondary h-5 w-5" />
-              </div>
-            </div>
-            <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">This Month</p>
-            <p className="text-text-primary text-2xl font-semibold tabular-nums">${formatNumber(currentMonthIncome)}</p>
-            <p className="text-text-secondary mt-1.5 text-sm font-medium">
-              {getMonthLabel(currentMonth).en} - <span dir="rtl">{getJalaliMonthName(currentMonth, currentYear)}</span>
-            </p>
-          </div>
-
-          {/* Average Monthly */}
-          <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-                <TrendingUp className="text-text-secondary h-5 w-5" />
-              </div>
-            </div>
-            <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Avg Monthly</p>
-            <p className="text-text-primary text-2xl font-semibold tabular-nums">
-              ${formatNumber(Math.round(avgMonthlyIncome))}
-            </p>
-            <p className="text-text-secondary mt-1.5 text-sm font-medium">per entry</p>
-          </div>
-        </div>
-
-        {/* Income List */}
-        {(() => {
-          if (isLoading && incomes.length === 0) {
-            return <Loading message="Loading income..." />;
-          }
-          if (error && incomes.length === 0) {
-            return (
-              <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
-                <div className="border-danger bg-danger-light mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
-                  <FileText className="text-danger h-8 w-8" />
-                </div>
-                <p className="text-danger font-medium">{error}</p>
-              </div>
-            );
-          }
-          if (incomes.length === 0) {
-            return (
-              <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
-                <div className="border-border-subtle bg-background-secondary mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
-                  <DollarSign className="text-text-muted h-8 w-8" />
-                </div>
-                <p className="text-text-secondary font-medium">No income recorded yet</p>
-                <p className="text-text-muted mt-1 text-sm">Add your first income entry above!</p>
-              </div>
-            );
-          }
-          return (
-            <div className="space-y-6">
-              {sortedYears.map((year) => (
-                <div key={year}>
-                  <h2 className="text-text-primary mb-4 text-lg font-semibold">{year}</h2>
-                  <div className="border-border-subtle bg-background relative overflow-hidden rounded-xl border shadow-sm">
-                    <div className="overflow-x-auto">
-                      <table className="w-full min-w-[600px] border-collapse">
-                        <thead>
-                          <tr className="bg-background-secondary">
-                            <th className="text-text-muted min-w-[100px] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                              Month
-                            </th>
-                            <th className="text-text-muted min-w-[100px] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                              Type
-                            </th>
-                            <th className="text-text-muted min-w-[120px] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                              Source
-                            </th>
-                            <th className="text-text-muted min-w-[130px] px-4 py-3 text-right text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                              Amount
-                            </th>
-                            <th className="text-text-muted min-w-[80px] px-4 py-3 text-center text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                              Actions
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {incomesByYear[year]
-                            .sort((a, b) => b.month - a.month)
-                            .map((income) => {
-                              const typeLabels = getIncomeTypeLabel(income.incomeType);
-                              const monthLabels = getMonthLabel(income.month);
-                              const jalaliMonth = getJalaliMonthName(income.month, income.year);
-
-                              return (
-                                <tr
-                                  key={income.id}
-                                  className="group border-border-subtle hover:bg-background-elevated border-t transition-colors duration-200 first:border-t-0"
-                                >
-                                  <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                    <div className="flex flex-col">
-                                      <span className="text-text-primary text-sm font-medium">{monthLabels.en}</span>
-                                      <span className="text-text-muted text-xs" dir="rtl">
-                                        {jalaliMonth}
-                                      </span>
-                                    </div>
-                                  </td>
-                                  <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                    <div className="flex flex-col">
-                                      <span className="text-text-primary text-sm font-medium">{typeLabels.en}</span>
-                                      <span className="text-text-muted text-xs" dir="rtl">
-                                        {typeLabels.fa}
-                                      </span>
-                                    </div>
-                                  </td>
-                                  <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                    <span className="text-text-secondary text-sm">{income.source || '-'}</span>
-                                  </td>
-                                  <td className="px-4 py-3 text-right sm:px-6 sm:py-4">
-                                    <div className="flex flex-col items-end">
-                                      <span className="text-success text-sm font-semibold">
-                                        ${formatNumber(income.amountUsd)} USD
-                                      </span>
-                                      <span className="text-text-muted text-xs" dir="rtl">
-                                        {formatNumber(income.amountToman)} تومان
-                                      </span>
-                                    </div>
-                                  </td>
-                                  <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                    <div className="flex items-center justify-center gap-1">
-                                      <button
-                                        onClick={() => handleEdit(income)}
-                                        className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
-                                        title="Edit"
-                                      >
-                                        <Edit className="h-4 w-4" />
-                                      </button>
-                                      <button
-                                        onClick={() => openDeleteModal(income)}
-                                        disabled={deletingId === income.id}
-                                        className="text-text-muted hover:bg-danger/10 hover:text-danger rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
-                                        title="Delete"
-                                      >
-                                        {deletingId === income.id ? (
-                                          <Loader2 className="h-4 w-4 animate-spin" />
-                                        ) : (
-                                          <Trash2 className="h-4 w-4" />
-                                        )}
-                                      </button>
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                        </tbody>
-                      </table>
-                    </div>
+        {isLoading && incomes.length === 0 ? (
+          <IncomeSkeleton />
+        ) : (
+          <>
+            {/* Summary Cards */}
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
+              {/* Total Income (All Time) */}
+              <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="border-success/20 bg-success-light rounded-lg border p-2.5">
+                    <Banknote className="text-success h-5 w-5" />
                   </div>
                 </div>
-              ))}
+                <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Income</p>
+                <p className="text-success text-2xl font-semibold tabular-nums">${formatNumber(totalIncomeAllTime)}</p>
+                <p className="text-text-secondary mt-1.5 text-sm font-medium" dir="rtl">
+                  {formatNumber(totalIncomeAllTimeToman)} تومان
+                </p>
+              </div>
+
+              {/* YTD Income */}
+              <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                    <TrendingUp className="text-blue h-5 w-5" />
+                  </div>
+                </div>
+                <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">YTD Income</p>
+                <p className="text-text-primary text-2xl font-semibold tabular-nums">${formatNumber(ytdIncome)}</p>
+                <p className="text-text-secondary mt-1.5 text-sm font-medium">{currentYear}</p>
+              </div>
+
+              {/* Current Month */}
+              <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                    <DollarSign className="text-text-secondary h-5 w-5" />
+                  </div>
+                </div>
+                <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">This Month</p>
+                <p className="text-text-primary text-2xl font-semibold tabular-nums">
+                  ${formatNumber(currentMonthIncome)}
+                </p>
+                <p className="text-text-secondary mt-1.5 text-sm font-medium">
+                  {getMonthLabel(currentMonth).en} -{' '}
+                  <span dir="rtl">{getJalaliMonthName(currentMonth, currentYear)}</span>
+                </p>
+              </div>
+
+              {/* Average Monthly */}
+              <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                    <TrendingUp className="text-text-secondary h-5 w-5" />
+                  </div>
+                </div>
+                <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Avg Monthly</p>
+                <p className="text-text-primary text-2xl font-semibold tabular-nums">
+                  ${formatNumber(Math.round(avgMonthlyIncome))}
+                </p>
+                <p className="text-text-secondary mt-1.5 text-sm font-medium">per entry</p>
+              </div>
             </div>
-          );
-        })()}
+
+            {/* Income List */}
+            {(() => {
+              if (error && incomes.length === 0) {
+                return (
+                  <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
+                    <div className="border-danger bg-danger-light mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
+                      <FileText className="text-danger h-8 w-8" />
+                    </div>
+                    <p className="text-danger font-medium">{error}</p>
+                  </div>
+                );
+              }
+              if (incomes.length === 0) {
+                return (
+                  <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
+                    <div className="border-border-subtle bg-background-secondary mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
+                      <DollarSign className="text-text-muted h-8 w-8" />
+                    </div>
+                    <p className="text-text-secondary font-medium">No income recorded yet</p>
+                    <p className="text-text-muted mt-1 text-sm">Add your first income entry above!</p>
+                  </div>
+                );
+              }
+              return (
+                <div className="space-y-6">
+                  {sortedYears.map((year) => (
+                    <div key={year}>
+                      <h2 className="text-text-primary mb-4 text-lg font-semibold">{year}</h2>
+                      <div className="border-border-subtle bg-background relative overflow-hidden rounded-xl border shadow-sm">
+                        <div className="overflow-x-auto">
+                          <table className="w-full min-w-[600px] border-collapse">
+                            <thead>
+                              <tr className="bg-background-secondary">
+                                <th className="text-text-muted min-w-[100px] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
+                                  Month
+                                </th>
+                                <th className="text-text-muted min-w-[100px] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
+                                  Type
+                                </th>
+                                <th className="text-text-muted min-w-[120px] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
+                                  Source
+                                </th>
+                                <th className="text-text-muted min-w-[130px] px-4 py-3 text-right text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
+                                  Amount
+                                </th>
+                                <th className="text-text-muted min-w-[80px] px-4 py-3 text-center text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
+                                  Actions
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {incomesByYear[year]
+                                .sort((a, b) => b.month - a.month)
+                                .map((income) => {
+                                  const typeLabels = getIncomeTypeLabel(income.incomeType);
+                                  const monthLabels = getMonthLabel(income.month);
+                                  const jalaliMonth = getJalaliMonthName(income.month, income.year);
+
+                                  return (
+                                    <tr
+                                      key={income.id}
+                                      className="group border-border-subtle hover:bg-background-elevated border-t transition-colors duration-200 first:border-t-0"
+                                    >
+                                      <td className="px-4 py-3 sm:px-6 sm:py-4">
+                                        <div className="flex flex-col">
+                                          <span className="text-text-primary text-sm font-medium">
+                                            {monthLabels.en}
+                                          </span>
+                                          <span className="text-text-muted text-xs" dir="rtl">
+                                            {jalaliMonth}
+                                          </span>
+                                        </div>
+                                      </td>
+                                      <td className="px-4 py-3 sm:px-6 sm:py-4">
+                                        <div className="flex flex-col">
+                                          <span className="text-text-primary text-sm font-medium">{typeLabels.en}</span>
+                                          <span className="text-text-muted text-xs" dir="rtl">
+                                            {typeLabels.fa}
+                                          </span>
+                                        </div>
+                                      </td>
+                                      <td className="px-4 py-3 sm:px-6 sm:py-4">
+                                        <span className="text-text-secondary text-sm">{income.source || '-'}</span>
+                                      </td>
+                                      <td className="px-4 py-3 text-right sm:px-6 sm:py-4">
+                                        <div className="flex flex-col items-end">
+                                          <span className="text-success text-sm font-semibold">
+                                            ${formatNumber(income.amountUsd)} USD
+                                          </span>
+                                          <span className="text-text-muted text-xs" dir="rtl">
+                                            {formatNumber(income.amountToman)} تومان
+                                          </span>
+                                        </div>
+                                      </td>
+                                      <td className="px-4 py-3 sm:px-6 sm:py-4">
+                                        <div className="flex items-center justify-center gap-1">
+                                          <button
+                                            onClick={() => handleEdit(income)}
+                                            className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
+                                            title="Edit"
+                                          >
+                                            <Edit className="h-4 w-4" />
+                                          </button>
+                                          <button
+                                            onClick={() => openDeleteModal(income)}
+                                            disabled={deletingId === income.id}
+                                            className="text-text-muted hover:bg-danger/10 hover:text-danger rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
+                                            title="Delete"
+                                          >
+                                            {deletingId === income.id ? (
+                                              <Loader2 className="h-4 w-4 animate-spin" />
+                                            ) : (
+                                              <Trash2 className="h-4 w-4" />
+                                            )}
+                                          </button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </>
+        )}
 
         {/* Delete Confirmation Modal */}
         <DeleteConfirmModal
