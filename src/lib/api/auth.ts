@@ -2,6 +2,7 @@ export interface AuthUser {
   id: number;
   email: string;
   name: string | null;
+  isDemo: boolean;
 }
 
 export async function fetchMe(): Promise<AuthUser | null> {

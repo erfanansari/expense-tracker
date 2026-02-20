@@ -24,12 +24,15 @@ export async function GET() {
 
     const user = result.rows[0];
 
+    const email = user.email as string;
+
     return NextResponse.json(
       {
         user: {
           id: user.id as number,
-          email: user.email as string,
+          email,
           name: user.name as string | null,
+          isDemo: email === 'demo@kharji.com',
         },
       },
       { status: 200 }
