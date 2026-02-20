@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
-import { Banknote, DollarSign, Edit, FileText, Loader2, Plus, Trash2, TrendingUp } from 'lucide-react';
+import { Banknote, DollarSign, Edit2, FileText, Loader2, Plus, Trash2, TrendingUp } from 'lucide-react';
 
 import type { Income } from '@types';
 
@@ -13,7 +13,9 @@ import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import FormDrawer from '@components/FormDrawer';
 import useDrawer from '@components/FormDrawer/useDrawer';
 
+import { useToast } from '@/components/Toast/ToastProvider';
 import { getIncomeTypeLabel, getMonthLabel } from '@/constants/income';
+import { useDeleteIncome, useIncomes } from '@/hooks/use-incomes';
 import { formatNumber, getJalaliMonthName } from '@/utils';
 
 function Pulse({ className = '' }: { className?: string }) {
@@ -77,33 +79,15 @@ function IncomeSkeleton() {
 }
 
 export default function IncomePage() {
-  const [incomes, setIncomes] = useState<Income[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: incomes = [], isLoading, error } = useIncomes();
+  const deleteIncome = useDeleteIncome();
+  const { showToast } = useToast();
+
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [editingIncome, setEditingIncome] = useState<Income | undefined>(undefined);
   const [incomeToDelete, setIncomeToDelete] = useState<Income | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { isOpen: isDrawerOpen, isDirty, openDrawer, closeDrawer, setIsDirty } = useDrawer();
-
-  const fetchIncomes = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/incomes');
-      if (response.ok) {
-        const data = await response.json();
-        setIncomes(data);
-      } else {
-        setError('Failed to load incomes');
-      }
-    } catch {
-      setError('Failed to load incomes');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
 
   const openDeleteModal = (income: Income) => {
     setIncomeToDelete(income);
@@ -121,28 +105,19 @@ export default function IncomePage() {
     setDeletingId(incomeToDelete.id);
 
     try {
-      const response = await fetch(`/api/incomes/${incomeToDelete.id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setIncomes(incomes.filter((inc) => inc.id !== incomeToDelete.id));
-        closeDeleteModal();
-      } else {
-        alert('Failed to delete income');
-      }
-    } catch {
-      alert('Failed to delete income');
+      await deleteIncome.mutateAsync(incomeToDelete.id);
+      closeDeleteModal();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to delete income', 'error');
     } finally {
       setDeletingId(null);
     }
   };
 
   const handleIncomeChange = useCallback(() => {
-    fetchIncomes();
     setEditingIncome(undefined);
     closeDrawer();
-  }, [fetchIncomes, closeDrawer]);
+  }, [closeDrawer]);
 
   const handleEdit = useCallback(
     (income: Income) => {
@@ -156,10 +131,6 @@ export default function IncomePage() {
     setEditingIncome(undefined);
     openDrawer();
   }, [openDrawer]);
-
-  useEffect(() => {
-    fetchIncomes();
-  }, [fetchIncomes]);
 
   // Calculate summary stats
   const currentYear = new Date().getFullYear();
@@ -279,7 +250,7 @@ export default function IncomePage() {
                     <div className="border-danger bg-danger-light mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
                       <FileText className="text-danger h-8 w-8" />
                     </div>
-                    <p className="text-danger font-medium">{error}</p>
+                    <p className="text-danger font-medium">{error.message}</p>
                   </div>
                 );
               }
@@ -364,7 +335,7 @@ export default function IncomePage() {
                                           className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
                                           title="Edit"
                                         >
-                                          <Edit className="h-4 w-4" />
+                                          <Edit2 className="h-4 w-4" />
                                         </button>
                                         <button
                                           onClick={() => openDeleteModal(income)}

@@ -1,13 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import {
   Banknote,
   Bitcoin,
   Building2,
-  Car,
-  Edit,
+  Edit2,
   Gem,
   Landmark,
   Loader2,
@@ -28,14 +27,16 @@ import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import FormDrawer from '@components/FormDrawer';
 import useDrawer from '@components/FormDrawer/useDrawer';
 
+import { useToast } from '@/components/Toast/ToastProvider';
 import { getAssetCategoryLabel } from '@/constants/assets';
+import { useAssets, useDeleteAsset } from '@/hooks/use-assets';
 import { formatNumber } from '@/utils';
 
 const CATEGORY_ICONS: Record<AssetCategory, typeof Wallet> = {
   cash: Banknote,
   crypto: Bitcoin,
   commodity: Gem,
-  vehicle: Car,
+  vehicle: Wallet,
   property: Building2,
   bank: Landmark,
   investment: TrendingUp,
@@ -139,33 +140,15 @@ function AssetsSkeleton() {
 }
 
 export default function AssetsPage() {
-  const [assets, setAssets] = useState<Asset[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: assets = [], isLoading, error } = useAssets();
+  const deleteAsset = useDeleteAsset();
+  const { showToast } = useToast();
+
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [editingAsset, setEditingAsset] = useState<Asset | undefined>(undefined);
   const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { isOpen: isDrawerOpen, isDirty, openDrawer, closeDrawer, setIsDirty } = useDrawer();
-
-  const fetchAssets = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/assets');
-      if (response.ok) {
-        const data = await response.json();
-        setAssets(data);
-      } else {
-        setError('Failed to load assets');
-      }
-    } catch {
-      setError('Failed to load assets');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
 
   const openDeleteModal = (asset: Asset) => {
     setAssetToDelete(asset);
@@ -183,28 +166,19 @@ export default function AssetsPage() {
     setDeletingId(assetToDelete.id);
 
     try {
-      const response = await fetch(`/api/assets/${assetToDelete.id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setAssets(assets.filter((a) => a.id !== assetToDelete.id));
-        closeDeleteModal();
-      } else {
-        alert('Failed to delete asset');
-      }
-    } catch {
-      alert('Failed to delete asset');
+      await deleteAsset.mutateAsync(assetToDelete.id);
+      closeDeleteModal();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to delete asset', 'error');
     } finally {
       setDeletingId(null);
     }
   };
 
   const handleAssetChange = useCallback(() => {
-    fetchAssets();
     setEditingAsset(undefined);
     closeDrawer();
-  }, [fetchAssets, closeDrawer]);
+  }, [closeDrawer]);
 
   const handleEdit = useCallback(
     (asset: Asset) => {
@@ -218,10 +192,6 @@ export default function AssetsPage() {
     setEditingAsset(undefined);
     openDrawer();
   }, [openDrawer]);
-
-  useEffect(() => {
-    fetchAssets();
-  }, [fetchAssets]);
 
   // Calculate totals
   const totalValueUsd = assets.reduce((sum, a) => sum + a.totalValueUsd, 0);
@@ -353,7 +323,7 @@ export default function AssetsPage() {
                       <div className="border-danger bg-danger-light mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
                         <Wallet className="text-danger h-8 w-8" />
                       </div>
-                      <p className="text-danger font-medium">{error}</p>
+                      <p className="text-danger font-medium">{error.message}</p>
                     </div>
                   );
                 }
@@ -439,7 +409,7 @@ export default function AssetsPage() {
                                               className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
                                               title="Update Value"
                                             >
-                                              <Edit className="h-4 w-4" />
+                                              <Edit2 className="h-4 w-4" />
                                             </button>
                                             <button
                                               onClick={() => openDeleteModal(asset)}

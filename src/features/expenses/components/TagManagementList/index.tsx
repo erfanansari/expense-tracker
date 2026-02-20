@@ -1,71 +1,48 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { Check, Edit2, Loader2, Plus, Search, Tag as TagIcon, Trash2, X } from 'lucide-react';
 
 import type { TagWithUsage } from '@/@types/expense';
 import DeleteTagModal from '@/components/DeleteTagModal';
+import { useCreateTag, useDeleteTag, useTagsWithUsage, useUpdateTag } from '@/hooks/use-tags';
 
 const TagManagementList = () => {
-  const [tags, setTags] = useState<TagWithUsage[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: tags = [], isLoading } = useTagsWithUsage();
+  const createTag = useCreateTag();
+  const updateTag = useUpdateTag();
+  const deleteTag = useDeleteTag();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [editingTagId, setEditingTagId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState('');
   const [editError, setEditError] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
   const [deletingTag, setDeletingTag] = useState<TagWithUsage | null>(null);
-  const [isDeletingInProgress, setIsDeletingInProgress] = useState(false);
   const [newTagName, setNewTagName] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState('');
-
-  // Fetch tags with usage counts
-  const fetchTags = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch('/api/tags?includeUsage=true');
-      if (response.ok) {
-        const fetchedTags = await response.json();
-        setTags(fetchedTags);
-      }
-    } catch (error) {
-      console.error('Failed to fetch tags:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTags();
-  }, []);
 
   // Filter tags based on search
   const filteredTags = tags.filter((tag) => tag.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
-  // Start editing a tag
   const startEdit = (tag: TagWithUsage) => {
     setEditingTagId(tag.id);
     setEditingName(tag.name);
     setEditError('');
   };
 
-  // Cancel editing
   const cancelEdit = () => {
     setEditingTagId(null);
     setEditingName('');
     setEditError('');
   };
 
-  // Save tag rename
   const saveEdit = async (tagId: number) => {
     if (!editingName.trim()) {
       setEditError('Tag name is required');
       return;
     }
 
-    // Check for duplicate locally first
     const isDuplicate = tags.some(
       (tag) => tag.id !== tagId && tag.name.toLowerCase() === editingName.trim().toLowerCase()
     );
@@ -75,34 +52,18 @@ const TagManagementList = () => {
       return;
     }
 
-    setIsSaving(true);
     setEditError('');
 
     try {
-      const response = await fetch(`/api/tags/${tagId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: editingName.trim() }),
-      });
-
-      if (response.ok) {
-        const updatedTag = await response.json();
-        setTags((prev) => prev.map((tag) => (tag.id === tagId ? { ...tag, name: updatedTag.name } : tag)));
-        setEditingTagId(null);
-        setEditingName('');
-      } else {
-        const error = await response.json();
-        setEditError(error.error || 'Failed to update tag');
-      }
+      await updateTag.mutateAsync({ id: tagId, name: editingName.trim() });
+      setEditingTagId(null);
+      setEditingName('');
     } catch (error) {
-      console.error('Failed to update tag:', error);
-      setEditError('Failed to update tag');
-    } finally {
-      setIsSaving(false);
+      const msg = error instanceof Error ? error.message : 'Failed to update tag';
+      setEditError(msg);
     }
   };
 
-  // Handle keyboard events for editing
   const handleEditKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, tagId: number) => {
     if (e.key === 'Enter') {
       saveEdit(tagId);
@@ -111,48 +72,31 @@ const TagManagementList = () => {
     }
   };
 
-  // Open delete confirmation modal
   const openDeleteModal = (tag: TagWithUsage) => {
     setDeletingTag(tag);
   };
 
-  // Cancel delete
   const cancelDelete = () => {
     setDeletingTag(null);
   };
 
-  // Confirm delete
   const confirmDelete = async () => {
     if (!deletingTag) return;
 
-    setIsDeletingInProgress(true);
-
     try {
-      const response = await fetch(`/api/tags/${deletingTag.id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setTags((prev) => prev.filter((tag) => tag.id !== deletingTag.id));
-        setDeletingTag(null);
-      } else {
-        console.error('Failed to delete tag');
-      }
+      await deleteTag.mutateAsync(deletingTag.id);
+      setDeletingTag(null);
     } catch (error) {
       console.error('Failed to delete tag:', error);
-    } finally {
-      setIsDeletingInProgress(false);
     }
   };
 
-  // Create new tag
-  const createTag = async () => {
+  const handleCreateTag = async () => {
     if (!newTagName.trim()) {
       setCreateError('Tag name is required');
       return;
     }
 
-    // Check for duplicate locally first
     const isDuplicate = tags.some((tag) => tag.name.toLowerCase() === newTagName.trim().toLowerCase());
 
     if (isDuplicate) {
@@ -160,38 +104,21 @@ const TagManagementList = () => {
       return;
     }
 
-    setIsCreating(true);
     setCreateError('');
 
     try {
-      const response = await fetch('/api/tags', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newTagName.trim() }),
-      });
-
-      if (response.ok) {
-        const newTag = await response.json();
-        // Add new tag with 0 usage count
-        setTags((prev) => [...prev, { ...newTag, usage_count: 0 }]);
-        setNewTagName('');
-        setCreateError('');
-      } else {
-        const error = await response.json();
-        setCreateError(error.error || 'Failed to create tag');
-      }
+      await createTag.mutateAsync(newTagName.trim());
+      setNewTagName('');
+      setCreateError('');
     } catch (error) {
-      console.error('Failed to create tag:', error);
-      setCreateError('Failed to create tag');
-    } finally {
-      setIsCreating(false);
+      const msg = error instanceof Error ? error.message : 'Failed to create tag';
+      setCreateError(msg);
     }
   };
 
-  // Handle keyboard events for creating tag
   const handleCreateKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      createTag();
+      handleCreateTag();
     } else if (e.key === 'Escape') {
       setNewTagName('');
       setCreateError('');
@@ -217,6 +144,10 @@ const TagManagementList = () => {
     );
   }
 
+  const isSaving = updateTag.isPending;
+  const isCreating = createTag.isPending;
+  const isDeletingInProgress = deleteTag.isPending;
+
   return (
     <div className="space-y-4">
       {/* Create New Tag */}
@@ -235,7 +166,7 @@ const TagManagementList = () => {
             />
           </div>
           <button
-            onClick={createTag}
+            onClick={handleCreateTag}
             disabled={isCreating || !newTagName.trim()}
             className="bg-primary hover:bg-button-primary-bg-hover flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-all disabled:cursor-not-allowed disabled:opacity-50"
           >

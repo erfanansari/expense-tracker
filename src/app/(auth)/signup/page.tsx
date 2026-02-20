@@ -5,7 +5,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+
+import { signup } from '@/lib/api/auth';
 
 export default function SignupPage() {
   const [fullName, setFullName] = useState('');
@@ -16,8 +19,29 @@ export default function SignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const signupMutation = useMutation({
+    mutationFn: ({
+      name,
+      email,
+      password,
+      passwordConfirm,
+    }: {
+      name: string;
+      email: string;
+      password: string;
+      passwordConfirm: string;
+    }) => signup(name, email, password, passwordConfirm),
+    onSuccess: () => {
+      router.push('/overview');
+    },
+    onError: (err: Error) => {
+      setError(err.message || 'Signup failed');
+    },
+  });
+
+  const loading = signupMutation.isPending;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -33,29 +57,7 @@ export default function SignupPage() {
       return;
     }
 
-    setLoading(true);
-
-    try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: fullName, email, password, passwordConfirm }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Signup failed');
-        return;
-      }
-
-      router.push('/overview');
-    } catch (err) {
-      setError('An error occurred. Please try again.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    signupMutation.mutate({ name: fullName, email, password, passwordConfirm });
   }
 
   return (

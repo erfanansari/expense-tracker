@@ -2,42 +2,34 @@
 
 import { useState } from 'react';
 
+import { useMutation } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
+
+import { forgotPassword } from '@/lib/api/auth';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+
+  const forgotPasswordMutation = useMutation({
+    mutationFn: (email: string) => forgotPassword(email),
+    onSuccess: (data) => {
+      setMessage(data.message);
+      setEmail('');
+    },
+    onError: (err: Error) => {
+      setError(err.message || 'Request failed');
+    },
+  });
+
+  const loading = forgotPasswordMutation.isPending;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setMessage('');
-    setLoading(true);
-
-    try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Request failed');
-        return;
-      }
-
-      setMessage(data.message);
-      setEmail('');
-    } catch (err) {
-      setError('An error occurred. Please try again.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    forgotPasswordMutation.mutate(email);
   }
 
   return (

@@ -14,6 +14,8 @@ import Tooltip from '@components/Tooltip';
 
 import { type CreateExpenseInput, type Tag } from '@/@types/expense';
 import { EXPENSE_CATEGORIES } from '@/constants';
+import { useExchangeRate } from '@/hooks/use-exchange-rate';
+import { useCreateExpense, useUpdateExpense } from '@/hooks/use-expenses';
 
 import TagInput from '../TagInput';
 
@@ -26,49 +28,46 @@ interface ExpenseFormProps {
 
 const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty }: ExpenseFormProps) => {
   const { showToast } = useToast();
-  const [formData, setFormData] = useState<CreateExpenseInput>({
+  const { data: rateData, isLoading: isFetchingRate } = useExchangeRate();
+  const createExpense = useCreateExpense();
+  const updateExpense = useUpdateExpense();
+
+  const fetchedRate = rateData?.usd ? parseInt(rateData.usd.value, 10) : 0;
+
+  // Derive editing rate from existing expense prices
+  const editingRate =
+    editingExpense?.price_toman && editingExpense?.price_usd
+      ? Math.round(editingExpense.price_toman / editingExpense.price_usd)
+      : null;
+
+  // User-overridden exchange rate; null means "use default"
+  const [userRate, setUserRate] = useState<number | null>(null);
+
+  // Derived exchange rate: user override > editing expense rate > fetched rate
+  const exchangeRate = userRate ?? editingRate ?? fetchedRate;
+
+  const defaultFormData: CreateExpenseInput = {
     date: new Date().toISOString().split('T')[0],
     category: '',
     description: '',
     price_toman: 0,
     price_usd: 0,
     tagIds: [],
-  });
+  };
+
+  const [formData, setFormData] = useState<CreateExpenseInput>(defaultFormData);
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
-  const [exchangeRate, setExchangeRate] = useState(0);
   const [lastChanged, setLastChanged] = useState<'toman' | 'usd'>('toman');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [isFetchingRate, setIsFetchingRate] = useState(true);
   const [initialFormData, setInitialFormData] = useState<CreateExpenseInput | null>(null);
-  const [initialTags, setInitialTags] = useState<Tag[]>([]);
+  const [initialDataCaptured, setInitialDataCaptured] = useState(false);
 
-  // Fetch latest exchange rate on mount
-  useEffect(() => {
-    const fetchExchangeRate = async () => {
-      try {
-        const response = await fetch('/api/exchange-rate');
-        if (response.ok) {
-          const data = await response.json();
-          const rate = parseInt(data.usd.value, 10);
-          setExchangeRate(rate);
+  const isSubmitting = createExpense.isPending || updateExpense.isPending;
 
-          // Exchange rate fetched successfully
-        } else {
-          console.warn('Exchange rate API unavailable, user must enter rate manually');
-        }
-      } catch (error) {
-        console.warn('Failed to fetch exchange rate, user must enter rate manually:', error);
-      } finally {
-        setIsFetchingRate(false);
-      }
-    };
-
-    fetchExchangeRate();
-  }, []);
-
-  // Load editing expense data
-  useEffect(() => {
+  // Render-time: sync form data when editingExpense prop changes
+  const [prevEditingExpense, setPrevEditingExpense] = useState(editingExpense);
+  if (prevEditingExpense !== editingExpense) {
+    setPrevEditingExpense(editingExpense);
     if (editingExpense) {
       const initialData = {
         date: editingExpense.date,
@@ -78,32 +77,18 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
         price_usd: editingExpense.price_usd,
         tagIds: editingExpense.tags?.map((t) => t.id) || [],
       };
-      const tags = editingExpense.tags || [];
       setFormData(initialData);
       setInitialFormData(initialData);
-      setSelectedTags(tags);
-      setInitialTags(tags);
-      // Calculate rate from existing data (full Toman value)
-      if (editingExpense.price_toman && editingExpense.price_usd) {
-        setExchangeRate(Math.round(editingExpense.price_toman / editingExpense.price_usd));
-      }
+      setSelectedTags(editingExpense.tags || []);
     }
-  }, [editingExpense]);
+    setUserRate(null);
+  }
 
-  // Set initial form data when exchange rate is loaded (for new expenses)
-  useEffect(() => {
-    if (!editingExpense && exchangeRate > 0 && !initialFormData) {
-      setInitialFormData({
-        date: new Date().toISOString().split('T')[0],
-        category: '',
-        description: '',
-        price_toman: 0,
-        price_usd: 0,
-        tagIds: [],
-      });
-      setInitialTags([]);
-    }
-  }, [editingExpense, exchangeRate, initialFormData]);
+  // Render-time: capture initialFormData once when rate is ready (for new expenses)
+  if (!editingExpense && exchangeRate > 0 && !initialDataCaptured) {
+    setInitialDataCaptured(true);
+    setInitialFormData(defaultFormData);
+  }
 
   // Track form changes and update dirty state
   useEffect(() => {
@@ -148,8 +133,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
   };
 
   const handleRateChange = (value: number) => {
-    setExchangeRate(value);
-    // Recalculate based on last changed field
+    setUserRate(value);
     if (lastChanged === 'toman') {
       setFormData({
         ...formData,
@@ -165,72 +149,38 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setMessage(null);
 
+    const dataToSubmit = {
+      ...formData,
+      tagIds: selectedTags.map((t) => t.id),
+    };
+
     try {
-      const url = editingExpense ? `/api/expenses/${editingExpense.id}` : '/api/expenses';
-      const method = editingExpense ? 'PUT' : 'POST';
-
-      // Sync tagIds with selectedTags
-      const dataToSubmit = {
-        ...formData,
-        tagIds: selectedTags.map((t) => t.id),
-      };
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dataToSubmit),
-      });
-
-      if (response.ok) {
-        const successMessage = editingExpense ? 'Expense updated successfully!' : 'Expense added successfully!';
-        showToast(successMessage, 'success');
-        setMessage({
-          type: 'success',
-          text: successMessage,
-        });
-        setFormData({
-          date: new Date().toISOString().split('T')[0],
-          category: '',
-          description: '',
-          price_toman: 0,
-          price_usd: 0,
-          tagIds: [],
-        });
-        setSelectedTags([]);
-        // Keep the fetched exchange rate (don't reset it)
-        onExpenseAdded();
-        if (editingExpense && onCancelEdit) {
-          onCancelEdit();
-        }
+      if (editingExpense) {
+        await updateExpense.mutateAsync({ id: editingExpense.id, data: dataToSubmit });
+        showToast('Expense updated successfully!', 'success');
       } else {
-        const error = await response.json();
-        const errorMessage = error.error || 'Failed to save expense';
-        showToast(errorMessage, 'error');
-        setMessage({ type: 'error', text: errorMessage });
+        await createExpense.mutateAsync(dataToSubmit);
+        showToast('Expense added successfully!', 'success');
       }
-    } catch {
-      const errorMessage = 'Failed to save expense';
+
+      setFormData(defaultFormData);
+      setSelectedTags([]);
+      setUserRate(null);
+      onExpenseAdded();
+      if (editingExpense && onCancelEdit) {
+        onCancelEdit();
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save expense';
       showToast(errorMessage, 'error');
       setMessage({ type: 'error', text: errorMessage });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   const handleCancel = () => {
-    setFormData({
-      date: new Date().toISOString().split('T')[0],
-      category: '',
-      description: '',
-      price_toman: 0,
-      price_usd: 0,
-    });
-    // Keep the fetched exchange rate (don't reset it)
+    setFormData(defaultFormData);
     if (onCancelEdit) {
       onCancelEdit();
     }

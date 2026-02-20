@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 
 import { numberToWords } from '@persian-tools/persian-tools';
 import { ChevronDown, DollarSign, FileText, Loader2, Package, Plus, Save } from 'lucide-react';
-import { twMerge } from 'tailwind-merge';
 
 import { usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
 
@@ -14,6 +13,8 @@ import Tooltip from '@components/Tooltip';
 
 import type { Asset, AssetCategory, CreateAssetInput } from '@/@types/asset';
 import { ASSET_CATEGORIES } from '@/constants/assets';
+import { useCreateAsset, useUpdateAsset } from '@/hooks/use-assets';
+import { useExchangeRate } from '@/hooks/use-exchange-rate';
 
 interface AssetFormProps {
   onAssetAdded: () => void;
@@ -24,7 +25,19 @@ interface AssetFormProps {
 
 const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: AssetFormProps) => {
   const { showToast } = useToast();
-  const [formData, setFormData] = useState<CreateAssetInput>({
+  const { data: rateData, isLoading: isFetchingRate } = useExchangeRate();
+  const createAsset = useCreateAsset();
+  const updateAsset = useUpdateAsset();
+
+  const fetchedRate = rateData?.usd ? parseInt(rateData.usd.value, 10) : 0;
+
+  // User-overridden exchange rate; null means "use default"
+  const [userRate, setUserRate] = useState<number | null>(null);
+
+  // Derived exchange rate: user override > editing asset rate > fetched rate
+  const exchangeRate = userRate ?? editingAsset?.exchangeRateUsed ?? fetchedRate;
+
+  const defaultFormData: CreateAssetInput = {
     category: 'cash',
     name: '',
     quantity: 1,
@@ -34,36 +47,18 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
     totalValueToman: 0,
     exchangeRateUsed: 0,
     notes: '',
-  });
-  const [exchangeRate, setExchangeRate] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [isFetchingRate, setIsFetchingRate] = useState(true);
+  };
+
+  const [formData, setFormData] = useState<CreateAssetInput>(defaultFormData);
   const [initialFormData, setInitialFormData] = useState<CreateAssetInput | null>(null);
+  const [initialDataCaptured, setInitialDataCaptured] = useState(false);
 
-  // Fetch exchange rate
-  useEffect(() => {
-    const fetchExchangeRate = async () => {
-      try {
-        const response = await fetch('/api/exchange-rate');
-        if (response.ok) {
-          const data = await response.json();
-          const rate = parseInt(data.usd.value, 10);
-          setExchangeRate(rate);
-          setFormData((prev) => ({ ...prev, exchangeRateUsed: rate }));
-        }
-      } catch (error) {
-        console.warn('Failed to fetch exchange rate:', error);
-      } finally {
-        setIsFetchingRate(false);
-      }
-    };
+  const isSubmitting = createAsset.isPending || updateAsset.isPending;
 
-    fetchExchangeRate();
-  }, []);
-
-  // Load editing asset data
-  useEffect(() => {
+  // Render-time: sync form data when editingAsset prop changes
+  const [prevEditingAsset, setPrevEditingAsset] = useState(editingAsset);
+  if (prevEditingAsset !== editingAsset) {
+    setPrevEditingAsset(editingAsset);
     if (editingAsset) {
       const initialData = {
         category: editingAsset.category,
@@ -78,26 +73,15 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
       };
       setFormData(initialData);
       setInitialFormData(initialData);
-      setExchangeRate(editingAsset.exchangeRateUsed);
     }
-  }, [editingAsset]);
+    setUserRate(null);
+  }
 
-  // Set initial form data when exchange rate is loaded (for new assets)
-  useEffect(() => {
-    if (!editingAsset && exchangeRate > 0 && !initialFormData) {
-      setInitialFormData({
-        category: 'cash',
-        name: '',
-        quantity: 1,
-        unit: '',
-        unitValueUsd: 0,
-        totalValueUsd: 0,
-        totalValueToman: 0,
-        exchangeRateUsed: exchangeRate,
-        notes: '',
-      });
-    }
-  }, [editingAsset, exchangeRate, initialFormData]);
+  // Render-time: capture initialFormData once when rate is ready (for new assets)
+  if (!editingAsset && exchangeRate > 0 && !initialDataCaptured) {
+    setInitialDataCaptured(true);
+    setInitialFormData({ ...defaultFormData, exchangeRateUsed: exchangeRate });
+  }
 
   // Track form changes and update dirty state
   useEffect(() => {
@@ -151,7 +135,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
   };
 
   const handleRateChange = (value: number) => {
-    setExchangeRate(value);
+    setUserRate(value);
     setFormData((prev) => ({
       ...prev,
       exchangeRateUsed: value,
@@ -161,72 +145,36 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setMessage(null);
+
+    const dataToSubmit = {
+      ...formData,
+      exchangeRateUsed: exchangeRate,
+      lastValuedAt: new Date().toISOString(),
+    };
 
     try {
-      const url = editingAsset ? `/api/assets/${editingAsset.id}` : '/api/assets';
-      const method = editingAsset ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          exchangeRateUsed: exchangeRate,
-          lastValuedAt: new Date().toISOString(),
-        }),
-      });
-
-      if (response.ok) {
-        const successMessage = editingAsset ? 'Asset updated successfully!' : 'Asset added successfully!';
-        showToast(successMessage, 'success');
-        setMessage({
-          type: 'success',
-          text: successMessage,
-        });
-        setFormData({
-          category: 'cash',
-          name: '',
-          quantity: 1,
-          unit: '',
-          unitValueUsd: 0,
-          totalValueUsd: 0,
-          totalValueToman: 0,
-          exchangeRateUsed: exchangeRate,
-          notes: '',
-        });
-        onAssetAdded();
-        if (editingAsset && onCancelEdit) {
-          onCancelEdit();
-        }
+      if (editingAsset) {
+        await updateAsset.mutateAsync({ id: editingAsset.id, data: dataToSubmit });
+        showToast('Asset updated successfully!', 'success');
       } else {
-        const error = await response.json();
-        const errorMessage = error.error || 'Failed to save asset';
-        showToast(errorMessage, 'error');
-        setMessage({ type: 'error', text: errorMessage });
+        await createAsset.mutateAsync(dataToSubmit);
+        showToast('Asset added successfully!', 'success');
       }
-    } catch {
-      const errorMessage = 'Failed to save asset';
+
+      setFormData({ ...defaultFormData, exchangeRateUsed: exchangeRate });
+      setUserRate(null);
+      onAssetAdded();
+      if (editingAsset && onCancelEdit) {
+        onCancelEdit();
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save asset';
       showToast(errorMessage, 'error');
-      setMessage({ type: 'error', text: errorMessage });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   const handleCancel = () => {
-    setFormData({
-      category: 'cash',
-      name: '',
-      quantity: 1,
-      unit: '',
-      unitValueUsd: 0,
-      totalValueUsd: 0,
-      totalValueToman: 0,
-      exchangeRateUsed: exchangeRate,
-      notes: '',
-    });
+    setFormData({ ...defaultFormData, exchangeRateUsed: exchangeRate });
     if (onCancelEdit) {
       onCancelEdit();
     }
@@ -234,20 +182,6 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
 
   return (
     <>
-      {/* Message */}
-      {message && (
-        <div
-          className={twMerge(
-            'mb-6 rounded-lg border p-4',
-            message.type === 'success'
-              ? 'border-success bg-success-light text-success'
-              : 'border-danger bg-danger-light text-danger'
-          )}
-        >
-          {message.text}
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Row 1: Category and Name */}
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8">

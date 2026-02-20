@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Download, Filter, Sparkles, TrendingUp } from 'lucide-react';
 
@@ -15,6 +15,8 @@ import { ExpenseCharts } from '@features/expenses/components/ExpenseCharts';
 import ExpenseStats from '@features/expenses/components/ExpenseStats';
 
 import Button from '@components/Button';
+
+import { useAllExpenses } from '@/hooks/use-all-expenses';
 
 function Pulse({ className = '' }: { className?: string }) {
   return <div className={`animate-pulse rounded-sm bg-zinc-300 ${className}`} aria-label="Loading" />;
@@ -59,25 +61,9 @@ function ReportsSkeleton() {
 }
 
 export default function ReportsPage() {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: expensesData, isLoading } = useAllExpenses();
+  const expenses: Expense[] = expensesData ?? [];
   const [dateRange, setDateRange] = useState<DateRange>('ALL_TIME');
-
-  useEffect(() => {
-    const fetchExpenses = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch('/api/expenses');
-        if (response.ok) {
-          const data = await response.json();
-          setExpenses(Array.isArray(data) ? data : data.expenses || []);
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchExpenses();
-  }, []);
 
   const filteredExpenses = useMemo(() => {
     return filterExpensesByDateRange(expenses, dateRange);

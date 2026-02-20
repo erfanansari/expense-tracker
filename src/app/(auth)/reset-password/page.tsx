@@ -1,60 +1,47 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useState } from 'react';
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+import { useMutation } from '@tanstack/react-query';
+
 import Button from '@/components/Button';
 import Loading from '@/components/Loading';
+import { resetPassword } from '@/lib/api/auth';
 
 function ResetPasswordContent() {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [tokenValid, setTokenValid] = useState(true);
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
+  const tokenValid = !!token;
 
-  useEffect(() => {
-    if (!token) {
-      setTokenValid(false);
-    }
-  }, [token]);
+  const resetMutation = useMutation({
+    mutationFn: ({ token, password }: { token: string; password: string }) => resetPassword(token, password),
+    onSuccess: () => {
+      setMessage('Password reset successfully! Redirecting to login...');
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+    },
+    onError: (err: Error) => {
+      setError(err.message || 'Reset failed');
+    },
+  });
+
+  const loading = resetMutation.isPending;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setMessage('');
-    setLoading(true);
-
-    try {
-      const response = await fetch('/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, password, passwordConfirm }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Reset failed');
-        return;
-      }
-
-      setMessage('Password reset successfully! Redirecting to login...');
-      setTimeout(() => {
-        router.push('/login');
-      }, 2000);
-    } catch (err) {
-      setError('An error occurred. Please try again.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    if (!token) return;
+    resetMutation.mutate({ token, password });
   }
 
   if (!tokenValid) {

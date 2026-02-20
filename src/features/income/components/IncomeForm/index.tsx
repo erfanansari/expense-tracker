@@ -14,6 +14,8 @@ import Tooltip from '@components/Tooltip';
 
 import type { CreateIncomeInput, Income } from '@/@types/income';
 import { INCOME_TYPES, MONTHS } from '@/constants/income';
+import { useExchangeRate } from '@/hooks/use-exchange-rate';
+import { useCreateIncome, useUpdateIncome } from '@/hooks/use-incomes';
 import { getJalaliMonthName } from '@/utils';
 
 interface IncomeFormProps {
@@ -25,8 +27,21 @@ interface IncomeFormProps {
 
 const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: IncomeFormProps) => {
   const { showToast } = useToast();
+  const { data: rateData, isLoading: isFetchingRate } = useExchangeRate();
+  const createIncome = useCreateIncome();
+  const updateIncome = useUpdateIncome();
+
+  const fetchedRate = rateData?.usd ? parseInt(rateData.usd.value, 10) : 0;
+
+  // User-overridden exchange rate; null means "use default"
+  const [userRate, setUserRate] = useState<number | null>(null);
+
+  // Derived exchange rate: user override > editing income rate > fetched rate
+  const exchangeRate = userRate ?? editingIncome?.exchangeRateUsed ?? fetchedRate;
+
   const currentDate = new Date();
-  const [formData, setFormData] = useState<CreateIncomeInput>({
+
+  const defaultFormData: CreateIncomeInput = {
     amountUsd: 0,
     amountToman: 0,
     exchangeRateUsed: 0,
@@ -35,37 +50,20 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
     incomeType: 'salary',
     source: '',
     notes: '',
-  });
-  const [exchangeRate, setExchangeRate] = useState(0);
+  };
+
+  const [formData, setFormData] = useState<CreateIncomeInput>(defaultFormData);
   const [lastChanged, setLastChanged] = useState<'toman' | 'usd'>('usd');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [isFetchingRate, setIsFetchingRate] = useState(true);
   const [initialFormData, setInitialFormData] = useState<CreateIncomeInput | null>(null);
+  const [initialDataCaptured, setInitialDataCaptured] = useState(false);
 
-  // Fetch latest exchange rate on mount
-  useEffect(() => {
-    const fetchExchangeRate = async () => {
-      try {
-        const response = await fetch('/api/exchange-rate');
-        if (response.ok) {
-          const data = await response.json();
-          const rate = parseInt(data.usd.value, 10);
-          setExchangeRate(rate);
-          setFormData((prev) => ({ ...prev, exchangeRateUsed: rate }));
-        }
-      } catch (error) {
-        console.warn('Failed to fetch exchange rate:', error);
-      } finally {
-        setIsFetchingRate(false);
-      }
-    };
+  const isSubmitting = createIncome.isPending || updateIncome.isPending;
 
-    fetchExchangeRate();
-  }, []);
-
-  // Load editing income data
-  useEffect(() => {
+  // Render-time: sync form data when editingIncome prop changes
+  const [prevEditingIncome, setPrevEditingIncome] = useState(editingIncome);
+  if (prevEditingIncome !== editingIncome) {
+    setPrevEditingIncome(editingIncome);
     if (editingIncome) {
       const initialData = {
         amountUsd: editingIncome.amountUsd,
@@ -79,25 +77,15 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
       };
       setFormData(initialData);
       setInitialFormData(initialData);
-      setExchangeRate(editingIncome.exchangeRateUsed);
     }
-  }, [editingIncome]);
+    setUserRate(null);
+  }
 
-  // Set initial form data when exchange rate is loaded (for new incomes)
-  useEffect(() => {
-    if (!editingIncome && exchangeRate > 0 && !initialFormData) {
-      setInitialFormData({
-        amountUsd: 0,
-        amountToman: 0,
-        exchangeRateUsed: exchangeRate,
-        month: currentDate.getMonth() + 1,
-        year: currentDate.getFullYear(),
-        incomeType: 'salary',
-        source: '',
-        notes: '',
-      });
-    }
-  }, [editingIncome, exchangeRate, initialFormData, currentDate]);
+  // Render-time: capture initialFormData once when rate is ready (for new incomes)
+  if (!editingIncome && exchangeRate > 0 && !initialDataCaptured) {
+    setInitialDataCaptured(true);
+    setInitialFormData({ ...defaultFormData, exchangeRateUsed: exchangeRate });
+  }
 
   // Track form changes and update dirty state
   useEffect(() => {
@@ -137,7 +125,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
   };
 
   const handleRateChange = (value: number) => {
-    setExchangeRate(value);
+    setUserRate(value);
     setFormData((prev) => ({
       ...prev,
       exchangeRateUsed: value,
@@ -149,69 +137,37 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setMessage(null);
 
+    const dataToSubmit = {
+      ...formData,
+      exchangeRateUsed: exchangeRate,
+    };
+
     try {
-      const url = editingIncome ? `/api/incomes/${editingIncome.id}` : '/api/incomes';
-      const method = editingIncome ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          exchangeRateUsed: exchangeRate,
-        }),
-      });
-
-      if (response.ok) {
-        const successMessage = editingIncome ? 'Income updated successfully!' : 'Income added successfully!';
-        showToast(successMessage, 'success');
-        setMessage({
-          type: 'success',
-          text: successMessage,
-        });
-        setFormData({
-          amountUsd: 0,
-          amountToman: 0,
-          exchangeRateUsed: exchangeRate,
-          month: currentDate.getMonth() + 1,
-          year: currentDate.getFullYear(),
-          incomeType: 'salary',
-          source: '',
-          notes: '',
-        });
-        onIncomeAdded();
-        if (editingIncome && onCancelEdit) {
-          onCancelEdit();
-        }
+      if (editingIncome) {
+        await updateIncome.mutateAsync({ id: editingIncome.id, data: dataToSubmit });
+        showToast('Income updated successfully!', 'success');
       } else {
-        const error = await response.json();
-        const errorMessage = error.error || 'Failed to save income';
-        showToast(errorMessage, 'error');
-        setMessage({ type: 'error', text: errorMessage });
+        await createIncome.mutateAsync(dataToSubmit);
+        showToast('Income added successfully!', 'success');
       }
-    } catch {
-      const errorMessage = 'Failed to save income';
+
+      setFormData({ ...defaultFormData, exchangeRateUsed: exchangeRate });
+      setUserRate(null);
+      onIncomeAdded();
+      if (editingIncome && onCancelEdit) {
+        onCancelEdit();
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save income';
       showToast(errorMessage, 'error');
       setMessage({ type: 'error', text: errorMessage });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   const handleCancel = () => {
-    setFormData({
-      amountUsd: 0,
-      amountToman: 0,
-      exchangeRateUsed: exchangeRate,
-      month: currentDate.getMonth() + 1,
-      year: currentDate.getFullYear(),
-      incomeType: 'salary',
-      source: '',
-      notes: '',
-    });
+    setFormData({ ...defaultFormData, exchangeRateUsed: exchangeRate });
     if (onCancelEdit) {
       onCancelEdit();
     }

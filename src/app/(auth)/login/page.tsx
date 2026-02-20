@@ -4,68 +4,38 @@ import { useState } from 'react';
 
 import Link from 'next/link';
 
+import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+
+import { login } from '@/lib/api/auth';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+
+  const loginMutation = useMutation({
+    mutationFn: ({ email, password }: { email: string; password: string }) => login(email, password),
+    onSuccess: () => {
+      window.location.href = '/overview';
+    },
+    onError: (err: Error) => {
+      setError(err.message || 'Login failed');
+    },
+  });
+
+  const loading = loginMutation.isPending;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-    setLoading(true);
-
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Login failed');
-        return;
-      }
-
-      window.location.href = '/overview';
-    } catch (err) {
-      setError('An error occurred. Please try again.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    loginMutation.mutate({ email, password });
   }
 
   async function handleDemoLogin() {
     setError('');
-    setLoading(true);
-
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: 'demo@kharji.com', password: 'Demouser1' }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Demo login failed');
-        return;
-      }
-
-      window.location.href = '/overview';
-    } catch (err) {
-      setError('An error occurred. Please try again.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    loginMutation.mutate({ email: 'demo@kharji.com', password: 'Demouser1' });
   }
 
   return (

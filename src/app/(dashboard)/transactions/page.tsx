@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { Edit2, FileText, Loader2, Plus, Tag, Trash2 } from 'lucide-react';
 
@@ -14,9 +14,9 @@ import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import FormDrawer from '@components/FormDrawer';
 import useDrawer from '@components/FormDrawer/useDrawer';
 
+import { useToast } from '@/components/Toast/ToastProvider';
+import { useDeleteExpense, useInfiniteExpenses } from '@/hooks/use-expenses';
 import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@/utils';
-
-const ITEMS_PER_PAGE = 20;
 
 function Pulse({ className = '' }: { className?: string }) {
   return <div className={`animate-pulse rounded-sm bg-zinc-300 ${className}`} aria-label="Loading" />;
@@ -65,19 +65,18 @@ function TransactionsSkeleton() {
 }
 
 export default function TransactionsPage() {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useInfiniteExpenses();
+  const deleteExpense = useDeleteExpense();
+  const { showToast } = useToast();
+
+  const expenses: Expense[] = data?.pages.flatMap((p) => p.expenses) ?? [];
+
   const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
   const [editingExpense, setEditingExpense] = useState<Expense | undefined>(undefined);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const isLoadingRef = useRef(false);
   const { isOpen: isDrawerOpen, isDirty, openDrawer, closeDrawer, setIsDirty } = useDrawer();
 
   const handleRowClick = (expense: Expense) => {
@@ -89,55 +88,6 @@ export default function TransactionsPage() {
     setIsModalOpen(false);
     setSelectedExpense(null);
   };
-
-  const fetchExpenses = useCallback(async (cursor: string | null = null, isInitial = false) => {
-    if (isLoadingRef.current) {
-      return;
-    }
-
-    if (isInitial) {
-      setIsLoading(true);
-    } else {
-      setIsLoadingMore(true);
-    }
-    setError(null);
-    isLoadingRef.current = true;
-
-    try {
-      const url = cursor
-        ? `/api/expenses?limit=${ITEMS_PER_PAGE}&cursor=${encodeURIComponent(cursor)}`
-        : `/api/expenses?limit=${ITEMS_PER_PAGE}`;
-
-      const response = await fetch(url);
-
-      if (response.ok) {
-        const data = await response.json();
-
-        if (isInitial) {
-          setExpenses(data.expenses);
-        } else {
-          setExpenses((prev) => [...prev, ...data.expenses]);
-        }
-
-        setNextCursor(data.nextCursor);
-        setHasMore(data.hasMore);
-      } else {
-        setError('Failed to load expenses');
-      }
-    } catch (_err) {
-      setError('Failed to load expenses');
-    } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
-      isLoadingRef.current = false;
-    }
-  }, []);
-
-  const loadMore = useCallback(() => {
-    if (!isLoadingRef.current && hasMore && nextCursor) {
-      fetchExpenses(nextCursor, false);
-    }
-  }, [hasMore, nextCursor, fetchExpenses]);
 
   const openDeleteModal = (expense: Expense) => {
     setExpenseToDelete(expense);
@@ -155,31 +105,20 @@ export default function TransactionsPage() {
     setDeletingId(expenseToDelete.id);
 
     try {
-      const response = await fetch(`/api/expenses/${expenseToDelete.id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setExpenses(expenses.filter((exp) => exp.id !== expenseToDelete.id));
-        closeDeleteModal();
-      } else {
-        alert('Failed to delete expense');
-      }
-    } catch {
-      alert('Failed to delete expense');
+      await deleteExpense.mutateAsync(expenseToDelete.id);
+      closeDeleteModal();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to delete expense', 'error');
     } finally {
       setDeletingId(null);
     }
   };
 
   const handleExpenseChange = useCallback(() => {
-    setExpenses([]);
-    setNextCursor(null);
-    setHasMore(true);
-    fetchExpenses(null, true);
+    // Invalidation is handled automatically by useCreateExpense/useUpdateExpense
     setEditingExpense(undefined);
     closeDrawer();
-  }, [fetchExpenses, closeDrawer]);
+  }, [closeDrawer]);
 
   const handleEdit = useCallback(
     (expense: Expense) => {
@@ -193,10 +132,6 @@ export default function TransactionsPage() {
     setEditingExpense(undefined);
     openDrawer();
   }, [openDrawer]);
-
-  useEffect(() => {
-    fetchExpenses(null, true);
-  }, [fetchExpenses]);
 
   return (
     <div className="min-h-screen">
@@ -224,7 +159,7 @@ export default function TransactionsPage() {
                 <div className="border-danger bg-danger-light mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
                   <FileText className="text-danger h-8 w-8" />
                 </div>
-                <p className="text-danger font-medium">{error}</p>
+                <p className="text-danger font-medium">{error.message}</p>
               </div>
             );
           }
@@ -347,11 +282,16 @@ export default function TransactionsPage() {
                 </table>
               </div>
 
-              {/* Load More Button - Separate from table */}
-              {hasMore && (
+              {/* Load More Button */}
+              {hasNextPage && (
                 <div className="mt-4">
-                  <Button onClick={loadMore} disabled={isLoadingMore} variant="outline" className="w-full">
-                    {isLoadingMore ? (
+                  <Button
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {isFetchingNextPage ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
                         Loading...
@@ -363,7 +303,7 @@ export default function TransactionsPage() {
                 </div>
               )}
 
-              {!hasMore && expenses.length > 0 && (
+              {!hasNextPage && expenses.length > 0 && (
                 <div className="text-text-muted mt-6 flex items-center justify-center gap-2 py-4">
                   <div className="bg-border-subtle h-px w-12" />
                   <p className="text-sm">End of transactions</p>

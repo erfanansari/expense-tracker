@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
@@ -42,6 +42,10 @@ import { getButtonClasses } from '@components/Button';
 import Tooltip from '@components/Tooltip';
 
 import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@utils';
+
+import { useAllExpenses } from '@/hooks/use-all-expenses';
+import { useExchangeRate } from '@/hooks/use-exchange-rate';
+import { useSummary } from '@/hooks/use-summary';
 
 // ─── Pie palette – matches ExpenseCharts exactly ───────────────────────────────
 const COLORS = [
@@ -154,36 +158,8 @@ function OverviewSkeleton() {
 }
 
 // ─── Exchange Rate Card ─────────────────────────────────────────────────────────
-interface ExchangeRateData {
-  usd?: { value: string; change: number };
-  _meta?: {
-    fetchedAt: string;
-    freshness?: 'fresh' | 'cached' | 'stale';
-    source?: 'navasan' | 'cached' | 'fallback';
-    usage?: { monthly: number; remaining: number; limit: number };
-  };
-}
-
 function ExchangeRateCard() {
-  const [rateData, setRateData] = useState<ExchangeRateData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchRate = async () => {
-      try {
-        const response = await fetch('/api/exchange-rate');
-        if (response.ok) {
-          const data = await response.json();
-          setRateData(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch exchange rate:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchRate();
-  }, []);
+  const { data: rateData, isLoading } = useExchangeRate();
 
   if (isLoading || !rateData?.usd) {
     return (
@@ -328,20 +304,6 @@ function ExchangeRateCard() {
   );
 }
 
-// ─── Summary API shape ──────────────────────────────────────────────────────────
-interface SummaryData {
-  current_month_income_usd: number;
-  current_month_income_toman: number;
-  current_month_expenses_usd: number;
-  current_month_expenses_toman: number;
-  total_income_usd: number;
-  total_income_toman: number;
-  total_expenses_usd: number;
-  total_expenses_toman: number;
-  net_worth_usd: number;
-  net_worth_toman: number;
-}
-
 // ─── Custom recharts tooltips ───────────────────────────────────────────────────
 function SpendingTooltip({
   active,
@@ -405,28 +367,12 @@ function getMonthKey(date: Date): string {
 
 // ─── Main page ──────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
-  const [summary, setSummary] = useState<SummaryData | null>(null);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: summary, isLoading: summaryLoading } = useSummary();
+  const { data: expensesData, isLoading: expensesLoading } = useAllExpenses();
   const [dateRange, setDateRange] = useState<DateRange>('30D');
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [summaryRes, expensesRes] = await Promise.all([fetch('/api/summary'), fetch('/api/expenses')]);
-        if (summaryRes.ok) setSummary(await summaryRes.json());
-        if (expensesRes.ok) {
-          const data = await expensesRes.json();
-          setExpenses(Array.isArray(data) ? data : data.expenses || []);
-        }
-      } catch (error) {
-        console.error('Failed to fetch overview data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const expenses: Expense[] = expensesData ?? [];
+  const isLoading = summaryLoading || expensesLoading;
 
   // ── Derived data ──────────────────────────────────────────────────────────────
   /** Last 5 expenses, newest first */

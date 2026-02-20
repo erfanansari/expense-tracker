@@ -1,83 +1,52 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { Bell, Database, Globe, HelpCircle, Loader2, Lock, Palette, Tag, User } from 'lucide-react';
 
 import Button from '@components/Button';
 
-import packageJson from '@/../package.json';
 import { useToast } from '@/components/Toast/ToastProvider';
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import TagManagementList from '@/features/expenses/components/TagManagementList';
+import { useUpdateUserProfile } from '@/hooks/use-user-profile';
 
 export default function SettingsPage() {
-  const { user, refetch, updateUser } = useAuth();
+  const { user } = useAuth();
   const { showToast } = useToast();
-  const [name, setName] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
+  const updateProfile = useUpdateUserProfile();
+  const [editedName, setEditedName] = useState('');
   const [isEditing, setIsEditing] = useState(false);
 
-  // Initialize name when user data is loaded
-  useEffect(() => {
-    if (user?.name) {
-      setName(user.name);
-    }
-  }, [user]);
+  // Derive displayed name: use server state when not editing, local state when editing
+  const nameValue = isEditing ? editedName : (user?.name ?? '');
 
   const handleEdit = () => {
+    setEditedName(user?.name ?? '');
     setIsEditing(true);
   };
 
   const handleSave = async () => {
-    if (!name.trim()) {
+    if (!editedName.trim()) {
       showToast('Name cannot be empty', 'error');
       return;
     }
 
-    // If name hasn't changed, just exit edit mode
-    if (name.trim() === user?.name) {
+    if (editedName.trim() === user?.name) {
       setIsEditing(false);
       return;
     }
 
-    const trimmedName = name.trim();
-    const previousName = user?.name;
-
-    // Optimistic update - update UI immediately
-    updateUser({ name: trimmedName });
-
-    setIsSaving(true);
-
     try {
-      const response = await fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: trimmedName }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        // Revert optimistic update on error
-        updateUser({ name: previousName });
-        showToast(data.error || 'Failed to update profile', 'error');
-        return;
-      }
-
+      await updateProfile.mutateAsync(editedName.trim());
       showToast('Profile updated successfully!', 'success');
-      setIsEditing(false); // Exit edit mode on success
-      await refetch(); // Refresh to ensure consistency
-    } catch {
-      // Revert optimistic update on error
-      updateUser({ name: previousName });
-      showToast('Failed to update profile', 'error');
-    } finally {
-      setIsSaving(false);
+      setIsEditing(false);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to update profile', 'error');
     }
   };
 
   const handleCancel = () => {
-    setName(user?.name || '');
     setIsEditing(false);
   };
   return (
@@ -122,8 +91,8 @@ export default function SettingsPage() {
                   <label className="text-text-secondary mb-2 block text-sm font-medium">Name</label>
                   <input
                     type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    value={nameValue}
+                    onChange={(e) => setEditedName(e.target.value)}
                     placeholder="Enter your name"
                     disabled={!isEditing}
                     className="border-border-subtle bg-background text-text-primary focus:border-blue w-full rounded-lg border px-4 py-2.5 transition-[opacity,border-color] duration-200 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
@@ -138,11 +107,11 @@ export default function SettingsPage() {
                     </Button>
                   ) : (
                     <>
-                      <Button variant="primary" onClick={handleSave} disabled={isSaving}>
-                        {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-                        {isSaving ? 'Saving...' : 'Save Changes'}
+                      <Button variant="primary" onClick={handleSave} disabled={updateProfile.isPending}>
+                        {updateProfile.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                        {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
                       </Button>
-                      <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
+                      <Button variant="outline" onClick={handleCancel} disabled={updateProfile.isPending}>
                         Cancel
                       </Button>
                     </>

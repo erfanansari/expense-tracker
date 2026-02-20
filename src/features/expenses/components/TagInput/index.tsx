@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Check, Edit2, Loader2, Plus, Tag as TagIcon, X } from 'lucide-react';
 
 import { type Tag } from '@/@types/expense';
+import { useCreateTag, useTags, useUpdateTag } from '@/hooks/use-tags';
 
 interface TagInputProps {
   selectedTags: Tag[];
@@ -12,49 +13,28 @@ interface TagInputProps {
 }
 
 const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
-  const [allTags, setAllTags] = useState<Tag[]>([]);
+  const { data: allTags = [] } = useTags();
+  const createTag = useCreateTag();
+  const updateTag = useUpdateTag();
+
   const [inputValue, setInputValue] = useState('');
-  const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
   const [editingTagId, setEditingTagId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState('');
   const [editError, setEditError] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch all tags on mount
-  useEffect(() => {
-    const fetchTags = async () => {
-      try {
-        const response = await fetch('/api/tags');
-        if (response.ok) {
-          const tags = await response.json();
-          setAllTags(tags);
-        }
-      } catch (error) {
-        console.error('Failed to fetch tags:', error);
-      }
-    };
-
-    fetchTags();
-  }, []);
-
   // Filter tags based on input
-  useEffect(() => {
+  const filteredTags = useMemo(() => {
     if (inputValue.trim()) {
       const search = inputValue.toLowerCase();
-      const filtered = allTags.filter(
+      return allTags.filter(
         (tag) => tag.name.toLowerCase().includes(search) && !selectedTags.some((selected) => selected.id === tag.id)
       );
-      setFilteredTags(filtered);
-    } else {
-      // Show all unselected tags when input is empty
-      const unselectedTags = allTags.filter((tag) => !selectedTags.some((selected) => selected.id === tag.id));
-      setFilteredTags(unselectedTags);
     }
+    return allTags.filter((tag) => !selectedTags.some((selected) => selected.id === tag.id));
   }, [inputValue, allTags, selectedTags]);
 
   // Close suggestions when clicking outside
@@ -74,28 +54,16 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const createTag = async (name: string) => {
+  const handleCreateTag = async (name: string) => {
     if (!name.trim()) return;
 
-    setIsCreating(true);
     try {
-      const response = await fetch('/api/tags', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim() }),
-      });
-
-      if (response.ok) {
-        const newTag = await response.json();
-        setAllTags((prev) => [...prev, newTag]);
-        onTagsChange([...selectedTags, newTag]);
-        setInputValue('');
-        setShowSuggestions(false);
-      }
+      const newTag = await createTag.mutateAsync(name.trim());
+      onTagsChange([...selectedTags, newTag]);
+      setInputValue('');
+      setShowSuggestions(false);
     } catch (error) {
       console.error('Failed to create tag:', error);
-    } finally {
-      setIsCreating(false);
     }
   };
 
@@ -106,12 +74,10 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
     inputRef.current?.focus();
   };
 
-  // Unselect tag from current expense (doesn't delete globally)
   const unselectTag = (tagId: number) => {
     onTagsChange(selectedTags.filter((tag) => tag.id !== tagId));
   };
 
-  // Start editing a tag from dropdown
   const startEditInDropdown = (tag: Tag, e: React.MouseEvent) => {
     e.stopPropagation();
     setEditingTagId(tag.id);
@@ -119,7 +85,6 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
     setEditError('');
   };
 
-  // Cancel editing
   const cancelEditInDropdown = (e: React.MouseEvent) => {
     e.stopPropagation();
     setEditingTagId(null);
@@ -127,7 +92,6 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
     setEditError('');
   };
 
-  // Save tag rename from dropdown
   const saveEditInDropdown = async (tagId: number, e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -136,7 +100,6 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
       return;
     }
 
-    // Check for duplicate locally first
     const isDuplicate = allTags.some(
       (tag) => tag.id !== tagId && tag.name.toLowerCase() === editingName.trim().toLowerCase()
     );
@@ -146,34 +109,18 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
       return;
     }
 
-    setIsSaving(true);
     setEditError('');
 
     try {
-      const response = await fetch(`/api/tags/${tagId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: editingName.trim() }),
-      });
-
-      if (response.ok) {
-        const updatedTag = await response.json();
-        setAllTags((prev) => prev.map((tag) => (tag.id === tagId ? updatedTag : tag)));
-        setEditingTagId(null);
-        setEditingName('');
-      } else {
-        const error = await response.json();
-        setEditError(error.error || 'Failed to update tag');
-      }
+      await updateTag.mutateAsync({ id: tagId, name: editingName.trim() });
+      setEditingTagId(null);
+      setEditingName('');
     } catch (error) {
-      console.error('Failed to update tag:', error);
-      setEditError('Failed to update tag');
-    } finally {
-      setIsSaving(false);
+      const msg = error instanceof Error ? error.message : 'Failed to update tag';
+      setEditError(msg);
     }
   };
 
-  // Handle keyboard events for editing in dropdown
   const handleEditKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, tagId: number) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -188,22 +135,21 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
     if (e.key === 'Enter' && inputValue.trim()) {
       e.preventDefault();
 
-      // If there's an exact match, select it
       const exactMatch = filteredTags.find((tag) => tag.name.toLowerCase() === inputValue.toLowerCase());
 
       if (exactMatch) {
         selectTag(exactMatch);
       } else {
-        // Create new tag
-        createTag(inputValue);
+        handleCreateTag(inputValue);
       }
     } else if (e.key === 'Backspace' && !inputValue && selectedTags.length > 0) {
-      // Remove last tag when backspace is pressed on empty input
       unselectTag(selectedTags[selectedTags.length - 1].id);
     }
   };
 
   const hasExactMatch = filteredTags.some((tag) => tag.name.toLowerCase() === inputValue.toLowerCase());
+  const isCreating = createTag.isPending;
+  const isSaving = updateTag.isPending;
 
   return (
     <div className="relative">
@@ -311,7 +257,7 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
           {inputValue.trim() && !hasExactMatch && (
             <button
               type="button"
-              onClick={() => createTag(inputValue)}
+              onClick={() => handleCreateTag(inputValue)}
               disabled={isCreating}
               className="border-border-subtle text-blue hover:bg-blue/10 flex w-full items-center gap-2.5 border-t px-4 py-2.5 text-left text-sm transition-colors last:rounded-b-lg disabled:opacity-50"
             >
