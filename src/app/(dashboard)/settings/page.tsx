@@ -346,7 +346,7 @@ export default function SettingsPage() {
                     href="https://github.com/erfanansari/kharji#readme"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="border-button-outline-border bg-background hover:bg-button-outline-bg-hover text-button-outline-text hover:text-button-outline-text-hover inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 font-medium transition-all"
+                    className="border-button-outline-border bg-background hover:bg-button-outline-bg-hover text-button-outline-text hover:text-button-outline-text-hover inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-all"
                   >
                     Documentation
                   </a>
@@ -354,7 +354,7 @@ export default function SettingsPage() {
                     href="https://github.com/erfanansari/kharji/issues"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="border-button-outline-border bg-background hover:bg-button-outline-bg-hover text-button-outline-text hover:text-button-outline-text-hover inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 font-medium transition-all"
+                    className="border-button-outline-border bg-background hover:bg-button-outline-bg-hover text-button-outline-text hover:text-button-outline-text-hover inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-all"
                   >
                     Contact Support
                   </a>

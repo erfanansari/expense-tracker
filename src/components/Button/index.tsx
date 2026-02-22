@@ -15,11 +15,11 @@ const baseStyles =
   'px-3 sm:px-5 py-2.5 rounded-lg text-sm font-semibold transition-[background-color,border-color,color,opacity] duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer';
 
 const variantStyles = {
-  primary: 'bg-button-primary-bg hover:bg-button-primary-bg-hover text-button-primary-text',
+  primary: 'bg-button-primary-bg enabled:hover:bg-button-primary-bg-hover text-button-primary-text',
   outline:
-    'bg-background hover:bg-button-outline-bg-hover border border-button-outline-border text-button-outline-text hover:text-button-outline-text-hover',
+    'bg-background enabled:hover:bg-button-outline-bg-hover border border-button-outline-border text-button-outline-text enabled:hover:text-button-outline-text-hover',
   danger:
-    'bg-background hover:bg-danger/10 border border-button-outline-border hover:border-danger text-button-outline-text hover:text-danger',
+    'bg-background enabled:hover:bg-danger/10 border border-button-outline-border enabled:hover:border-danger text-button-outline-text enabled:hover:text-danger',
 };
 
 export const getButtonClasses = (variant: 'primary' | 'outline' | 'danger' = 'primary', className = '') => {
