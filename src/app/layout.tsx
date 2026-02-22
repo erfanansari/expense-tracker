@@ -24,7 +24,10 @@ const persianFont = Vazirmatn({
 });
 
 export const metadata: Metadata = {
-  title: 'Kharji',
+  title: {
+    template: '%s | Kharji',
+    default: 'Kharji',
+  },
   description: 'Track your personal expenses',
 };
 
