@@ -49,9 +49,25 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
     notes: '',
   };
 
-  const [formData, setFormData] = useState<CreateAssetInput>(defaultFormData);
-  const [initialFormData, setInitialFormData] = useState<CreateAssetInput | null>(null);
-  const [initialDataCaptured, setInitialDataCaptured] = useState(false);
+  const buildFormData = (asset: Asset): CreateAssetInput => ({
+    category: asset.category,
+    name: asset.name,
+    quantity: asset.quantity,
+    unit: asset.unit || '',
+    unitValueUsd: asset.unitValueUsd || 0,
+    totalValueUsd: asset.totalValueUsd,
+    totalValueToman: asset.totalValueToman,
+    exchangeRateUsed: asset.exchangeRateUsed,
+    notes: asset.notes || '',
+  });
+
+  const [formData, setFormData] = useState<CreateAssetInput>(
+    editingAsset ? buildFormData(editingAsset) : defaultFormData
+  );
+  const [initialFormData, setInitialFormData] = useState<CreateAssetInput | null>(
+    editingAsset ? buildFormData(editingAsset) : null
+  );
+  const [initialDataCaptured, setInitialDataCaptured] = useState(!!editingAsset);
 
   const isSubmitting = createAsset.isPending || updateAsset.isPending;
 
@@ -60,17 +76,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
   if (prevEditingAsset !== editingAsset) {
     setPrevEditingAsset(editingAsset);
     if (editingAsset) {
-      const initialData = {
-        category: editingAsset.category,
-        name: editingAsset.name,
-        quantity: editingAsset.quantity,
-        unit: editingAsset.unit || '',
-        unitValueUsd: editingAsset.unitValueUsd || 0,
-        totalValueUsd: editingAsset.totalValueUsd,
-        totalValueToman: editingAsset.totalValueToman,
-        exchangeRateUsed: editingAsset.exchangeRateUsed,
-        notes: editingAsset.notes || '',
-      };
+      const initialData = buildFormData(editingAsset);
       setFormData(initialData);
       setInitialFormData(initialData);
     }

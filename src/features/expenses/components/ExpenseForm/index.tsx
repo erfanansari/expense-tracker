@@ -55,12 +55,32 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
     tagIds: [],
   };
 
-  const [formData, setFormData] = useState<CreateExpenseInput>(defaultFormData);
-  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const buildFormData = (expense: {
+    date: string;
+    category: string;
+    description: string;
+    price_toman: number;
+    price_usd: number;
+    tags?: Tag[];
+  }): CreateExpenseInput => ({
+    date: expense.date,
+    category: expense.category,
+    description: expense.description,
+    price_toman: expense.price_toman,
+    price_usd: expense.price_usd,
+    tagIds: expense.tags?.map((t) => t.id) || [],
+  });
+
+  const [formData, setFormData] = useState<CreateExpenseInput>(
+    editingExpense ? buildFormData(editingExpense) : defaultFormData
+  );
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(editingExpense?.tags || []);
   const [lastChanged, setLastChanged] = useState<'toman' | 'usd'>('toman');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [initialFormData, setInitialFormData] = useState<CreateExpenseInput | null>(null);
-  const [initialDataCaptured, setInitialDataCaptured] = useState(false);
+  const [initialFormData, setInitialFormData] = useState<CreateExpenseInput | null>(
+    editingExpense ? buildFormData(editingExpense) : null
+  );
+  const [initialDataCaptured, setInitialDataCaptured] = useState(!!editingExpense);
 
   const isSubmitting = createExpense.isPending || updateExpense.isPending;
 
@@ -69,14 +89,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
   if (prevEditingExpense !== editingExpense) {
     setPrevEditingExpense(editingExpense);
     if (editingExpense) {
-      const initialData = {
-        date: editingExpense.date,
-        category: editingExpense.category,
-        description: editingExpense.description,
-        price_toman: editingExpense.price_toman,
-        price_usd: editingExpense.price_usd,
-        tagIds: editingExpense.tags?.map((t) => t.id) || [],
-      };
+      const initialData = buildFormData(editingExpense);
       setFormData(initialData);
       setInitialFormData(initialData);
       setSelectedTags(editingExpense.tags || []);

@@ -52,11 +52,26 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
     notes: '',
   };
 
-  const [formData, setFormData] = useState<CreateIncomeInput>(defaultFormData);
+  const buildFormData = (income: Income): CreateIncomeInput => ({
+    amountUsd: income.amountUsd,
+    amountToman: income.amountToman,
+    exchangeRateUsed: income.exchangeRateUsed,
+    month: income.month,
+    year: income.year,
+    incomeType: income.incomeType,
+    source: income.source || '',
+    notes: income.notes || '',
+  });
+
+  const [formData, setFormData] = useState<CreateIncomeInput>(
+    editingIncome ? buildFormData(editingIncome) : defaultFormData
+  );
   const [lastChanged, setLastChanged] = useState<'toman' | 'usd'>('usd');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [initialFormData, setInitialFormData] = useState<CreateIncomeInput | null>(null);
-  const [initialDataCaptured, setInitialDataCaptured] = useState(false);
+  const [initialFormData, setInitialFormData] = useState<CreateIncomeInput | null>(
+    editingIncome ? buildFormData(editingIncome) : null
+  );
+  const [initialDataCaptured, setInitialDataCaptured] = useState(!!editingIncome);
 
   const isSubmitting = createIncome.isPending || updateIncome.isPending;
 
@@ -65,16 +80,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
   if (prevEditingIncome !== editingIncome) {
     setPrevEditingIncome(editingIncome);
     if (editingIncome) {
-      const initialData = {
-        amountUsd: editingIncome.amountUsd,
-        amountToman: editingIncome.amountToman,
-        exchangeRateUsed: editingIncome.exchangeRateUsed,
-        month: editingIncome.month,
-        year: editingIncome.year,
-        incomeType: editingIncome.incomeType,
-        source: editingIncome.source || '',
-        notes: editingIncome.notes || '',
-      };
+      const initialData = buildFormData(editingIncome);
       setFormData(initialData);
       setInitialFormData(initialData);
     }
