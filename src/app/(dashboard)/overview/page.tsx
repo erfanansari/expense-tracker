@@ -382,7 +382,7 @@ export default function DashboardPage() {
         if (a.date !== b.date) return new Date(b.date).getTime() - new Date(a.date).getTime();
         return b.id - a.id;
       })
-      .slice(0, 5);
+      .slice(0, 7);
   }, [expenses]);
 
   /** Expenses filtered by the selected date range (for spending trend chart) */
@@ -426,39 +426,10 @@ export default function DashboardPage() {
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [filteredExpenses, granularity]);
 
-  /** This month's expenses grouped by category (for donut chart) */
-  const categorySplit = useMemo(() => {
-    const now = new Date();
-    const startOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-    const monthExps = expenses.filter((exp) => exp.date >= startOfMonth);
-
-    const totals = monthExps.reduce(
-      (acc, exp) => {
-        const existing = acc.find((item) => item.category === exp.category);
-        if (existing) {
-          existing.value += exp.price_toman;
-          existing.usdValue += exp.price_usd;
-        } else {
-          const labels = getCategoryLabel(exp.category);
-          acc.push({
-            category: exp.category,
-            name: labels.en,
-            nameFa: labels.fa,
-            value: exp.price_toman,
-            usdValue: exp.price_usd,
-          });
-        }
-        return acc;
-      },
-      [] as Array<{ category: string; name: string; nameFa: string; value: number; usdValue: number }>
-    );
-    return totals.sort((a, b) => b.value - a.value);
-  }, [expenses]);
-
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <div className="relative min-h-screen overflow-x-hidden">
-      <div className="mx-auto max-w-[1600px] px-6 py-8">
+      <div className="mx-auto max-w-[1600px] p-8 px-6">
         {/* Header */}
         <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
@@ -534,7 +505,7 @@ export default function DashboardPage() {
             </div>
 
             {/* ── Charts row: Spending Trend (2 cols) + Category Split (1 col) ─── */}
-            <div className="mb-6 grid grid-cols-1 gap-5 sm:mb-8 sm:gap-6 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-3">
               {/* Spending Trend – area chart with DateRangeSelector */}
               <div className="border-border-subtle bg-background relative rounded-xl border p-5 shadow-sm sm:p-6 lg:col-span-2">
                 <div className="mb-5 flex items-center justify-between">
@@ -547,7 +518,7 @@ export default function DashboardPage() {
                   <DateRangeSelector value={dateRange} onChange={setDateRange} />
                 </div>
 
-                <div className="h-[300px]">
+                <div className="h-[450px]">
                   <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <AreaChart data={spendingTrend} margin={{ left: 0, right: 20, top: 10, bottom: 0 }}>
                       <defs>
@@ -602,154 +573,75 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Category Split – donut chart matching ExpenseCharts */}
-              <div className="border-border-subtle bg-background relative rounded-xl border p-5 shadow-sm sm:p-6">
-                <div className="mb-5 flex items-center gap-3">
-                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-                    <PieChartIcon className="text-blue h-5 w-5" />
-                  </div>
-                  <h3 className="text-text-primary text-lg font-semibold">Category Split</h3>
+              {/* ── Recent Transactions ─────────────────────────────────────────── */}
+              <div className="border-border-subtle bg-background overflow-hidden rounded-xl border shadow-sm">
+                <div className="flex items-center justify-between px-6 py-5">
+                  <h2 className="text-text-primary text-lg font-semibold">Recent Transactions</h2>
+                  <Link
+                    href="/transactions"
+                    className="text-blue flex items-center gap-1 text-sm font-medium hover:underline"
+                  >
+                    View all
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </div>
 
-                {categorySplit.length > 0 ? (
-                  <>
-                    <div className="h-[220px]">
-                      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                        <PieChart>
-                          <Pie
-                            data={categorySplit}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={95}
-                            paddingAngle={4}
-                            dataKey="value"
-                            stroke="#ffffff"
-                            strokeWidth={2}
-                            animationDuration={800}
-                            animationEasing="ease-out"
-                          >
-                            {categorySplit.map((_, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <RechartsTooltip content={<CategoryTooltip />} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-
-                    {/* Legend – pill style matching ExpenseCharts */}
-                    <div className="mt-4 grid grid-cols-2 gap-2">
-                      {categorySplit.map((cat, index) => (
-                        <div
-                          key={cat.category}
-                          className="border-border-subtle bg-background-secondary hover:bg-background-elevated flex cursor-default items-center gap-2.5 rounded-lg border p-2.5 transition-all duration-200"
-                        >
-                          <div
-                            className="h-3 w-3 shrink-0 rounded-full"
-                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                          />
-                          <span className="text-text-secondary truncate text-sm font-medium">{cat.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex h-[220px] flex-col items-center justify-center">
-                    <p className="text-text-muted text-sm">No expenses this month</p>
+                {recentTransactions.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[480px] border-collapse">
+                      <thead>
+                        <tr className="bg-background-secondary">
+                          <th className="text-text-muted w-[60%] px-6 py-4 text-left text-xs font-semibold tracking-wider uppercase">
+                            Description
+                          </th>
+                          <th className="text-text-muted w-[40%] px-6 py-4 text-right text-xs font-semibold tracking-wider uppercase">
+                            Amount
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {recentTransactions.map((expense) => {
+                          return (
+                            <tr
+                              key={expense.id}
+                              className="border-border-subtle hover:bg-background-elevated border-t transition-colors duration-200 first:border-t-0"
+                            >
+                              <td className="px-6 py-4">
+                                <div className="flex flex-col gap-2">
+                                  <span className="text-text-primary text-sm font-medium">{expense.description}</span>
+                                  {expense.tags && expense.tags.length > 0 && (
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {expense.tags.map((tag) => (
+                                        <div
+                                          key={tag.id}
+                                          className="border-border-subtle bg-background-elevated text-text-secondary flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium"
+                                        >
+                                          <Tag className="h-3 w-3" />
+                                          <span>{tag.name}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <div className="flex flex-col items-end">
+                                  <span className="text-text-primary text-sm font-semibold" dir="rtl">
+                                    {formatNumber(expense.price_toman)} تومان
+                                  </span>
+                                  <span className="text-text-muted text-xs">${expense.price_usd.toFixed(2)} USD</span>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
                   </div>
+                ) : (
+                  <p className="text-text-muted px-6 py-8 text-center text-sm">No transactions yet</p>
                 )}
               </div>
-            </div>
-
-            {/* ── Recent Transactions ─────────────────────────────────────────── */}
-            <div className="border-border-subtle bg-background overflow-hidden rounded-xl border shadow-sm">
-              <div className="flex items-center justify-between px-6 py-5">
-                <h2 className="text-text-primary text-lg font-semibold">Recent Transactions</h2>
-                <Link
-                  href="/transactions"
-                  className="text-blue flex items-center gap-1 text-sm font-medium hover:underline"
-                >
-                  View all
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-
-              {recentTransactions.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[480px] border-collapse">
-                    <thead>
-                      <tr className="bg-background-secondary">
-                        <th className="text-text-muted w-[40%] px-6 py-4 text-left text-xs font-semibold tracking-wider uppercase">
-                          Description
-                        </th>
-                        <th className="text-text-muted w-[20%] px-6 py-4 text-left text-xs font-semibold tracking-wider uppercase">
-                          Category
-                        </th>
-                        <th className="text-text-muted w-[18%] px-6 py-4 text-left text-xs font-semibold tracking-wider uppercase">
-                          Date
-                        </th>
-                        <th className="text-text-muted w-[22%] px-6 py-4 text-right text-xs font-semibold tracking-wider uppercase">
-                          Amount
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {recentTransactions.map((expense) => {
-                        const categoryLabels = getCategoryLabel(expense.category);
-                        const farsiDate = formatToFarsiDate(expense.date);
-
-                        return (
-                          <tr
-                            key={expense.id}
-                            className="border-border-subtle hover:bg-background-elevated border-t transition-colors duration-200 first:border-t-0"
-                          >
-                            <td className="px-6 py-4">
-                              <div className="flex flex-col gap-2">
-                                <span className="text-text-primary text-sm font-medium">{expense.description}</span>
-                                {expense.tags && expense.tags.length > 0 && (
-                                  <div className="flex flex-wrap gap-1.5">
-                                    {expense.tags.map((tag) => (
-                                      <div
-                                        key={tag.id}
-                                        className="border-border-subtle bg-background-elevated text-text-secondary flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium"
-                                      >
-                                        <Tag className="h-3 w-3" />
-                                        <span>{tag.name}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className="text-text-primary text-sm font-medium">{categoryLabels.en}</span>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="flex flex-col">
-                                <span className="text-text-primary text-sm">{expense.date}</span>
-                                <span className="text-text-muted text-xs" dir="rtl">
-                                  {farsiDate}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 text-right">
-                              <div className="flex flex-col items-end">
-                                <span className="text-text-primary text-sm font-semibold" dir="rtl">
-                                  {formatNumber(expense.price_toman)} تومان
-                                </span>
-                                <span className="text-text-muted text-xs">${expense.price_usd.toFixed(2)} USD</span>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p className="text-text-muted px-6 py-8 text-center text-sm">No transactions yet</p>
-              )}
             </div>
           </>
         )}
