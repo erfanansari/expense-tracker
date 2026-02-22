@@ -15,7 +15,6 @@ import {
   TrendingUp,
   Wallet,
 } from 'lucide-react';
-import { Cell, Pie, PieChart, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 
 import type { Asset, AssetCategory } from '@types';
 
@@ -71,47 +70,44 @@ function AssetsSkeleton() {
         ))}
       </div>
 
-      {/* Asset list + chart */}
-      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          {[...Array(2)].map((_, i) => (
-            <div key={i} className="border-border-subtle bg-background rounded-xl border shadow-sm">
-              <div className="bg-background-secondary border-border-subtle border-b px-6 py-4">
-                <div className="flex justify-between">
-                  <Pulse className="h-3 w-16" />
-                  <Pulse className="h-3 w-16" />
-                  <Pulse className="h-3 w-16" />
-                </div>
+      {/* Asset list */}
+      <div className="space-y-6">
+        {[...Array(2)].map((_, i) => (
+          <div key={i} className="border-border-subtle bg-background rounded-xl border shadow-sm">
+            <div className="bg-background-secondary border-border-subtle border-b px-6 py-4">
+              <div className="flex justify-between">
+                <Pulse className="h-3 w-16" />
+                <Pulse className="h-3 w-16" />
+                <Pulse className="h-3 w-16" />
               </div>
-              {[...Array(3)].map((_, j) => (
-                <div key={j} className="border-border-subtle border-t px-6 py-4">
-                  <div className="flex justify-between">
-                    <Pulse className="h-4 w-28" />
-                    <Pulse className="h-4 w-16" />
-                    <Pulse className="h-4 w-20" />
-                  </div>
+            </div>
+            {[...Array(3)].map((_, j) => (
+              <div key={j} className="border-border-subtle border-t px-6 py-4">
+                <div className="flex justify-between">
+                  <Pulse className="h-4 w-28" />
+                  <Pulse className="h-4 w-16" />
+                  <Pulse className="h-4 w-20" />
                 </div>
-              ))}
-            </div>
-          ))}
-        </div>
-
-        <div className="border-border-subtle bg-background rounded-xl border p-6 shadow-sm lg:col-span-1">
-          <Pulse className="mb-6 h-5 w-36" />
-          <div className="flex h-64 items-center justify-center">
-            <div className="relative h-40 w-40">
-              <Pulse className="absolute inset-0 rounded-full" />
-              <div className="bg-background absolute inset-0 m-auto h-24 w-24 rounded-full" />
-            </div>
-          </div>
-          <div className="mt-4 space-y-2.5">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex justify-between">
-                <Pulse className="h-3 w-24" />
-                <Pulse className="h-3 w-8" />
               </div>
             ))}
           </div>
+        ))}
+      </div>
+
+      {/* Distribution chart */}
+      <div className="border-border-subtle bg-background rounded-xl border p-6 shadow-sm">
+        <Pulse className="mb-5 h-5 w-36" />
+        <Pulse className="mb-6 h-3 w-full rounded-full" />
+        <div className="grid grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-3 lg:grid-cols-4">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <Pulse className="h-2.5 w-2.5 shrink-0 rounded-full" />
+              <div className="flex flex-col gap-1">
+                <Pulse className="h-3 w-20" />
+                <Pulse className="h-3 w-16" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </>
@@ -199,31 +195,6 @@ export default function AssetsPage() {
     tomanValue: data.totalToman,
     color: CATEGORY_COLORS[category as AssetCategory] || '#525252',
   }));
-
-  // Custom tooltip for pie chart
-  const CustomChartTooltip = ({
-    active,
-    payload,
-  }: {
-    active?: boolean;
-    payload?: Array<{ value: number; payload: { name: string; nameFa: string; tomanValue: number } }>;
-  }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0];
-      return (
-        <div className="border-border-subtle bg-background rounded-lg border p-4 shadow-lg">
-          <p className="text-text-primary text-lg font-bold" dir="rtl">
-            {formatNumber(data.payload.tomanValue)} تومان
-          </p>
-          <p className="text-text-muted mt-1.5 text-sm font-medium">${formatNumber(data.value)} USD</p>
-          <p className="text-blue mt-2 text-sm font-medium" dir="rtl">
-            {data.payload.nameFa}
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <DashboardLayout>
@@ -318,9 +289,9 @@ export default function AssetsPage() {
                   );
                 }
                 return (
-                  <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+                  <div className="space-y-6">
                     {/* Asset List */}
-                    <div className="space-y-6 lg:col-span-2">
+                    <div className="space-y-6">
                       {Object.entries(assetsByCategory)
                         .sort(([, a], [, b]) => b.totalUsd - a.totalUsd)
                         .map(([category, data]) => {
@@ -334,80 +305,84 @@ export default function AssetsPage() {
                                 <Icon className="h-5 w-5" style={{ color }} />
                                 <h2 className="text-text-primary text-lg font-semibold">{labels.en}</h2>
                               </div>
-                              <div className="border-border-subtle bg-background relative overflow-hidden rounded-xl border shadow-sm">
-                                <table className="w-full table-fixed border-collapse">
-                                  <thead>
-                                    <tr className="bg-background-secondary">
-                                      <th className="text-text-muted w-[40%] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                                        Asset
-                                      </th>
-                                      <th className="text-text-muted w-[20%] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                                        Quantity
-                                      </th>
-                                      <th className="text-text-muted w-[25%] px-4 py-3 text-right text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                                        Value
-                                      </th>
-                                      <th className="text-text-muted w-[15%] px-4 py-3 text-center text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                                        Actions
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {data.assets.map((asset) => (
-                                      <tr
-                                        key={asset.id}
-                                        className="group border-border-subtle hover:bg-background-elevated border-t transition-colors duration-200 first:border-t-0"
-                                      >
-                                        <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                          <div className="flex flex-col">
-                                            <span className="text-text-primary text-sm font-medium">{asset.name}</span>
-                                            <span className="text-text-muted text-xs">
-                                              {getAssetCategoryLabel(asset.category).en}
-                                            </span>
-                                          </div>
-                                        </td>
-                                        <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                          <span className="text-text-secondary text-sm">
-                                            {asset.quantity} {asset.unit || 'unit'}
-                                          </span>
-                                        </td>
-                                        <td className="px-4 py-3 text-right sm:px-6 sm:py-4">
-                                          <div className="flex flex-col items-end">
-                                            <span className="text-text-primary text-sm font-semibold">
-                                              ${formatNumber(asset.totalValueUsd)}
-                                            </span>
-                                            <span className="text-text-muted text-xs" dir="rtl">
-                                              {formatNumber(asset.totalValueToman)} ت
-                                            </span>
-                                          </div>
-                                        </td>
-                                        <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                          <div className="flex items-center justify-center gap-1">
-                                            <button
-                                              onClick={() => handleEdit(asset)}
-                                              className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
-                                              title="Update Value"
-                                            >
-                                              <Edit2 className="h-4 w-4" />
-                                            </button>
-                                            <button
-                                              onClick={() => openDeleteModal(asset)}
-                                              disabled={deletingId === asset.id}
-                                              className="text-text-muted hover:bg-danger/10 hover:text-danger rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
-                                              title="Delete"
-                                            >
-                                              {deletingId === asset.id ? (
-                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                              ) : (
-                                                <Trash2 className="h-4 w-4" />
-                                              )}
-                                            </button>
-                                          </div>
-                                        </td>
+                              <div className="border-border-subtle bg-background relative rounded-xl border shadow-sm">
+                                <div className="overflow-x-auto">
+                                  <table className="w-full min-w-[480px] border-collapse">
+                                    <thead>
+                                      <tr className="bg-background-secondary">
+                                        <th className="text-text-muted w-[40%] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
+                                          Asset
+                                        </th>
+                                        <th className="text-text-muted w-[20%] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
+                                          Quantity
+                                        </th>
+                                        <th className="text-text-muted w-[25%] px-4 py-3 text-right text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
+                                          Value
+                                        </th>
+                                        <th className="text-text-muted w-[15%] px-4 py-3 text-center text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
+                                          Actions
+                                        </th>
                                       </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
+                                    </thead>
+                                    <tbody>
+                                      {data.assets.map((asset) => (
+                                        <tr
+                                          key={asset.id}
+                                          className="group border-border-subtle hover:bg-background-elevated border-t transition-colors duration-200 first:border-t-0"
+                                        >
+                                          <td className="px-4 py-3 sm:px-6 sm:py-4">
+                                            <div className="flex flex-col">
+                                              <span className="text-text-primary text-sm font-medium">
+                                                {asset.name}
+                                              </span>
+                                              <span className="text-text-muted text-xs">
+                                                {getAssetCategoryLabel(asset.category).en}
+                                              </span>
+                                            </div>
+                                          </td>
+                                          <td className="px-4 py-3 sm:px-6 sm:py-4">
+                                            <span className="text-text-secondary text-sm">
+                                              {asset.quantity} {asset.unit || 'unit'}
+                                            </span>
+                                          </td>
+                                          <td className="px-4 py-3 text-right sm:px-6 sm:py-4">
+                                            <div className="flex flex-col items-end">
+                                              <span className="text-text-primary text-sm font-semibold">
+                                                ${formatNumber(asset.totalValueUsd)}
+                                              </span>
+                                              <span className="text-text-muted text-xs" dir="rtl">
+                                                {formatNumber(asset.totalValueToman)} ت
+                                              </span>
+                                            </div>
+                                          </td>
+                                          <td className="px-4 py-3 sm:px-6 sm:py-4">
+                                            <div className="flex items-center justify-center gap-1">
+                                              <button
+                                                onClick={() => handleEdit(asset)}
+                                                className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
+                                                title="Update Value"
+                                              >
+                                                <Edit2 className="h-4 w-4" />
+                                              </button>
+                                              <button
+                                                onClick={() => openDeleteModal(asset)}
+                                                disabled={deletingId === asset.id}
+                                                className="text-text-muted hover:bg-danger/10 hover:text-danger rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
+                                                title="Delete"
+                                              >
+                                                {deletingId === asset.id ? (
+                                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                                ) : (
+                                                  <Trash2 className="h-4 w-4" />
+                                                )}
+                                              </button>
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
                               </div>
                             </div>
                           );
@@ -415,43 +390,47 @@ export default function AssetsPage() {
                     </div>
 
                     {/* Distribution Chart */}
-                    <div className="lg:col-span-1">
-                      <div className="border-border-subtle bg-background sticky top-24 rounded-xl border p-6 shadow-sm">
-                        <h3 className="text-text-primary mb-4 text-lg font-semibold">Asset Distribution</h3>
-                        <div className="h-64">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                              <Pie
-                                data={chartData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={60}
-                                outerRadius={80}
-                                paddingAngle={2}
-                                dataKey="value"
-                              >
-                                {chartData.map((entry, index) => (
-                                  <Cell key={`cell-${index}`} fill={entry.color} />
-                                ))}
-                              </Pie>
-                              <RechartsTooltip content={<CustomChartTooltip />} />
-                            </PieChart>
-                          </ResponsiveContainer>
-                        </div>
-                        {/* Legend */}
-                        <div className="mt-4 space-y-2">
-                          {chartData.map((entry) => (
-                            <div key={entry.name} className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                                <span className="text-text-secondary text-sm">{entry.name}</span>
+                    <div className="border-border-subtle bg-background rounded-xl border p-6 shadow-sm">
+                      <h3 className="text-text-primary mb-5 text-lg font-semibold">Asset Distribution</h3>
+
+                      {/* Stacked bar */}
+                      <div className="mb-6 flex h-3 w-full overflow-hidden rounded-full">
+                        {[...chartData]
+                          .sort((a, b) => b.value - a.value)
+                          .map((entry) => {
+                            const pct = totalValueUsd > 0 ? (entry.value / totalValueUsd) * 100 : 0;
+                            return (
+                              <div
+                                key={entry.name}
+                                className="h-full"
+                                style={{ width: `${pct}%`, backgroundColor: entry.color }}
+                                title={`${entry.name}: ${pct.toFixed(1)}%`}
+                              />
+                            );
+                          })}
+                      </div>
+
+                      {/* Legend */}
+                      <div className="grid grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                        {[...chartData]
+                          .sort((a, b) => b.value - a.value)
+                          .map((entry) => {
+                            const pct = totalValueUsd > 0 ? (entry.value / totalValueUsd) * 100 : 0;
+                            return (
+                              <div key={entry.name} className="flex min-w-0 items-center gap-2">
+                                <div
+                                  className="h-2.5 w-2.5 shrink-0 rounded-full"
+                                  style={{ backgroundColor: entry.color }}
+                                />
+                                <div className="min-w-0">
+                                  <p className="text-text-secondary truncate text-sm">{entry.name}</p>
+                                  <p className="text-text-muted text-xs tabular-nums">
+                                    {pct.toFixed(1)}% · ${formatNumber(entry.value)}
+                                  </p>
+                                </div>
                               </div>
-                              <span className="text-text-primary text-sm font-medium">
-                                {totalValueUsd > 0 ? ((entry.value / totalValueUsd) * 100).toFixed(1) : 0}%
-                              </span>
-                            </div>
-                          ))}
-                        </div>
+                            );
+                          })}
                       </div>
                     </div>
                   </div>

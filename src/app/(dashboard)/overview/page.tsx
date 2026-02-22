@@ -676,75 +676,77 @@ export default function DashboardPage() {
               </div>
 
               {recentTransactions.length > 0 ? (
-                <table className="w-full table-fixed border-collapse">
-                  <thead>
-                    <tr className="bg-background-secondary">
-                      <th className="text-text-muted w-[40%] px-6 py-4 text-left text-xs font-semibold tracking-wider uppercase">
-                        Description
-                      </th>
-                      <th className="text-text-muted w-[20%] px-6 py-4 text-left text-xs font-semibold tracking-wider uppercase">
-                        Category
-                      </th>
-                      <th className="text-text-muted w-[18%] px-6 py-4 text-left text-xs font-semibold tracking-wider uppercase">
-                        Date
-                      </th>
-                      <th className="text-text-muted w-[22%] px-6 py-4 text-right text-xs font-semibold tracking-wider uppercase">
-                        Amount
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentTransactions.map((expense) => {
-                      const categoryLabels = getCategoryLabel(expense.category);
-                      const farsiDate = formatToFarsiDate(expense.date);
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[480px] border-collapse">
+                    <thead>
+                      <tr className="bg-background-secondary">
+                        <th className="text-text-muted w-[40%] px-6 py-4 text-left text-xs font-semibold tracking-wider uppercase">
+                          Description
+                        </th>
+                        <th className="text-text-muted w-[20%] px-6 py-4 text-left text-xs font-semibold tracking-wider uppercase">
+                          Category
+                        </th>
+                        <th className="text-text-muted w-[18%] px-6 py-4 text-left text-xs font-semibold tracking-wider uppercase">
+                          Date
+                        </th>
+                        <th className="text-text-muted w-[22%] px-6 py-4 text-right text-xs font-semibold tracking-wider uppercase">
+                          Amount
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recentTransactions.map((expense) => {
+                        const categoryLabels = getCategoryLabel(expense.category);
+                        const farsiDate = formatToFarsiDate(expense.date);
 
-                      return (
-                        <tr
-                          key={expense.id}
-                          className="border-border-subtle hover:bg-background-elevated border-t transition-colors duration-200 first:border-t-0"
-                        >
-                          <td className="px-6 py-4">
-                            <div className="flex flex-col gap-2">
-                              <span className="text-text-primary text-sm font-medium">{expense.description}</span>
-                              {expense.tags && expense.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1.5">
-                                  {expense.tags.map((tag) => (
-                                    <div
-                                      key={tag.id}
-                                      className="border-border-subtle bg-background-elevated text-text-secondary flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium"
-                                    >
-                                      <Tag className="h-3 w-3" />
-                                      <span>{tag.name}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className="text-text-primary text-sm font-medium">{categoryLabels.en}</span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex flex-col">
-                              <span className="text-text-primary text-sm">{expense.date}</span>
-                              <span className="text-text-muted text-xs" dir="rtl">
-                                {farsiDate}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="flex flex-col items-end">
-                              <span className="text-text-primary text-sm font-semibold" dir="rtl">
-                                {formatNumber(expense.price_toman)} تومان
-                              </span>
-                              <span className="text-text-muted text-xs">${expense.price_usd.toFixed(2)} USD</span>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                        return (
+                          <tr
+                            key={expense.id}
+                            className="border-border-subtle hover:bg-background-elevated border-t transition-colors duration-200 first:border-t-0"
+                          >
+                            <td className="px-6 py-4">
+                              <div className="flex flex-col gap-2">
+                                <span className="text-text-primary text-sm font-medium">{expense.description}</span>
+                                {expense.tags && expense.tags.length > 0 && (
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {expense.tags.map((tag) => (
+                                      <div
+                                        key={tag.id}
+                                        className="border-border-subtle bg-background-elevated text-text-secondary flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium"
+                                      >
+                                        <Tag className="h-3 w-3" />
+                                        <span>{tag.name}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="text-text-primary text-sm font-medium">{categoryLabels.en}</span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-col">
+                                <span className="text-text-primary text-sm">{expense.date}</span>
+                                <span className="text-text-muted text-xs" dir="rtl">
+                                  {farsiDate}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex flex-col items-end">
+                                <span className="text-text-primary text-sm font-semibold" dir="rtl">
+                                  {formatNumber(expense.price_toman)} تومان
+                                </span>
+                                <span className="text-text-muted text-xs">${expense.price_usd.toFixed(2)} USD</span>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               ) : (
                 <p className="text-text-muted px-6 py-8 text-center text-sm">No transactions yet</p>
               )}
