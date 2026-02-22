@@ -11,8 +11,41 @@ import { useAuth } from '@/features/auth/hooks/use-auth';
 import TagManagementList from '@/features/expenses/components/TagManagementList';
 import { useUpdateUserProfile } from '@/hooks/use-user-profile';
 
+function Pulse({ className = '' }: { className?: string }) {
+  return <div className={`animate-pulse rounded-sm bg-zinc-300 ${className}`} aria-label="Loading" />;
+}
+
+function SettingsSkeleton() {
+  return (
+    <div className="grid gap-6">
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="border-border-subtle bg-background rounded-xl border shadow-sm">
+          <div className="border-border-subtle border-b p-6">
+            <div className="flex items-center gap-3">
+              <Pulse className="h-9 w-9 rounded-lg" />
+              <Pulse className="h-9 w-40 rounded-lg" />
+              <div className="flex flex-col gap-2">
+                <Pulse className="h-8" />
+                <Pulse className="h-6" />
+              </div>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="flex flex-col gap-3">
+              <Pulse className="h-6 md:w-1/2" />
+              <Pulse className="h-8 md:w-1/2" />
+              <Pulse className="h-6 md:w-1/2" />
+              <Pulse className="h-8 md:w-1/2" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function SettingsPage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { showToast } = useToast();
   const updateProfile = useUpdateUserProfile();
   const [editedName, setEditedName] = useState('');
@@ -60,309 +93,313 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Settings Sections */}
-        <div className="grid gap-6">
-          {/* Profile Settings */}
-          <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
-            <div className="border-border-subtle border-b p-6">
-              <div className="flex items-center gap-3">
-                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-                  <User className="text-text-secondary h-5 w-5" />
-                </div>
-                <div>
-                  <h2 className="text-text-primary text-lg font-semibold">Profile</h2>
-                  <p className="text-text-muted text-sm">Update your personal information</p>
-                </div>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="grid max-w-2xl gap-4">
-                {/* Email - Read Only */}
-                <div>
-                  <label className="text-text-secondary mb-2 block text-sm font-medium">Email</label>
-                  <div className="border-border-subtle bg-background-secondary text-text-muted w-full rounded-lg border px-4 py-2.5">
-                    {user?.email || 'Loading...'}
-                  </div>
-                  <p className="text-text-muted mt-1 text-xs">Your email cannot be changed</p>
-                </div>
-
-                {/* Name - Editable */}
-                <div>
-                  <label className="text-text-secondary mb-2 block text-sm font-medium">Name</label>
-                  <input
-                    type="text"
-                    value={nameValue}
-                    onChange={(e) => setEditedName(e.target.value)}
-                    placeholder="Enter your name"
-                    disabled={!isEditing}
-                    className="border-border-subtle bg-background text-text-primary focus:border-blue w-full rounded-lg border px-4 py-2.5 transition-[opacity,border-color] duration-200 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                  />
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex min-h-[42px] gap-3 pt-2">
-                  {!isEditing ? (
-                    <Button variant="outline" onClick={handleEdit}>
-                      Edit Profile
-                    </Button>
-                  ) : (
-                    <>
-                      <Button variant="primary" onClick={handleSave} disabled={updateProfile.isPending}>
-                        {updateProfile.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                        {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
-                      </Button>
-                      <Button variant="outline" onClick={handleCancel} disabled={updateProfile.isPending}>
-                        Cancel
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Tags */}
-          <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
-            <div className="border-border-subtle border-b p-6">
-              <div className="flex items-center gap-3">
-                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-                  <Tag className="text-text-secondary h-5 w-5" />
-                </div>
-                <div>
-                  <h2 className="text-text-primary text-lg font-semibold">Tags</h2>
-                  <p className="text-text-muted text-sm">Manage your expense tags</p>
-                </div>
-              </div>
-            </div>
-            <div className="p-6">
-              <TagManagementList />
-            </div>
-          </div>
-
-          {/* Preferences */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {/* Language */}
-            <div className="border-border-subtle bg-background rounded-xl border opacity-60 shadow-sm">
+        {loading ? (
+          <SettingsSkeleton />
+        ) : (
+          /* Settings Sections */
+          <div className="grid gap-6">
+            {/* Profile Settings */}
+            <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
               <div className="border-border-subtle border-b p-6">
                 <div className="flex items-center gap-3">
                   <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-                    <Globe className="text-text-secondary h-5 w-5" />
+                    <User className="text-text-secondary h-5 w-5" />
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-text-primary text-lg font-semibold">Language</h2>
-                      <span className="bg-background-elevated text-text-muted rounded px-2 py-0.5 text-xs font-medium">
-                        Coming Soon
-                      </span>
-                    </div>
-                    <p className="text-text-muted text-sm">Select your preferred language</p>
+                  <div>
+                    <h2 className="text-text-primary text-lg font-semibold">Profile</h2>
+                    <p className="text-text-muted text-sm">Update your personal information</p>
                   </div>
                 </div>
               </div>
               <div className="p-6">
-                <div className="relative">
-                  <select
-                    disabled
-                    className="border-border-subtle bg-background-secondary text-text-muted w-full cursor-not-allowed appearance-none rounded-lg border px-4 py-2.5 pr-10"
-                  >
-                    <option>English</option>
-                    <option>فارسی (Persian)</option>
-                  </select>
-                  <svg
-                    className="text-text-muted pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                <div className="grid max-w-2xl gap-4">
+                  {/* Email - Read Only */}
+                  <div>
+                    <label className="text-text-secondary mb-2 block text-sm font-medium">Email</label>
+                    <div className="border-border-subtle bg-background-secondary text-text-muted w-full rounded-lg border px-4 py-2.5">
+                      {user?.email || 'Loading...'}
+                    </div>
+                    <p className="text-text-muted mt-1 text-xs">Your email cannot be changed</p>
+                  </div>
+
+                  {/* Name - Editable */}
+                  <div>
+                    <label className="text-text-secondary mb-2 block text-sm font-medium">Name</label>
+                    <input
+                      type="text"
+                      value={nameValue}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      placeholder="Enter your name"
+                      disabled={!isEditing}
+                      className="border-border-subtle bg-background text-text-primary focus:border-blue w-full rounded-lg border px-4 py-2.5 transition-[opacity,border-color] duration-200 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                    />
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex min-h-[42px] gap-3 pt-2">
+                    {!isEditing ? (
+                      <Button variant="outline" onClick={handleEdit}>
+                        Edit Profile
+                      </Button>
+                    ) : (
+                      <>
+                        <Button variant="primary" onClick={handleSave} disabled={updateProfile.isPending}>
+                          {updateProfile.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                          {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
+                        </Button>
+                        <Button variant="outline" onClick={handleCancel} disabled={updateProfile.isPending}>
+                          Cancel
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Appearance */}
-            <div className="border-border-subtle bg-background rounded-xl border opacity-60 shadow-sm">
+            {/* Tags */}
+            <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
               <div className="border-border-subtle border-b p-6">
                 <div className="flex items-center gap-3">
                   <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-                    <Palette className="text-text-secondary h-5 w-5" />
+                    <Tag className="text-text-secondary h-5 w-5" />
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-text-primary text-lg font-semibold">Appearance</h2>
-                      <span className="bg-background-elevated text-text-muted rounded px-2 py-0.5 text-xs font-medium">
-                        Coming Soon
-                      </span>
-                    </div>
-                    <p className="text-text-muted text-sm">Customize the look and feel</p>
+                  <div>
+                    <h2 className="text-text-primary text-lg font-semibold">Tags</h2>
+                    <p className="text-text-muted text-sm">Manage your expense tags</p>
                   </div>
                 </div>
               </div>
               <div className="p-6">
-                <div className="relative">
-                  <select
-                    disabled
-                    className="border-border-subtle bg-background-secondary text-text-muted w-full cursor-not-allowed appearance-none rounded-lg border px-4 py-2.5 pr-10"
-                  >
-                    <option>Light Mode</option>
-                    <option>Dark Mode</option>
-                  </select>
-                  <svg
-                    className="text-text-muted pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
+                <TagManagementList />
               </div>
             </div>
-          </div>
 
-          {/* Notifications */}
-          <div className="border-border-subtle bg-background rounded-xl border opacity-60 shadow-sm">
-            <div className="border-border-subtle border-b p-6">
-              <div className="flex items-center gap-3">
-                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-                  <Bell className="text-text-secondary h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-text-primary text-lg font-semibold">Notifications</h2>
-                    <span className="bg-background-elevated text-text-muted rounded px-2 py-0.5 text-xs font-medium">
-                      Coming Soon
-                    </span>
+            {/* Preferences */}
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {/* Language */}
+              <div className="border-border-subtle bg-background rounded-xl border opacity-60 shadow-sm">
+                <div className="border-border-subtle border-b p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
+                      <Globe className="text-text-secondary h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-text-primary text-lg font-semibold">Language</h2>
+                        <span className="bg-background-elevated text-text-muted rounded px-2 py-0.5 text-xs font-medium">
+                          Coming Soon
+                        </span>
+                      </div>
+                      <p className="text-text-muted text-sm">Select your preferred language</p>
+                    </div>
                   </div>
-                  <p className="text-text-muted text-sm">Manage your notification preferences</p>
+                </div>
+                <div className="p-6">
+                  <div className="relative">
+                    <select
+                      disabled
+                      className="border-border-subtle bg-background-secondary text-text-muted w-full cursor-not-allowed appearance-none rounded-lg border px-4 py-2.5 pr-10"
+                    >
+                      <option>English</option>
+                      <option>فارسی (Persian)</option>
+                    </select>
+                    <svg
+                      className="text-text-muted pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Appearance */}
+              <div className="border-border-subtle bg-background rounded-xl border opacity-60 shadow-sm">
+                <div className="border-border-subtle border-b p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
+                      <Palette className="text-text-secondary h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-text-primary text-lg font-semibold">Appearance</h2>
+                        <span className="bg-background-elevated text-text-muted rounded px-2 py-0.5 text-xs font-medium">
+                          Coming Soon
+                        </span>
+                      </div>
+                      <p className="text-text-muted text-sm">Customize the look and feel</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="relative">
+                    <select
+                      disabled
+                      className="border-border-subtle bg-background-secondary text-text-muted w-full cursor-not-allowed appearance-none rounded-lg border px-4 py-2.5 pr-10"
+                    >
+                      <option>Light Mode</option>
+                      <option>Dark Mode</option>
+                    </select>
+                    <svg
+                      className="text-text-muted pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="p-6">
-              <div className="max-w-2xl space-y-4">
-                <div className="flex items-center justify-between">
+
+            {/* Notifications */}
+            <div className="border-border-subtle bg-background rounded-xl border opacity-60 shadow-sm">
+              <div className="border-border-subtle border-b p-6">
+                <div className="flex items-center gap-3">
+                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
+                    <Bell className="text-text-secondary h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-text-primary text-lg font-semibold">Notifications</h2>
+                      <span className="bg-background-elevated text-text-muted rounded px-2 py-0.5 text-xs font-medium">
+                        Coming Soon
+                      </span>
+                    </div>
+                    <p className="text-text-muted text-sm">Manage your notification preferences</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="max-w-2xl space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-text-muted text-sm font-medium">Email Notifications</p>
+                      <p className="text-text-muted mt-0.5 text-xs">Receive email updates about your expenses</p>
+                    </div>
+                    <button
+                      disabled
+                      className="bg-background-secondary relative inline-flex h-6 w-11 cursor-not-allowed items-center rounded-full"
+                    >
+                      <span className="bg-background-elevated inline-block h-4 w-4 translate-x-1 transform rounded-full" />
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-text-muted text-sm font-medium">Weekly Reports</p>
+                      <p className="text-text-muted mt-0.5 text-xs">Get weekly expense summaries</p>
+                    </div>
+                    <button
+                      disabled
+                      className="bg-background-secondary relative inline-flex h-6 w-11 cursor-not-allowed items-center rounded-full"
+                    >
+                      <span className="bg-background-elevated inline-block h-4 w-4 translate-x-1 transform rounded-full" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Security */}
+            <div className="border-border-subtle bg-background rounded-xl border opacity-60 shadow-sm">
+              <div className="border-border-subtle border-b p-6">
+                <div className="flex items-center gap-3">
+                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
+                    <Lock className="text-text-secondary h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-text-primary text-lg font-semibold">Security</h2>
+                      <span className="bg-background-elevated text-text-muted rounded px-2 py-0.5 text-xs font-medium">
+                        Coming Soon
+                      </span>
+                    </div>
+                    <p className="text-text-muted text-sm">Manage your password and security settings</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="max-w-2xl">
+                  <Button variant="outline" disabled className="cursor-not-allowed opacity-50">
+                    Change Password
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Data Management */}
+            <div className="border-border-subtle bg-background rounded-xl border opacity-60 shadow-sm">
+              <div className="border-border-subtle border-b p-6">
+                <div className="flex items-center gap-3">
+                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
+                    <Database className="text-text-secondary h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-text-primary text-lg font-semibold">Data Management</h2>
+                      <span className="bg-background-elevated text-text-muted rounded px-2 py-0.5 text-xs font-medium">
+                        Coming Soon
+                      </span>
+                    </div>
+                    <p className="text-text-muted text-sm">Export or delete your data</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="flex max-w-2xl flex-col gap-3 sm:flex-row">
+                  <Button variant="outline" disabled className="cursor-not-allowed opacity-50">
+                    Export Data
+                  </Button>
+                  <Button variant="danger" disabled className="cursor-not-allowed opacity-50">
+                    Delete All Data
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Help & Support */}
+            <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
+              <div className="border-border-subtle border-b p-6">
+                <div className="flex items-center gap-3">
+                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
+                    <HelpCircle className="text-text-secondary h-5 w-5" />
+                  </div>
                   <div>
-                    <p className="text-text-muted text-sm font-medium">Email Notifications</p>
-                    <p className="text-text-muted mt-0.5 text-xs">Receive email updates about your expenses</p>
+                    <h2 className="text-text-primary text-lg font-semibold">Help & Support</h2>
+                    <p className="text-text-muted text-sm">Get help or send feedback</p>
                   </div>
-                  <button
-                    disabled
-                    className="bg-background-secondary relative inline-flex h-6 w-11 cursor-not-allowed items-center rounded-full"
-                  >
-                    <span className="bg-background-elevated inline-block h-4 w-4 translate-x-1 transform rounded-full" />
-                  </button>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-text-muted text-sm font-medium">Weekly Reports</p>
-                    <p className="text-text-muted mt-0.5 text-xs">Get weekly expense summaries</p>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  {/* Action Buttons */}
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <a
+                      href="https://github.com/erfanansari/kharji#readme"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="border-button-outline-border bg-background hover:bg-button-outline-bg-hover text-button-outline-text hover:text-button-outline-text-hover inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-all"
+                    >
+                      Documentation
+                    </a>
+                    <a
+                      href="https://github.com/erfanansari/kharji/issues"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="border-button-outline-border bg-background hover:bg-button-outline-bg-hover text-button-outline-text hover:text-button-outline-text-hover inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-all"
+                    >
+                      Contact Support
+                    </a>
                   </div>
-                  <button
-                    disabled
-                    className="bg-background-secondary relative inline-flex h-6 w-11 cursor-not-allowed items-center rounded-full"
-                  >
-                    <span className="bg-background-elevated inline-block h-4 w-4 translate-x-1 transform rounded-full" />
-                  </button>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Security */}
-          <div className="border-border-subtle bg-background rounded-xl border opacity-60 shadow-sm">
-            <div className="border-border-subtle border-b p-6">
-              <div className="flex items-center gap-3">
-                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-                  <Lock className="text-text-secondary h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-text-primary text-lg font-semibold">Security</h2>
-                    <span className="bg-background-elevated text-text-muted rounded px-2 py-0.5 text-xs font-medium">
-                      Coming Soon
-                    </span>
-                  </div>
-                  <p className="text-text-muted text-sm">Manage your password and security settings</p>
-                </div>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="max-w-2xl">
-                <Button variant="outline" disabled className="cursor-not-allowed opacity-50">
-                  Change Password
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Data Management */}
-          <div className="border-border-subtle bg-background rounded-xl border opacity-60 shadow-sm">
-            <div className="border-border-subtle border-b p-6">
-              <div className="flex items-center gap-3">
-                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-                  <Database className="text-text-secondary h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-text-primary text-lg font-semibold">Data Management</h2>
-                    <span className="bg-background-elevated text-text-muted rounded px-2 py-0.5 text-xs font-medium">
-                      Coming Soon
-                    </span>
-                  </div>
-                  <p className="text-text-muted text-sm">Export or delete your data</p>
-                </div>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="flex max-w-2xl flex-col gap-3 sm:flex-row">
-                <Button variant="outline" disabled className="cursor-not-allowed opacity-50">
-                  Export Data
-                </Button>
-                <Button variant="danger" disabled className="cursor-not-allowed opacity-50">
-                  Delete All Data
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Help & Support */}
-          <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
-            <div className="border-border-subtle border-b p-6">
-              <div className="flex items-center gap-3">
-                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-                  <HelpCircle className="text-text-secondary h-5 w-5" />
-                </div>
-                <div>
-                  <h2 className="text-text-primary text-lg font-semibold">Help & Support</h2>
-                  <p className="text-text-muted text-sm">Get help or send feedback</p>
-                </div>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                {/* Action Buttons */}
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <a
-                    href="https://github.com/erfanansari/kharji#readme"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="border-button-outline-border bg-background hover:bg-button-outline-bg-hover text-button-outline-text hover:text-button-outline-text-hover inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-all"
-                  >
-                    Documentation
-                  </a>
-                  <a
-                    href="https://github.com/erfanansari/kharji/issues"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="border-button-outline-border bg-background hover:bg-button-outline-bg-hover text-button-outline-text hover:text-button-outline-text-hover inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-all"
-                  >
-                    Contact Support
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
