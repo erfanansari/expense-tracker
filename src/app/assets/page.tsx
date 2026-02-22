@@ -59,79 +59,58 @@ function Pulse({ className = '' }: { className?: string }) {
 function AssetsSkeleton() {
   return (
     <>
-      {/* 4 card skeletons */}
+      {/* Summary cards */}
       <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="border-border-subtle bg-background rounded-xl border p-4 shadow-sm sm:p-5">
-            <Pulse className="mb-3 h-9 w-9 rounded-lg sm:mb-4 sm:h-10 sm:w-10" />
-            <Pulse className="mb-2 h-3 w-20 sm:mb-3 sm:w-24" />
-            <Pulse className="mb-2 h-6 w-3/4 sm:h-8" />
-            <Pulse className="h-3 w-1/3 sm:h-4" />
+          <div key={i} className="border-border-subtle bg-background rounded-xl border p-5 shadow-sm">
+            <Pulse className="mb-4 h-9 w-9 rounded-lg" />
+            <Pulse className="mb-2 h-3 w-20" />
+            <Pulse className="mb-2 h-7 w-3/4" />
+            <Pulse className="h-3 w-1/2" />
           </div>
         ))}
       </div>
 
-      {/* Main content: asset tables + distribution chart */}
+      {/* Asset list + chart */}
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-        {/* Asset tables (2/3 width) */}
         <div className="space-y-6 lg:col-span-2">
           {[...Array(2)].map((_, i) => (
-            <div key={i}>
-              {/* Category heading */}
-              <div className="mb-4 flex items-center gap-2">
-                <Pulse className="h-5 w-5 rounded-sm" />
-                <Pulse className="h-5 w-24" />
+            <div key={i} className="border-border-subtle bg-background rounded-xl border shadow-sm">
+              <div className="bg-background-secondary border-border-subtle border-b px-6 py-4">
+                <div className="flex justify-between">
+                  <Pulse className="h-3 w-16" />
+                  <Pulse className="h-3 w-16" />
+                  <Pulse className="h-3 w-16" />
+                </div>
               </div>
-              <div className="border-border-subtle bg-background overflow-hidden rounded-xl border shadow-sm">
-                {/* Table header */}
-                <div className="bg-background-secondary px-4 py-3 sm:px-6 sm:py-4">
-                  <div className="flex items-center justify-between">
-                    <Pulse className="h-3 w-14" />
-                    <Pulse className="h-3 w-16" />
-                    <Pulse className="h-3 w-12" />
+              {[...Array(3)].map((_, j) => (
+                <div key={j} className="border-border-subtle border-t px-6 py-4">
+                  <div className="flex justify-between">
+                    <Pulse className="h-4 w-28" />
+                    <Pulse className="h-4 w-16" />
+                    <Pulse className="h-4 w-20" />
                   </div>
                 </div>
-                {/* Table rows */}
-                {[...Array(3)].map((_, j) => (
-                  <div key={j} className="border-border-subtle border-t px-4 py-3.5 sm:px-6 sm:py-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-col gap-1.5">
-                        <Pulse className="h-4 w-28" />
-                        <Pulse className="h-3 w-16" />
-                      </div>
-                      <Pulse className="h-4 w-16" />
-                      <div className="flex flex-col items-end gap-1.5">
-                        <Pulse className="h-4 w-20" />
-                        <Pulse className="h-3 w-14" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
           ))}
         </div>
 
-        {/* Distribution chart (1/3 width) */}
-        <div className="lg:col-span-1">
-          <div className="border-border-subtle bg-background rounded-xl border p-6 shadow-sm">
-            <Pulse className="mb-6 h-5 w-36" />
-            {/* Donut */}
-            <div className="flex h-64 items-center justify-center">
-              <div className="relative flex h-40 w-40 items-center justify-center">
-                <Pulse className="absolute h-40 w-40 rounded-full" />
-                <div className="bg-background relative z-10 h-[88px] w-[88px] rounded-full" />
+        <div className="border-border-subtle bg-background rounded-xl border p-6 shadow-sm lg:col-span-1">
+          <Pulse className="mb-6 h-5 w-36" />
+          <div className="flex h-64 items-center justify-center">
+            <div className="relative h-40 w-40">
+              <Pulse className="absolute inset-0 rounded-full" />
+              <div className="bg-background absolute inset-0 m-auto h-24 w-24 rounded-full" />
+            </div>
+          </div>
+          <div className="mt-4 space-y-2.5">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex justify-between">
+                <Pulse className="h-3 w-24" />
+                <Pulse className="h-3 w-8" />
               </div>
-            </div>
-            {/* Legend */}
-            <div className="mt-4 space-y-2.5">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <Pulse className="h-4 w-24" />
-                  <Pulse className="h-4 w-8" />
-                </div>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
       </div>
