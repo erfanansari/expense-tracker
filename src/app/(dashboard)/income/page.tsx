@@ -136,16 +136,21 @@ export default function IncomePage() {
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
 
+  const lastMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+  const lastMonthYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+
   const ytdIncome = incomes.filter((inc) => inc.year === currentYear).reduce((sum, inc) => sum + inc.amountUsd, 0);
 
-  const currentMonthIncome = incomes
-    .filter((inc) => inc.year === currentYear && inc.month === currentMonth)
+  const lastMonthIncome = incomes
+    .filter((inc) => inc.year === lastMonthYear && inc.month === lastMonth)
     .reduce((sum, inc) => sum + inc.amountUsd, 0);
 
   const totalIncomeAllTime = incomes.reduce((sum, inc) => sum + inc.amountUsd, 0);
   const totalIncomeAllTimeToman = incomes.reduce((sum, inc) => sum + inc.amountToman, 0);
 
-  const avgMonthlyIncome = incomes.length > 0 ? totalIncomeAllTime / incomes.length : 0;
+  // True monthly average: total ÷ number of distinct year-month combinations
+  const distinctMonths = new Set(incomes.map((inc) => `${inc.year}-${inc.month}`)).size;
+  const avgMonthlyIncome = distinctMonths > 0 ? totalIncomeAllTime / distinctMonths : 0;
 
   // Group incomes by year
   const incomesByYear = incomes.reduce(
@@ -210,35 +215,36 @@ export default function IncomePage() {
                 <p className="text-text-secondary mt-1.5 text-sm font-medium">{currentYear}</p>
               </div>
 
-              {/* Current Month */}
+              {/* Last Month */}
               <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
                 <div className="mb-4 flex items-center justify-between">
                   <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
                     <DollarSign className="text-text-secondary h-5 w-5" />
                   </div>
                 </div>
-                <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">This Month</p>
+                <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Last Month</p>
                 <p className="text-text-primary text-2xl font-semibold tabular-nums">
-                  ${formatNumber(currentMonthIncome)}
+                  ${formatNumber(lastMonthIncome)}
                 </p>
                 <p className="text-text-secondary mt-1.5 text-sm font-medium">
-                  {getMonthLabel(currentMonth).en} -{' '}
-                  <span dir="rtl">{getJalaliMonthName(currentMonth, currentYear)}</span>
+                  {getMonthLabel(lastMonth).en} {lastMonthYear}
                 </p>
               </div>
 
-              {/* Average Monthly */}
+              {/* Monthly Average */}
               <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
                 <div className="mb-4 flex items-center justify-between">
                   <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
                     <TrendingUp className="text-text-secondary h-5 w-5" />
                   </div>
                 </div>
-                <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Avg Monthly</p>
+                <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Monthly Average</p>
                 <p className="text-text-primary text-2xl font-semibold tabular-nums">
                   ${formatNumber(Math.round(avgMonthlyIncome))}
                 </p>
-                <p className="text-text-secondary mt-1.5 text-sm font-medium">per entry</p>
+                <p className="text-text-secondary mt-1.5 text-sm font-medium">
+                  over {distinctMonths} month{distinctMonths !== 1 ? 's' : ''}
+                </p>
               </div>
             </div>
 
