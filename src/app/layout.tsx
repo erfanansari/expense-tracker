@@ -23,8 +23,10 @@ const persianFont = Vazirmatn({
   weight: ['300', '400', '500', '600', '700'],
 });
 
+const APP_URL = 'https://kharji.erfanansari.com';
+
 export const metadata: Metadata = {
-  metadataBase: new URL('https://kharji.erfanansari.com'),
+  metadataBase: new URL(APP_URL),
   title: {
     template: '%s | Kharji',
     default: 'Kharji',
@@ -34,7 +36,8 @@ export const metadata: Metadata = {
     title: 'Kharji – Personal Finance Tracker',
     description: 'Track expenses, income, and assets — all in one place.',
     siteName: 'Kharji',
-    url: 'https://kharji.erfanansari.com',
+    url: APP_URL,
+    locale: 'en_US',
     type: 'website',
     images: [
       {
