@@ -10,7 +10,7 @@ export const authConfig = {
     maxAge: 60 * 60 * 24 * 30, // 30 days in seconds
   },
   routes: {
-    public: ['/', '/login', '/signup', '/forgot-password', '/reset-password'],
+    public: ['/', '/login', '/signup', '/forgot-password', '/reset-password', '/opengraph-image'],
     apiPublic: [
       '/api/auth/login',
       '/api/auth/signup',
