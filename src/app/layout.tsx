@@ -24,6 +24,7 @@ const persianFont = Vazirmatn({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://kharji.erfanansari.com'),
   title: {
     template: '%s | Kharji',
     default: 'Kharji',
@@ -37,7 +38,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: 'https://kharji.erfanansari.com/opengraph-image',
+        url: '/opengraph-image',
         width: 1200,
         height: 630,
         alt: 'Kharji – Personal Finance Tracker',
@@ -48,7 +49,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Kharji – Personal Finance Tracker',
     description: 'Track expenses, income, and assets — all in one place.',
-    images: ['https://kharji.erfanansari.com/opengraph-image'],
+    images: ['/opengraph-image'],
   },
 };
 
