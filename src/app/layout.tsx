@@ -28,7 +28,18 @@ export const metadata: Metadata = {
     template: '%s | Kharji',
     default: 'Kharji',
   },
-  description: 'Track your personal expenses',
+  description: 'Track expenses, income, and assets — all in one place.',
+  openGraph: {
+    title: 'Kharji – Personal Finance Tracker',
+    description: 'Track expenses, income, and assets — all in one place.',
+    siteName: 'Kharji',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Kharji – Personal Finance Tracker',
+    description: 'Track expenses, income, and assets — all in one place.',
+  },
 };
 
 export const viewport = {
