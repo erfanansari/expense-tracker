@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { numberToWords } from '@persian-tools/persian-tools';
-import { Calendar, ChevronDown, DollarSign, FileText, Layers, Loader2, Plus, Save, X } from 'lucide-react';
+import { Calendar, ChevronDown, DollarSign, FileText, Layers, Loader2, Plus, Save } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
 import { tomanToUsd, usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
@@ -200,38 +200,12 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
   };
 
   return (
-    <div className="border-border-subtle bg-background relative rounded-xl border p-6 shadow-sm">
-      {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-            {editingExpense ? (
-              <Save className="text-text-secondary h-5 w-5" />
-            ) : (
-              <Plus className="text-text-secondary h-5 w-5" />
-            )}
-          </div>
-          <div>
-            <h2 className="text-text-primary text-lg font-semibold">
-              {editingExpense ? 'Edit Expense' : 'Add New Expense'}
-            </h2>
-          </div>
-        </div>
-        {editingExpense && (
-          <button
-            onClick={handleCancel}
-            className="text-text-muted hover:bg-background-elevated hover:text-text-primary rounded-lg p-2 transition-all"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        )}
-      </div>
-
+    <>
       {/* Message */}
       {message && (
         <div
           className={twMerge(
-            'mb-6 rounded-lg border p-4',
+            'mb-4 rounded-lg border p-3 text-sm',
             message.type === 'success'
               ? 'border-success bg-success-light text-success'
               : 'border-danger bg-danger-light text-danger'
@@ -241,11 +215,11 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3">
         {/* Row 1: Category and Date */}
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
           {/* Category */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <Layers className="text-text-muted h-4 w-4" />
               Category
@@ -255,7 +229,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 required
-                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-3 pr-10 transition-all focus:outline-none"
+                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-3 py-2 pr-10 text-sm transition-all focus:outline-none"
               >
                 <option value="" className="bg-background">
                   Select category...
@@ -271,7 +245,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
           </div>
 
           {/* Date */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <Calendar className="text-text-muted h-4 w-4" />
               Date
@@ -281,13 +255,13 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
               required
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="border-border-subtle bg-background text-text-primary focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
+              className="border-border-subtle bg-background text-text-primary focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
             />
           </div>
         </div>
 
         {/* Description */}
-        <div className="space-y-2">
+        <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <FileText className="text-text-muted h-4 w-4" />
             Description
@@ -295,15 +269,15 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
           <textarea
             placeholder="Enter expense details..."
             required
-            rows={3}
+            rows={2}
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full resize-none rounded-lg border px-4 py-3 transition-all focus:outline-none"
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full resize-none rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
           />
         </div>
 
         {/* Tags */}
-        <div className="space-y-2">
+        <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <span className="text-text-muted">#</span>
             Tags
@@ -311,10 +285,10 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
           <TagInput selectedTags={selectedTags} onTagsChange={setSelectedTags} />
         </div>
 
-        {/* Prices - 2 columns */}
-        <div className="grid grid-cols-1 gap-5">
+        {/* Prices */}
+        <div className="grid grid-cols-1 gap-3">
           {/* Toman */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <span className="text-success font-bold">T</span>
               Price (Toman)
@@ -328,13 +302,13 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
                 step="1"
                 value={formData.price_toman || ''}
                 onChange={(e) => handleTomanChange(parseFloat(e.target.value) || 0)}
-                className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-success w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
+                className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-success w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
               />
             </Tooltip>
           </div>
 
           {/* USD */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <DollarSign className="text-blue h-4 w-4" />
               Price (USD)
@@ -347,13 +321,13 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
               step="0.01"
               value={formData.price_usd || ''}
               onChange={(e) => handleUsdChange(parseFloat(e.target.value) || 0)}
-              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
             />
           </div>
         </div>
 
-        {/* Exchange Rate - separate row */}
-        <div className="space-y-2">
+        {/* Exchange Rate */}
+        <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <span className="text-text-muted">↔</span>
             Rate (Toman/USD)
@@ -368,12 +342,12 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
             value={exchangeRate || ''}
             onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
             disabled={isFetchingRate}
-            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
           />
         </div>
 
         {/* Buttons */}
-        <div className="flex gap-3 pt-2">
+        <div className="flex gap-3 pt-1">
           <Button
             type="submit"
             disabled={isSubmitting || isFetchingRate || !exchangeRate}
@@ -412,7 +386,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
           )}
         </div>
       </form>
-    </div>
+    </>
   );
 };
 

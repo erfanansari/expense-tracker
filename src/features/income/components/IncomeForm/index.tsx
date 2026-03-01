@@ -191,7 +191,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
       {message && (
         <div
           className={twMerge(
-            'mb-6 rounded-lg border p-4',
+            'mb-4 rounded-lg border p-3 text-sm',
             message.type === 'success'
               ? 'border-success bg-success-light text-success'
               : 'border-danger bg-danger-light text-danger'
@@ -201,11 +201,11 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3">
         {/* Row 1: Income Type, Month, Year */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           {/* Income Type */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <Briefcase className="text-text-muted h-4 w-4" />
               Type
@@ -217,7 +217,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
                   setFormData({ ...formData, incomeType: e.target.value as CreateIncomeInput['incomeType'] })
                 }
                 required
-                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-3 pr-10 text-sm transition-all focus:outline-none"
+                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-3 py-2 pr-10 text-sm transition-all focus:outline-none"
               >
                 {INCOME_TYPES.map((type) => (
                   <option key={type.value} value={type.value}>
@@ -230,7 +230,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
           </div>
 
           {/* Month */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <Calendar className="text-text-muted h-4 w-4" />
               Month
@@ -240,7 +240,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
                 value={formData.month}
                 onChange={(e) => setFormData({ ...formData, month: parseInt(e.target.value, 10) })}
                 required
-                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-3 pr-10 text-sm transition-all focus:outline-none"
+                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-3 py-2 pr-10 text-sm transition-all focus:outline-none"
               >
                 {MONTHS.map((month) => (
                   <option key={month.value} value={month.value}>
@@ -253,7 +253,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
           </div>
 
           {/* Year */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <Calendar className="text-text-muted h-4 w-4" />
               Year
@@ -263,7 +263,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
                 value={formData.year}
                 onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value, 10) })}
                 required
-                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-3 pr-10 text-sm transition-all focus:outline-none"
+                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-3 py-2 pr-10 text-sm transition-all focus:outline-none"
               >
                 {yearOptions.map((year) => (
                   <option key={year} value={year}>
@@ -277,7 +277,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
         </div>
 
         {/* Source */}
-        <div className="space-y-2">
+        <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <Briefcase className="text-text-muted h-4 w-4" />
             Source (Optional)
@@ -287,12 +287,12 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
             placeholder="e.g., Company Name, Client..."
             value={formData.source}
             onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
           />
         </div>
 
         {/* Notes */}
-        <div className="space-y-2">
+        <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <FileText className="text-text-muted h-4 w-4" />
             Notes (Optional)
@@ -302,14 +302,14 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
             rows={2}
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full resize-none rounded-lg border px-4 py-3 transition-all focus:outline-none"
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full resize-none rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
           />
         </div>
 
-        {/* Amounts - 2 columns */}
-        <div className="grid grid-cols-1 gap-4">
-          {/* Toman (on left) */}
-          <div className="space-y-2">
+        {/* Amounts */}
+        <div className="grid grid-cols-1 gap-3">
+          {/* Toman */}
+          <div className="space-y-1">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <span className="text-success font-bold">T</span>
               Amount (Toman)
@@ -323,13 +323,13 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
                 step="1"
                 value={formData.amountToman || ''}
                 onChange={(e) => handleTomanChange(parseFloat(e.target.value) || 0)}
-                className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-success w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
+                className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-success w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
               />
             </Tooltip>
           </div>
 
-          {/* USD (on right) */}
-          <div className="space-y-2">
+          {/* USD */}
+          <div className="space-y-1">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <DollarSign className="text-blue h-4 w-4" />
               Amount (USD)
@@ -342,13 +342,13 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
               step="0.01"
               value={formData.amountUsd || ''}
               onChange={(e) => handleUsdChange(parseFloat(e.target.value) || 0)}
-              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
             />
           </div>
         </div>
 
-        {/* Exchange Rate - separate row */}
-        <div className="space-y-2">
+        {/* Exchange Rate */}
+        <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <span className="text-text-muted">↔</span>
             Exchange Rate
@@ -363,12 +363,12 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
             value={exchangeRate || ''}
             onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
             disabled={isFetchingRate}
-            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
           />
         </div>
 
         {/* Buttons */}
-        <div className="flex gap-3 pt-2">
+        <div className="flex gap-3 pt-1">
           <Button
             type="submit"
             disabled={isSubmitting || isFetchingRate || !exchangeRate}
