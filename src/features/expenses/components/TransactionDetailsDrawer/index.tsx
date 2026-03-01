@@ -17,11 +17,10 @@ interface TransactionDetailsDrawerProps {
 interface DetailRowProps {
   icon: React.ReactNode;
   label: string;
-  labelFa: string;
   value: React.ReactNode;
 }
 
-const DetailRow = ({ icon, label, labelFa, value }: DetailRowProps) => (
+const DetailRow = ({ icon, label, value }: DetailRowProps) => (
   <div className="flex items-start gap-3 sm:gap-4">
     <div
       className="border-border-subtle bg-background-secondary flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border sm:h-10 sm:w-10"
@@ -30,12 +29,7 @@ const DetailRow = ({ icon, label, labelFa, value }: DetailRowProps) => (
       {icon}
     </div>
     <div className="min-w-0 flex-1 pt-0.5">
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-        <span className="text-text-muted text-xs font-medium">{label}</span>
-        <span className="text-text-muted text-xs" dir="rtl">
-          {labelFa}
-        </span>
-      </div>
+      <span className="text-text-muted text-xs font-medium">{label}</span>
       <div className="text-text-primary mt-1 text-sm font-medium sm:text-base">{value}</div>
     </div>
   </div>
@@ -123,9 +117,6 @@ export default function TransactionDetailsDrawer({ expense, isOpen, onClose }: T
             >
               <div className="min-w-0 flex-1">
                 <h2 className="text-text-primary text-base font-semibold sm:text-lg">Transaction Details</h2>
-                <p className="text-text-muted mt-1 text-xs" dir="rtl">
-                  جزئیات تراکنش
-                </p>
               </div>
               <button
                 onClick={handleClose}
@@ -146,7 +137,6 @@ export default function TransactionDetailsDrawer({ expense, isOpen, onClose }: T
                 <DetailRow
                   icon={<FileText className="text-text-secondary h-4 w-4" />}
                   label="Description"
-                  labelFa="توضیحات"
                   value={<span className="break-words">{expense.description}</span>}
                 />
 
@@ -154,22 +144,13 @@ export default function TransactionDetailsDrawer({ expense, isOpen, onClose }: T
                 <DetailRow
                   icon={<FolderOpen className="text-text-secondary h-4 w-4" />}
                   label="Category"
-                  labelFa="دسته‌بندی"
-                  value={
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <span>{categoryLabels?.en}</span>
-                      <span className="text-text-muted" dir="rtl">
-                        ({categoryLabels?.fa})
-                      </span>
-                    </div>
-                  }
+                  value={<span>{categoryLabels?.en}</span>}
                 />
 
                 {/* Date */}
                 <DetailRow
                   icon={<Calendar className="text-text-secondary h-4 w-4" />}
                   label="Date"
-                  labelFa="تاریخ"
                   value={
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       <span>{expense.date}</span>
@@ -187,10 +168,9 @@ export default function TransactionDetailsDrawer({ expense, isOpen, onClose }: T
                 <DetailRow
                   icon={<DollarSign className="text-text-secondary h-4 w-4" />}
                   label="Amount (Toman)"
-                  labelFa="مبلغ (تومان)"
                   value={
-                    <span className="text-text-primary font-semibold tabular-nums" dir="rtl">
-                      {formatNumber(expense.price_toman)} تومان
+                    <span className="text-text-primary font-semibold tabular-nums">
+                      {formatNumber(expense.price_toman)} Toman
                     </span>
                   }
                 />
@@ -199,7 +179,6 @@ export default function TransactionDetailsDrawer({ expense, isOpen, onClose }: T
                 <DetailRow
                   icon={<DollarSign className="text-text-secondary h-4 w-4" />}
                   label="Amount (USD)"
-                  labelFa="مبلغ (دلار)"
                   value={<span className="text-text-primary tabular-nums">${expense.price_usd.toFixed(2)} USD</span>}
                 />
 
@@ -207,7 +186,6 @@ export default function TransactionDetailsDrawer({ expense, isOpen, onClose }: T
                 <DetailRow
                   icon={<ArrowLeftRight className="text-text-secondary h-4 w-4" />}
                   label="Exchange Rate"
-                  labelFa="نرخ ارز"
                   value={
                     <span className="text-text-secondary tabular-nums">{formatNumber(exchangeRate)} Toman/USD</span>
                   }
@@ -222,7 +200,6 @@ export default function TransactionDetailsDrawer({ expense, isOpen, onClose }: T
                     <DetailRow
                       icon={<Tag className="text-text-secondary h-4 w-4" />}
                       label="Tags"
-                      labelFa="برچسب‌ها"
                       value={
                         <div className="flex flex-wrap gap-1.5 sm:gap-2">
                           {expense.tags.map((tag) => (
@@ -247,7 +224,6 @@ export default function TransactionDetailsDrawer({ expense, isOpen, onClose }: T
                 <DetailRow
                   icon={<Clock className="text-text-secondary h-4 w-4" />}
                   label="Created At"
-                  labelFa="تاریخ ثبت"
                   value={
                     <time dateTime={expense.created_at} className="text-text-secondary">
                       {new Date(expense.created_at).toLocaleString()}

@@ -49,8 +49,8 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
 
         <div>
           <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Expenses</p>
-          <p className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl" dir="rtl">
-            {formatNumber(totalToman)} <span className="text-text-muted text-lg">تومان</span>
+          <p className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl">
+            {formatNumber(totalToman)} <span className="text-text-muted text-lg">Toman</span>
           </p>
           <p className="text-text-secondary mt-1.5 text-sm font-medium">${totalUsd.toFixed(2)} USD</p>
         </div>
@@ -71,9 +71,7 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
         <div>
           <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Transactions</p>
           <p className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl">{expenses.length}</p>
-          <p className="text-text-secondary mt-1.5 text-sm font-medium" dir="rtl">
-            تعداد تراکنش
-          </p>
+          <p className="text-text-secondary mt-1.5 text-sm font-medium">Transactions</p>
         </div>
       </div>
 
@@ -91,8 +89,8 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
 
         <div>
           <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Daily Average</p>
-          <p className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl" dir="rtl">
-            {formatNumber(avgDailyToman)} <span className="text-text-muted text-lg">تومان</span>
+          <p className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl">
+            {formatNumber(avgDailyToman)} <span className="text-text-muted text-lg">Toman</span>
           </p>
           <p className="text-text-secondary mt-1.5 text-sm font-medium">${avgDailyUsd.toFixed(2)} USD</p>
         </div>

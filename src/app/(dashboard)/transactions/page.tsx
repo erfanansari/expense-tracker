@@ -243,8 +243,8 @@ export default function TransactionsPage() {
                             </td>
                             <td className="px-6 py-4 text-right">
                               <div className="flex flex-col items-end">
-                                <span className="text-text-primary text-sm font-semibold" dir="rtl">
-                                  {formatNumber(expense.price_toman)} تومان
+                                <span className="text-text-primary text-sm font-semibold">
+                                  {formatNumber(expense.price_toman)} Toman
                                 </span>
                                 <span className="text-text-muted text-xs">${expense.price_usd.toFixed(2)} USD</span>
                               </div>
@@ -338,7 +338,6 @@ export default function TransactionsPage() {
         isOpen={isDrawerOpen}
         onClose={closeDrawer}
         title={editingExpense ? 'Edit Expense' : 'Add New Expense'}
-        titleFa={editingExpense ? 'ویرایش هزینه' : 'افزودن هزینه جدید'}
         isDirty={isDirty}
       >
         <ExpenseForm

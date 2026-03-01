@@ -229,8 +229,8 @@ export default function AssetsPage() {
                   <p className="text-text-primary text-2xl font-semibold tabular-nums">
                     ${formatNumber(totalValueUsd)}
                   </p>
-                  <p className="text-text-secondary mt-1.5 text-sm font-medium" dir="rtl">
-                    {formatNumber(totalValueToman)} تومان
+                  <p className="text-text-secondary mt-1.5 text-sm font-medium">
+                    {formatNumber(totalValueToman)} Toman
                   </p>
                 </div>
 
@@ -350,8 +350,8 @@ export default function AssetsPage() {
                                               <span className="text-text-primary text-sm font-semibold">
                                                 ${formatNumber(asset.totalValueUsd)}
                                               </span>
-                                              <span className="text-text-muted text-xs" dir="rtl">
-                                                {formatNumber(asset.totalValueToman)} ت
+                                              <span className="text-text-muted text-xs">
+                                                {formatNumber(asset.totalValueToman)} Toman
                                               </span>
                                             </div>
                                           </td>
@@ -456,7 +456,6 @@ export default function AssetsPage() {
           isOpen={isDrawerOpen}
           onClose={closeDrawer}
           title={editingAsset ? 'Edit Asset' : 'Add New Asset'}
-          titleFa={editingAsset ? 'ویرایش دارایی' : 'افزودن دارایی جدید'}
           isDirty={isDirty}
         >
           <AssetForm
