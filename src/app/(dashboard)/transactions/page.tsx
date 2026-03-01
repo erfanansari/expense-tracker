@@ -178,7 +178,7 @@ export default function TransactionsPage() {
             <>
               <div className="border-border-subtle bg-background relative rounded-xl border shadow-sm">
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[560px] border-collapse">
+                  <table className="w-full min-w-[560px] table-fixed border-collapse">
                     <thead>
                       <tr className="bg-background-secondary">
                         <th className="text-text-muted w-[35%] px-6 py-4 text-left text-xs font-semibold tracking-wider uppercase">
@@ -211,8 +211,10 @@ export default function TransactionsPage() {
                             style={{ animationDelay: `${index * 20}ms` }}
                           >
                             <td className="px-6 py-4">
-                              <div className="flex flex-col gap-2">
-                                <span className="text-text-primary text-sm font-medium">{expense.description}</span>
+                              <div className="flex min-w-0 flex-col gap-2">
+                                <span className="text-text-primary truncate text-sm font-medium">
+                                  {expense.description}
+                                </span>
                                 {expense.tags && expense.tags.length > 0 && (
                                   <div className="flex flex-wrap gap-1.5">
                                     {expense.tags.map((tag) => (
