@@ -9,6 +9,7 @@ import { twMerge } from 'tailwind-merge';
 import { tomanToUsd, usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
 
 import Button from '@components/Button';
+import DatePicker from '@components/DatePicker';
 import { useToast } from '@components/Toast/ToastProvider';
 import Tooltip from '@components/Tooltip';
 
@@ -250,13 +251,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
               <Calendar className="text-text-muted h-4 w-4" />
               Date
             </label>
-            <input
-              type="date"
-              required
-              value={formData.date}
-              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="border-border-subtle bg-background text-text-primary focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
-            />
+            <DatePicker value={formData.date} onChange={(date) => setFormData({ ...formData, date })} required />
           </div>
         </div>
 
