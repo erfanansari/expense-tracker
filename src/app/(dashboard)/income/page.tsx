@@ -198,8 +198,8 @@ export default function IncomePage() {
                 </div>
                 <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Income</p>
                 <p className="text-success text-2xl font-semibold tabular-nums">${formatNumber(totalIncomeAllTime)}</p>
-                <p className="text-text-secondary mt-1.5 text-sm font-medium" dir="rtl">
-                  {formatNumber(totalIncomeAllTimeToman)} تومان
+                <p className="text-text-secondary mt-1.5 text-sm font-medium">
+                  {formatNumber(totalIncomeAllTimeToman)} Toman
                 </p>
               </div>
 
@@ -332,8 +332,8 @@ export default function IncomePage() {
                                           <span className="text-success text-sm font-semibold">
                                             ${formatNumber(income.amountUsd)} USD
                                           </span>
-                                          <span className="text-text-muted text-xs" dir="rtl">
-                                            {formatNumber(income.amountToman)} تومان
+                                          <span className="text-text-muted text-xs">
+                                            {formatNumber(income.amountToman)} Toman
                                           </span>
                                         </div>
                                       </td>
@@ -396,7 +396,6 @@ export default function IncomePage() {
         isOpen={isDrawerOpen}
         onClose={closeDrawer}
         title={editingIncome ? 'Edit Income' : 'Add New Income'}
-        titleFa={editingIncome ? 'ویرایش درآمد' : 'افزودن درآمد جدید'}
         isDirty={isDirty}
       >
         <IncomeForm

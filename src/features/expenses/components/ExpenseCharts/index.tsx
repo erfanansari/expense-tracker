@@ -49,9 +49,7 @@ const CustomTooltip = ({
     const usdValue = data.payload.usdValue || 0;
     return (
       <div className="border-border-subtle bg-background rounded-lg border p-4 shadow-lg">
-        <p className="text-text-primary text-lg font-bold" dir="rtl">
-          {formatNumber(data.value)} تومان
-        </p>
+        <p className="text-text-primary text-lg font-bold">{formatNumber(data.value)} Toman</p>
         <p className="text-text-muted mt-1.5 text-sm font-medium">${usdValue.toFixed(2)} USD</p>
         {data.payload.nameFa && (
           <p className="text-blue mt-2 text-sm font-medium" dir="rtl">

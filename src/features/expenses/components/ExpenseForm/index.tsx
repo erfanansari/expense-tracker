@@ -215,9 +215,6 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
             <h2 className="text-text-primary text-lg font-semibold">
               {editingExpense ? 'Edit Expense' : 'Add New Expense'}
             </h2>
-            <p className="text-text-muted text-sm" dir="rtl">
-              {editingExpense ? 'ویرایش هزینه' : 'افزودن هزینه جدید'}
-            </p>
           </div>
         </div>
         {editingExpense && (
@@ -251,7 +248,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <Layers className="text-text-muted h-4 w-4" />
-              Category / دسته‌بندی
+              Category
             </label>
             <div className="relative">
               <select
@@ -265,7 +262,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
                 </option>
                 {EXPENSE_CATEGORIES.map((cat) => (
                   <option key={cat.value} value={cat.value} className="bg-background">
-                    {cat.label} / {cat.labelFa}
+                    {cat.label}
                   </option>
                 ))}
               </select>
@@ -277,7 +274,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <Calendar className="text-text-muted h-4 w-4" />
-              Date / تاریخ
+              Date
             </label>
             <input
               type="date"
@@ -293,7 +290,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
         <div className="space-y-2">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <FileText className="text-text-muted h-4 w-4" />
-            Description / توضیحات
+            Description
           </label>
           <textarea
             placeholder="Enter expense details..."
@@ -309,7 +306,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
         <div className="space-y-2">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <span className="text-text-muted">#</span>
-            Tags / برچسب‌ها
+            Tags
           </label>
           <TagInput selectedTags={selectedTags} onTagsChange={setSelectedTags} />
         </div>
@@ -320,7 +317,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <span className="text-success font-bold">T</span>
-              Price (Toman) / مبلغ (تومان)
+              Price (Toman)
             </label>
             <Tooltip content={numberToPersianWord} position="top">
               <input
@@ -340,7 +337,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <DollarSign className="text-blue h-4 w-4" />
-              Price (USD) / مبلغ (دلار)
+              Price (USD)
             </label>
             <input
               type="number"
@@ -359,7 +356,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
         <div className="space-y-2">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <span className="text-text-muted">↔</span>
-            Rate (Toman/USD) / نرخ
+            Rate (Toman/USD)
             {isFetchingRate && <Loader2 className="text-text-muted h-3 w-3 animate-spin" />}
           </label>
           <input
@@ -403,14 +400,14 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
               return (
                 <>
                   {editingExpense ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                  {editingExpense ? 'Update / بروزرسانی' : 'Add / افزودن'}
+                  {editingExpense ? 'Update' : 'Add'}
                 </>
               );
             })()}
           </Button>
           {editingExpense && (
             <Button type="button" onClick={handleCancel} variant="outline">
-              Cancel / لغو
+              Cancel
             </Button>
           )}
         </div>

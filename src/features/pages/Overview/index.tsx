@@ -256,7 +256,7 @@ function ExchangeRateCard() {
       <div>
         <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Exchange Rate</p>
         <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl">
-          {formatNumber(rate)} <span className="text-text-muted text-lg">تومان</span>
+          {formatNumber(rate)} <span className="text-text-muted text-lg">Toman</span>
         </p>
         <div className="flex items-center justify-between gap-2">
           {lastUpdate && <span className="text-text-secondary mt-1.5 text-sm font-medium">Updated {lastUpdate}</span>}
@@ -292,9 +292,7 @@ function SpendingTooltip({
   const usdValue = payload[0]?.payload?.usdValue || 0;
   return (
     <div className="border-border-subtle bg-background rounded-lg border p-4 shadow-lg">
-      <p className="text-text-primary text-lg font-bold" dir="rtl">
-        {formatNumber(payload[0].value)} تومان
-      </p>
+      <p className="text-text-primary text-lg font-bold">{formatNumber(payload[0].value)} Toman</p>
       <p className="text-text-muted mt-1.5 text-sm font-medium">${usdValue.toFixed(2)} USD</p>
       {label && <p className="text-blue mt-2 text-sm font-medium">{label}</p>}
     </div>
@@ -407,8 +405,8 @@ function Dashboard() {
                   </div>
                 </div>
                 <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Net Worth</p>
-                <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl" dir="rtl">
-                  {formatNumber(summary?.net_worth_toman ?? 0)} <span className="text-text-muted text-lg">تومان</span>
+                <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl">
+                  {formatNumber(summary?.net_worth_toman ?? 0)} <span className="text-text-muted text-lg">Toman</span>
                 </p>
                 <p className="text-text-secondary mt-1.5 text-sm font-medium">
                   ${(summary?.net_worth_usd ?? 0).toFixed(2)} USD
@@ -423,9 +421,9 @@ function Dashboard() {
                   </div>
                 </div>
                 <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Income</p>
-                <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl" dir="rtl">
+                <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl">
                   {formatNumber(summary?.total_income_toman ?? 0)}{' '}
-                  <span className="text-text-muted text-lg">تومان</span>
+                  <span className="text-text-muted text-lg">Toman</span>
                 </p>
                 <p className="text-text-secondary mt-1.5 text-sm font-medium">
                   ${(summary?.total_income_usd ?? 0).toFixed(2)} USD
@@ -440,9 +438,9 @@ function Dashboard() {
                   </div>
                 </div>
                 <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Expenses</p>
-                <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl" dir="rtl">
+                <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl">
                   {formatNumber(summary?.total_expenses_toman ?? 0)}{' '}
-                  <span className="text-text-muted text-lg">تومان</span>
+                  <span className="text-text-muted text-lg">Toman</span>
                 </p>
                 <p className="text-text-secondary mt-1.5 text-sm font-medium">
                   ${(summary?.total_expenses_usd ?? 0).toFixed(2)} USD
@@ -575,8 +573,8 @@ function Dashboard() {
                               </td>
                               <td className="px-6 py-4 text-right">
                                 <div className="flex flex-col items-end">
-                                  <span className="text-text-primary text-sm font-semibold" dir="rtl">
-                                    {formatNumber(expense.price_toman)} تومان
+                                  <span className="text-text-primary text-sm font-semibold">
+                                    {formatNumber(expense.price_toman)} Toman
                                   </span>
                                   <span className="text-text-muted text-xs">${expense.price_usd.toFixed(2)} USD</span>
                                 </div>

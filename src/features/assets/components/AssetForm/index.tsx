@@ -195,7 +195,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <Package className="text-text-muted h-4 w-4" />
-              Category / دسته‌بندی
+              Category
             </label>
             <div className="relative">
               <select
@@ -206,7 +206,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
               >
                 {ASSET_CATEGORIES.map((cat) => (
                   <option key={cat.value} value={cat.value}>
-                    {cat.label} / {cat.labelFa}
+                    {cat.label}
                   </option>
                 ))}
               </select>
@@ -218,7 +218,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <FileText className="text-text-muted h-4 w-4" />
-              Name / نام
+              Name
             </label>
             <input
               type="text"
@@ -236,7 +236,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <Package className="text-text-muted h-4 w-4" />
-              Quantity / مقدار
+              Quantity
             </label>
             <input
               type="number"
@@ -252,7 +252,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <span className="text-text-muted">U</span>
-              Unit / واحد (Optional)
+              Unit (Optional)
             </label>
             <input
               type="text"
@@ -268,7 +268,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
         <div className="space-y-2">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <DollarSign className="text-blue h-4 w-4" />
-            Unit Value (USD) / ارزش واحد (دلار)
+            Unit Value (USD)
           </label>
           <input
             type="number"
@@ -287,7 +287,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <span className="text-success font-bold">T</span>
-              Total (Toman) / ارزش کل (تومان)
+              Total (Toman)
             </label>
             <Tooltip content={numberToPersianWord} position="top">
               <input
@@ -307,7 +307,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <DollarSign className="text-blue h-4 w-4" />
-              Total Value (USD) / ارزش کل (دلار)
+              Total Value (USD)
             </label>
             <input
               type="number"
@@ -326,7 +326,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
         <div className="space-y-2">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <span className="text-text-muted">↔</span>
-            Exchange Rate / نرخ تبدیل
+            Exchange Rate
             {isFetchingRate && <Loader2 className="text-text-muted h-3 w-3 animate-spin" />}
           </label>
           <input
@@ -346,7 +346,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
         <div className="space-y-2">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <FileText className="text-text-muted h-4 w-4" />
-            Notes / یادداشت (Optional)
+            Notes (Optional)
           </label>
           <textarea
             placeholder="Any additional notes..."
@@ -385,14 +385,14 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
               return (
                 <>
                   {editingAsset ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                  {editingAsset ? 'Update / بروزرسانی' : 'Add / افزودن'}
+                  {editingAsset ? 'Update' : 'Add'}
                 </>
               );
             })()}
           </Button>
           {editingAsset && (
             <Button type="button" onClick={handleCancel} variant="outline">
-              Cancel / لغو
+              Cancel
             </Button>
           )}
         </div>

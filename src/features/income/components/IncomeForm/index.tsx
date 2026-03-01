@@ -208,7 +208,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <Briefcase className="text-text-muted h-4 w-4" />
-              Type / نوع
+              Type
             </label>
             <div className="relative">
               <select
@@ -221,7 +221,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
               >
                 {INCOME_TYPES.map((type) => (
                   <option key={type.value} value={type.value}>
-                    {type.label} / {type.labelFa}
+                    {type.label}
                   </option>
                 ))}
               </select>
@@ -233,7 +233,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <Calendar className="text-text-muted h-4 w-4" />
-              Month / ماه
+              Month
             </label>
             <div className="relative">
               <select
@@ -256,7 +256,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <Calendar className="text-text-muted h-4 w-4" />
-              Year / سال
+              Year
             </label>
             <div className="relative">
               <select
@@ -280,7 +280,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
         <div className="space-y-2">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <Briefcase className="text-text-muted h-4 w-4" />
-            Source / منبع (Optional)
+            Source (Optional)
           </label>
           <input
             type="text"
@@ -295,7 +295,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
         <div className="space-y-2">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <FileText className="text-text-muted h-4 w-4" />
-            Notes / یادداشت (Optional)
+            Notes (Optional)
           </label>
           <textarea
             placeholder="Any additional notes..."
@@ -312,7 +312,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <span className="text-success font-bold">T</span>
-              Amount (Toman) / مبلغ (تومان)
+              Amount (Toman)
             </label>
             <Tooltip content={numberToPersianWord} position="top">
               <input
@@ -332,7 +332,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
           <div className="space-y-2">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <DollarSign className="text-blue h-4 w-4" />
-              Amount (USD) / مبلغ (دلار)
+              Amount (USD)
             </label>
             <input
               type="number"
@@ -351,7 +351,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
         <div className="space-y-2">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <span className="text-text-muted">↔</span>
-            Exchange Rate / نرخ تبدیل
+            Exchange Rate
             {isFetchingRate && <Loader2 className="text-text-muted h-3 w-3 animate-spin" />}
           </label>
           <input
@@ -395,14 +395,14 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
               return (
                 <>
                   {editingIncome ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                  {editingIncome ? 'Update / بروزرسانی' : 'Add / افزودن'}
+                  {editingIncome ? 'Update' : 'Add'}
                 </>
               );
             })()}
           </Button>
           {editingIncome && (
             <Button type="button" onClick={handleCancel} variant="outline">
-              Cancel / لغو
+              Cancel
             </Button>
           )}
         </div>
