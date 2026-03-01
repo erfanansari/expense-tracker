@@ -154,7 +154,7 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
   return (
     <div className="relative">
       {/* Selected Tags + Input */}
-      <div className="border-border-subtle bg-background focus-within:border-blue flex min-h-[48px] flex-wrap items-center gap-2 rounded-lg border px-4 py-3 transition-all">
+      <div className="border-border-subtle bg-background focus-within:border-blue flex min-h-[36px] flex-wrap items-center gap-1.5 rounded-lg border px-3 py-2 transition-all">
         {selectedTags.map((tag) => (
           <div
             key={tag.id}
@@ -181,7 +181,7 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
           onKeyDown={handleKeyDown}
           onFocus={() => setShowSuggestions(true)}
           placeholder={selectedTags.length === 0 ? 'Add tags...' : ''}
-          className="text-text-primary placeholder:text-text-muted min-w-[120px] flex-1 bg-transparent outline-none"
+          className="text-text-primary placeholder:text-text-muted min-w-[100px] flex-1 bg-transparent text-sm outline-none"
         />
       </div>
 

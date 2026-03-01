@@ -188,11 +188,11 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3">
         {/* Row 1: Category and Name */}
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
           {/* Category */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <Package className="text-text-muted h-4 w-4" />
               Category
@@ -202,7 +202,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value as AssetCategory })}
                 required
-                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-4 py-3 pr-10 text-sm transition-all focus:outline-none"
+                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-3 py-2 pr-10 text-sm transition-all focus:outline-none"
               >
                 {ASSET_CATEGORIES.map((cat) => (
                   <option key={cat.value} value={cat.value}>
@@ -215,7 +215,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
           </div>
 
           {/* Name */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <FileText className="text-text-muted h-4 w-4" />
               Name
@@ -226,14 +226,14 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
             />
           </div>
         </div>
 
-        {/* Row 2: Quantity and Unit - 2 columns */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-8">
-          <div className="space-y-2">
+        {/* Row 2: Quantity and Unit */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+          <div className="space-y-1">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <Package className="text-text-muted h-4 w-4" />
               Quantity
@@ -246,10 +246,10 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
               step="any"
               value={formData.quantity || ''}
               onChange={(e) => handleQuantityChange(parseFloat(e.target.value) || 0)}
-              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 text-sm transition-all focus:outline-none"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <span className="text-text-muted">U</span>
               Unit (Optional)
@@ -259,13 +259,13 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
               placeholder="e.g., BTC, gram, unit..."
               value={formData.unit || ''}
               onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 text-sm transition-all focus:outline-none"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
             />
           </div>
         </div>
 
-        {/* Unit Value (USD) - full width */}
-        <div className="space-y-2">
+        {/* Unit Value (USD) */}
+        <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <DollarSign className="text-blue h-4 w-4" />
             Unit Value (USD)
@@ -277,14 +277,14 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
             step="0.01"
             value={formData.unitValueUsd || ''}
             onChange={(e) => handleUnitValueChange(parseFloat(e.target.value) || 0)}
-            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
           />
         </div>
 
-        {/* Total Values - 2 columns */}
-        <div className="grid grid-cols-1 gap-4">
-          {/* Total Toman (on left) */}
-          <div className="space-y-2">
+        {/* Total Values */}
+        <div className="grid grid-cols-1 gap-3">
+          {/* Total Toman */}
+          <div className="space-y-1">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <span className="text-success font-bold">T</span>
               Total (Toman)
@@ -298,13 +298,13 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
                 step="1"
                 value={formData.totalValueToman || ''}
                 readOnly
-                className="border-border-subtle bg-background-secondary text-text-secondary w-full rounded-lg border px-4 py-3 transition-all"
+                className="border-border-subtle bg-background-secondary text-text-secondary w-full rounded-lg border px-3 py-2 text-sm transition-all"
               />
             </Tooltip>
           </div>
 
-          {/* Total Value USD (on right) */}
-          <div className="space-y-2">
+          {/* Total Value USD */}
+          <div className="space-y-1">
             <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
               <DollarSign className="text-blue h-4 w-4" />
               Total Value (USD)
@@ -317,13 +317,13 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
               step="0.01"
               value={formData.totalValueUsd || ''}
               onChange={(e) => handleTotalValueChange(parseFloat(e.target.value) || 0)}
-              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
             />
           </div>
         </div>
 
-        {/* Exchange Rate - separate row */}
-        <div className="space-y-2">
+        {/* Exchange Rate */}
+        <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <span className="text-text-muted">↔</span>
             Exchange Rate
@@ -338,12 +338,12 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
             value={exchangeRate || ''}
             onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
             disabled={isFetchingRate}
-            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-4 py-3 transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
           />
         </div>
 
         {/* Notes */}
-        <div className="space-y-2">
+        <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <FileText className="text-text-muted h-4 w-4" />
             Notes (Optional)
@@ -353,12 +353,12 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
             rows={2}
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full resize-none rounded-lg border px-4 py-3 transition-all focus:outline-none"
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full resize-none rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
           />
         </div>
 
         {/* Buttons */}
-        <div className="flex gap-3 pt-2">
+        <div className="flex gap-3 pt-1">
           <Button
             type="submit"
             disabled={isSubmitting || isFetchingRate || !exchangeRate || !formData.name}
