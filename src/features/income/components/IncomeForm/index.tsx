@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react';
 
 import { numberToWords } from '@persian-tools/persian-tools';
-import { Briefcase, Calendar, ChevronDown, DollarSign, FileText, Loader2, Plus, Save } from 'lucide-react';
+import { Briefcase, Calendar, DollarSign, FileText, Loader2, Plus, Save } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
 import { tomanToUsd, usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
 
 import Button from '@components/Button';
+import Select from '@components/Select';
 import { useToast } from '@components/Toast/ToastProvider';
 import Tooltip from '@components/Tooltip';
 
@@ -210,23 +211,12 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
               <Briefcase className="text-text-muted h-4 w-4" />
               Type
             </label>
-            <div className="relative">
-              <select
-                value={formData.incomeType}
-                onChange={(e) =>
-                  setFormData({ ...formData, incomeType: e.target.value as CreateIncomeInput['incomeType'] })
-                }
-                required
-                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-3 py-2 pr-10 text-sm transition-all focus:outline-none"
-              >
-                {INCOME_TYPES.map((type) => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="text-text-muted pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2" />
-            </div>
+            <Select
+              value={formData.incomeType}
+              onChange={(val) => setFormData({ ...formData, incomeType: val as CreateIncomeInput['incomeType'] })}
+              options={INCOME_TYPES.map((type) => ({ value: type.value, label: type.label }))}
+              required
+            />
           </div>
 
           {/* Month */}
@@ -235,21 +225,15 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
               <Calendar className="text-text-muted h-4 w-4" />
               Month
             </label>
-            <div className="relative">
-              <select
-                value={formData.month}
-                onChange={(e) => setFormData({ ...formData, month: parseInt(e.target.value, 10) })}
-                required
-                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-3 py-2 pr-10 text-sm transition-all focus:outline-none"
-              >
-                {MONTHS.map((month) => (
-                  <option key={month.value} value={month.value}>
-                    {month.label} / {getJalaliMonthName(month.value, formData.year)}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="text-text-muted pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2" />
-            </div>
+            <Select
+              value={String(formData.month)}
+              onChange={(val) => setFormData({ ...formData, month: parseInt(val, 10) })}
+              options={MONTHS.map((month) => ({
+                value: String(month.value),
+                label: `${month.label} / ${getJalaliMonthName(month.value, formData.year)}`,
+              }))}
+              required
+            />
           </div>
 
           {/* Year */}
@@ -258,21 +242,15 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
               <Calendar className="text-text-muted h-4 w-4" />
               Year
             </label>
-            <div className="relative">
-              <select
-                value={formData.year}
-                onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value, 10) })}
-                required
-                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-3 py-2 pr-10 text-sm transition-all focus:outline-none"
-              >
-                {yearOptions.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="text-text-muted pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2" />
-            </div>
+            <Select
+              value={String(formData.year)}
+              onChange={(val) => setFormData({ ...formData, year: parseInt(val, 10) })}
+              options={yearOptions.map((year) => ({
+                value: String(year),
+                label: String(year),
+              }))}
+              required
+            />
           </div>
         </div>
 

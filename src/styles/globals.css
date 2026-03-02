@@ -252,7 +252,6 @@ input[type='text'],
 input[type='number'],
 input[type='email'],
 input[type='password'],
-select,
 textarea {
   font-family: var(--font-geist-sans), sans-serif !important;
   background: var(--color-input-bg) !important;
@@ -266,7 +265,6 @@ input[type='text']:focus,
 input[type='number']:focus,
 input[type='email']:focus,
 input[type='password']:focus,
-select:focus,
 textarea:focus {
   border-color: var(--color-input-border-focus) !important;
   box-shadow: none !important;
@@ -384,19 +382,6 @@ textarea:focus {
 
 .react-datepicker__triangle {
   display: none !important;
-}
-
-/* Select dropdown - remove default arrow, components handle their own */
-select {
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  color-scheme: light !important;
-}
-
-/* Force light backgrounds on select dropdowns */
-select option {
-  background-color: var(--color-background) !important;
-  color: var(--color-text-primary) !important;
 }
 
 /* Scrollbar styling */
@@ -560,8 +545,7 @@ select option {
 
 /* Prevent drawer content from auto-scrolling to focused inputs */
 [data-vaul-drawer] input:focus,
-[data-vaul-drawer] textarea:focus,
-[data-vaul-drawer] select:focus {
+[data-vaul-drawer] textarea:focus {
   scroll-margin: 0;
   scroll-padding: 0;
 }
