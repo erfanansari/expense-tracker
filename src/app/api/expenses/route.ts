@@ -29,6 +29,10 @@ export async function GET(request: Request) {
     const { searchParams } = url;
     const limitParam = searchParams.get('limit');
     const cursor = searchParams.get('cursor');
+    const description = searchParams.get('description')?.trim() || null;
+    const category = searchParams.get('category')?.trim() || null;
+    const dateFrom = searchParams.get('dateFrom')?.trim() || null;
+    const dateTo = searchParams.get('dateTo')?.trim() || null;
 
     // Backward compatibility: if no limit is specified, return all expenses in old format (array)
     // This is used by the page component for stats and charts
@@ -87,6 +91,24 @@ export async function GET(request: Request) {
 
     let sql = 'SELECT * FROM expenses WHERE user_id = ?';
     const args: (string | number)[] = [user.userId];
+
+    // Apply text/category/date filters
+    if (description) {
+      sql += ' AND description LIKE ?';
+      args.push(`%${description}%`);
+    }
+    if (category) {
+      sql += ' AND category = ?';
+      args.push(category);
+    }
+    if (dateFrom) {
+      sql += ' AND date >= ?';
+      args.push(dateFrom);
+    }
+    if (dateTo) {
+      sql += ' AND date <= ?';
+      args.push(dateTo);
+    }
 
     // Apply cursor-based pagination
     // Since we order by date DESC, created_at DESC, id DESC, we want items that come after the cursor

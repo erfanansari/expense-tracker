@@ -69,6 +69,7 @@ export default function FormDrawer({ isOpen, onClose, title, titleFa, children }
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 z-50 bg-black/20 backdrop-blur-[2px]" />
         <Drawer.Content
+          aria-describedby={undefined}
           className={
             isMobile
               ? 'bg-background fixed right-0 bottom-0 left-0 z-50 flex h-[85dvh] max-h-[85dvh] flex-col rounded-t-2xl shadow-2xl outline-none'

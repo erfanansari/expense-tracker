@@ -302,13 +302,12 @@ textarea:focus {
   background: var(--color-background-secondary) !important;
   border-bottom: 1px solid var(--color-border-subtle) !important;
   padding-top: 10px !important;
+  padding-bottom: 0 !important;
 }
 
+/* Hidden when renderCustomHeader is used */
 .react-datepicker__current-month {
-  font-size: 0.875rem !important;
-  font-weight: 600 !important;
-  color: var(--color-text-primary) !important;
-  margin-bottom: 4px !important;
+  display: none !important;
 }
 
 .react-datepicker__day-names {

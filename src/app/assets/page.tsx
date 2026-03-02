@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react';
 
+import { type ColumnDef } from '@tanstack/react-table';
 import {
   Banknote,
   Bitcoin,
@@ -22,6 +23,7 @@ import AssetForm from '@features/assets/components/AssetForm';
 
 import Button from '@components/Button';
 import DashboardLayout from '@components/DashboardLayout';
+import DataTable from '@components/DataTable';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import FormDrawer from '@components/FormDrawer';
 import useDrawer from '@components/FormDrawer/useDrawer';
@@ -112,6 +114,92 @@ function AssetsSkeleton() {
       </div>
     </>
   );
+}
+
+function buildAssetColumns(
+  handleEdit: (asset: Asset) => void,
+  openDeleteModal: (asset: Asset) => void,
+  deletingId: number | null
+): ColumnDef<Asset, unknown>[] {
+  return [
+    {
+      id: 'name',
+      accessorKey: 'name',
+      header: 'Asset',
+      meta: { widthClass: 'w-[40%]' },
+      cell: ({ row }) => {
+        const asset = row.original;
+        return (
+          <div className="flex flex-col">
+            <span className="text-text-primary text-sm font-medium">{asset.name}</span>
+            <span className="text-text-muted text-xs">{getAssetCategoryLabel(asset.category).en}</span>
+          </div>
+        );
+      },
+    },
+    {
+      id: 'quantity',
+      accessorKey: 'quantity',
+      header: 'Quantity',
+      meta: { widthClass: 'w-[20%]' },
+      cell: ({ row }) => {
+        const asset = row.original;
+        return (
+          <span className="text-text-secondary text-sm">
+            {asset.quantity} {asset.unit || 'unit'}
+          </span>
+        );
+      },
+    },
+    {
+      id: 'value',
+      accessorKey: 'totalValueUsd',
+      header: 'Value',
+      meta: { widthClass: 'w-[25%]', align: 'right' as const },
+      cell: ({ row }) => {
+        const asset = row.original;
+        return (
+          <div className="flex flex-col items-end">
+            <span className="text-text-primary text-sm font-semibold">${formatNumber(asset.totalValueUsd)}</span>
+            <span className="text-text-muted text-xs">{formatNumber(asset.totalValueToman)} Toman</span>
+          </div>
+        );
+      },
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      meta: { widthClass: 'w-[15%]', align: 'center' as const },
+      cell: ({ row }) => {
+        const asset = row.original;
+        return (
+          <div className="flex items-center justify-center gap-1">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit(asset);
+              }}
+              className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
+              title="Update Value"
+            >
+              <Edit2 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                openDeleteModal(asset);
+              }}
+              disabled={deletingId === asset.id}
+              className="text-text-muted hover:bg-danger/10 hover:text-danger rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
+              title="Delete"
+            >
+              {deletingId === asset.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+            </button>
+          </div>
+        );
+      },
+    },
+  ];
 }
 
 export default function AssetsPage() {
@@ -305,85 +393,12 @@ export default function AssetsPage() {
                                 <Icon className="h-5 w-5" style={{ color }} />
                                 <h2 className="text-text-primary text-lg font-semibold">{labels.en}</h2>
                               </div>
-                              <div className="border-border-subtle bg-background relative rounded-xl border shadow-sm">
-                                <div className="overflow-x-auto">
-                                  <table className="w-full min-w-[480px] border-collapse">
-                                    <thead>
-                                      <tr className="bg-background-secondary">
-                                        <th className="text-text-muted w-[40%] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                                          Asset
-                                        </th>
-                                        <th className="text-text-muted w-[20%] px-4 py-3 text-left text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                                          Quantity
-                                        </th>
-                                        <th className="text-text-muted w-[25%] px-4 py-3 text-right text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                                          Value
-                                        </th>
-                                        <th className="text-text-muted w-[15%] px-4 py-3 text-center text-xs font-semibold tracking-wider uppercase sm:px-6 sm:py-4">
-                                          Actions
-                                        </th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {data.assets.map((asset) => (
-                                        <tr
-                                          key={asset.id}
-                                          className="group border-border-subtle hover:bg-background-elevated border-t transition-colors duration-200 first:border-t-0"
-                                        >
-                                          <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                            <div className="flex flex-col">
-                                              <span className="text-text-primary text-sm font-medium">
-                                                {asset.name}
-                                              </span>
-                                              <span className="text-text-muted text-xs">
-                                                {getAssetCategoryLabel(asset.category).en}
-                                              </span>
-                                            </div>
-                                          </td>
-                                          <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                            <span className="text-text-secondary text-sm">
-                                              {asset.quantity} {asset.unit || 'unit'}
-                                            </span>
-                                          </td>
-                                          <td className="px-4 py-3 text-right sm:px-6 sm:py-4">
-                                            <div className="flex flex-col items-end">
-                                              <span className="text-text-primary text-sm font-semibold">
-                                                ${formatNumber(asset.totalValueUsd)}
-                                              </span>
-                                              <span className="text-text-muted text-xs">
-                                                {formatNumber(asset.totalValueToman)} Toman
-                                              </span>
-                                            </div>
-                                          </td>
-                                          <td className="px-4 py-3 sm:px-6 sm:py-4">
-                                            <div className="flex items-center justify-center gap-1">
-                                              <button
-                                                onClick={() => handleEdit(asset)}
-                                                className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
-                                                title="Update Value"
-                                              >
-                                                <Edit2 className="h-4 w-4" />
-                                              </button>
-                                              <button
-                                                onClick={() => openDeleteModal(asset)}
-                                                disabled={deletingId === asset.id}
-                                                className="text-text-muted hover:bg-danger/10 hover:text-danger rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
-                                                title="Delete"
-                                              >
-                                                {deletingId === asset.id ? (
-                                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                                ) : (
-                                                  <Trash2 className="h-4 w-4" />
-                                                )}
-                                              </button>
-                                            </div>
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              </div>
+                              <DataTable
+                                data={data.assets}
+                                columns={buildAssetColumns(handleEdit, openDeleteModal, deletingId)}
+                                minWidth="min-w-[480px]"
+                                getRowId={(row) => String(row.id)}
+                              />
                             </div>
                           );
                         })}
