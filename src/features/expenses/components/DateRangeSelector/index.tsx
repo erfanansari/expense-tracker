@@ -1,6 +1,8 @@
 'use client';
 
-import { Calendar, ChevronDown } from 'lucide-react';
+import { Calendar } from 'lucide-react';
+
+import Select from '@components/Select';
 
 export type DateRange = '7D' | '30D' | 'THIS_MONTH' | 'LAST_MONTH' | 'YTD' | 'ALL_TIME';
 
@@ -20,33 +22,13 @@ const DateRangeSelector = ({ value, onChange }: DateRangeSelectorProps) => {
   ];
 
   return (
-    <div className="group relative">
-      <div className="border-border-subtle bg-background hover:border-blue flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2.5 shadow-sm transition-all duration-200">
-        <Calendar className="text-blue h-4 w-4" />
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value as DateRange)}
-          className="text-text-primary cursor-pointer appearance-none border-none bg-transparent pr-6 text-sm font-semibold outline-none focus:ring-0 focus:outline-none"
-          style={{
-            background: 'transparent',
-            outline: 'none',
-            boxShadow: 'none',
-            colorScheme: 'light',
-          }}
-        >
-          {options.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-              className="bg-background text-text-primary"
-              style={{ background: '#ffffff', color: '#171717' }}
-            >
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <ChevronDown className="text-text-muted group-hover:text-blue pointer-events-none absolute right-3 h-4 w-4 transition-colors" />
-      </div>
+    <div className="flex items-center gap-2">
+      <Calendar className="text-blue h-4 w-4 shrink-0" />
+      <Select
+        value={value}
+        onChange={(val) => onChange(val as DateRange)}
+        options={options.map((o) => ({ value: o.value, label: o.label }))}
+      />
     </div>
   );
 };

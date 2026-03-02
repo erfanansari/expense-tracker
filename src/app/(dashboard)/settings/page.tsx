@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Bell, Database, Globe, HelpCircle, Loader2, Lock, Palette, Tag, User } from 'lucide-react';
 
 import Button from '@components/Button';
+import Select from '@components/Select';
 
 import { useToast } from '@/components/Toast/ToastProvider';
 import { useAuth } from '@/features/auth/hooks/use-auth';
@@ -196,23 +197,15 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="p-6">
-                  <div className="relative">
-                    <select
-                      disabled
-                      className="border-border-subtle bg-background-secondary text-text-muted w-full cursor-not-allowed appearance-none rounded-lg border px-4 py-2.5 pr-10"
-                    >
-                      <option>English</option>
-                      <option>فارسی (Persian)</option>
-                    </select>
-                    <svg
-                      className="text-text-muted pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
+                  <Select
+                    value="en"
+                    onChange={() => {}}
+                    options={[
+                      { value: 'en', label: 'English' },
+                      { value: 'fa', label: 'فارسی (Persian)' },
+                    ]}
+                    disabled
+                  />
                 </div>
               </div>
 
@@ -235,23 +228,15 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="p-6">
-                  <div className="relative">
-                    <select
-                      disabled
-                      className="border-border-subtle bg-background-secondary text-text-muted w-full cursor-not-allowed appearance-none rounded-lg border px-4 py-2.5 pr-10"
-                    >
-                      <option>Light Mode</option>
-                      <option>Dark Mode</option>
-                    </select>
-                    <svg
-                      className="text-text-muted pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
+                  <Select
+                    value="light"
+                    onChange={() => {}}
+                    options={[
+                      { value: 'light', label: 'Light Mode' },
+                      { value: 'dark', label: 'Dark Mode' },
+                    ]}
+                    disabled
+                  />
                 </div>
               </div>
             </div>

@@ -3,13 +3,14 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { numberToWords } from '@persian-tools/persian-tools';
-import { Calendar, ChevronDown, DollarSign, FileText, Layers, Loader2, Plus, Save } from 'lucide-react';
+import { Calendar, DollarSign, FileText, Layers, Loader2, Plus, Save } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
 import { tomanToUsd, usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
 
 import Button from '@components/Button';
 import DatePicker from '@components/DatePicker';
+import Select from '@components/Select';
 import { useToast } from '@components/Toast/ToastProvider';
 import Tooltip from '@components/Tooltip';
 
@@ -225,24 +226,13 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
               <Layers className="text-text-muted h-4 w-4" />
               Category
             </label>
-            <div className="relative">
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                required
-                className="border-border-subtle bg-background text-text-primary focus:border-blue w-full cursor-pointer appearance-none rounded-lg border px-3 py-2 pr-10 text-sm transition-all focus:outline-none"
-              >
-                <option value="" className="bg-background">
-                  Select category...
-                </option>
-                {EXPENSE_CATEGORIES.map((cat) => (
-                  <option key={cat.value} value={cat.value} className="bg-background">
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="text-text-muted pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2" />
-            </div>
+            <Select
+              value={formData.category}
+              onChange={(val) => setFormData({ ...formData, category: val })}
+              options={EXPENSE_CATEGORIES.map((cat) => ({ value: cat.value, label: cat.label }))}
+              placeholder="Select category..."
+              required
+            />
           </div>
 
           {/* Date */}

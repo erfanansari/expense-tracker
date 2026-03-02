@@ -14,7 +14,7 @@ interface FormDrawerProps {
   isDirty?: boolean;
 }
 
-export default function FormDrawer({ isOpen, onClose, title, titleFa, children, isDirty = false }: FormDrawerProps) {
+export default function FormDrawer({ isOpen, onClose, title, titleFa, children }: FormDrawerProps) {
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -30,12 +30,8 @@ export default function FormDrawer({ isOpen, onClose, title, titleFa, children, 
   }, []);
 
   const handleClose = useCallback(() => {
-    if (isDirty) {
-      const confirmed = window.confirm('You have unsaved changes. Are you sure you want to close?');
-      if (!confirmed) return;
-    }
     onClose();
-  }, [isDirty, onClose]);
+  }, [onClose]);
 
   // Handle ESC key
   useEffect(() => {
@@ -66,7 +62,7 @@ export default function FormDrawer({ isOpen, onClose, title, titleFa, children, 
         if (!open) handleClose();
       }}
       direction={isMobile ? 'bottom' : 'left'}
-      dismissible={!isDirty}
+      dismissible
       shouldScaleBackground={false}
       repositionInputs={false}
     >
