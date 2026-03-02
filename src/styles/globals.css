@@ -338,16 +338,24 @@ textarea:focus {
   border-radius: 6px !important;
 }
 
-.react-datepicker__day--selected,
-.react-datepicker__day--keyboard-selected {
+.react-datepicker__day--selected {
   background: var(--color-blue) !important;
   color: #ffffff !important;
   font-weight: 600 !important;
 }
 
-.react-datepicker__day--selected:hover,
-.react-datepicker__day--keyboard-selected:hover {
+.react-datepicker__day--selected:hover {
   background: var(--color-blue-hover) !important;
+}
+
+/* Keyboard focus — subtle only when NOT also the selected day */
+.react-datepicker__day--keyboard-selected:not(.react-datepicker__day--selected) {
+  background: var(--color-background-elevated) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.react-datepicker__day--keyboard-selected:not(.react-datepicker__day--selected):hover {
+  background: var(--color-background-hover) !important;
 }
 
 .react-datepicker__day--today {

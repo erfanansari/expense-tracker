@@ -60,31 +60,34 @@ const DatePicker = ({ value, onChange, required, placeholder, isClearable, wrapp
     () =>
       function CalendarContainerInner({ className, children }: { className: string; children: React.ReactNode }) {
         const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
         const tomorrow = new Date(today);
         tomorrow.setDate(today.getDate() + 1);
 
         const weekday = (d: Date) => d.toLocaleDateString('en-US', { weekday: 'short' });
 
+        const shortcuts = [
+          { label: 'Yesterday', date: yesterday },
+          { label: 'Today', date: today },
+          { label: 'Tomorrow', date: tomorrow },
+        ];
+
         return (
           <div className={className}>
             {/* Quick shortcuts */}
             <div className="border-border-subtle border-b px-2 py-1.5">
-              <button
-                type="button"
-                onClick={() => onChangeRef.current(formatDateString(today))}
-                className="hover:bg-background-elevated flex w-full items-center rounded-lg px-3 py-2 transition-colors"
-              >
-                <span className="text-text-primary text-sm font-medium">Today</span>
-                <span className="text-text-muted ml-auto text-xs">{weekday(today)}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onChangeRef.current(formatDateString(tomorrow))}
-                className="hover:bg-background-elevated flex w-full items-center rounded-lg px-3 py-2 transition-colors"
-              >
-                <span className="text-text-primary text-sm font-medium">Tomorrow</span>
-                <span className="text-text-muted ml-auto text-xs">{weekday(tomorrow)}</span>
-              </button>
+              {shortcuts.map(({ label, date }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => onChangeRef.current(formatDateString(date))}
+                  className="hover:bg-background-elevated flex w-full items-center rounded-lg px-3 py-2 transition-colors"
+                >
+                  <span className="text-text-primary text-sm font-medium">{label}</span>
+                  <span className="text-text-muted ml-auto text-xs">{weekday(date)}</span>
+                </button>
+              ))}
             </div>
             {/* Calendar body */}
             {children}
