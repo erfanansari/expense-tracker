@@ -1,17 +1,24 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { CreateExpenseInput } from '@/@types/expense';
-import { createExpense, deleteExpense, fetchExpensesPage, updateExpense } from '@/lib/api/expenses';
+import {
+  createExpense,
+  deleteExpense,
+  type ExpenseFilters,
+  fetchExpensesPage,
+  updateExpense,
+} from '@/lib/api/expenses';
 import { queryKeys } from '@/lib/query-keys';
 
 const ITEMS_PER_PAGE = 20;
 
-export function useInfiniteExpenses() {
+export function useInfiniteExpenses(filters?: ExpenseFilters) {
   return useInfiniteQuery({
-    queryKey: queryKeys.expenses.paginated(),
-    queryFn: ({ pageParam }) => fetchExpensesPage(pageParam as string | undefined, ITEMS_PER_PAGE),
+    queryKey: [...queryKeys.expenses.paginated(), filters ?? {}],
+    queryFn: ({ pageParam }) => fetchExpensesPage(pageParam as string | undefined, ITEMS_PER_PAGE, filters),
     getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.nextCursor : undefined),
     initialPageParam: undefined as string | undefined,
+    placeholderData: keepPreviousData,
   });
 }
 

@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
+import { type ColumnDef } from '@tanstack/react-table';
 import { ArrowRight, Banknote, DollarSign, Info, Minus, Plus, Tag, TrendingDown, TrendingUp } from 'lucide-react';
 import {
   Area,
@@ -25,6 +26,7 @@ import DateRangeSelector, {
 } from '@features/expenses/components/DateRangeSelector';
 
 import { getButtonClasses } from '@components/Button';
+import DataTable from '@components/DataTable';
 import Tooltip from '@components/Tooltip';
 
 import { formatNumber } from '@utils';
@@ -312,6 +314,52 @@ function getMonthKey(date: Date): string {
   return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
 }
 
+// ─── Overview table columns ───────────────────────────────────────────────────
+const overviewColumns: ColumnDef<Expense, unknown>[] = [
+  {
+    id: 'description',
+    accessorKey: 'description',
+    header: 'Description',
+    meta: { widthClass: 'w-[60%]' },
+    cell: ({ row }) => {
+      const expense = row.original;
+      return (
+        <div className="flex flex-col gap-2">
+          <span className="text-text-primary text-sm font-medium">{expense.description}</span>
+          {expense.tags && expense.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {expense.tags.map((tag) => (
+                <div
+                  key={tag.id}
+                  className="border-border-subtle bg-background-elevated text-text-secondary flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium"
+                >
+                  <Tag className="h-3 w-3" aria-hidden="true" />
+                  <span>{tag.name}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    },
+  },
+  {
+    id: 'amount',
+    accessorKey: 'price_toman',
+    header: 'Amount',
+    meta: { widthClass: 'w-[40%]', align: 'right' },
+    cell: ({ row }) => {
+      const expense = row.original;
+      return (
+        <div className="flex flex-col items-end">
+          <span className="text-text-primary text-sm font-semibold">{formatNumber(expense.price_toman)} Toman</span>
+          <span className="text-text-muted text-xs">${expense.price_usd.toFixed(2)} USD</span>
+        </div>
+      );
+    },
+  },
+];
+
 // ─── Main page ──────────────────────────────────────────────────────────────────
 function Dashboard() {
   const { data: summary, isLoading: summaryLoading } = useSummary();
@@ -521,74 +569,25 @@ function Dashboard() {
               </div>
 
               {/* ── Recent Transactions ─────────────────────────────────────────── */}
-              <div className="border-border-subtle bg-background overflow-hidden rounded-xl border shadow-sm">
-                <div className="flex items-center justify-between px-6 py-5">
-                  <h2 className="text-text-primary text-lg font-semibold">Recent Transactions</h2>
-                  <Link
-                    href="/transactions"
-                    className="text-blue flex items-center gap-1 text-sm font-medium hover:underline"
-                  >
-                    View all
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </div>
-
-                {recentTransactions.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[480px] border-collapse">
-                      <thead>
-                        <tr className="bg-background-secondary">
-                          <th className="text-text-muted w-[60%] px-6 py-4 text-left text-xs font-semibold tracking-wider uppercase">
-                            Description
-                          </th>
-                          <th className="text-text-muted w-[40%] px-6 py-4 text-right text-xs font-semibold tracking-wider uppercase">
-                            Amount
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {recentTransactions.map((expense) => {
-                          return (
-                            <tr
-                              key={expense.id}
-                              className="border-border-subtle hover:bg-background-elevated border-t transition-colors duration-200 first:border-t-0"
-                            >
-                              <td className="px-6 py-4">
-                                <div className="flex flex-col gap-2">
-                                  <span className="text-text-primary text-sm font-medium">{expense.description}</span>
-                                  {expense.tags && expense.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-1.5">
-                                      {expense.tags.map((tag) => (
-                                        <div
-                                          key={tag.id}
-                                          className="border-border-subtle bg-background-elevated text-text-secondary flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium"
-                                        >
-                                          <Tag className="h-3 w-3" />
-                                          <span>{tag.name}</span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 text-right">
-                                <div className="flex flex-col items-end">
-                                  <span className="text-text-primary text-sm font-semibold">
-                                    {formatNumber(expense.price_toman)} Toman
-                                  </span>
-                                  <span className="text-text-muted text-xs">${expense.price_usd.toFixed(2)} USD</span>
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+              <DataTable
+                data={recentTransactions}
+                columns={overviewColumns}
+                minimal={true}
+                minWidth="min-w-[480px]"
+                header={
+                  <div className="flex items-center justify-between px-6 py-5">
+                    <h2 className="text-text-primary text-lg font-semibold">Recent Transactions</h2>
+                    <Link
+                      href="/transactions"
+                      className="text-blue flex items-center gap-1 text-sm font-medium hover:underline"
+                    >
+                      View all
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
                   </div>
-                ) : (
-                  <p className="text-text-muted px-6 py-8 text-center text-sm">No transactions yet</p>
-                )}
-              </div>
+                }
+                emptyState={<p className="text-text-muted text-sm">No transactions yet</p>}
+              />
             </div>
           </>
         )}

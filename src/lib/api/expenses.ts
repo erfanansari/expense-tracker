@@ -6,9 +6,20 @@ export interface ExpensesPage {
   hasMore: boolean;
 }
 
-export async function fetchExpensesPage(cursor?: string, limit = 20): Promise<ExpensesPage> {
+export interface ExpenseFilters {
+  description?: string;
+  category?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export async function fetchExpensesPage(cursor?: string, limit = 20, filters?: ExpenseFilters): Promise<ExpensesPage> {
   const params = new URLSearchParams({ limit: String(limit) });
   if (cursor) params.set('cursor', cursor);
+  if (filters?.description) params.set('description', filters.description);
+  if (filters?.category) params.set('category', filters.category);
+  if (filters?.dateFrom) params.set('dateFrom', filters.dateFrom);
+  if (filters?.dateTo) params.set('dateTo', filters.dateTo);
   const response = await fetch(`/api/expenses?${params}`);
   if (!response.ok) throw new Error('Failed to load expenses');
   return response.json();
