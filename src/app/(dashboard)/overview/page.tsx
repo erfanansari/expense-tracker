@@ -1,17 +1,17 @@
 import type { Metadata } from 'next';
 
-import Dashboard from '@features/pages/Overview';
+import Overview from '@features/pages/Overview';
 
 export const metadata: Metadata = {
   title: 'Overview',
 };
 
-const DashboardPage = () => {
+const OverviewPage = () => {
   return (
     <>
-      <Dashboard />
+      <Overview />
     </>
   );
 };
 
-export default DashboardPage;
+export default OverviewPage;
