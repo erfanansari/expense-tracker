@@ -1,19 +1,21 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { generateResetToken } from '@/core/auth/token';
-import { isValidEmail } from '@/core/auth/validation';
-import { db } from '@/core/database/client';
+import { forgotPasswordSchema } from '@schemas';
+
+import { generateResetToken } from '@core/auth/token';
+import { db } from '@core/database/client';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { email } = body;
+    const raw = await request.json();
+    const parsed = forgotPasswordSchema.safeParse(raw);
 
-    // Validation
-    if (!email || !isValidEmail(email)) {
-      return NextResponse.json({ error: 'Valid email is required' }, { status: 400 });
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
+
+    const { email } = parsed.data;
 
     // Find user
     const userResult = await db.execute({
@@ -26,7 +28,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'If that email exists, we sent a password reset link' }, { status: 200 });
     }
 
-    const userId = userResult.rows[0][0] as number;
+    const userId = userResult.rows[0].id as number;
 
     // Generate reset token
     const resetToken = generateResetToken();
@@ -43,10 +45,7 @@ export async function POST(request: NextRequest) {
     // eslint-disable-next-line no-console
     console.log(`Password reset token for ${email}: ${resetToken}`);
 
-    return NextResponse.json(
-      { message: 'If that email exists, we sent a password reset link', token: resetToken },
-      { status: 200 }
-    );
+    return NextResponse.json({ message: 'If that email exists, we sent a password reset link' }, { status: 200 });
   } catch (error) {
     console.error('Forgot password error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

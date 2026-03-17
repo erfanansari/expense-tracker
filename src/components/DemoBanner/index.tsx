@@ -1,7 +1,8 @@
 'use client';
 
-import Alert from '@/components/Alert';
-import { useAuth } from '@/hooks/use-auth';
+import Alert from '@components/Alert';
+
+import { useAuth } from '@hooks/use-auth';
 
 export default function DemoBanner() {
   const { user } = useAuth();

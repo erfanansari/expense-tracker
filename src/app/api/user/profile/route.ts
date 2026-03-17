@@ -1,14 +1,14 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { db } from '@/core/database/client';
-import { getSession } from '@/core/session/session';
+import { db } from '@core/database/client';
+import { getCurrentUser } from '@core/session/session';
 
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getSession();
+    const user = await getCurrentUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -33,27 +33,27 @@ export async function PUT(request: NextRequest) {
     // Update user's name in database
     await db.execute({
       sql: 'UPDATE users SET name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      args: [trimmedName, session.userId],
+      args: [trimmedName, user.userId],
     });
 
     // Fetch updated user data
     const result = await db.execute({
       sql: 'SELECT id, email, name FROM users WHERE id = ?',
-      args: [session.userId],
+      args: [user.userId],
     });
 
     if (!result.rows.length) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const user = result.rows[0];
+    const updatedUser = result.rows[0];
 
     return NextResponse.json(
       {
         user: {
-          id: user.id as number,
-          email: user.email as string,
-          name: user.name as string | null,
+          id: updatedUser.id as number,
+          email: updatedUser.email as string,
+          name: updatedUser.name as string | null,
         },
       },
       { status: 200 }

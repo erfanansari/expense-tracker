@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import { ArrowRight, Github, Zap } from 'lucide-react';
 
-import Button from '@/components/Button';
+import Button from '@components/Button';
 
 function DashboardMockup() {
   return (

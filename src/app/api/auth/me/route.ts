@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 
-import { db } from '@/core/database/client';
-import { deleteSession, getSession } from '@/core/session/session';
+import { DEMO_EMAIL } from '@constants';
+
+import { db } from '@core/database/client';
+import { deleteSession, getSession } from '@core/session/session';
 
 export async function GET() {
   try {
@@ -32,7 +34,7 @@ export async function GET() {
           id: user.id as number,
           email,
           name: user.name as string | null,
-          isDemo: email === 'demo@kharji.com',
+          isDemo: email === DEMO_EMAIL,
         },
       },
       { status: 200 }

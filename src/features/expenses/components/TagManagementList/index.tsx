@@ -4,9 +4,11 @@ import { useState } from 'react';
 
 import { Check, Edit2, Loader2, Plus, Search, Tag as TagIcon, Trash2, X } from 'lucide-react';
 
+import DeleteTagModal from '@components/DeleteTagModal';
+
+import { useCreateTag, useDeleteTag, useTagsWithUsage, useUpdateTag } from '@hooks/use-tags';
+
 import type { TagWithUsage } from '@/@types/expense';
-import DeleteTagModal from '@/components/DeleteTagModal';
-import { useCreateTag, useDeleteTag, useTagsWithUsage, useUpdateTag } from '@/hooks/use-tags';
 
 const TagManagementList = () => {
   const { data: tags = [], isLoading } = useTagsWithUsage();

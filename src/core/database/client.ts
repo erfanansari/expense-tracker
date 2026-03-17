@@ -1,6 +1,5 @@
+import { databaseConfig } from '@configs/database.config';
 import { createClient } from '@libsql/client';
-
-import { databaseConfig } from '@/configs/database.config';
 
 if (!databaseConfig.url || !databaseConfig.authToken) {
   throw new Error('Missing Turso environment variables');

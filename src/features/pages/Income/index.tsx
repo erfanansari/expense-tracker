@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
+import { getIncomeTypeLabel, getMonthLabel } from '@constants/income';
 import { type ColumnDef } from '@tanstack/react-table';
 import { Banknote, DollarSign, Edit2, FileText, Loader2, Plus, Trash2, TrendingUp } from 'lucide-react';
 
@@ -14,15 +15,13 @@ import DataTable from '@components/DataTable';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import FormDrawer from '@components/FormDrawer';
 import useDrawer from '@components/FormDrawer/useDrawer';
+import Pulse from '@components/Skeleton';
+import { useToast } from '@components/Toast/ToastProvider';
 
-import { useToast } from '@/components/Toast/ToastProvider';
-import { getIncomeTypeLabel, getMonthLabel } from '@/constants/income';
-import { useDeleteIncome, useIncomes } from '@/hooks/use-incomes';
-import { formatNumber, getJalaliMonthName } from '@/utils';
+import { useDeleteConfirmation } from '@hooks/use-delete-confirmation';
+import { useDeleteIncome, useIncomes } from '@hooks/use-incomes';
 
-function Pulse({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse rounded-sm bg-zinc-300 ${className}`} aria-label="Loading" />;
-}
+import { formatNumber, getJalaliMonthName } from '@utils';
 
 function IncomeSkeleton() {
   return (
@@ -179,36 +178,20 @@ export default function IncomePage() {
   const deleteIncome = useDeleteIncome();
   const { showToast } = useToast();
 
-  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [editingIncome, setEditingIncome] = useState<Income | undefined>(undefined);
-  const [incomeToDelete, setIncomeToDelete] = useState<Income | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { isOpen: isDrawerOpen, isDirty, openDrawer, closeDrawer, setIsDirty } = useDrawer();
 
-  const openDeleteModal = (income: Income) => {
-    setIncomeToDelete(income);
-    setIsDeleteModalOpen(true);
-  };
-
-  const closeDeleteModal = () => {
-    setIncomeToDelete(null);
-    setIsDeleteModalOpen(false);
-  };
-
-  const confirmDelete = async () => {
-    if (!incomeToDelete) return;
-
-    setDeletingId(incomeToDelete.id);
-
-    try {
-      await deleteIncome.mutateAsync(incomeToDelete.id);
-      closeDeleteModal();
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Failed to delete income', 'error');
-    } finally {
-      setDeletingId(null);
-    }
-  };
+  const {
+    itemToDelete: incomeToDelete,
+    isModalOpen: isDeleteModalOpen,
+    deletingId,
+    openModal: openDeleteModal,
+    closeModal: closeDeleteModal,
+    confirmDelete,
+  } = useDeleteConfirmation<Income>({
+    onDelete: (id) => deleteIncome.mutateAsync(id),
+    onError: (err) => showToast(err instanceof Error ? err.message : 'Failed to delete income', 'error'),
+  });
 
   const handleIncomeChange = useCallback(() => {
     setEditingIncome(undefined);
@@ -227,6 +210,11 @@ export default function IncomePage() {
     setEditingIncome(undefined);
     openDrawer();
   }, [openDrawer]);
+
+  const incomeColumns = useMemo(
+    () => buildIncomeColumns(handleEdit, openDeleteModal, deletingId),
+    [handleEdit, openDeleteModal, deletingId]
+  );
 
   // Calculate summary stats
   const currentYear = new Date().getFullYear();
@@ -374,7 +362,7 @@ export default function IncomePage() {
                       <h2 className="text-text-primary mb-4 text-lg font-semibold">{year}</h2>
                       <DataTable
                         data={[...incomesByYear[year]].sort((a, b) => b.month - a.month)}
-                        columns={buildIncomeColumns(handleEdit, openDeleteModal, deletingId)}
+                        columns={incomeColumns}
                         minWidth="min-w-[480px]"
                         getRowId={(row) => String(row.id)}
                       />

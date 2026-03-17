@@ -1,8 +1,8 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { db } from '@/core/database/client';
-import { getCurrentUser } from '@/core/session/session';
+import { db } from '@core/database/client';
+import { getCurrentUser } from '@core/session/session';
 
 // GET /api/tags - Get all tags for current user with usage counts
 export async function GET(request: NextRequest) {

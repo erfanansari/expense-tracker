@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 
-import type { Income, UpdateIncomeInput } from '@/@types/income';
-import { INCOME_TYPES } from '@/constants/income';
-import { db } from '@/core/database/client';
-import { getCurrentUser } from '@/core/session/session';
+import { createIncomeSchema } from '@schemas';
+
+import { db } from '@core/database/client';
+import { getCurrentUser } from '@core/session/session';
+
+import type { Income } from '@/@types/income';
 
 // GET /api/incomes/[id] - Get a single income entry
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -75,7 +77,14 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Income not found' }, { status: 404 });
     }
 
-    const body: UpdateIncomeInput = await request.json();
+    const raw = await request.json();
+    const parsed = createIncomeSchema.partial().safeParse(raw);
+
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
+    }
+
+    const body = parsed.data;
 
     // Build dynamic update query based on provided fields
     const updates: string[] = [];
@@ -94,9 +103,6 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       args.push(body.exchangeRateUsed);
     }
     if (body.month !== undefined) {
-      if (body.month < 1 || body.month > 12) {
-        return NextResponse.json({ error: 'Month must be between 1 and 12' }, { status: 400 });
-      }
       updates.push('month = ?');
       args.push(body.month);
     }
@@ -105,10 +111,6 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       args.push(body.year);
     }
     if (body.incomeType !== undefined) {
-      const validTypes = INCOME_TYPES.map((t) => t.value);
-      if (!validTypes.includes(body.incomeType)) {
-        return NextResponse.json({ error: 'Invalid income type' }, { status: 400 });
-      }
       updates.push('incomeType = ?');
       args.push(body.incomeType);
     }

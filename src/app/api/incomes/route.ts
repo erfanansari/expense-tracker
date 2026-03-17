@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 
-import type { CreateIncomeInput, Income } from '@/@types/income';
-import { INCOME_TYPES } from '@/constants/income';
-import { db } from '@/core/database/client';
-import { getCurrentUser } from '@/core/session/session';
+import { createIncomeSchema } from '@schemas';
+
+import { db } from '@core/database/client';
+import { getCurrentUser } from '@core/session/session';
+
+import type { Income } from '@/@types/income';
 
 // GET /api/incomes - Fetch incomes with optional year/month filters
 // Query parameters:
@@ -73,39 +75,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body: CreateIncomeInput = await request.json();
+    const raw = await request.json();
+    const parsed = createIncomeSchema.safeParse(raw);
 
-    // Validate required fields
-    if (
-      body.amountUsd === undefined ||
-      body.amountToman === undefined ||
-      body.exchangeRateUsed === undefined ||
-      !body.month ||
-      !body.year ||
-      !body.incomeType
-    ) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
 
-    // Validate numbers
-    if (
-      typeof body.amountUsd !== 'number' ||
-      typeof body.amountToman !== 'number' ||
-      typeof body.exchangeRateUsed !== 'number'
-    ) {
-      return NextResponse.json({ error: 'Amounts and exchange rate must be numbers' }, { status: 400 });
-    }
-
-    // Validate month range
-    if (body.month < 1 || body.month > 12) {
-      return NextResponse.json({ error: 'Month must be between 1 and 12' }, { status: 400 });
-    }
-
-    // Validate income type
-    const validTypes = INCOME_TYPES.map((t) => t.value);
-    if (!validTypes.includes(body.incomeType)) {
-      return NextResponse.json({ error: 'Invalid income type' }, { status: 400 });
-    }
+    const body = parsed.data;
 
     const result = await db.execute({
       sql: `INSERT INTO incomes (userId, amountUsd, amountToman, exchangeRateUsed, month, year, incomeType, source, notes)

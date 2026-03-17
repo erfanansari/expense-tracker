@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { NextResponse } from 'next/server';
 
-import { db } from '@/core/database/client';
+import { db } from '@core/database/client';
 
 // Configuration
 const NAVASAN_API_BASE = 'https://api.navasan.tech';

@@ -4,9 +4,10 @@ import { Geist, Vazirmatn } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { twMerge } from 'tailwind-merge';
 
-import { CommandPaletteProvider } from '@/components/CommandPalette/CommandPaletteProvider';
-import QueryProvider from '@/components/QueryProvider';
-import { ToastProvider } from '@/components/Toast/ToastProvider';
+import { CommandPaletteProvider } from '@components/CommandPalette/CommandPaletteProvider';
+import QueryProvider from '@components/QueryProvider';
+import { ToastProvider } from '@components/Toast/ToastProvider';
+
 import '@/styles/globals.css';
 
 const geistSans = Geist({

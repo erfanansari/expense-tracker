@@ -4,8 +4,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Check, Edit2, Loader2, Plus, Tag as TagIcon, X } from 'lucide-react';
 
+import { useCreateTag, useTags, useUpdateTag } from '@hooks/use-tags';
+
 import { type Tag } from '@/@types/expense';
-import { useCreateTag, useTags, useUpdateTag } from '@/hooks/use-tags';
 
 interface TagInputProps {
   selectedTags: Tag[];

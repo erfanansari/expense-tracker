@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 
-import { type CreateExpenseInput } from '@/@types/expense';
-import { db } from '@/core/database/client';
-import { getCurrentUser } from '@/core/session/session';
+import { createExpenseSchema } from '@schemas';
+
+import { db } from '@core/database/client';
+import { getCurrentUser } from '@core/session/session';
 
 // PUT /api/expenses/[id] - Update an expense
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -30,12 +31,14 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Expense not found' }, { status: 404 });
     }
 
-    const body = (await request.json()) as CreateExpenseInput;
+    const raw = await request.json();
+    const parsed = createExpenseSchema.safeParse(raw);
 
-    // Validate required fields
-    if (!body.date || !body.category || !body.description) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
+
+    const body = parsed.data;
 
     // Update the expense
     await db.execute({

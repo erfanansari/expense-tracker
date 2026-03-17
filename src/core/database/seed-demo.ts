@@ -3,13 +3,13 @@ import type { InStatement } from '@libsql/client';
 import { createClient } from '@libsql/client';
 import { config } from 'dotenv';
 
-import { hashPassword } from '@/core/auth/password';
+import { DEMO_EMAIL, DEMO_PASSWORD } from '@constants';
+
+import { hashPassword } from '@core/auth/password';
 
 // Load environment variables from .env.local
 config({ path: '.env.local' });
 
-const DEMO_EMAIL = 'demo@kharji.com';
-const DEMO_PASSWORD = 'Demouser1';
 const DEMO_NAME = 'Demo User';
 
 // ─── Deterministic PRNG (mulberry32) ────────────────────────────────────────

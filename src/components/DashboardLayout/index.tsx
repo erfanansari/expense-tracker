@@ -4,8 +4,8 @@ import type { FC } from 'react';
 
 import TopNav from '@features/navigation/components/TopNav';
 
-import DemoBanner from '@/components/DemoBanner';
-import Footer from '@/components/Footer';
+import DemoBanner from '@components/DemoBanner';
+import Footer from '@components/Footer';
 
 import type { DashboardLayoutProps } from './@types';
 

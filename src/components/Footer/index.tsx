@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import { Github, Zap } from 'lucide-react';
 
-import { NAV_ITEMS } from '@/constants';
+import { NAV_ITEMS } from '@constants';
 
 import pkg from '../../../package.json';
 
