@@ -2,7 +2,7 @@
 import { createClient } from '@libsql/client';
 import { config } from 'dotenv';
 
-import { hashPassword } from '@/core/auth/password';
+import { hashPassword } from '@core/auth/password';
 
 // Load environment variables from .env.local
 config({ path: '.env.local' });

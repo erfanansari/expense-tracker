@@ -27,18 +27,14 @@ import DateRangeSelector, {
 
 import { getButtonClasses } from '@components/Button';
 import DataTable from '@components/DataTable';
+import Pulse from '@components/Skeleton';
 import Tooltip from '@components/Tooltip';
 
+import { useAllExpenses } from '@hooks/use-all-expenses';
+import { useExchangeRate } from '@hooks/use-exchange-rate';
+import { useSummary } from '@hooks/use-summary';
+
 import { formatNumber } from '@utils';
-
-import { useAllExpenses } from '@/hooks/use-all-expenses';
-import { useExchangeRate } from '@/hooks/use-exchange-rate';
-import { useSummary } from '@/hooks/use-summary';
-
-// ─── Skeleton ───────────────────────────────────────────────────────────────────
-function Pulse({ className }: { className?: string }) {
-  return <div className={twMerge('h-6 w-full animate-pulse rounded-sm bg-zinc-300', className)} aria-label="Loading" />;
-}
 
 function OverviewSkeleton() {
   return (

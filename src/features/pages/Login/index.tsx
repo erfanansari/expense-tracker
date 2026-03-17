@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
+import { DEMO_EMAIL, DEMO_PASSWORD } from '@constants';
+
 import { login } from '@/lib/api/auth';
 
 export default function Login() {
@@ -35,7 +37,7 @@ export default function Login() {
 
   async function handleDemoLogin() {
     setError('');
-    loginMutation.mutate({ email: 'demo@kharji.com', password: 'Demouser1' });
+    loginMutation.mutate({ email: DEMO_EMAIL, password: DEMO_PASSWORD });
   }
 
   return (

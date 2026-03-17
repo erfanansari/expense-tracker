@@ -4,7 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { numberToWords } from '@persian-tools/persian-tools';
 import { Calendar, DollarSign, FileText, Layers, Loader2, Plus, Save } from 'lucide-react';
-import { twMerge } from 'tailwind-merge';
+
+import { createExpenseSchema } from '@schemas';
+
+import { EXPENSE_CATEGORIES } from '@constants';
 
 import { tomanToUsd, usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
 
@@ -14,10 +17,10 @@ import Select from '@components/Select';
 import { useToast } from '@components/Toast/ToastProvider';
 import Tooltip from '@components/Tooltip';
 
+import { useExchangeRateForm } from '@hooks/use-exchange-rate-form';
+import { useCreateExpense, useUpdateExpense } from '@hooks/use-expenses';
+
 import { type CreateExpenseInput, type Tag } from '@/@types/expense';
-import { EXPENSE_CATEGORIES } from '@/constants';
-import { useExchangeRate } from '@/hooks/use-exchange-rate';
-import { useCreateExpense, useUpdateExpense } from '@/hooks/use-expenses';
 
 import TagInput from '../TagInput';
 
@@ -30,11 +33,8 @@ interface ExpenseFormProps {
 
 const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty }: ExpenseFormProps) => {
   const { showToast } = useToast();
-  const { data: rateData, isLoading: isFetchingRate } = useExchangeRate();
   const createExpense = useCreateExpense();
   const updateExpense = useUpdateExpense();
-
-  const fetchedRate = rateData?.usd ? parseInt(rateData.usd.value, 10) : 0;
 
   // Derive editing rate from existing expense prices
   const editingRate =
@@ -42,11 +42,9 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
       ? Math.round(editingExpense.price_toman / editingExpense.price_usd)
       : null;
 
-  // User-overridden exchange rate; null means "use default"
-  const [userRate, setUserRate] = useState<number | null>(null);
-
-  // Derived exchange rate: user override > editing expense rate > fetched rate
-  const exchangeRate = userRate ?? editingRate ?? fetchedRate;
+  const { exchangeRate, isFetchingRate, setUserRate, resetUserRate } = useExchangeRateForm({
+    editingRate,
+  });
 
   const defaultFormData: CreateExpenseInput = {
     date: new Date().toISOString().split('T')[0],
@@ -78,7 +76,6 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
   );
   const [selectedTags, setSelectedTags] = useState<Tag[]>(editingExpense?.tags || []);
   const [lastChanged, setLastChanged] = useState<'toman' | 'usd'>('toman');
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [initialFormData, setInitialFormData] = useState<CreateExpenseInput | null>(
     editingExpense ? buildFormData(editingExpense) : null
   );
@@ -96,7 +93,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
       setInitialFormData(initialData);
       setSelectedTags(editingExpense.tags || []);
     }
-    setUserRate(null);
+    resetUserRate();
   }
 
   // Render-time: capture initialFormData once when rate is ready (for new expenses)
@@ -164,12 +161,17 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage(null);
 
     const dataToSubmit = {
       ...formData,
       tagIds: selectedTags.map((t) => t.id),
     };
+
+    const validated = createExpenseSchema.safeParse(dataToSubmit);
+    if (!validated.success) {
+      showToast(validated.error.issues[0].message, 'error');
+      return;
+    }
 
     try {
       if (editingExpense) {
@@ -182,15 +184,13 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
 
       setFormData(defaultFormData);
       setSelectedTags([]);
-      setUserRate(null);
+      resetUserRate();
       onExpenseAdded();
       if (editingExpense && onCancelEdit) {
         onCancelEdit();
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to save expense';
-      showToast(errorMessage, 'error');
-      setMessage({ type: 'error', text: errorMessage });
+      showToast(err instanceof Error ? err.message : 'Failed to save expense', 'error');
     }
   };
 
@@ -202,176 +202,160 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
   };
 
   return (
-    <>
-      {/* Message */}
-      {message && (
-        <div
-          className={twMerge(
-            'mb-4 rounded-lg border p-3 text-sm',
-            message.type === 'success'
-              ? 'border-success bg-success-light text-success'
-              : 'border-danger bg-danger-light text-danger'
-          )}
-        >
-          {message.text}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-3">
-        {/* Row 1: Category and Date */}
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
-          {/* Category */}
-          <div className="space-y-1">
-            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
-              <Layers className="text-text-muted h-4 w-4" />
-              Category
-            </label>
-            <Select
-              value={formData.category}
-              onChange={(val) => setFormData({ ...formData, category: val })}
-              options={EXPENSE_CATEGORIES.map((cat) => ({ value: cat.value, label: cat.label }))}
-              placeholder="Select category..."
-              required
-            />
-          </div>
-
-          {/* Date */}
-          <div className="space-y-1">
-            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
-              <Calendar className="text-text-muted h-4 w-4" />
-              Date
-            </label>
-            <DatePicker value={formData.date} onChange={(date) => setFormData({ ...formData, date })} required />
-          </div>
-        </div>
-
-        {/* Description */}
+    <form onSubmit={handleSubmit} className="space-y-3">
+      {/* Row 1: Category and Date */}
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
+        {/* Category */}
         <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
-            <FileText className="text-text-muted h-4 w-4" />
-            Description
+            <Layers className="text-text-muted h-4 w-4" />
+            Category
           </label>
-          <textarea
-            placeholder="Enter expense details..."
+          <Select
+            value={formData.category}
+            onChange={(val) => setFormData({ ...formData, category: val })}
+            options={EXPENSE_CATEGORIES.map((cat) => ({ value: cat.value, label: cat.label }))}
+            placeholder="Select category..."
             required
-            rows={2}
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full resize-none rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
           />
         </div>
 
-        {/* Tags */}
+        {/* Date */}
         <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
-            <span className="text-text-muted">#</span>
-            Tags
+            <Calendar className="text-text-muted h-4 w-4" />
+            Date
           </label>
-          <TagInput selectedTags={selectedTags} onTagsChange={setSelectedTags} />
+          <DatePicker value={formData.date} onChange={(date) => setFormData({ ...formData, date })} required />
         </div>
+      </div>
 
-        {/* Prices */}
-        <div className="grid grid-cols-1 gap-3">
-          {/* Toman */}
-          <div className="space-y-1">
-            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
-              <span className="text-success font-bold">T</span>
-              Price (Toman)
-            </label>
-            <Tooltip content={numberToPersianWord} position="top">
-              <input
-                type="number"
-                placeholder="60000"
-                required
-                min="0"
-                step="1"
-                value={formData.price_toman || ''}
-                onChange={(e) => handleTomanChange(parseFloat(e.target.value) || 0)}
-                className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-success w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
-              />
-            </Tooltip>
-          </div>
+      {/* Description */}
+      <div className="space-y-1">
+        <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+          <FileText className="text-text-muted h-4 w-4" />
+          Description
+        </label>
+        <textarea
+          placeholder="Enter expense details..."
+          required
+          rows={2}
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full resize-none rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
+        />
+      </div>
 
-          {/* USD */}
-          <div className="space-y-1">
-            <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
-              <DollarSign className="text-blue h-4 w-4" />
-              Price (USD)
-            </label>
+      {/* Tags */}
+      <div className="space-y-1">
+        <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+          <span className="text-text-muted">#</span>
+          Tags
+        </label>
+        <TagInput selectedTags={selectedTags} onTagsChange={setSelectedTags} />
+      </div>
+
+      {/* Prices */}
+      <div className="grid grid-cols-1 gap-3">
+        {/* Toman */}
+        <div className="space-y-1">
+          <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+            <span className="text-success font-bold">T</span>
+            Price (Toman)
+          </label>
+          <Tooltip content={numberToPersianWord} position="top">
             <input
               type="number"
-              placeholder="0.00"
+              placeholder="60000"
               required
               min="0"
-              step="0.01"
-              value={formData.price_usd || ''}
-              onChange={(e) => handleUsdChange(parseFloat(e.target.value) || 0)}
-              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
+              step="1"
+              value={formData.price_toman || ''}
+              onChange={(e) => handleTomanChange(parseFloat(e.target.value) || 0)}
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-success w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
             />
-          </div>
+          </Tooltip>
         </div>
 
-        {/* Exchange Rate */}
+        {/* USD */}
         <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
-            <span className="text-text-muted">↔</span>
-            Rate (Toman/USD)
-            {isFetchingRate && <Loader2 className="text-text-muted h-3 w-3 animate-spin" />}
+            <DollarSign className="text-blue h-4 w-4" />
+            Price (USD)
           </label>
           <input
             type="number"
-            placeholder="130100"
+            placeholder="0.00"
             required
-            min="1"
-            step="1"
-            value={exchangeRate || ''}
-            onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
-            disabled={isFetchingRate}
-            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
+            min="0"
+            step="0.01"
+            value={formData.price_usd || ''}
+            onChange={(e) => handleUsdChange(parseFloat(e.target.value) || 0)}
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
           />
         </div>
+      </div>
 
-        {/* Buttons */}
-        <div className="flex gap-3 pt-1">
-          <Button
-            type="submit"
-            disabled={isSubmitting || isFetchingRate || !exchangeRate}
-            variant="primary"
-            className="flex-1"
-          >
-            {(() => {
-              if (isFetchingRate) {
-                return (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading rate...
-                  </>
-                );
-              }
-              if (isSubmitting) {
-                return (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                );
-              }
+      {/* Exchange Rate */}
+      <div className="space-y-1">
+        <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+          <span className="text-text-muted">↔</span>
+          Rate (Toman/USD)
+          {isFetchingRate && <Loader2 className="text-text-muted h-3 w-3 animate-spin" />}
+        </label>
+        <input
+          type="number"
+          placeholder="130100"
+          required
+          min="1"
+          step="1"
+          value={exchangeRate || ''}
+          onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
+          disabled={isFetchingRate}
+          className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
+        />
+      </div>
+
+      {/* Buttons */}
+      <div className="flex gap-3 pt-1">
+        <Button
+          type="submit"
+          disabled={isSubmitting || isFetchingRate || !exchangeRate}
+          variant="primary"
+          className="flex-1"
+        >
+          {(() => {
+            if (isFetchingRate) {
               return (
                 <>
-                  {editingExpense ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                  {editingExpense ? 'Update' : 'Add'}
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Loading rate...
                 </>
               );
-            })()}
+            }
+            if (isSubmitting) {
+              return (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              );
+            }
+            return (
+              <>
+                {editingExpense ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                {editingExpense ? 'Update' : 'Add'}
+              </>
+            );
+          })()}
+        </Button>
+        {editingExpense && (
+          <Button type="button" onClick={handleCancel} variant="outline">
+            Cancel
           </Button>
-          {editingExpense && (
-            <Button type="button" onClick={handleCancel} variant="outline">
-              Cancel
-            </Button>
-          )}
-        </div>
-      </form>
-    </>
+        )}
+      </div>
+    </form>
   );
 };
 

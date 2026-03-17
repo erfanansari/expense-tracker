@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from 'react';
 
+import { ASSET_CATEGORIES } from '@constants/assets';
 import { numberToWords } from '@persian-tools/persian-tools';
 import { DollarSign, FileText, Loader2, Package, Plus, Save } from 'lucide-react';
+
+import { createAssetSchema } from '@schemas';
 
 import { usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
 
@@ -12,10 +15,10 @@ import Select from '@components/Select';
 import { useToast } from '@components/Toast/ToastProvider';
 import Tooltip from '@components/Tooltip';
 
+import { useCreateAsset, useUpdateAsset } from '@hooks/use-assets';
+import { useExchangeRateForm } from '@hooks/use-exchange-rate-form';
+
 import type { Asset, AssetCategory, CreateAssetInput } from '@/@types/asset';
-import { ASSET_CATEGORIES } from '@/constants/assets';
-import { useCreateAsset, useUpdateAsset } from '@/hooks/use-assets';
-import { useExchangeRate } from '@/hooks/use-exchange-rate';
 
 interface AssetFormProps {
   onAssetAdded: () => void;
@@ -26,17 +29,12 @@ interface AssetFormProps {
 
 const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: AssetFormProps) => {
   const { showToast } = useToast();
-  const { data: rateData, isLoading: isFetchingRate } = useExchangeRate();
   const createAsset = useCreateAsset();
   const updateAsset = useUpdateAsset();
 
-  const fetchedRate = rateData?.usd ? parseInt(rateData.usd.value, 10) : 0;
-
-  // User-overridden exchange rate; null means "use default"
-  const [userRate, setUserRate] = useState<number | null>(null);
-
-  // Derived exchange rate: user override > editing asset rate > fetched rate
-  const exchangeRate = userRate ?? editingAsset?.exchangeRateUsed ?? fetchedRate;
+  const { exchangeRate, isFetchingRate, setUserRate, resetUserRate } = useExchangeRateForm({
+    editingRate: editingAsset?.exchangeRateUsed,
+  });
 
   const defaultFormData: CreateAssetInput = {
     category: 'cash',
@@ -81,7 +79,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
       setFormData(initialData);
       setInitialFormData(initialData);
     }
-    setUserRate(null);
+    resetUserRate();
   }
 
   // Render-time: capture initialFormData once when rate is ready (for new assets)
@@ -159,6 +157,12 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
       lastValuedAt: new Date().toISOString(),
     };
 
+    const validated = createAssetSchema.safeParse(dataToSubmit);
+    if (!validated.success) {
+      showToast(validated.error.issues[0].message, 'error');
+      return;
+    }
+
     try {
       if (editingAsset) {
         await updateAsset.mutateAsync({ id: editingAsset.id, data: dataToSubmit });
@@ -169,7 +173,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
       }
 
       setFormData({ ...defaultFormData, exchangeRateUsed: exchangeRate });
-      setUserRate(null);
+      resetUserRate();
       onAssetAdded();
       if (editingAsset && onCancelEdit) {
         onCancelEdit();

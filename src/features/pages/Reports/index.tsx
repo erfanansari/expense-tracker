@@ -15,12 +15,9 @@ import { ExpenseCharts } from '@features/expenses/components/ExpenseCharts';
 import ExpenseStats from '@features/expenses/components/ExpenseStats';
 
 import Button from '@components/Button';
+import Pulse from '@components/Skeleton';
 
-import { useAllExpenses } from '@/hooks/use-all-expenses';
-
-function Pulse({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse rounded-sm bg-zinc-300 ${className}`} aria-label="Loading" />;
-}
+import { useAllExpenses } from '@hooks/use-all-expenses';
 
 function ReportsSkeleton() {
   return (

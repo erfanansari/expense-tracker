@@ -1,31 +1,23 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { hashPassword } from '@/core/auth/password';
-import { generateToken } from '@/core/auth/token';
-import { isValidEmail, validatePassword } from '@/core/auth/validation';
-import { db } from '@/core/database/client';
+import { signupSchema } from '@schemas';
 
-const TOKEN_COOKIE_NAME = 'auth_token';
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days in seconds
+import { hashPassword } from '@core/auth/password';
+import { validatePassword } from '@core/auth/validation';
+import { db } from '@core/database/client';
+import { createSession } from '@core/session/session';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { name, email, password, passwordConfirm } = body;
+    const raw = await request.json();
+    const parsed = signupSchema.safeParse(raw);
 
-    // Validation
-    if (!email || !password || !passwordConfirm) {
-      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
 
-    if (!isValidEmail(email)) {
-      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
-    }
-
-    if (password !== passwordConfirm) {
-      return NextResponse.json({ error: 'Passwords do not match' }, { status: 400 });
-    }
+    const { name, email, password } = parsed.data;
 
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.valid) {
@@ -54,31 +46,10 @@ export async function POST(request: NextRequest) {
 
     const userId = Number(result.lastInsertRowid);
 
-    // Generate JWT token
-    const token = await generateToken(userId, normalizedEmail);
+    // Create session (sets cookie automatically)
+    await createSession(userId, normalizedEmail);
 
-    // Build cookie string manually
-    const isProduction = process.env.NODE_ENV === 'production';
-    const cookieParts = [
-      `${TOKEN_COOKIE_NAME}=${token}`,
-      `Path=/`,
-      `Max-Age=${COOKIE_MAX_AGE}`,
-      `HttpOnly`,
-      `SameSite=Lax`,
-    ];
-    if (isProduction) {
-      cookieParts.push('Secure');
-    }
-    const cookieString = cookieParts.join('; ');
-
-    // Create response with Set-Cookie header
-    return new NextResponse(JSON.stringify({ message: 'User created successfully', userId }), {
-      status: 201,
-      headers: {
-        'Content-Type': 'application/json',
-        'Set-Cookie': cookieString,
-      },
-    });
+    return NextResponse.json({ message: 'User created successfully', userId }, { status: 201 });
   } catch (error) {
     console.error('Signup error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

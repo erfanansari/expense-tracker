@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { EXPENSE_CATEGORIES } from '@constants/categories';
 import { type ColumnDef } from '@tanstack/react-table';
 import { Edit2, FileText, Loader2, Plus, Tag, Trash2, X } from 'lucide-react';
 
@@ -17,16 +18,15 @@ import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import FormDrawer from '@components/FormDrawer';
 import useDrawer from '@components/FormDrawer/useDrawer';
 import Select from '@components/Select';
+import Pulse from '@components/Skeleton';
+import { useToast } from '@components/Toast/ToastProvider';
 
-import { useToast } from '@/components/Toast/ToastProvider';
-import { EXPENSE_CATEGORIES } from '@/constants/categories';
-import { useDeleteExpense, useInfiniteExpenses } from '@/hooks/use-expenses';
+import { useDeleteConfirmation } from '@hooks/use-delete-confirmation';
+import { useDeleteExpense, useInfiniteExpenses } from '@hooks/use-expenses';
+
+import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@utils';
+
 import { type ExpenseFilters } from '@/lib/api/expenses';
-import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@/utils';
-
-function Pulse({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse rounded-sm bg-zinc-300 ${className}`} aria-label="Loading" />;
-}
 
 function TransactionsSkeleton() {
   return (
@@ -204,13 +204,22 @@ export default function TransactionsPage() {
 
   const expenses: Expense[] = data?.pages.flatMap((p) => p.expenses) ?? [];
 
-  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [editingExpense, setEditingExpense] = useState<Expense | undefined>(undefined);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { isOpen: isDrawerOpen, isDirty, openDrawer, closeDrawer, setIsDirty } = useDrawer();
+
+  const {
+    itemToDelete: expenseToDelete,
+    isModalOpen: isDeleteModalOpen,
+    deletingId,
+    openModal: openDeleteModal,
+    closeModal: closeDeleteModal,
+    confirmDelete,
+  } = useDeleteConfirmation<Expense>({
+    onDelete: (id) => deleteExpense.mutateAsync(id),
+    onError: (err) => showToast(err instanceof Error ? err.message : 'Failed to delete expense', 'error'),
+  });
 
   const handleRowClick = (expense: Expense) => {
     setSelectedExpense(expense);
@@ -220,31 +229,6 @@ export default function TransactionsPage() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedExpense(null);
-  };
-
-  const openDeleteModal = (expense: Expense) => {
-    setExpenseToDelete(expense);
-    setIsDeleteModalOpen(true);
-  };
-
-  const closeDeleteModal = () => {
-    setExpenseToDelete(null);
-    setIsDeleteModalOpen(false);
-  };
-
-  const confirmDelete = async () => {
-    if (!expenseToDelete) return;
-
-    setDeletingId(expenseToDelete.id);
-
-    try {
-      await deleteExpense.mutateAsync(expenseToDelete.id);
-      closeDeleteModal();
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Failed to delete expense', 'error');
-    } finally {
-      setDeletingId(null);
-    }
   };
 
   const handleExpenseChange = useCallback(() => {
@@ -268,7 +252,7 @@ export default function TransactionsPage() {
 
   const transactionColumns = useMemo(
     () => buildTransactionColumns(handleEdit, openDeleteModal, deletingId),
-    [handleEdit, deletingId] // openDeleteModal is stable
+    [handleEdit, openDeleteModal, deletingId]
   );
 
   return (

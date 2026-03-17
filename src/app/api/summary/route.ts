@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 
+import { db } from '@core/database/client';
+import { getCurrentUser } from '@core/session/session';
+
 import type { AssetCategory } from '@/@types/asset';
-import { db } from '@/core/database/client';
-import { getCurrentUser } from '@/core/session/session';
 
 interface MonthlySummary {
   month: number;
@@ -112,46 +113,78 @@ export async function GET() {
     const netWorthUsd = totalAssetsUsd;
     const netWorthToman = totalAssetsToman;
 
-    // Get income vs expenses for last 6 months
-    const incomeVsExpenses: MonthlySummary[] = [];
-
-    for (let i = 0; i < 6; i++) {
+    // Get income vs expenses for last 6 months (2 queries instead of 12)
+    const months: { month: number; year: number; start: string; end: string }[] = [];
+    for (let i = 5; i >= 0; i--) {
       const date = new Date(currentYear, currentMonth - 1 - i, 1);
-      const month = date.getMonth() + 1;
-      const year = date.getFullYear();
-
-      const monthStart = `${year}-${String(month).padStart(2, '0')}-01`;
-      const monthEnd = new Date(year, month, 0);
-      const monthEndStr = `${year}-${String(month).padStart(2, '0')}-${String(monthEnd.getDate()).padStart(2, '0')}`;
-
-      // Get income for this month
-      const incomeResult = await db.execute({
-        sql: `SELECT COALESCE(SUM(amountUsd), 0) as totalUsd, COALESCE(SUM(amountToman), 0) as totalToman
-              FROM incomes
-              WHERE userId = ? AND month = ? AND year = ?`,
-        args: [user.userId, month, year],
-      });
-
-      // Get expenses for this month
-      const expensesResult = await db.execute({
-        sql: `SELECT COALESCE(SUM(price_usd), 0) as totalUsd, COALESCE(SUM(price_toman), 0) as totalToman
-              FROM expenses
-              WHERE user_id = ? AND date >= ? AND date <= ?`,
-        args: [user.userId, monthStart, monthEndStr],
-      });
-
-      incomeVsExpenses.push({
-        month,
-        year,
-        incomeUsd: (incomeResult.rows[0]?.totalUsd as number) || 0,
-        incomeToman: (incomeResult.rows[0]?.totalToman as number) || 0,
-        expensesUsd: (expensesResult.rows[0]?.totalUsd as number) || 0,
-        expensesToman: (expensesResult.rows[0]?.totalToman as number) || 0,
+      const m = date.getMonth() + 1;
+      const y = date.getFullYear();
+      const lastDay = new Date(y, m, 0).getDate();
+      months.push({
+        month: m,
+        year: y,
+        start: `${y}-${String(m).padStart(2, '0')}-01`,
+        end: `${y}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`,
       });
     }
 
-    // Reverse to show oldest first
-    incomeVsExpenses.reverse();
+    // Build month/year pairs for income query
+    const monthYearConditions = months.map(() => '(month = ? AND year = ?)').join(' OR ');
+    const monthYearArgs = months.flatMap((m) => [m.month, m.year]);
+
+    const incomeByMonthResult = await db.execute({
+      sql: `SELECT month, year, COALESCE(SUM(amountUsd), 0) as totalUsd, COALESCE(SUM(amountToman), 0) as totalToman
+            FROM incomes
+            WHERE userId = ? AND (${monthYearConditions})
+            GROUP BY month, year`,
+      args: [user.userId, ...monthYearArgs],
+    });
+
+    // Build date range for expenses query
+    const oldestStart = months[0].start;
+    const newestEnd = months[months.length - 1].end;
+
+    const expensesByMonthResult = await db.execute({
+      sql: `SELECT
+              CAST(SUBSTR(date, 6, 2) AS INTEGER) as month,
+              CAST(SUBSTR(date, 1, 4) AS INTEGER) as year,
+              COALESCE(SUM(price_usd), 0) as totalUsd,
+              COALESCE(SUM(price_toman), 0) as totalToman
+            FROM expenses
+            WHERE user_id = ? AND date >= ? AND date <= ?
+            GROUP BY SUBSTR(date, 1, 7)`,
+      args: [user.userId, oldestStart, newestEnd],
+    });
+
+    // Build lookup maps
+    const incomeMap = new Map<string, { usd: number; toman: number }>();
+    incomeByMonthResult.rows.forEach((row) => {
+      incomeMap.set(`${row.year}-${row.month}`, {
+        usd: (row.totalUsd as number) || 0,
+        toman: (row.totalToman as number) || 0,
+      });
+    });
+
+    const expenseMap = new Map<string, { usd: number; toman: number }>();
+    expensesByMonthResult.rows.forEach((row) => {
+      expenseMap.set(`${row.year}-${row.month}`, {
+        usd: (row.totalUsd as number) || 0,
+        toman: (row.totalToman as number) || 0,
+      });
+    });
+
+    const incomeVsExpenses: MonthlySummary[] = months.map((m) => {
+      const inc = incomeMap.get(`${m.year}-${m.month}`) || { usd: 0, toman: 0 };
+      const exp = expenseMap.get(`${m.year}-${m.month}`) || { usd: 0, toman: 0 };
+      return {
+        month: m.month,
+        year: m.year,
+        incomeUsd: inc.usd,
+        incomeToman: inc.toman,
+        expensesUsd: exp.usd,
+        expensesToman: exp.toman,
+      };
+    });
 
     // Get assets by category (simplified - directly from assets table)
     const categoryResult = await db.execute({

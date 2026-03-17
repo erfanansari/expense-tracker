@@ -16,8 +16,9 @@ import {
   YAxis,
 } from 'recharts';
 
+import { formatNumber, getCategoryLabel } from '@utils';
+
 import { type Expense } from '@/@types/expense';
-import { formatNumber, getCategoryLabel } from '@/utils';
 
 interface ExpenseChartsProps {
   expenses: Expense[];

@@ -2,8 +2,9 @@
 
 import { ArrowDownRight, ArrowUpRight, BarChart3, Hash, Sparkles, TrendingUp } from 'lucide-react';
 
+import { formatNumber } from '@utils';
+
 import { type Expense } from '@/@types/expense';
-import { formatNumber } from '@/utils';
 
 interface ExpenseStatsProps {
   expenses: Expense[];

@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 
-import type { Asset, AssetValuation, UpdateAssetInput } from '@/@types/asset';
-import { ASSET_CATEGORIES } from '@/constants/assets';
-import { db } from '@/core/database/client';
-import { getCurrentUser } from '@/core/session/session';
+import { createAssetSchema } from '@schemas';
+
+import { db } from '@core/database/client';
+import { getCurrentUser } from '@core/session/session';
+
+import type { Asset, AssetValuation } from '@/@types/asset';
 
 // GET /api/assets/[id] - Get a single asset with valuation history
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -100,7 +102,14 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 
     const currentAsset = existing.rows[0];
-    const body: UpdateAssetInput = await request.json();
+    const raw = await request.json();
+    const parsed = createAssetSchema.partial().safeParse(raw);
+
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
+    }
+
+    const body = parsed.data;
 
     // Build dynamic update query
     const updates: string[] = [];
@@ -115,10 +124,6 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const newExchangeRate = body.exchangeRateUsed ?? (currentAsset.exchangeRateUsed as number);
 
     if (body.category !== undefined) {
-      const validCategories = ASSET_CATEGORIES.map((c) => c.value);
-      if (!validCategories.includes(body.category)) {
-        return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
-      }
       updates.push('category = ?');
       args.push(body.category);
     }

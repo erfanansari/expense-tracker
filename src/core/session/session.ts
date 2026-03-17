@@ -1,8 +1,10 @@
 import { cookies } from 'next/headers';
 
+import { authConfig } from '@configs/auth.config';
+
+import { generateToken, verifyToken } from '@core/auth/token';
+
 import type { Session, UserPayload } from '@/@types/auth';
-import { authConfig } from '@/configs/auth.config';
-import { generateToken, verifyToken } from '@/core/auth/token';
 
 export async function createSession(userId: number, email: string): Promise<string> {
   const token = await generateToken(userId, email);

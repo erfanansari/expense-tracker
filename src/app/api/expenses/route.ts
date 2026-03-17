@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 
-import { type CreateExpenseInput, type Expense, type Tag } from '@/@types/expense';
-import { db } from '@/core/database/client';
-import { getCurrentUser } from '@/core/session/session';
+import { createExpenseSchema } from '@schemas';
+
+import { db } from '@core/database/client';
+import { fetchTagsForExpenses } from '@core/database/tags';
+import { getCurrentUser } from '@core/session/session';
+
+import { type Expense } from '@/@types/expense';
 
 // GET /api/expenses - Fetch expenses with pagination support
 // Query parameters:
@@ -43,34 +47,7 @@ export async function GET(request: Request) {
       });
 
       // Fetch tags for all expenses
-      const expenseIds = result.rows.map((row) => row.id);
-      const tagsMap: Record<number, Tag[]> = {};
-
-      if (expenseIds.length > 0) {
-        const placeholders = expenseIds.map(() => '?').join(',');
-        const tagsResult = await db.execute({
-          sql: `
-            SELECT et.expense_id, t.id, t.name, t.created_at
-            FROM expense_tags et
-            JOIN tags t ON et.tag_id = t.id
-            WHERE et.expense_id IN (${placeholders})
-          `,
-          args: expenseIds,
-        });
-
-        // Group tags by expense_id
-        tagsResult.rows.forEach((row) => {
-          const expense_id = row.expense_id as number;
-          const id = row.id as number;
-          const name = row.name as string;
-          const created_at = row.created_at as string;
-
-          if (!tagsMap[expense_id]) {
-            tagsMap[expense_id] = [];
-          }
-          tagsMap[expense_id].push({ id, name, created_at });
-        });
-      }
+      const tagsMap = await fetchTagsForExpenses(result.rows.map((row) => row.id));
 
       const expenses: Expense[] = result.rows.map((row) => ({
         id: row.id as number,
@@ -129,34 +106,7 @@ export async function GET(request: Request) {
     const expensesToReturn = hasMore ? result.rows.slice(0, limit) : result.rows;
 
     // Fetch tags for all expenses
-    const expenseIds = expensesToReturn.map((row) => row.id);
-    const tagsMap: Record<number, Tag[]> = {};
-
-    if (expenseIds.length > 0) {
-      const placeholders = expenseIds.map(() => '?').join(',');
-      const tagsResult = await db.execute({
-        sql: `
-          SELECT et.expense_id, t.id, t.name, t.created_at
-          FROM expense_tags et
-          JOIN tags t ON et.tag_id = t.id
-          WHERE et.expense_id IN (${placeholders})
-        `,
-        args: expenseIds,
-      });
-
-      // Group tags by expense_id
-      tagsResult.rows.forEach((row) => {
-        const expense_id = row.expense_id as number;
-        const id = row.id as number;
-        const name = row.name as string;
-        const created_at = row.created_at as string;
-
-        if (!tagsMap[expense_id]) {
-          tagsMap[expense_id] = [];
-        }
-        tagsMap[expense_id].push({ id, name, created_at });
-      });
-    }
+    const tagsMap = await fetchTagsForExpenses(expensesToReturn.map((row) => row.id));
 
     const expenses: Expense[] = expensesToReturn.map((row) => ({
       id: row.id as number,
@@ -197,23 +147,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body: CreateExpenseInput = await request.json();
+    const raw = await request.json();
+    const parsed = createExpenseSchema.safeParse(raw);
 
-    // Validate required fields
-    if (
-      !body.date ||
-      !body.category ||
-      !body.description ||
-      body.price_toman === undefined ||
-      body.price_usd === undefined
-    ) {
-      return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
 
-    // Validate numbers
-    if (typeof body.price_toman !== 'number' || typeof body.price_usd !== 'number') {
-      return NextResponse.json({ error: 'Prices must be numbers' }, { status: 400 });
-    }
+    const body = parsed.data;
 
     // Insert the expense with user_id
     const expenseResult = await db.execute({

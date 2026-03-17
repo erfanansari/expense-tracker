@@ -11,8 +11,9 @@ import { twMerge } from 'tailwind-merge';
 
 import { ROUTES } from '@constants';
 
-import { useCommandPalette } from '@/components/CommandPalette/CommandPaletteProvider';
-import { useAuth } from '@/features/auth/hooks/use-auth';
+import { useAuth } from '@features/auth/hooks/use-auth';
+
+import { useCommandPalette } from '@components/CommandPalette/CommandPaletteProvider';
 
 import type { NavItem } from './@types';
 

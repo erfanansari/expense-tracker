@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import { Github, Zap } from 'lucide-react';
 
-import Button from '@/components/Button';
+import Button from '@components/Button';
 
 export default function Header() {
   return (

@@ -1,22 +1,22 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { verifyPassword } from '@/core/auth/password';
-import { generateToken } from '@/core/auth/token';
-import { db } from '@/core/database/client';
+import { loginSchema } from '@schemas';
 
-const TOKEN_COOKIE_NAME = 'auth_token';
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days in seconds
+import { verifyPassword } from '@core/auth/password';
+import { db } from '@core/database/client';
+import { createSession } from '@core/session/session';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { email, password } = body;
+    const raw = await request.json();
+    const parsed = loginSchema.safeParse(raw);
 
-    // Validation
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
+
+    const { email, password } = parsed.data;
 
     // Find user
     const result = await db.execute({
@@ -38,31 +38,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
 
-    // Generate JWT token
-    const token = await generateToken(userId, userEmail);
+    // Create session (sets cookie automatically)
+    await createSession(userId, userEmail);
 
-    // Build cookie string manually
-    const isProduction = process.env.NODE_ENV === 'production';
-    const cookieParts = [
-      `${TOKEN_COOKIE_NAME}=${token}`,
-      `Path=/`,
-      `Max-Age=${COOKIE_MAX_AGE}`,
-      `HttpOnly`,
-      `SameSite=Lax`,
-    ];
-    if (isProduction) {
-      cookieParts.push('Secure');
-    }
-    const cookieString = cookieParts.join('; ');
-
-    // Create response with Set-Cookie header
-    return new NextResponse(JSON.stringify({ message: 'Logged in successfully', userId }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Set-Cookie': cookieString,
-      },
-    });
+    return NextResponse.json({ message: 'Logged in successfully', userId });
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

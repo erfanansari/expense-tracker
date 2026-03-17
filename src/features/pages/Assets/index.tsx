@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
+import { ASSET_CATEGORY_COLORS, getAssetCategoryLabel } from '@constants/assets';
 import { type ColumnDef } from '@tanstack/react-table';
 import {
   Banknote,
@@ -22,16 +23,17 @@ import type { Asset, AssetCategory } from '@types';
 import AssetForm from '@features/assets/components/AssetForm';
 
 import Button from '@components/Button';
-import DashboardLayout from '@components/DashboardLayout';
 import DataTable from '@components/DataTable';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import FormDrawer from '@components/FormDrawer';
 import useDrawer from '@components/FormDrawer/useDrawer';
+import Pulse from '@components/Skeleton';
+import { useToast } from '@components/Toast/ToastProvider';
 
-import { useToast } from '@/components/Toast/ToastProvider';
-import { getAssetCategoryLabel } from '@/constants/assets';
-import { useAssets, useDeleteAsset } from '@/hooks/use-assets';
-import { formatNumber } from '@/utils';
+import { useAssets, useDeleteAsset } from '@hooks/use-assets';
+import { useDeleteConfirmation } from '@hooks/use-delete-confirmation';
+
+import { formatNumber } from '@utils';
 
 const CATEGORY_ICONS: Record<AssetCategory, typeof Wallet> = {
   cash: Banknote,
@@ -43,19 +45,7 @@ const CATEGORY_ICONS: Record<AssetCategory, typeof Wallet> = {
   investment: TrendingUp,
 };
 
-const CATEGORY_COLORS: Record<AssetCategory, string> = {
-  cash: '#10b981',
-  crypto: '#f59e0b',
-  commodity: '#eab308',
-  vehicle: '#6366f1',
-  property: '#0070f3',
-  bank: '#8b5cf6',
-  investment: '#ec4899',
-};
-
-function Pulse({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse rounded-sm bg-zinc-300 ${className}`} aria-label="Loading" />;
-}
+const CATEGORY_COLORS = ASSET_CATEGORY_COLORS as Record<AssetCategory, string>;
 
 function AssetsSkeleton() {
   return (
@@ -207,36 +197,20 @@ export default function AssetsPage() {
   const deleteAsset = useDeleteAsset();
   const { showToast } = useToast();
 
-  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [editingAsset, setEditingAsset] = useState<Asset | undefined>(undefined);
-  const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { isOpen: isDrawerOpen, isDirty, openDrawer, closeDrawer, setIsDirty } = useDrawer();
 
-  const openDeleteModal = (asset: Asset) => {
-    setAssetToDelete(asset);
-    setIsDeleteModalOpen(true);
-  };
-
-  const closeDeleteModal = () => {
-    setAssetToDelete(null);
-    setIsDeleteModalOpen(false);
-  };
-
-  const confirmDelete = async () => {
-    if (!assetToDelete) return;
-
-    setDeletingId(assetToDelete.id);
-
-    try {
-      await deleteAsset.mutateAsync(assetToDelete.id);
-      closeDeleteModal();
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Failed to delete asset', 'error');
-    } finally {
-      setDeletingId(null);
-    }
-  };
+  const {
+    itemToDelete: assetToDelete,
+    isModalOpen: isDeleteModalOpen,
+    deletingId,
+    openModal: openDeleteModal,
+    closeModal: closeDeleteModal,
+    confirmDelete,
+  } = useDeleteConfirmation<Asset>({
+    onDelete: (id) => deleteAsset.mutateAsync(id),
+    onError: (err) => showToast(err instanceof Error ? err.message : 'Failed to delete asset', 'error'),
+  });
 
   const handleAssetChange = useCallback(() => {
     setEditingAsset(undefined);
@@ -255,6 +229,11 @@ export default function AssetsPage() {
     setEditingAsset(undefined);
     openDrawer();
   }, [openDrawer]);
+
+  const assetColumns = useMemo(
+    () => buildAssetColumns(handleEdit, openDeleteModal, deletingId),
+    [handleEdit, openDeleteModal, deletingId]
+  );
 
   // Calculate totals
   const totalValueUsd = assets.reduce((sum, a) => sum + a.totalValueUsd, 0);
@@ -285,202 +264,196 @@ export default function AssetsPage() {
   }));
 
   return (
-    <DashboardLayout>
-      <div className="min-h-screen">
-        <div className="mx-auto max-w-[1600px] px-6 py-8">
-          {/* Page Header */}
-          <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
-            <div className="min-w-0 flex-1">
-              <h1 className="text-text-primary text-xl font-bold sm:text-2xl md:text-3xl">Assets</h1>
-              <p className="text-text-muted mt-1 text-xs sm:text-sm">Track your wealth portfolio</p>
-            </div>
-            <Button variant="primary" onClick={handleAddAsset} className="shrink-0">
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add Asset</span>
-            </Button>
+    <div className="min-h-screen">
+      <div className="mx-auto max-w-[1600px] px-6 py-8">
+        {/* Page Header */}
+        <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-text-primary text-xl font-bold sm:text-2xl md:text-3xl">Assets</h1>
+            <p className="text-text-muted mt-1 text-xs sm:text-sm">Track your wealth portfolio</p>
           </div>
+          <Button variant="primary" onClick={handleAddAsset} className="shrink-0">
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Add Asset</span>
+          </Button>
+        </div>
 
-          {isLoading && assets.length === 0 ? (
-            <AssetsSkeleton />
-          ) : (
-            <>
-              {/* Summary Cards */}
-              <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
-                {/* Total Value */}
-                <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
-                  <div className="mb-4 flex items-center justify-between">
-                    <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-                      <TrendingUp className="text-blue h-5 w-5" />
-                    </div>
+        {isLoading && assets.length === 0 ? (
+          <AssetsSkeleton />
+        ) : (
+          <>
+            {/* Summary Cards */}
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
+              {/* Total Value */}
+              <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                    <TrendingUp className="text-blue h-5 w-5" />
                   </div>
-                  <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Net Worth</p>
-                  <p className="text-text-primary text-2xl font-semibold tabular-nums">
-                    ${formatNumber(totalValueUsd)}
-                  </p>
-                  <p className="text-text-secondary mt-1.5 text-sm font-medium">
-                    {formatNumber(totalValueToman)} Toman
-                  </p>
                 </div>
-
-                {/* Top 3 Categories */}
-                {Object.entries(assetsByCategory)
-                  .sort(([, a], [, b]) => b.totalUsd - a.totalUsd)
-                  .slice(0, 3)
-                  .map(([category, data]) => {
-                    const Icon = CATEGORY_ICONS[category as AssetCategory] || Wallet;
-                    const labels = getAssetCategoryLabel(category);
-                    const color = CATEGORY_COLORS[category as AssetCategory] || '#525252';
-
-                    return (
-                      <div
-                        key={category}
-                        className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm"
-                      >
-                        <div className="mb-4 flex items-center justify-between">
-                          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-                            <Icon className="h-5 w-5" style={{ color }} />
-                          </div>
-                        </div>
-                        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{labels.en}</p>
-                        <p className="text-text-primary text-2xl font-semibold tabular-nums">
-                          ${formatNumber(data.totalUsd)}
-                        </p>
-                        <p className="text-text-secondary mt-1.5 text-sm font-medium">
-                          {data.assets.length} asset{data.assets.length !== 1 ? 's' : ''}
-                        </p>
-                      </div>
-                    );
-                  })}
+                <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Net Worth</p>
+                <p className="text-text-primary text-2xl font-semibold tabular-nums">${formatNumber(totalValueUsd)}</p>
+                <p className="text-text-secondary mt-1.5 text-sm font-medium">{formatNumber(totalValueToman)} Toman</p>
               </div>
 
-              {/* Main Content */}
-              {(() => {
-                if (error && assets.length === 0) {
-                  return (
-                    <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
-                      <div className="border-danger bg-danger-light mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
-                        <Wallet className="text-danger h-8 w-8" />
-                      </div>
-                      <p className="text-danger font-medium">{error.message}</p>
-                    </div>
-                  );
-                }
-                if (assets.length === 0) {
-                  return (
-                    <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
-                      <div className="border-border-subtle bg-background-secondary mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
-                        <Wallet className="text-text-muted h-8 w-8" />
-                      </div>
-                      <p className="text-text-secondary font-medium">No assets recorded yet</p>
-                      <p className="text-text-muted mt-1 text-sm">Add your first asset above!</p>
-                    </div>
-                  );
-                }
-                return (
-                  <div className="space-y-6">
-                    {/* Asset List */}
-                    <div className="space-y-6">
-                      {Object.entries(assetsByCategory)
-                        .sort(([, a], [, b]) => b.totalUsd - a.totalUsd)
-                        .map(([category, data]) => {
-                          const Icon = CATEGORY_ICONS[category as AssetCategory] || Wallet;
-                          const labels = getAssetCategoryLabel(category);
-                          const color = CATEGORY_COLORS[category as AssetCategory] || '#525252';
+              {/* Top 3 Categories */}
+              {Object.entries(assetsByCategory)
+                .sort(([, a], [, b]) => b.totalUsd - a.totalUsd)
+                .slice(0, 3)
+                .map(([category, data]) => {
+                  const Icon = CATEGORY_ICONS[category as AssetCategory] || Wallet;
+                  const labels = getAssetCategoryLabel(category);
+                  const color = CATEGORY_COLORS[category as AssetCategory] || '#525252';
 
-                          return (
-                            <div key={category}>
-                              <div className="mb-4 flex items-center gap-2">
-                                <Icon className="h-5 w-5" style={{ color }} />
-                                <h2 className="text-text-primary text-lg font-semibold">{labels.en}</h2>
-                              </div>
-                              <DataTable
-                                data={data.assets}
-                                columns={buildAssetColumns(handleEdit, openDeleteModal, deletingId)}
-                                minWidth="min-w-[480px]"
-                                getRowId={(row) => String(row.id)}
-                              />
+                  return (
+                    <div
+                      key={category}
+                      className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm"
+                    >
+                      <div className="mb-4 flex items-center justify-between">
+                        <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                          <Icon className="h-5 w-5" style={{ color }} />
+                        </div>
+                      </div>
+                      <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{labels.en}</p>
+                      <p className="text-text-primary text-2xl font-semibold tabular-nums">
+                        ${formatNumber(data.totalUsd)}
+                      </p>
+                      <p className="text-text-secondary mt-1.5 text-sm font-medium">
+                        {data.assets.length} asset{data.assets.length !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  );
+                })}
+            </div>
+
+            {/* Main Content */}
+            {(() => {
+              if (error && assets.length === 0) {
+                return (
+                  <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
+                    <div className="border-danger bg-danger-light mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
+                      <Wallet className="text-danger h-8 w-8" />
+                    </div>
+                    <p className="text-danger font-medium">{error.message}</p>
+                  </div>
+                );
+              }
+              if (assets.length === 0) {
+                return (
+                  <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
+                    <div className="border-border-subtle bg-background-secondary mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
+                      <Wallet className="text-text-muted h-8 w-8" />
+                    </div>
+                    <p className="text-text-secondary font-medium">No assets recorded yet</p>
+                    <p className="text-text-muted mt-1 text-sm">Add your first asset above!</p>
+                  </div>
+                );
+              }
+              return (
+                <div className="space-y-6">
+                  {/* Asset List */}
+                  <div className="space-y-6">
+                    {Object.entries(assetsByCategory)
+                      .sort(([, a], [, b]) => b.totalUsd - a.totalUsd)
+                      .map(([category, data]) => {
+                        const Icon = CATEGORY_ICONS[category as AssetCategory] || Wallet;
+                        const labels = getAssetCategoryLabel(category);
+                        const color = CATEGORY_COLORS[category as AssetCategory] || '#525252';
+
+                        return (
+                          <div key={category}>
+                            <div className="mb-4 flex items-center gap-2">
+                              <Icon className="h-5 w-5" style={{ color }} />
+                              <h2 className="text-text-primary text-lg font-semibold">{labels.en}</h2>
                             </div>
+                            <DataTable
+                              data={data.assets}
+                              columns={assetColumns}
+                              minWidth="min-w-[480px]"
+                              getRowId={(row) => String(row.id)}
+                            />
+                          </div>
+                        );
+                      })}
+                  </div>
+
+                  {/* Distribution Chart */}
+                  <div className="border-border-subtle bg-background rounded-xl border p-6 shadow-sm">
+                    <h3 className="text-text-primary mb-5 text-lg font-semibold">Asset Distribution</h3>
+
+                    {/* Stacked bar */}
+                    <div className="mb-6 flex h-3 w-full overflow-hidden rounded-full">
+                      {[...chartData]
+                        .sort((a, b) => b.value - a.value)
+                        .map((entry) => {
+                          const pct = totalValueUsd > 0 ? (entry.value / totalValueUsd) * 100 : 0;
+                          return (
+                            <div
+                              key={entry.name}
+                              className="h-full"
+                              style={{ width: `${pct}%`, backgroundColor: entry.color }}
+                              title={`${entry.name}: ${pct.toFixed(1)}%`}
+                            />
                           );
                         })}
                     </div>
 
-                    {/* Distribution Chart */}
-                    <div className="border-border-subtle bg-background rounded-xl border p-6 shadow-sm">
-                      <h3 className="text-text-primary mb-5 text-lg font-semibold">Asset Distribution</h3>
-
-                      {/* Stacked bar */}
-                      <div className="mb-6 flex h-3 w-full overflow-hidden rounded-full">
-                        {[...chartData]
-                          .sort((a, b) => b.value - a.value)
-                          .map((entry) => {
-                            const pct = totalValueUsd > 0 ? (entry.value / totalValueUsd) * 100 : 0;
-                            return (
+                    {/* Legend */}
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                      {[...chartData]
+                        .sort((a, b) => b.value - a.value)
+                        .map((entry) => {
+                          const pct = totalValueUsd > 0 ? (entry.value / totalValueUsd) * 100 : 0;
+                          return (
+                            <div key={entry.name} className="flex min-w-0 items-center gap-2">
                               <div
-                                key={entry.name}
-                                className="h-full"
-                                style={{ width: `${pct}%`, backgroundColor: entry.color }}
-                                title={`${entry.name}: ${pct.toFixed(1)}%`}
+                                className="h-2.5 w-2.5 shrink-0 rounded-full"
+                                style={{ backgroundColor: entry.color }}
                               />
-                            );
-                          })}
-                      </div>
-
-                      {/* Legend */}
-                      <div className="grid grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                        {[...chartData]
-                          .sort((a, b) => b.value - a.value)
-                          .map((entry) => {
-                            const pct = totalValueUsd > 0 ? (entry.value / totalValueUsd) * 100 : 0;
-                            return (
-                              <div key={entry.name} className="flex min-w-0 items-center gap-2">
-                                <div
-                                  className="h-2.5 w-2.5 shrink-0 rounded-full"
-                                  style={{ backgroundColor: entry.color }}
-                                />
-                                <div className="min-w-0">
-                                  <p className="text-text-secondary truncate text-sm">{entry.name}</p>
-                                  <p className="text-text-muted text-xs tabular-nums">
-                                    {pct.toFixed(1)}% · ${formatNumber(entry.value)}
-                                  </p>
-                                </div>
+                              <div className="min-w-0">
+                                <p className="text-text-secondary truncate text-sm">{entry.name}</p>
+                                <p className="text-text-muted text-xs tabular-nums">
+                                  {pct.toFixed(1)}% · ${formatNumber(entry.value)}
+                                </p>
                               </div>
-                            );
-                          })}
-                      </div>
+                            </div>
+                          );
+                        })}
                     </div>
                   </div>
-                );
-              })()}
-            </>
-          )}
+                </div>
+              );
+            })()}
+          </>
+        )}
 
-          {/* Delete Confirmation Modal */}
-          <DeleteConfirmModal
-            isOpen={isDeleteModalOpen}
-            title="Delete asset"
-            message="Are you sure you want to delete this asset? All valuation history will be removed."
-            itemName={assetToDelete?.name}
-            onConfirm={confirmDelete}
-            onCancel={closeDeleteModal}
-            isDeleting={deletingId === assetToDelete?.id}
-          />
-        </div>
-
-        {/* Asset Form Drawer */}
-        <FormDrawer
-          isOpen={isDrawerOpen}
-          onClose={closeDrawer}
-          title={editingAsset ? 'Edit Asset' : 'Add New Asset'}
-          isDirty={isDirty}
-        >
-          <AssetForm
-            onAssetAdded={handleAssetChange}
-            editingAsset={editingAsset}
-            onCancelEdit={closeDrawer}
-            setIsDirty={setIsDirty}
-          />
-        </FormDrawer>
+        {/* Delete Confirmation Modal */}
+        <DeleteConfirmModal
+          isOpen={isDeleteModalOpen}
+          title="Delete asset"
+          message="Are you sure you want to delete this asset? All valuation history will be removed."
+          itemName={assetToDelete?.name}
+          onConfirm={confirmDelete}
+          onCancel={closeDeleteModal}
+          isDeleting={deletingId === assetToDelete?.id}
+        />
       </div>
-    </DashboardLayout>
+
+      {/* Asset Form Drawer */}
+      <FormDrawer
+        isOpen={isDrawerOpen}
+        onClose={closeDrawer}
+        title={editingAsset ? 'Edit Asset' : 'Add New Asset'}
+        isDirty={isDirty}
+      >
+        <AssetForm
+          onAssetAdded={handleAssetChange}
+          editingAsset={editingAsset}
+          onCancelEdit={closeDrawer}
+          setIsDirty={setIsDirty}
+        />
+      </FormDrawer>
+    </div>
   );
 }

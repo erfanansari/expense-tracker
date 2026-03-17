@@ -1,8 +1,8 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { db } from '@/core/database/client';
-import { getCurrentUser } from '@/core/session/session';
+import { db } from '@core/database/client';
+import { getCurrentUser } from '@core/session/session';
 
 // PUT /api/tags/[id] - Update tag name
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

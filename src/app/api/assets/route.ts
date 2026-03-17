@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 
-import type { Asset, CreateAssetInput } from '@/@types/asset';
-import { ASSET_CATEGORIES } from '@/constants/assets';
-import { db } from '@/core/database/client';
-import { getCurrentUser } from '@/core/session/session';
+import { createAssetSchema } from '@schemas';
+
+import { db } from '@core/database/client';
+import { getCurrentUser } from '@core/session/session';
+
+import type { Asset } from '@/@types/asset';
 
 // GET /api/assets - List all user assets
 // Query parameters:
@@ -68,25 +70,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body: CreateAssetInput = await request.json();
+    const raw = await request.json();
+    const parsed = createAssetSchema.safeParse(raw);
 
-    // Validate required fields
-    if (
-      !body.category ||
-      !body.name ||
-      body.quantity === undefined ||
-      body.totalValueUsd === undefined ||
-      body.totalValueToman === undefined ||
-      body.exchangeRateUsed === undefined
-    ) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
 
-    // Validate category
-    const validCategories = ASSET_CATEGORIES.map((c) => c.value);
-    if (!validCategories.includes(body.category)) {
-      return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
-    }
+    const body = parsed.data;
 
     const lastValuedAt = body.lastValuedAt || new Date().toISOString();
 
