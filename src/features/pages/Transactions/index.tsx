@@ -24,7 +24,7 @@ import { useToast } from '@components/Toast/ToastProvider';
 import { useDeleteConfirmation } from '@hooks/use-delete-confirmation';
 import { useDeleteExpense, useInfiniteExpenses } from '@hooks/use-expenses';
 
-import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@utils';
+import { ensureError, formatNumber, formatToFarsiDate, getCategoryLabel } from '@utils';
 
 import { type ExpenseFilters } from '@/lib/api/expenses';
 
@@ -218,7 +218,7 @@ export default function TransactionsPage() {
     confirmDelete,
   } = useDeleteConfirmation<Expense>({
     onDelete: (id) => deleteExpense.mutateAsync(id),
-    onError: (err) => showToast(err instanceof Error ? err.message : 'Failed to delete expense', 'error'),
+    onError: (err) => showToast(ensureError(err).message, 'error'),
   });
 
   const handleRowClick = (expense: Expense) => {

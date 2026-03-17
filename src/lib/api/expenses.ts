@@ -1,5 +1,7 @@
 import type { CreateExpenseInput, Expense } from '@/@types/expense';
 
+import { apiFetch, apiMutate } from './client';
+
 export interface ExpensesPage {
   expenses: Expense[];
   nextCursor: string | null;
@@ -20,41 +22,17 @@ export async function fetchExpensesPage(cursor?: string, limit = 20, filters?: E
   if (filters?.category) params.set('category', filters.category);
   if (filters?.dateFrom) params.set('dateFrom', filters.dateFrom);
   if (filters?.dateTo) params.set('dateTo', filters.dateTo);
-  const response = await fetch(`/api/expenses?${params}`);
-  if (!response.ok) throw new Error('Failed to load expenses');
-  return response.json();
+  return apiFetch<ExpensesPage>(`/api/expenses?${params}`);
 }
 
 export async function fetchAllExpenses(): Promise<Expense[]> {
-  const response = await fetch('/api/expenses');
-  if (!response.ok) throw new Error('Failed to load expenses');
-  const data = await response.json();
+  const data = await apiFetch<Expense[] | { expenses: Expense[] }>('/api/expenses');
   return Array.isArray(data) ? data : (data.expenses ?? []);
 }
 
-export async function createExpense(data: CreateExpenseInput): Promise<Expense> {
-  const response = await fetch('/api/expenses', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  const json = await response.json();
-  if (!response.ok) throw new Error(json.error || 'Failed to create expense');
-  return json;
-}
+export const createExpense = (data: CreateExpenseInput) => apiMutate<Expense>('/api/expenses', 'POST', data);
 
-export async function updateExpense(id: number, data: Partial<CreateExpenseInput>): Promise<Expense> {
-  const response = await fetch(`/api/expenses/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  const json = await response.json();
-  if (!response.ok) throw new Error(json.error || 'Failed to update expense');
-  return json;
-}
+export const updateExpense = (id: number, data: Partial<CreateExpenseInput>) =>
+  apiMutate<Expense>(`/api/expenses/${id}`, 'PUT', data);
 
-export async function deleteExpense(id: number): Promise<void> {
-  const response = await fetch(`/api/expenses/${id}`, { method: 'DELETE' });
-  if (!response.ok) throw new Error('Failed to delete expense');
-}
+export const deleteExpense = (id: number) => apiMutate<void>(`/api/expenses/${id}`, 'DELETE');

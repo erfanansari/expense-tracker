@@ -8,6 +8,8 @@ import DeleteTagModal from '@components/DeleteTagModal';
 
 import { useCreateTag, useDeleteTag, useTagsWithUsage, useUpdateTag } from '@hooks/use-tags';
 
+import { ensureError } from '@utils';
+
 import type { TagWithUsage } from '@/@types/expense';
 
 const TagManagementList = () => {
@@ -61,8 +63,7 @@ const TagManagementList = () => {
       setEditingTagId(null);
       setEditingName('');
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Failed to update tag';
-      setEditError(msg);
+      setEditError(ensureError(error).message);
     }
   };
 
@@ -113,8 +114,7 @@ const TagManagementList = () => {
       setNewTagName('');
       setCreateError('');
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Failed to create tag';
-      setCreateError(msg);
+      setCreateError(ensureError(error).message);
     }
   };
 

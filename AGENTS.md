@@ -116,19 +116,105 @@ Use `useDeleteConfirmation` hook from `@hooks/use-delete-confirmation` instead o
 
 Use `useExchangeRateForm` hook from `@hooks/use-exchange-rate-form` for forms needing exchange rate fetching + user override.
 
-### Next.js 16 API Route Params
+### API Route Pattern
 
-Route `params` are async and must be awaited:
+All protected API routes use the `withAuth` wrapper from `@core/api/utils`. This eliminates manual auth checks, try-catch, and error logging.
 
 ```typescript
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-}
+import { parseIdParam, validateBody, verifyOwnership, withAuth } from '@core/api/utils';
+
+// Collection route (no params)
+export const GET = withAuth(async (user, request) => {
+  // user is guaranteed to be authenticated
+  return NextResponse.json(data);
+}, 'FeatureName');
+
+// Item route (with [id] param)
+export const PUT = withAuth(async (user, request, { params }) => {
+  const id = await parseIdParam(params);
+  if (id instanceof NextResponse) return id;
+
+  const existing = await verifyOwnership('tableName', id, user.userId);
+  if (existing instanceof NextResponse) return existing;
+
+  const raw = await request.json();
+  const result = validateBody(schema, raw);
+  if (result instanceof NextResponse) return result;
+
+  // ... business logic with result.data
+}, 'FeatureName');
 ```
 
-### API Input Validation
+**Utilities in `@core/api/utils`:**
 
-Use Zod schemas from `@schemas` for validating API request bodies with `schema.safeParse(body)`.
+| Utility                                    | Purpose                                                              |
+| ------------------------------------------ | -------------------------------------------------------------------- |
+| `withAuth(handler, label?)`                | Wraps handler with auth check + try-catch + error logging            |
+| `parseIdParam(params)`                     | Validates async `[id]` param, returns `number \| NextResponse`       |
+| `verifyOwnership(table, id, userId, col?)` | Checks record exists and belongs to user, returns row or 404         |
+| `validateBody(schema, body)`               | Zod `safeParse` + error response, returns `{ data } \| NextResponse` |
+
+**Tag helpers in `@core/database/tags`:**
+
+| Helper                            | Purpose                                             |
+| --------------------------------- | --------------------------------------------------- |
+| `fetchTagsForExpenses(ids)`       | Bulk-fetch tags for expense list (avoids N+1)       |
+| `assignTagsToExpense(id, tagIds)` | Replace all tags for an expense (delete + reinsert) |
+
+### Client API Pattern
+
+All client-side API calls use `apiFetch` / `apiMutate` from `src/lib/api/client.ts`.
+
+```typescript
+import { apiFetch, apiMutate } from './client';
+
+// GET requests
+export const fetchItems = () => apiFetch<Item[]>('/api/items');
+
+// POST/PUT/DELETE requests
+export const createItem = (data: CreateInput) => apiMutate<Item>('/api/items', 'POST', data);
+
+export const deleteItem = (id: number) => apiMutate<void>(`/api/items/${id}`, 'DELETE');
+```
+
+- `apiFetch<T>(url, options?)` — for GET requests, returns typed JSON
+- `apiMutate<T>(url, method, body?)` — for POST/PUT/DELETE, auto-sets headers and stringifies body
+- Both throw `ApiError` (with `.message` and `.status`) on non-ok responses
+
+### React Query Conventions
+
+Query keys are defined in `src/lib/query-keys.ts`. Always use the factory functions:
+
+```typescript
+import { queryKeys } from '@/lib/query-keys';
+
+// Query
+useQuery({ queryKey: queryKeys.expenses.all(), queryFn: fetchAllExpenses });
+
+// Mutation invalidation
+onSuccess: () => {
+  queryClient.invalidateQueries({ queryKey: queryKeys.expenses.all() });
+  queryClient.invalidateQueries({ queryKey: queryKeys.summary.all() });
+};
+```
+
+**Key structure:** `[domain, variant?]` — e.g., `['expenses']`, `['expenses', 'paginated']`, `['tags', 'withUsage']`
+
+**Invalidation rules:** Mutations that change data must invalidate related queries. Expense mutations should also invalidate `summary`.
+
+### Error Handling
+
+Use `ensureError` from `@utils` in catch blocks instead of `instanceof Error` checks:
+
+```typescript
+import { ensureError } from '@utils';
+
+try {
+  await someAction();
+} catch (err) {
+  showToast(ensureError(err).message, 'error');
+}
+```
 
 ---
 
@@ -141,6 +227,34 @@ pnpm lint         # Lint code
 pnpm migrate      # Run database migration
 pnpm db:test      # Test database connection
 ```
+
+---
+
+## Naming Conventions
+
+| Kind                 | Convention                                                 | Example                                            |
+| -------------------- | ---------------------------------------------------------- | -------------------------------------------------- |
+| Files (components)   | kebab-case directory, `index.tsx` inside                   | `components/DeleteConfirmModal/index.tsx`          |
+| Components           | PascalCase                                                 | `ExpenseForm`, `TagInput`                          |
+| Hooks                | `use-` prefix, kebab-case files                            | `hooks/use-tags.ts` → `useTags()`                  |
+| Constants            | UPPER_SNAKE_CASE                                           | `ASSET_CATEGORIES`, `INCOME_TYPES`                 |
+| Zod schemas          | camelCase + `Schema` suffix                                | `createExpenseSchema`, `loginSchema`               |
+| API client functions | camelCase, verb prefix                                     | `fetchExpenses()`, `createIncome()`, `deleteTag()` |
+| Query keys           | nested object in `query-keys.ts`                           | `queryKeys.expenses.all()`                         |
+| Database columns     | camelCase (except legacy `expenses` table uses snake_case) | `userId`, `amountUsd`                              |
+
+---
+
+## Anti-Patterns (Do Not)
+
+- **No raw `fetch()`** in client code — use `apiFetch` / `apiMutate` from `lib/api/client.ts`
+- **No manual auth checks** in API routes — use `withAuth` wrapper
+- **No `console.log`** in production code (use `console.error` only in catch blocks via `withAuth`)
+- **No hardcoded colors** — use theme tokens from `globals.css`
+- **No duplicate constants** — import from `@constants/`
+- **No `confirm()` / `alert()`** — use custom modal components
+- **No `instanceof Error` checks** — use `ensureError()` from `@utils`
+- **No index-based DB row access** — use named column access (`row.name`, not `row[0]`)
 
 ---
 

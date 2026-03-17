@@ -33,7 +33,7 @@ import { useToast } from '@components/Toast/ToastProvider';
 import { useAssets, useDeleteAsset } from '@hooks/use-assets';
 import { useDeleteConfirmation } from '@hooks/use-delete-confirmation';
 
-import { formatNumber } from '@utils';
+import { ensureError, formatNumber } from '@utils';
 
 const CATEGORY_ICONS: Record<AssetCategory, typeof Wallet> = {
   cash: Banknote,
@@ -209,7 +209,7 @@ export default function AssetsPage() {
     confirmDelete,
   } = useDeleteConfirmation<Asset>({
     onDelete: (id) => deleteAsset.mutateAsync(id),
-    onError: (err) => showToast(err instanceof Error ? err.message : 'Failed to delete asset', 'error'),
+    onError: (err) => showToast(ensureError(err).message, 'error'),
   });
 
   const handleAssetChange = useCallback(() => {

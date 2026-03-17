@@ -18,6 +18,8 @@ import Tooltip from '@components/Tooltip';
 import { useCreateAsset, useUpdateAsset } from '@hooks/use-assets';
 import { useExchangeRateForm } from '@hooks/use-exchange-rate-form';
 
+import { ensureError } from '@utils';
+
 import type { Asset, AssetCategory, CreateAssetInput } from '@/@types/asset';
 
 interface AssetFormProps {
@@ -179,8 +181,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
         onCancelEdit();
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to save asset';
-      showToast(errorMessage, 'error');
+      showToast(ensureError(err).message, 'error');
     }
   };
 

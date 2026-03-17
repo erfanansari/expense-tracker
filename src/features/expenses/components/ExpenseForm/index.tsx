@@ -20,6 +20,8 @@ import Tooltip from '@components/Tooltip';
 import { useExchangeRateForm } from '@hooks/use-exchange-rate-form';
 import { useCreateExpense, useUpdateExpense } from '@hooks/use-expenses';
 
+import { ensureError } from '@utils';
+
 import { type CreateExpenseInput, type Tag } from '@/@types/expense';
 
 import TagInput from '../TagInput';
@@ -190,7 +192,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
         onCancelEdit();
       }
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Failed to save expense', 'error');
+      showToast(ensureError(err).message, 'error');
     }
   };
 

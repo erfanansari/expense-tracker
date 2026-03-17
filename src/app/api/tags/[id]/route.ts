@@ -1,109 +1,68 @@
-import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
+import { parseIdParam, verifyOwnership, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
-import { getCurrentUser } from '@core/session/session';
 
 // PUT /api/tags/[id] - Update tag name
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+export const PUT = withAuth(async (user, request, { params }) => {
+  const id = await parseIdParam(params);
+  if (id instanceof NextResponse) return id;
 
-    const { id } = await params;
-    const tagId = parseInt(id, 10);
-    if (isNaN(tagId)) {
-      return NextResponse.json({ error: 'Invalid tag ID' }, { status: 400 });
-    }
+  const existing = await verifyOwnership('tags', id, user.userId, 'user_id');
+  if (existing instanceof NextResponse) return existing;
 
-    const { name } = await request.json();
+  const { name } = await request.json();
 
-    if (!name || typeof name !== 'string' || name.trim().length === 0) {
-      return NextResponse.json({ error: 'Tag name is required' }, { status: 400 });
-    }
-
-    const trimmedName = name.trim();
-
-    // Verify tag exists and belongs to user
-    const existingTag = await db.execute({
-      sql: 'SELECT id FROM tags WHERE id = ? AND user_id = ?',
-      args: [tagId, user.userId],
-    });
-
-    if (existingTag.rows.length === 0) {
-      return NextResponse.json({ error: 'Tag not found' }, { status: 404 });
-    }
-
-    // Check for duplicate name (excluding current tag)
-    const duplicate = await db.execute({
-      sql: 'SELECT id FROM tags WHERE LOWER(name) = LOWER(?) AND user_id = ? AND id != ?',
-      args: [trimmedName, user.userId, tagId],
-    });
-
-    if (duplicate.rows.length > 0) {
-      return NextResponse.json({ error: `Tag "${trimmedName}" already exists` }, { status: 409 });
-    }
-
-    // Update tag name
-    const result = await db.execute({
-      sql: 'UPDATE tags SET name = ? WHERE id = ? AND user_id = ? RETURNING *',
-      args: [trimmedName, tagId, user.userId],
-    });
-
-    return NextResponse.json(result.rows[0]);
-  } catch (error) {
-    console.error('Failed to update tag:', error);
-    return NextResponse.json({ error: 'Failed to update tag' }, { status: 500 });
+  if (!name || typeof name !== 'string' || name.trim().length === 0) {
+    return NextResponse.json({ error: 'Tag name is required' }, { status: 400 });
   }
-}
+
+  const trimmedName = name.trim();
+
+  // Check for duplicate name (excluding current tag)
+  const duplicate = await db.execute({
+    sql: 'SELECT id FROM tags WHERE LOWER(name) = LOWER(?) AND user_id = ? AND id != ?',
+    args: [trimmedName, user.userId, id],
+  });
+
+  if (duplicate.rows.length > 0) {
+    return NextResponse.json({ error: `Tag "${trimmedName}" already exists` }, { status: 409 });
+  }
+
+  // Update tag name
+  const result = await db.execute({
+    sql: 'UPDATE tags SET name = ? WHERE id = ? AND user_id = ? RETURNING *',
+    args: [trimmedName, id, user.userId],
+  });
+
+  return NextResponse.json(result.rows[0]);
+}, 'Tags');
 
 // DELETE /api/tags/[id] - Delete tag
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+export const DELETE = withAuth(async (user, _request, { params }) => {
+  const id = await parseIdParam(params);
+  if (id instanceof NextResponse) return id;
 
-    const { id } = await params;
-    const tagId = parseInt(id, 10);
-    if (isNaN(tagId)) {
-      return NextResponse.json({ error: 'Invalid tag ID' }, { status: 400 });
-    }
+  const existing = await verifyOwnership('tags', id, user.userId, 'user_id');
+  if (existing instanceof NextResponse) return existing;
 
-    // Verify tag exists and belongs to user
-    const existingTag = await db.execute({
-      sql: 'SELECT id, name FROM tags WHERE id = ? AND user_id = ?',
-      args: [tagId, user.userId],
-    });
+  // Get usage count before deletion
+  const usageResult = await db.execute({
+    sql: 'SELECT COUNT(*) as count FROM expense_tags WHERE tag_id = ?',
+    args: [id],
+  });
 
-    if (existingTag.rows.length === 0) {
-      return NextResponse.json({ error: 'Tag not found' }, { status: 404 });
-    }
+  const usageCount = (usageResult.rows[0] as unknown as { count: number }).count;
 
-    // Get usage count before deletion
-    const usageResult = await db.execute({
-      sql: 'SELECT COUNT(*) as count FROM expense_tags WHERE tag_id = ?',
-      args: [tagId],
-    });
+  // Delete tag (CASCADE will automatically remove from expense_tags)
+  await db.execute({
+    sql: 'DELETE FROM tags WHERE id = ? AND user_id = ?',
+    args: [id, user.userId],
+  });
 
-    const usageCount = (usageResult.rows[0] as unknown as { count: number }).count;
-
-    // Delete tag (CASCADE will automatically remove from expense_tags)
-    await db.execute({
-      sql: 'DELETE FROM tags WHERE id = ? AND user_id = ?',
-      args: [tagId, user.userId],
-    });
-
-    return NextResponse.json({
-      success: true,
-      usageCount,
-      message: `Tag deleted successfully`,
-    });
-  } catch (error) {
-    console.error('Failed to delete tag:', error);
-    return NextResponse.json({ error: 'Failed to delete tag' }, { status: 500 });
-  }
-}
+  return NextResponse.json({
+    success: true,
+    usageCount,
+    message: `Tag deleted successfully`,
+  });
+}, 'Tags');

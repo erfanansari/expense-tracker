@@ -1,3 +1,5 @@
+import { apiFetch } from './client';
+
 export interface SummaryData {
   current_month_income_usd: number;
   current_month_income_toman: number;
@@ -11,8 +13,4 @@ export interface SummaryData {
   net_worth_toman: number;
 }
 
-export async function fetchSummary(): Promise<SummaryData> {
-  const response = await fetch('/api/summary');
-  if (!response.ok) throw new Error('Failed to load summary');
-  return response.json();
-}
+export const fetchSummary = () => apiFetch<SummaryData>('/api/summary');
