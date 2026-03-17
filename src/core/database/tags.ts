@@ -37,3 +37,23 @@ export async function fetchTagsForExpenses(expenseIds: InValue[]): Promise<Recor
 
   return tagsMap;
 }
+
+/**
+ * Replace all tag associations for an expense.
+ * Deletes existing tags then inserts new ones.
+ */
+export async function assignTagsToExpense(expenseId: number, tagIds: number[] | undefined): Promise<void> {
+  await db.execute({
+    sql: 'DELETE FROM expense_tags WHERE expense_id = ?',
+    args: [expenseId],
+  });
+
+  if (tagIds && tagIds.length > 0) {
+    for (const tagId of tagIds) {
+      await db.execute({
+        sql: 'INSERT INTO expense_tags (expense_id, tag_id) VALUES (?, ?)',
+        args: [expenseId, tagId],
+      });
+    }
+  }
+}

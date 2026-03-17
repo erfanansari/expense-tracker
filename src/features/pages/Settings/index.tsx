@@ -13,6 +13,8 @@ import { useToast } from '@components/Toast/ToastProvider';
 
 import { useUpdateUserProfile } from '@hooks/use-user-profile';
 
+import { ensureError } from '@utils';
+
 function Pulse({ className = '' }: { className?: string }) {
   return <div className={`animate-pulse rounded-sm bg-zinc-300 ${className}`} aria-label="Loading" />;
 }
@@ -77,7 +79,7 @@ export default function SettingsPage() {
       showToast('Profile updated successfully!', 'success');
       setIsEditing(false);
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Failed to update profile', 'error');
+      showToast(ensureError(err).message, 'error');
     }
   };
 

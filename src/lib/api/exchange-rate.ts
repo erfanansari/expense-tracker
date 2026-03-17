@@ -1,3 +1,5 @@
+import { apiFetch } from './client';
+
 export interface ExchangeRateData {
   usd?: { value: string; change: number };
   _meta?: {
@@ -8,8 +10,4 @@ export interface ExchangeRateData {
   };
 }
 
-export async function fetchExchangeRate(): Promise<ExchangeRateData> {
-  const response = await fetch('/api/exchange-rate');
-  if (!response.ok) throw new Error('Failed to fetch exchange rate');
-  return response.json();
-}
+export const fetchExchangeRate = () => apiFetch<ExchangeRateData>('/api/exchange-rate');

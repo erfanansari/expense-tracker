@@ -2,103 +2,51 @@ import { NextResponse } from 'next/server';
 
 import { createExpenseSchema } from '@schemas';
 
+import { parseIdParam, validateBody, verifyOwnership, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
-import { getCurrentUser } from '@core/session/session';
+import { assignTagsToExpense } from '@core/database/tags';
 
 // PUT /api/expenses/[id] - Update an expense
-export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    // Get current user
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+export const PUT = withAuth(async (user, request, { params }) => {
+  const id = await parseIdParam(params);
+  if (id instanceof NextResponse) return id;
 
-    const { id } = await params;
+  const existing = await verifyOwnership('expenses', id, user.userId, 'user_id');
+  if (existing instanceof NextResponse) return existing;
 
-    // Validate ID
-    if (!id || isNaN(Number(id))) {
-      return NextResponse.json({ error: 'Invalid expense ID' }, { status: 400 });
-    }
+  const raw = await request.json();
+  const result = validateBody(createExpenseSchema, raw);
+  if (result instanceof NextResponse) return result;
 
-    // Check if expense belongs to user
-    const existing = await db.execute({
-      sql: 'SELECT id FROM expenses WHERE id = ? AND user_id = ?',
-      args: [Number(id), user.userId],
-    });
+  const body = result.data;
 
-    if (existing.rows.length === 0) {
-      return NextResponse.json({ error: 'Expense not found' }, { status: 404 });
-    }
+  // Update the expense
+  await db.execute({
+    sql: `UPDATE expenses
+          SET date = ?, category = ?, description = ?, price_toman = ?, price_usd = ?
+          WHERE id = ? AND user_id = ?`,
+    args: [body.date, body.category, body.description, body.price_toman, body.price_usd, id, user.userId],
+  });
 
-    const raw = await request.json();
-    const parsed = createExpenseSchema.safeParse(raw);
+  // Update tags - delete existing and insert new ones
+  await assignTagsToExpense(id, body.tagIds);
 
-    if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
-    }
-
-    const body = parsed.data;
-
-    // Update the expense
-    await db.execute({
-      sql: `UPDATE expenses
-            SET date = ?, category = ?, description = ?, price_toman = ?, price_usd = ?
-            WHERE id = ? AND user_id = ?`,
-      args: [body.date, body.category, body.description, body.price_toman, body.price_usd, Number(id), user.userId],
-    });
-
-    // Update tags - delete existing and insert new ones
-    await db.execute({
-      sql: 'DELETE FROM expense_tags WHERE expense_id = ?',
-      args: [Number(id)],
-    });
-
-    if (body.tagIds && body.tagIds.length > 0) {
-      for (const tagId of body.tagIds) {
-        await db.execute({
-          sql: 'INSERT INTO expense_tags (expense_id, tag_id) VALUES (?, ?)',
-          args: [Number(id), tagId],
-        });
-      }
-    }
-
-    return NextResponse.json({ message: 'Expense updated successfully' }, { status: 200 });
-  } catch (error) {
-    console.error('Failed to update expense:', error);
-    return NextResponse.json({ error: 'Failed to update expense' }, { status: 500 });
-  }
-}
+  return NextResponse.json({ message: 'Expense updated successfully' }, { status: 200 });
+}, 'Expenses');
 
 // DELETE /api/expenses/[id] - Delete an expense
-export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    // Get current user
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+export const DELETE = withAuth(async (user, _request, { params }) => {
+  const id = await parseIdParam(params);
+  if (id instanceof NextResponse) return id;
 
-    const { id } = await params;
+  const result = await db.execute({
+    sql: 'DELETE FROM expenses WHERE id = ? AND user_id = ?',
+    args: [id, user.userId],
+  });
 
-    // Validate ID
-    if (!id || isNaN(Number(id))) {
-      return NextResponse.json({ error: 'Invalid expense ID' }, { status: 400 });
-    }
-
-    // Delete the expense (only if it belongs to user)
-    const result = await db.execute({
-      sql: 'DELETE FROM expenses WHERE id = ? AND user_id = ?',
-      args: [Number(id), user.userId],
-    });
-
-    if (result.rowsAffected === 0) {
-      return NextResponse.json({ error: 'Expense not found' }, { status: 404 });
-    }
-
-    return NextResponse.json({ message: 'Expense deleted successfully' }, { status: 200 });
-  } catch (error) {
-    console.error('Failed to delete expense:', error);
-    return NextResponse.json({ error: 'Failed to delete expense' }, { status: 500 });
+  if (result.rowsAffected === 0) {
+    return NextResponse.json({ error: 'Expense not found' }, { status: 404 });
   }
-}
+
+  return NextResponse.json({ message: 'Expense deleted successfully' }, { status: 200 });
+}, 'Expenses');

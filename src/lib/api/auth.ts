@@ -1,3 +1,5 @@
+import { apiMutate } from './client';
+
 export interface AuthUser {
   id: number;
   email: string;
@@ -13,13 +15,7 @@ export async function fetchMe(): Promise<AuthUser | null> {
 }
 
 export async function login(email: string, password: string): Promise<AuthUser> {
-  const response = await fetch('/api/auth/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || 'Login failed');
+  const data = await apiMutate<{ user: AuthUser }>('/api/auth/login', 'POST', { email, password });
   return data.user;
 }
 
@@ -33,33 +29,17 @@ export async function signup(
   password: string,
   passwordConfirm: string
 ): Promise<AuthUser> {
-  const response = await fetch('/api/auth/signup', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, password, passwordConfirm }),
+  const data = await apiMutate<{ user: AuthUser }>('/api/auth/signup', 'POST', {
+    name,
+    email,
+    password,
+    passwordConfirm,
   });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || 'Signup failed');
   return data.user;
 }
 
-export async function forgotPassword(email: string): Promise<{ message: string }> {
-  const response = await fetch('/api/auth/forgot-password', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || 'Failed to send reset email');
-  return data;
-}
+export const forgotPassword = (email: string) =>
+  apiMutate<{ message: string }>('/api/auth/forgot-password', 'POST', { email });
 
-export async function resetPassword(token: string, password: string): Promise<void> {
-  const response = await fetch('/api/auth/reset-password', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token, password }),
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || 'Failed to reset password');
-}
+export const resetPassword = (token: string, password: string) =>
+  apiMutate<void>('/api/auth/reset-password', 'POST', { token, password });

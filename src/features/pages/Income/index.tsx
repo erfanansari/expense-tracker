@@ -21,7 +21,7 @@ import { useToast } from '@components/Toast/ToastProvider';
 import { useDeleteConfirmation } from '@hooks/use-delete-confirmation';
 import { useDeleteIncome, useIncomes } from '@hooks/use-incomes';
 
-import { formatNumber, getJalaliMonthName } from '@utils';
+import { ensureError, formatNumber, getJalaliMonthName } from '@utils';
 
 function IncomeSkeleton() {
   return (
@@ -190,7 +190,7 @@ export default function IncomePage() {
     confirmDelete,
   } = useDeleteConfirmation<Income>({
     onDelete: (id) => deleteIncome.mutateAsync(id),
-    onError: (err) => showToast(err instanceof Error ? err.message : 'Failed to delete income', 'error'),
+    onError: (err) => showToast(ensureError(err).message, 'error'),
   });
 
   const handleIncomeChange = useCallback(() => {

@@ -18,7 +18,7 @@ import Tooltip from '@components/Tooltip';
 import { useExchangeRateForm } from '@hooks/use-exchange-rate-form';
 import { useCreateIncome, useUpdateIncome } from '@hooks/use-incomes';
 
-import { getJalaliMonthName } from '@utils';
+import { ensureError, getJalaliMonthName } from '@utils';
 
 import type { CreateIncomeInput, Income } from '@/@types/income';
 
@@ -169,7 +169,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
         onCancelEdit();
       }
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Failed to save income', 'error');
+      showToast(ensureError(err).message, 'error');
     }
   };
 

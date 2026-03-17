@@ -6,6 +6,8 @@ import { Check, Edit2, Loader2, Plus, Tag as TagIcon, X } from 'lucide-react';
 
 import { useCreateTag, useTags, useUpdateTag } from '@hooks/use-tags';
 
+import { ensureError } from '@utils';
+
 import { type Tag } from '@/@types/expense';
 
 interface TagInputProps {
@@ -117,8 +119,7 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
       setEditingTagId(null);
       setEditingName('');
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Failed to update tag';
-      setEditError(msg);
+      setEditError(ensureError(error).message);
     }
   };
 
