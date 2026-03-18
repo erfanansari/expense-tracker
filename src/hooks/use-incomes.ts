@@ -1,8 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import type { CreateIncomeInput, UpdateIncomeInput } from '@/@types/income';
 import { createIncome, deleteIncome, fetchIncomes, updateIncome } from '@/lib/api/incomes';
 import { queryKeys } from '@/lib/query-keys';
+
+import { useMutationWithInvalidation } from './use-mutation-with-invalidation';
+
+const INCOME_INVALIDATION_KEYS = [queryKeys.incomes.all(), queryKeys.summary.all()] as const;
 
 export function useIncomes() {
   return useQuery({
@@ -11,38 +15,15 @@ export function useIncomes() {
   });
 }
 
-export function useCreateIncome() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: createIncome,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.incomes.all() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.summary.all() });
-    },
-  });
-}
+export const useCreateIncome = () => useMutationWithInvalidation(createIncome, INCOME_INVALIDATION_KEYS);
 
-export function useUpdateIncome() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: UpdateIncomeInput }) => updateIncome(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.incomes.all() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.summary.all() });
-    },
-  });
-}
+export const useUpdateIncome = () =>
+  useMutationWithInvalidation(
+    ({ id, data }: { id: number; data: UpdateIncomeInput }) => updateIncome(id, data),
+    INCOME_INVALIDATION_KEYS
+  );
 
-export function useDeleteIncome() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: deleteIncome,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.incomes.all() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.summary.all() });
-    },
-  });
-}
+export const useDeleteIncome = () => useMutationWithInvalidation(deleteIncome, INCOME_INVALIDATION_KEYS);
 
 // Re-export type so pages don't need to import from lib/api
 export type { CreateIncomeInput };

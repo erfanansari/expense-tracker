@@ -112,6 +112,21 @@ Use `twMerge` from `tailwind-merge` for dynamic class composition. Never use tem
 
 Use `useDeleteConfirmation` hook from `@hooks/use-delete-confirmation` instead of duplicating modal state management.
 
+### Action Buttons
+
+Use the `ActionButtons` component from `@components/ActionButtons` for edit+delete button pairs in table action columns:
+
+```typescript
+import ActionButtons from '@components/ActionButtons';
+
+<ActionButtons
+  onEdit={() => handleEdit(item)}
+  onDelete={() => openDeleteModal(item)}
+  isDeleting={deletingId === item.id}
+  editTitle="Update Value" // optional, defaults to "Edit"
+/>
+```
+
 ### Exchange Rate Forms
 
 Use `useExchangeRateForm` hook from `@hooks/use-exchange-rate-form` for forms needing exchange rate fetching + user override.
@@ -153,6 +168,7 @@ export const PUT = withAuth(async (user, request, { params }) => {
 | `parseIdParam(params)`                     | Validates async `[id]` param, returns `number \| NextResponse`       |
 | `verifyOwnership(table, id, userId, col?)` | Checks record exists and belongs to user, returns row or 404         |
 | `validateBody(schema, body)`               | Zod `safeParse` + error response, returns `{ data } \| NextResponse` |
+| `getSearchParams(request)`                 | Safe URL search params extraction with fallback                      |
 
 **Tag helpers in `@core/database/tags`:**
 
@@ -160,6 +176,17 @@ export const PUT = withAuth(async (user, request, { params }) => {
 | --------------------------------- | --------------------------------------------------- |
 | `fetchTagsForExpenses(ids)`       | Bulk-fetch tags for expense list (avoids N+1)       |
 | `assignTagsToExpense(id, tagIds)` | Replace all tags for an expense (delete + reinsert) |
+
+**Row mappers in `@core/database/mappers`:**
+
+| Mapper                        | Purpose                                |
+| ----------------------------- | -------------------------------------- |
+| `mapRowToIncome(row)`         | Maps DB row → `Income` type            |
+| `mapRowToAsset(row)`          | Maps DB row → `Asset` type             |
+| `mapRowToAssetValuation`      | Maps DB row → `AssetValuation` type    |
+| `mapRowToExpense(row, tags?)` | Maps DB row → `Expense` type with tags |
+
+Always use mappers instead of inline row-to-type casts. Single source of truth for field mapping.
 
 ### Client API Pattern
 
@@ -190,17 +217,24 @@ import { queryKeys } from '@/lib/query-keys';
 
 // Query
 useQuery({ queryKey: queryKeys.expenses.all(), queryFn: fetchAllExpenses });
-
-// Mutation invalidation
-onSuccess: () => {
-  queryClient.invalidateQueries({ queryKey: queryKeys.expenses.all() });
-  queryClient.invalidateQueries({ queryKey: queryKeys.summary.all() });
-};
 ```
 
 **Key structure:** `[domain, variant?]` — e.g., `['expenses']`, `['expenses', 'paginated']`, `['tags', 'withUsage']`
 
 **Invalidation rules:** Mutations that change data must invalidate related queries. Expense mutations should also invalidate `summary`.
+
+#### Mutation Hook Factory
+
+Use `useMutationWithInvalidation` from `@/hooks/use-mutation-with-invalidation` for all mutation hooks. Never manually wire `useQueryClient` + `useMutation` + `invalidateQueries`:
+
+```typescript
+import { useMutationWithInvalidation } from './use-mutation-with-invalidation';
+
+const INVALIDATION_KEYS = [queryKeys.assets.all(), queryKeys.summary.all()] as const;
+
+// One-liner instead of 10 lines
+export const useCreateAsset = () => useMutationWithInvalidation(createAsset, INVALIDATION_KEYS);
+```
 
 ### Error Handling
 
@@ -245,6 +279,12 @@ pnpm db:test      # Test database connection
 
 ---
 
+## Import Conventions
+
+- Use `import type { Foo }` (not `import { type Foo }`) for type-only imports
+- Import order: third-party → path aliases → relative imports
+- Separate import groups with blank lines
+
 ## Anti-Patterns (Do Not)
 
 - **No raw `fetch()`** in client code — use `apiFetch` / `apiMutate` from `lib/api/client.ts`
@@ -255,6 +295,10 @@ pnpm db:test      # Test database connection
 - **No `confirm()` / `alert()`** — use custom modal components
 - **No `instanceof Error` checks** — use `ensureError()` from `@utils`
 - **No index-based DB row access** — use named column access (`row.name`, not `row[0]`)
+- **No duplicate row mapping** — use mappers from `@core/database/mappers`
+- **No manual URL parsing** in API routes — use `getSearchParams(request)` from `@core/api/utils`
+- **No inline edit+delete buttons** — use `ActionButtons` component from `@components/ActionButtons`
+- **No manual mutation boilerplate** — use `useMutationWithInvalidation` from `@/hooks/use-mutation-with-invalidation`
 
 ---
 

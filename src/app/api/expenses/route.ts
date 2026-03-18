@@ -2,11 +2,10 @@ import { NextResponse } from 'next/server';
 
 import { createExpenseSchema } from '@schemas';
 
-import { validateBody, withAuth } from '@core/api/utils';
+import { getSearchParams, validateBody, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
+import { mapRowToExpense } from '@core/database/mappers';
 import { assignTagsToExpense, fetchTagsForExpenses } from '@core/database/tags';
-
-import { type Expense } from '@/@types/expense';
 
 // GET /api/expenses - Fetch expenses with pagination support
 // Query parameters:
@@ -15,15 +14,7 @@ import { type Expense } from '@/@types/expense';
 // If limit is not provided, returns all expenses in the old format (backward compatible)
 // If limit is provided, returns paginated format: { expenses, nextCursor, hasMore }
 export const GET = withAuth(async (user, request) => {
-  // Handle both Request object and edge cases
-  let url: URL;
-  try {
-    url = new URL(request.url);
-  } catch {
-    // Fallback if URL parsing fails
-    url = new URL(request.url || '', 'http://localhost');
-  }
-  const { searchParams } = url;
+  const searchParams = getSearchParams(request);
   const limitParam = searchParams.get('limit');
   const cursor = searchParams.get('cursor');
   const description = searchParams.get('description')?.trim() || null;
@@ -41,17 +32,7 @@ export const GET = withAuth(async (user, request) => {
 
     // Fetch tags for all expenses
     const tagsMap = await fetchTagsForExpenses(result.rows.map((row) => row.id));
-
-    const expenses: Expense[] = result.rows.map((row) => ({
-      id: row.id as number,
-      date: row.date as string,
-      category: row.category as string,
-      description: row.description as string,
-      price_toman: row.price_toman as number,
-      price_usd: row.price_usd as number,
-      created_at: row.created_at as string,
-      tags: tagsMap[row.id as number] || [],
-    }));
+    const expenses = result.rows.map((row) => mapRowToExpense(row, tagsMap[row.id as number]));
 
     return NextResponse.json(expenses);
   }
@@ -98,17 +79,7 @@ export const GET = withAuth(async (user, request) => {
 
   // Fetch tags for all expenses
   const tagsMap = await fetchTagsForExpenses(expensesToReturn.map((row) => row.id));
-
-  const expenses: Expense[] = expensesToReturn.map((row) => ({
-    id: row.id as number,
-    date: row.date as string,
-    category: row.category as string,
-    description: row.description as string,
-    price_toman: row.price_toman as number,
-    price_usd: row.price_usd as number,
-    created_at: row.created_at as string,
-    tags: tagsMap[row.id as number] || [],
-  }));
+  const expenses = expensesToReturn.map((row) => mapRowToExpense(row, tagsMap[row.id as number]));
 
   // Generate next cursor from the last item
   let nextCursor: string | null = null;

@@ -8,6 +8,18 @@ import { getCurrentUser } from '@core/session/session';
 import type { Session } from '@/@types/auth';
 
 // ---------------------------------------------------------------------------
+// getSearchParams — safe URL search params extraction
+// ---------------------------------------------------------------------------
+
+export function getSearchParams(request: Request): URLSearchParams {
+  try {
+    return new URL(request.url).searchParams;
+  } catch {
+    return new URL(request.url || '', 'http://localhost').searchParams;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 

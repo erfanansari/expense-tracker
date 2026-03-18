@@ -4,24 +4,13 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { ASSET_CATEGORY_COLORS, getAssetCategoryLabel } from '@constants/assets';
 import { type ColumnDef } from '@tanstack/react-table';
-import {
-  Banknote,
-  Bitcoin,
-  Building2,
-  Edit2,
-  Gem,
-  Landmark,
-  Loader2,
-  Plus,
-  Trash2,
-  TrendingUp,
-  Wallet,
-} from 'lucide-react';
+import { Banknote, Bitcoin, Building2, Gem, Landmark, Loader2, Plus, TrendingUp, Wallet } from 'lucide-react';
 
 import type { Asset, AssetCategory } from '@types';
 
 import AssetForm from '@features/assets/components/AssetForm';
 
+import ActionButtons from '@components/ActionButtons';
 import Button from '@components/Button';
 import DataTable from '@components/DataTable';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
@@ -163,29 +152,12 @@ function buildAssetColumns(
       cell: ({ row }) => {
         const asset = row.original;
         return (
-          <div className="flex items-center justify-center gap-1">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleEdit(asset);
-              }}
-              className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
-              title="Update Value"
-            >
-              <Edit2 className="h-4 w-4" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                openDeleteModal(asset);
-              }}
-              disabled={deletingId === asset.id}
-              className="text-text-muted hover:bg-danger/10 hover:text-danger rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
-              title="Delete"
-            >
-              {deletingId === asset.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-            </button>
-          </div>
+          <ActionButtons
+            onEdit={() => handleEdit(asset)}
+            onDelete={() => openDeleteModal(asset)}
+            isDeleting={deletingId === asset.id}
+            editTitle="Update Value"
+          />
         );
       },
     },

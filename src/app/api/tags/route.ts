@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
 
-import { withAuth } from '@core/api/utils';
+import { getSearchParams, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
 
 // GET /api/tags - Get all tags for current user with usage counts
 export const GET = withAuth(async (user, request) => {
-  // Check if usage counts are requested
-  const { searchParams } = new URL(request.url);
+  const searchParams = getSearchParams(request);
   const includeUsage = searchParams.get('includeUsage') === 'true';
 
   if (includeUsage) {
