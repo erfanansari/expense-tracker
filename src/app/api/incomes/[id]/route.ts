@@ -4,8 +4,7 @@ import { createIncomeSchema } from '@schemas';
 
 import { parseIdParam, validateBody, verifyOwnership, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
-
-import type { Income } from '@/@types/income';
+import { mapRowToIncome } from '@core/database/mappers';
 
 // GET /api/incomes/[id] - Get a single income entry
 export const GET = withAuth(async (user, _request, { params }) => {
@@ -15,22 +14,7 @@ export const GET = withAuth(async (user, _request, { params }) => {
   const row = await verifyOwnership('incomes', id, user.userId);
   if (row instanceof NextResponse) return row;
 
-  const income: Income = {
-    id: row.id as number,
-    userId: row.userId as number,
-    amountUsd: row.amountUsd as number,
-    amountToman: row.amountToman as number,
-    exchangeRateUsed: row.exchangeRateUsed as number,
-    month: row.month as number,
-    year: row.year as number,
-    incomeType: row.incomeType as Income['incomeType'],
-    source: row.source as string | null,
-    notes: row.notes as string | null,
-    createdAt: row.createdAt as string,
-    updatedAt: row.updatedAt as string,
-  };
-
-  return NextResponse.json(income);
+  return NextResponse.json(mapRowToIncome(row));
 }, 'Incomes');
 
 // PUT /api/incomes/[id] - Update an income entry

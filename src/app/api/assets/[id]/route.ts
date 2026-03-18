@@ -4,8 +4,7 @@ import { createAssetSchema } from '@schemas';
 
 import { parseIdParam, validateBody, verifyOwnership, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
-
-import type { Asset, AssetValuation } from '@/@types/asset';
+import { mapRowToAsset, mapRowToAssetValuation } from '@core/database/mappers';
 
 // GET /api/assets/[id] - Get a single asset with valuation history
 export const GET = withAuth(async (user, _request, { params }) => {
@@ -14,23 +13,6 @@ export const GET = withAuth(async (user, _request, { params }) => {
 
   const row = await verifyOwnership('assets', id, user.userId);
   if (row instanceof NextResponse) return row;
-
-  const asset: Asset = {
-    id: row.id as number,
-    userId: row.userId as number,
-    category: row.category as Asset['category'],
-    name: row.name as string,
-    quantity: row.quantity as number,
-    unit: row.unit as string | null,
-    unitValueUsd: row.unitValueUsd as number | null,
-    totalValueUsd: row.totalValueUsd as number,
-    totalValueToman: row.totalValueToman as number,
-    exchangeRateUsed: row.exchangeRateUsed as number,
-    notes: row.notes as string | null,
-    lastValuedAt: row.lastValuedAt as string,
-    createdAt: row.createdAt as string,
-    updatedAt: row.updatedAt as string,
-  };
 
   // Get valuation history (last 30 entries)
   const valuationsResult = await db.execute({
@@ -41,19 +23,10 @@ export const GET = withAuth(async (user, _request, { params }) => {
     args: [id],
   });
 
-  const valuations: AssetValuation[] = valuationsResult.rows.map((v) => ({
-    id: v.id as number,
-    assetId: v.assetId as number,
-    quantity: v.quantity as number,
-    unitValueUsd: v.unitValueUsd as number | null,
-    totalValueUsd: v.totalValueUsd as number,
-    totalValueToman: v.totalValueToman as number,
-    exchangeRateUsed: v.exchangeRateUsed as number,
-    valuedAt: v.valuedAt as string,
-    createdAt: v.createdAt as string,
-  }));
-
-  return NextResponse.json({ asset, valuations });
+  return NextResponse.json({
+    asset: mapRowToAsset(row),
+    valuations: valuationsResult.rows.map(mapRowToAssetValuation),
+  });
 }, 'Assets');
 
 // PUT /api/assets/[id] - Update an asset (creates new valuation snapshot)

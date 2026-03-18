@@ -1,7 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import { createTag, deleteTag, fetchTags, fetchTagsWithUsage, updateTag } from '@/lib/api/tags';
 import { queryKeys } from '@/lib/query-keys';
+
+import { useMutationWithInvalidation } from './use-mutation-with-invalidation';
+
+const TAG_INVALIDATION_KEYS = [queryKeys.tags.all(), queryKeys.tags.withUsage()] as const;
 
 export function useTags() {
   return useQuery({
@@ -17,37 +21,16 @@ export function useTagsWithUsage() {
   });
 }
 
-export function useCreateTag() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: createTag,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.tags.all() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.tags.withUsage() });
-    },
-  });
-}
+export const useCreateTag = () => useMutationWithInvalidation(createTag, TAG_INVALIDATION_KEYS);
 
-export function useUpdateTag() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, name }: { id: number; name: string }) => updateTag(id, name),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.tags.all() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.tags.withUsage() });
-    },
-  });
-}
+export const useUpdateTag = () =>
+  useMutationWithInvalidation(
+    ({ id, name }: { id: number; name: string }) => updateTag(id, name),
+    TAG_INVALIDATION_KEYS
+  );
 
-export function useDeleteTag() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: deleteTag,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.tags.all() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.tags.withUsage() });
-      // Tag deletion affects expense display (tags removed from expenses)
-      queryClient.invalidateQueries({ queryKey: queryKeys.expenses.all() });
-    },
-  });
-}
+export const useDeleteTag = () =>
+  useMutationWithInvalidation(deleteTag, [
+    ...TAG_INVALIDATION_KEYS,
+    queryKeys.expenses.all(), // Tag deletion affects expense display
+  ]);

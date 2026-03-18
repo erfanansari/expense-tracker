@@ -4,13 +4,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EXPENSE_CATEGORIES } from '@constants/categories';
 import { type ColumnDef } from '@tanstack/react-table';
-import { Edit2, FileText, Loader2, Plus, Tag, Trash2, X } from 'lucide-react';
+import { FileText, Loader2, Plus, Tag, X } from 'lucide-react';
 
 import { type Expense } from '@types';
 
 import ExpenseForm from '@features/expenses/components/ExpenseForm';
 import TransactionDetailsDrawer from '@features/expenses/components/TransactionDetailsDrawer';
 
+import ActionButtons from '@components/ActionButtons';
 import Button from '@components/Button';
 import DataTable from '@components/DataTable';
 import DatePicker from '@components/DatePicker';
@@ -153,33 +154,11 @@ function buildTransactionColumns(
       cell: ({ row }) => {
         const expense = row.original;
         return (
-          <div className="flex items-center justify-center gap-1">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleEdit(expense);
-              }}
-              className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
-              title="Edit"
-            >
-              <Edit2 className="h-4 w-4" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                openDeleteModal(expense);
-              }}
-              disabled={deletingId === expense.id}
-              className="text-text-muted hover:bg-danger/10 hover:text-danger rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
-              title="Delete"
-            >
-              {deletingId === expense.id ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Trash2 className="h-4 w-4" />
-              )}
-            </button>
-          </div>
+          <ActionButtons
+            onEdit={() => handleEdit(expense)}
+            onDelete={() => openDeleteModal(expense)}
+            isDeleting={deletingId === expense.id}
+          />
         );
       },
     },

@@ -4,13 +4,13 @@ import { useState } from 'react';
 
 import { Bell, Database, Globe, HelpCircle, Loader2, Lock, Palette, Tag, User } from 'lucide-react';
 
-import { useAuth } from '@features/auth/hooks/use-auth';
 import TagManagementList from '@features/expenses/components/TagManagementList';
 
 import Button from '@components/Button';
 import Select from '@components/Select';
 import { useToast } from '@components/Toast/ToastProvider';
 
+import { useAuth } from '@hooks/use-auth';
 import { useUpdateUserProfile } from '@hooks/use-user-profile';
 
 import { ensureError } from '@utils';

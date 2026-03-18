@@ -1,4 +1,4 @@
-import { keepPreviousData, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 
 import type { CreateExpenseInput } from '@/@types/expense';
 import {
@@ -10,7 +10,10 @@ import {
 } from '@/lib/api/expenses';
 import { queryKeys } from '@/lib/query-keys';
 
+import { useMutationWithInvalidation } from './use-mutation-with-invalidation';
+
 const ITEMS_PER_PAGE = 20;
+const EXPENSE_INVALIDATION_KEYS = [queryKeys.expenses.all(), queryKeys.summary.all()] as const;
 
 export function useInfiniteExpenses(filters?: ExpenseFilters) {
   return useInfiniteQuery({
@@ -22,35 +25,12 @@ export function useInfiniteExpenses(filters?: ExpenseFilters) {
   });
 }
 
-export function useCreateExpense() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: createExpense,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.expenses.all() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.summary.all() });
-    },
-  });
-}
+export const useCreateExpense = () => useMutationWithInvalidation(createExpense, EXPENSE_INVALIDATION_KEYS);
 
-export function useUpdateExpense() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<CreateExpenseInput> }) => updateExpense(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.expenses.all() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.summary.all() });
-    },
-  });
-}
+export const useUpdateExpense = () =>
+  useMutationWithInvalidation(
+    ({ id, data }: { id: number; data: Partial<CreateExpenseInput> }) => updateExpense(id, data),
+    EXPENSE_INVALIDATION_KEYS
+  );
 
-export function useDeleteExpense() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: deleteExpense,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.expenses.all() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.summary.all() });
-    },
-  });
-}
+export const useDeleteExpense = () => useMutationWithInvalidation(deleteExpense, EXPENSE_INVALIDATION_KEYS);

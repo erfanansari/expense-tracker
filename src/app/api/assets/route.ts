@@ -2,20 +2,13 @@ import { NextResponse } from 'next/server';
 
 import { createAssetSchema } from '@schemas';
 
-import { validateBody, withAuth } from '@core/api/utils';
+import { getSearchParams, validateBody, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
-
-import type { Asset } from '@/@types/asset';
+import { mapRowToAsset } from '@core/database/mappers';
 
 // GET /api/assets - List all user assets
 export const GET = withAuth(async (user, request) => {
-  let url: URL;
-  try {
-    url = new URL(request.url);
-  } catch {
-    url = new URL(request.url || '', 'http://localhost');
-  }
-  const { searchParams } = url;
+  const searchParams = getSearchParams(request);
   const categoryFilter = searchParams.get('category');
 
   let sql = `SELECT * FROM assets WHERE userId = ?`;
@@ -30,24 +23,7 @@ export const GET = withAuth(async (user, request) => {
 
   const result = await db.execute({ sql, args });
 
-  const assets: Asset[] = result.rows.map((row) => ({
-    id: row.id as number,
-    userId: row.userId as number,
-    category: row.category as Asset['category'],
-    name: row.name as string,
-    quantity: row.quantity as number,
-    unit: row.unit as string | null,
-    unitValueUsd: row.unitValueUsd as number | null,
-    totalValueUsd: row.totalValueUsd as number,
-    totalValueToman: row.totalValueToman as number,
-    exchangeRateUsed: row.exchangeRateUsed as number,
-    notes: row.notes as string | null,
-    lastValuedAt: row.lastValuedAt as string,
-    createdAt: row.createdAt as string,
-    updatedAt: row.updatedAt as string,
-  }));
-
-  return NextResponse.json(assets);
+  return NextResponse.json(result.rows.map(mapRowToAsset));
 }, 'Assets');
 
 // POST /api/assets - Create a new asset

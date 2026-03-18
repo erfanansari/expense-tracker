@@ -4,12 +4,13 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { getIncomeTypeLabel, getMonthLabel } from '@constants/income';
 import { type ColumnDef } from '@tanstack/react-table';
-import { Banknote, DollarSign, Edit2, FileText, Loader2, Plus, Trash2, TrendingUp } from 'lucide-react';
+import { Banknote, DollarSign, FileText, Loader2, Plus, TrendingUp } from 'lucide-react';
 
 import type { Income } from '@types';
 
 import IncomeForm from '@features/income/components/IncomeForm';
 
+import ActionButtons from '@components/ActionButtons';
 import Button from '@components/Button';
 import DataTable from '@components/DataTable';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
@@ -144,29 +145,11 @@ function buildIncomeColumns(
       cell: ({ row }) => {
         const income = row.original;
         return (
-          <div className="flex items-center justify-center gap-1">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleEdit(income);
-              }}
-              className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
-              title="Edit"
-            >
-              <Edit2 className="h-4 w-4" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                openDeleteModal(income);
-              }}
-              disabled={deletingId === income.id}
-              className="text-text-muted hover:bg-danger/10 hover:text-danger rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
-              title="Delete"
-            >
-              {deletingId === income.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-            </button>
-          </div>
+          <ActionButtons
+            onEdit={() => handleEdit(income)}
+            onDelete={() => openDeleteModal(income)}
+            isDeleting={deletingId === income.id}
+          />
         );
       },
     },
