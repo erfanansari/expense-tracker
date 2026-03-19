@@ -56,6 +56,153 @@ src/
 
 ---
 
+## Code Style
+
+### Component / Hook Body Structure
+
+Use **section comments** to organize the body of every component and hook. Each section is a single-line `// SectionName` comment. Only include sections that are actually used in that component.
+
+**Canonical order:**
+
+```typescript
+const MyComponent = ({ prop1, prop2 }: MyComponentProps) => {
+  // States
+  const [value, setValue] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Customs
+  const { showToast } = useToast();
+  const { user } = useAuth();
+
+  // Variables
+  const isValid = value.trim().length > 0;
+  const totalAmount = items.reduce((sum, i) => sum + i.amount, 0);
+
+  // Queries
+  const { data: expenses, isLoading } = useQuery({ ... });
+
+  // Mutations
+  const createExpense = useCreateExpense();
+
+  // Memos
+  const sortedItems = useMemo(() => items.sort(...), [items]);
+
+  // Callbacks
+  const handleSubmit = useCallback(async () => { ... }, []);
+  const handleClose = () => { ... };
+
+  // Effects
+  useEffect(() => { ... }, [dependency]);
+
+  // Early returns (loading, error, empty)
+  if (isLoading) return <Skeleton />;
+
+  return ( ... );
+};
+
+export default MyComponent;
+```
+
+**Section labels reference:**
+
+| Label           | What goes under it                                              |
+| --------------- | --------------------------------------------------------------- |
+| `// States`     | `useState` declarations                                         |
+| `// References` | `useRef` declarations                                           |
+| `// Customs`    | Project custom hooks (`useAuth`, `useToast`, `useRouter`, etc.) |
+| `// Variables`  | Derived/computed values, plain `const` from state/props         |
+| `// Queries`    | `useQuery` / `useInfiniteQuery` calls                           |
+| `// Mutations`  | `useMutation` / mutation hook calls                             |
+| `// Forms`      | `useForm` setup (if using form hooks in the future)             |
+| `// Memos`      | `useMemo` calls                                                 |
+| `// Callbacks`  | `useCallback`, event handlers, async functions                  |
+| `// Effects`    | `useEffect` calls                                               |
+
+**Rules:**
+
+- Only include a section if it has at least one item
+- A section label can appear more than once if readability benefits (e.g., a second `// Variables` block after queries for derived query data)
+- No blank line between the section comment and its first item
+- One blank line between sections
+
+### Function Style
+
+- **Components**: Arrow functions with separate `export default` at end of file
+- **Helper/internal components** (skeletons, tooltips): Function declarations (`function HelperName() { ... }`) — no export
+- **Column builders and pure helpers**: Function declarations
+- **Hooks**: Arrow functions with `export default` for feature hooks; named exports for global hooks (`export const useCreateAsset = () => ...`)
+
+```typescript
+// Main component — arrow function + export default
+const IncomePage = () => {
+  // ...
+};
+export default IncomePage;
+
+// Helper component — function declaration, no export
+function IncomeSkeleton() {
+  return ( ... );
+}
+
+// Column builder — function declaration
+function buildIncomeColumns(...): ColumnDef<Income>[] {
+  return [ ... ];
+}
+```
+
+### Import Organization
+
+Imports are organized into **3 groups**, separated by blank lines:
+
+```typescript
+// Group 1: Third-party packages (react first, then alphabetical)
+'use client';
+
+import { useCallback, useMemo, useState } from 'react';
+
+import { type ColumnDef } from '@tanstack/react-table';
+import { FileText, Loader2, Plus } from 'lucide-react';
+
+// Group 2: Internal path aliases (@types, @schemas, @constants, @core, @features, @components, @hooks, @utils, @/lib, etc.)
+import type { Income } from '@types';
+
+import IncomeForm from '@features/income/components/IncomeForm';
+
+import ActionButtons from '@components/ActionButtons';
+import Button from '@components/Button';
+
+import { useDeleteIncome, useIncomes } from '@hooks/use-incomes';
+
+import { ensureError, formatNumber } from '@utils';
+
+import { queryKeys } from '@/lib/query-keys';
+
+// Group 3: Relative imports (parent `..` first, then current `.`)
+import type { QuickTransferFormProps } from '../../@types';
+import { FORM_DEFAULT_VALUES } from '../../constants';
+```
+
+**Rules:**
+
+- Always use `import type { Foo }` for type-only imports (never `import { type Foo }`)
+- Within each group, `type` imports can be interleaved with value imports from the same module
+- `'use client'` directive goes at the very top, before any imports
+
+### Export Conventions
+
+| What               | Pattern                                                                           |
+| ------------------ | --------------------------------------------------------------------------------- |
+| Page components    | `const PageName = () => { ... }; export default PageName;`                        |
+| Feature components | `const Component = ({ ... }: Props) => { ... }; export default Component;`        |
+| Helper components  | `function HelperName() { ... }` (no export)                                       |
+| Global hooks       | `export function useHookName() { ... }` or `export const useHookName = () => ...` |
+| Feature hooks      | `const useHookName = () => { ... }; export default useHookName;`                  |
+| Utility functions  | Named exports from `index.ts`                                                     |
+| Constants          | Named exports (`export const CONSTANT_NAME = ...`)                                |
+| Types              | `export type` / `export interface` from `@types/` files                           |
+
+---
+
 ## Architecture Rules
 
 ### Thin Pages
@@ -266,24 +413,22 @@ pnpm db:test      # Test database connection
 
 ## Naming Conventions
 
-| Kind                 | Convention                                                 | Example                                            |
-| -------------------- | ---------------------------------------------------------- | -------------------------------------------------- |
-| Files (components)   | kebab-case directory, `index.tsx` inside                   | `components/DeleteConfirmModal/index.tsx`          |
-| Components           | PascalCase                                                 | `ExpenseForm`, `TagInput`                          |
-| Hooks                | `use-` prefix, kebab-case files                            | `hooks/use-tags.ts` → `useTags()`                  |
-| Constants            | UPPER_SNAKE_CASE                                           | `ASSET_CATEGORIES`, `INCOME_TYPES`                 |
-| Zod schemas          | camelCase + `Schema` suffix                                | `createExpenseSchema`, `loginSchema`               |
-| API client functions | camelCase, verb prefix                                     | `fetchExpenses()`, `createIncome()`, `deleteTag()` |
-| Query keys           | nested object in `query-keys.ts`                           | `queryKeys.expenses.all()`                         |
-| Database columns     | camelCase (except legacy `expenses` table uses snake_case) | `userId`, `amountUsd`                              |
+| Kind                 | Convention                                                 | Example                                             |
+| -------------------- | ---------------------------------------------------------- | --------------------------------------------------- |
+| Files (components)   | PascalCase directory, `index.tsx` inside                   | `components/DeleteConfirmModal/index.tsx`           |
+| Files (hooks)        | kebab-case with `use-` prefix                              | `hooks/use-tags.ts`                                 |
+| Files (utils)        | kebab-case                                                 | `utils/index.ts`                                    |
+| Components           | PascalCase                                                 | `ExpenseForm`, `TagInput`                           |
+| Hooks                | camelCase with `use` prefix                                | `useTags()`, `useAuth()`, `useDeleteConfirmation()` |
+| Constants            | UPPER_SNAKE_CASE                                           | `ASSET_CATEGORIES`, `INCOME_TYPES`                  |
+| Zod schemas          | camelCase + `Schema` suffix                                | `createExpenseSchema`, `loginSchema`                |
+| Types / Interfaces   | PascalCase                                                 | `Income`, `AssetCategory`, `CreateExpenseInput`     |
+| Props types          | `{ComponentName}Props`                                     | `ActionButtonsProps`, `IncomeFormProps`             |
+| API client functions | camelCase, verb prefix                                     | `fetchExpenses()`, `createIncome()`, `deleteTag()`  |
+| Query keys           | nested object in `query-keys.ts`                           | `queryKeys.expenses.all()`                          |
+| Database columns     | camelCase (except legacy `expenses` table uses snake_case) | `userId`, `amountUsd`                               |
 
 ---
-
-## Import Conventions
-
-- Use `import type { Foo }` (not `import { type Foo }`) for type-only imports
-- Import order: third-party → path aliases → relative imports
-- Separate import groups with blank lines
 
 ## Anti-Patterns (Do Not)
 
@@ -299,6 +444,7 @@ pnpm db:test      # Test database connection
 - **No manual URL parsing** in API routes — use `getSearchParams(request)` from `@core/api/utils`
 - **No inline edit+delete buttons** — use `ActionButtons` component from `@components/ActionButtons`
 - **No manual mutation boilerplate** — use `useMutationWithInvalidation` from `@/hooks/use-mutation-with-invalidation`
+- **No unsectioned component bodies** — use section comments (`// States`, `// Customs`, etc.) to organize code
 
 ---
 
@@ -311,3 +457,4 @@ pnpm db:test      # Test database connection
 - **Constants**: Import from `@constants/` — never hardcode category/type arrays
 - **Bilingual**: English labels with Persian (Farsi) translations
 - **Loading states**: Use shared `Pulse` skeleton component from `@components/Skeleton`
+- **`'use client'`**: Required at top of all client components, before imports
