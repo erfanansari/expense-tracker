@@ -53,11 +53,16 @@ src/
 │   │   └── Settings/      Settings page
 │   ├── assets/          Asset domain (shared components, hooks, utils)
 │   ├── expenses/        Expense domain (shared components, hooks, utils)
-│   └── income/          Income domain (shared components, hooks, utils)
+│   ├── income/          Income domain (shared components, hooks, utils)
+│   └── Providers/       Centralized provider composition (Query, CommandPalette, Toast)
 ├── hooks/               Global custom React hooks
 ├── lib/                 API client functions and query keys
 ├── styles/              Global CSS with theme tokens
-└── utils/               Utility functions
+└── utils/               Domain-organized utility functions
+    ├── category/        Category label helpers
+    ├── date/            Jalali/Farsi date helpers
+    ├── error/           ensureError (re-exports from @core/errors)
+    └── format/          Number formatting
 ```
 
 ---
@@ -476,6 +481,81 @@ try {
 }
 ```
 
+### Error Class Hierarchy
+
+Custom errors live in `src/core/errors/` and extend from `AppError`:
+
+```
+AppError (base — has `code` property)
+├── ApiError (adds `status: number`)
+└── ValidationError (adds `field: string`, `constraints: string[]`)
+```
+
+```typescript
+import { ApiError, AppError, ValidationError } from '@core/errors';
+
+// ApiError — thrown by apiFetch/apiMutate on non-ok responses
+try {
+  await apiFetch('/api/items');
+} catch (err) {
+  if (err instanceof ApiError && err.status === 404) {
+    /* handle 404 */
+  }
+}
+
+// ValidationError — for form validation failures
+throw new ValidationError('Email is invalid', 'email', ['Must be a valid email address']);
+```
+
+`ensureError` is also exported from `@core/errors` (and re-exported via `@utils` for convenience).
+
+### Providers Pattern
+
+All app-level providers are composed in `src/features/Providers/index.tsx`. The root layout imports `<Providers>` instead of nesting providers inline:
+
+```typescript
+// src/app/layout.tsx
+import Providers from '@features/Providers';
+
+<Providers>
+  {children}
+  <Analytics />
+</Providers>
+```
+
+To add a new provider, wrap it in `src/features/Providers/index.tsx` — no changes needed in layout.
+
+### Utils Domain Folders
+
+Utils are organized by domain in `src/utils/`. Each domain is a folder with an `index.ts`. The top-level `src/utils/index.ts` barrel re-exports everything, so consumers import from `@utils`:
+
+```typescript
+// Always import from the barrel — never from individual domain folders
+import { ensureError, formatNumber, getCategoryLabel } from '@utils';
+```
+
+To add a new util: create `src/utils/{domain}/index.ts`, then add `export * from './{domain}'` to `src/utils/index.ts`.
+
+### Tabs Component
+
+Radix-based tabs component at `src/components/Tabs/`:
+
+```typescript
+import Tabs, { TabsContent } from '@components/Tabs';
+
+const TAB_ITEMS = [
+  { value: 'overview', label: 'Overview', labelFa: 'نمای کلی' },
+  { value: 'details', label: 'Details', labelFa: 'جزئیات' },
+];
+
+<Tabs items={TAB_ITEMS} defaultValue="overview" onValueChange={(v) => console.log(v)}>
+  <TabsContent value="overview">Overview content</TabsContent>
+  <TabsContent value="details">Details content</TabsContent>
+</Tabs>
+```
+
+Props: `items` (array of `{ value, label, labelFa? }`), `defaultValue`, `onValueChange?`, `children` (`TabsContent` elements).
+
 ---
 
 ## Commands
@@ -519,6 +599,8 @@ pnpm db:test      # Test database connection
 - **No duplicate constants** — import from `@constants/`
 - **No `confirm()` / `alert()`** — use custom modal components
 - **No `instanceof Error` checks** — use `ensureError()` from `@utils`
+- **No local error classes** — use `ApiError`, `ValidationError` from `@core/errors`
+- **No inline provider nesting** in layout — add new providers to `src/features/Providers/index.tsx`
 - **No index-based DB row access** — use named column access (`row.name`, not `row[0]`)
 - **No duplicate row mapping** — use mappers from `@core/database/mappers`
 - **No manual URL parsing** in API routes — use `getSearchParams(request)` from `@core/api/utils`

@@ -4,9 +4,7 @@ import { Geist, Vazirmatn } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { twMerge } from 'tailwind-merge';
 
-import { CommandPaletteProvider } from '@components/CommandPalette/CommandPaletteProvider';
-import QueryProvider from '@components/QueryProvider';
-import { ToastProvider } from '@components/Toast/ToastProvider';
+import Providers from '@features/Providers';
 
 import '@/styles/globals.css';
 
@@ -75,14 +73,10 @@ export default function RootLayout({
         <meta name="color-scheme" content="light" />
       </head>
       <body className={twMerge(geistSans.variable, persianFont.variable, 'bg-background antialiased')}>
-        <QueryProvider>
-          <CommandPaletteProvider>
-            <ToastProvider>
-              {children}
-              <Analytics />
-            </ToastProvider>
-          </CommandPaletteProvider>
-        </QueryProvider>
+        <Providers>
+          {children}
+          <Analytics />
+        </Providers>
       </body>
     </html>
   );

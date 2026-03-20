@@ -1,4 +1,4 @@
-import { formatNumber } from '../format';
+import { formatNumber } from '../index';
 
 describe('formatNumber', () => {
   it('formats integers with commas', () => {

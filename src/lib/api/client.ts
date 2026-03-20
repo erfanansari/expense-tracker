@@ -2,16 +2,9 @@
  * Shared client-side API fetch utilities.
  * All client API functions should use these instead of raw fetch().
  */
+import { ApiError } from '@core/errors';
 
-export class ApiError extends Error {
-  constructor(
-    message: string,
-    public status: number
-  ) {
-    super(message);
-    this.name = 'ApiError';
-  }
-}
+export { ApiError };
 
 /**
  * Fetch wrapper for GET requests that returns typed JSON.
