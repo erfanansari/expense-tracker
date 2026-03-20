@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 
-import { Download, Filter, Sparkles, TrendingUp } from 'lucide-react';
+import { Download, Filter } from 'lucide-react';
 
 import { type Expense } from '@types';
 
@@ -11,31 +11,28 @@ import DateRangeSelector, {
   filterExpensesByDateRange,
   getChartGranularity,
 } from '@features/expenses/components/DateRangeSelector';
-import { ExpenseCharts } from '@features/expenses/components/ExpenseCharts';
-import ExpenseStats from '@features/expenses/components/ExpenseStats';
 
 import Button from '@components/Button';
 import Pulse from '@components/Skeleton';
 
 import { useAllExpenses } from '@hooks/use-all-expenses';
 
+import ReportsCharts from './components/ReportsCharts';
+import ReportsStats from './components/ReportsStats';
+
 function ReportsSkeleton() {
   return (
     <>
-      {/* 3 stat card skeletons — matches ExpenseStats md:grid-cols-3 */}
+      {/* 3 stat card skeletons */}
       <div className="mb-8 grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-3">
         {[...Array(3)].map((_, i) => (
           <div key={i} className="border-border-subtle bg-background rounded-xl border p-5 shadow-sm sm:p-6">
-            {/* Icon box + badge row */}
             <div className="mb-4 flex items-center justify-between">
               <Pulse className="h-9 w-9 rounded-lg" />
               <Pulse className="h-6 w-20 rounded-full" />
             </div>
-            {/* Label */}
             <Pulse className="mb-3 h-3 w-24" />
-            {/* Value */}
             <Pulse className="mb-2 h-8 w-3/4" />
-            {/* Subtitle */}
             <Pulse className="h-4 w-2/5" />
           </div>
         ))}
@@ -68,13 +65,8 @@ const ReportsPage = () => {
   const expenses: Expense[] = expensesData ?? [];
 
   // Memos
-  const filteredExpenses = useMemo(() => {
-    return filterExpensesByDateRange(expenses, dateRange);
-  }, [expenses, dateRange]);
-
-  const chartGranularity = useMemo(() => {
-    return getChartGranularity(dateRange);
-  }, [dateRange]);
+  const filteredExpenses = useMemo(() => filterExpensesByDateRange(expenses, dateRange), [expenses, dateRange]);
+  const chartGranularity = useMemo(() => getChartGranularity(dateRange), [dateRange]);
 
   return (
     <div className="min-h-screen">
@@ -102,39 +94,8 @@ const ReportsPage = () => {
           <ReportsSkeleton />
         ) : (
           <>
-            {/* Statistics */}
-            <div className="mb-8">
-              <ExpenseStats expenses={filteredExpenses} />
-            </div>
-
-            {/* Charts */}
-            {filteredExpenses.length > 0 ? (
-              <div className="relative">
-                <div className="border-border-subtle bg-background rounded-xl border p-6 shadow-sm sm:p-8">
-                  <div className="mb-6 flex items-center gap-3">
-                    <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-                      <TrendingUp className="text-blue h-4 w-4" />
-                    </div>
-                    <h2 className="text-text-primary text-lg font-semibold">Spending Analytics</h2>
-                  </div>
-                  <ExpenseCharts expenses={filteredExpenses} granularity={chartGranularity} />
-                </div>
-              </div>
-            ) : (
-              <div className="border-border-subtle bg-background rounded-xl border p-16 text-center shadow-sm">
-                <div className="mx-auto flex max-w-md flex-col items-center gap-4">
-                  <div className="border-border-subtle bg-background-secondary rounded-xl border p-4">
-                    <Sparkles className="text-text-muted h-10 w-10" />
-                  </div>
-                  <div>
-                    <h3 className="text-text-primary mb-2 text-lg font-semibold">No data available</h3>
-                    <p className="text-text-muted">
-                      No transactions found for the selected period. Try adjusting your date range.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+            <ReportsStats expenses={filteredExpenses} />
+            <ReportsCharts expenses={filteredExpenses} granularity={chartGranularity} />
           </>
         )}
       </div>

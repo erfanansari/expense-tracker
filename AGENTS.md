@@ -44,15 +44,94 @@ src/
 ├── constants/           Centralized constants (categories, income types)
 ├── core/                Framework modules (database, auth, session)
 ├── features/            Domain-specific feature modules
-│   ├── pages/           Page-level components (Overview, Assets, Income, etc.)
-│   ├── assets/          Asset feature components
-│   ├── expenses/        Expense feature components
-│   └── income/          Income feature components
+│   ├── pages/           Page-level feature modules (see Feature Module Structure)
+│   │   ├── Transactions/  Transactions page (sub-components, constants, types)
+│   │   ├── Income/        Income page
+│   │   ├── Assets/        Assets page
+│   │   ├── Overview/      Dashboard overview page
+│   │   ├── Reports/       Reports page
+│   │   └── Settings/      Settings page
+│   ├── assets/          Asset domain (shared components, hooks, utils)
+│   ├── expenses/        Expense domain (shared components, hooks, utils)
+│   └── income/          Income domain (shared components, hooks, utils)
 ├── hooks/               Global custom React hooks
 ├── lib/                 API client functions and query keys
 ├── styles/              Global CSS with theme tokens
 └── utils/               Utility functions
 ```
+
+---
+
+## Feature Module Structure
+
+Each feature module under `src/features/` follows a standard sub-folder layout. Only include folders that have content.
+
+### Page Features (`src/features/pages/{PageName}/`)
+
+Page features compose the full page UI from Card/section components:
+
+```
+src/features/pages/Transactions/
+├── @types/
+│   └── index.ts              # Props, local interfaces
+├── components/
+│   ├── TransactionsTable/
+│   │   └── index.tsx
+│   └── TransactionsFilters/
+│       └── index.tsx
+├── constants/
+│   └── index.ts              # Page-specific constants (column defs, filter options)
+└── index.tsx                  # Composes sub-components into full page layout
+```
+
+The page `index.tsx` is a **composition file** — it holds shared state/queries and passes data down to sub-components:
+
+```typescript
+const TransactionsPage = () => {
+  // Queries
+  const { data: expenses } = useExpenses();
+
+  // Customs
+  const deleteConfirmation = useDeleteConfirmation({ ... });
+
+  return (
+    <div>
+      <TransactionsTable expenses={expenses} onDelete={deleteConfirmation.openModal} />
+    </div>
+  );
+};
+export default TransactionsPage;
+```
+
+### Domain Features (`src/features/{domain}/`)
+
+Domain features contain shared components, hooks, and utilities for a business domain:
+
+```
+src/features/expenses/
+├── @types/
+│   └── index.ts
+├── components/
+│   ├── ExpenseForm/
+│   │   └── index.tsx
+│   ├── TagInput/
+│   │   └── index.tsx
+│   └── TagManagementList/
+│       └── index.tsx
+├── hooks/
+│   └── index.ts              # Domain-specific hooks
+├── constants/
+│   └── index.ts
+└── utils/
+    └── index.ts
+```
+
+### Rules
+
+- Only create sub-folders that have content (no empty placeholder folders)
+- Page `index.tsx` is a composition file — logic + state lives here, sub-components receive props
+- Helper components (skeletons, tooltips) stay as function declarations inside the file that uses them
+- Column builder functions go in `constants/index.ts` when they are large, or stay in the component file when small
 
 ---
 
@@ -426,6 +505,7 @@ pnpm db:test      # Test database connection
 | Props types          | `{ComponentName}Props`                                     | `ActionButtonsProps`, `IncomeFormProps`             |
 | API client functions | camelCase, verb prefix                                     | `fetchExpenses()`, `createIncome()`, `deleteTag()`  |
 | Query keys           | nested object in `query-keys.ts`                           | `queryKeys.expenses.all()`                          |
+| Feature sub-folders  | `@types/`, `components/`, `constants/`, `hooks/`, `utils/` | `features/pages/Income/constants/index.ts`          |
 | Database columns     | camelCase (except legacy `expenses` table uses snake_case) | `userId`, `amountUsd`                               |
 
 ---

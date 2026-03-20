@@ -1,0 +1,108 @@
+import { useMemo } from 'react';
+
+import { DollarSign, FileText } from 'lucide-react';
+
+import DataTable from '@components/DataTable';
+import Pulse from '@components/Skeleton';
+
+import type { IncomeTableProps } from '../../@types';
+import { buildIncomeColumns } from '../../constants';
+
+function IncomeSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <Pulse className="mb-4 h-6 w-12 rounded-md" />
+        <div className="border-border-subtle bg-background overflow-hidden rounded-xl border shadow-sm">
+          <div className="bg-background-secondary px-4 py-3 sm:px-6 sm:py-4">
+            <div className="flex items-center justify-between">
+              <Pulse className="h-3 w-16" />
+              <Pulse className="hidden h-3 w-14 sm:block" />
+              <Pulse className="hidden h-3 w-20 sm:block" />
+              <Pulse className="h-3 w-16" />
+              <Pulse className="hidden h-3 w-12 sm:block" />
+            </div>
+          </div>
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="border-border-subtle border-t px-4 py-3 sm:px-6 sm:py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-1">
+                  <Pulse className="h-4 w-20" />
+                  <Pulse className="h-3 w-16" />
+                </div>
+                <Pulse className="hidden h-4 w-16 sm:block" />
+                <Pulse className="hidden h-4 w-24 sm:block" />
+                <div className="flex flex-col items-end gap-1">
+                  <Pulse className="h-4 w-24" />
+                  <Pulse className="h-3 w-20" />
+                </div>
+                <div className="hidden items-center justify-center gap-1 sm:flex">
+                  <Pulse className="h-8 w-8 rounded-lg" />
+                  <Pulse className="h-8 w-8 rounded-lg" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const IncomeTable = ({
+  incomesByYear,
+  sortedYears,
+  isLoading,
+  error,
+  onEdit,
+  onDelete,
+  deletingId,
+}: IncomeTableProps) => {
+  // Memos
+  const incomeColumns = useMemo(() => buildIncomeColumns(onEdit, onDelete, deletingId), [onEdit, onDelete, deletingId]);
+
+  if (isLoading) {
+    return <IncomeSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
+        <div className="border-danger bg-danger-light mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
+          <FileText className="text-danger h-8 w-8" />
+        </div>
+        <p className="text-danger font-medium">{error.message}</p>
+      </div>
+    );
+  }
+
+  if (sortedYears.length === 0) {
+    return (
+      <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
+        <div className="border-border-subtle bg-background-secondary mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
+          <DollarSign className="text-text-muted h-8 w-8" />
+        </div>
+        <p className="text-text-secondary font-medium">No income recorded yet</p>
+        <p className="text-text-muted mt-1 text-sm">Add your first income entry above!</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {sortedYears.map((year) => (
+        <div key={year}>
+          <h2 className="text-text-primary mb-4 text-lg font-semibold">{year}</h2>
+          <DataTable
+            data={[...incomesByYear[year]].sort((a, b) => b.month - a.month)}
+            columns={incomeColumns}
+            minWidth="min-w-[480px]"
+            getRowId={(row) => String(row.id)}
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default IncomeTable;
