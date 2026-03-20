@@ -30,7 +30,10 @@ interface AssetFormProps {
 }
 
 const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: AssetFormProps) => {
+  // Customs
   const { showToast } = useToast();
+
+  // Mutations
   const createAsset = useCreateAsset();
   const updateAsset = useUpdateAsset();
 
@@ -38,6 +41,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
     editingRate: editingAsset?.exchangeRateUsed,
   });
 
+  // Variables
   const defaultFormData: CreateAssetInput = {
     category: 'cash',
     name: '',
@@ -62,6 +66,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
     notes: asset.notes || '',
   });
 
+  // States
   const [formData, setFormData] = useState<CreateAssetInput>(
     editingAsset ? buildFormData(editingAsset) : defaultFormData
   );
@@ -90,7 +95,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
     setInitialFormData({ ...defaultFormData, exchangeRateUsed: exchangeRate });
   }
 
-  // Track form changes and update dirty state
+  // Effects
   useEffect(() => {
     if (!initialFormData || !setIsDirty) return;
 

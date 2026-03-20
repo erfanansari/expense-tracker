@@ -4,7 +4,7 @@ import { Github, Zap } from 'lucide-react';
 
 import Button from '@components/Button';
 
-export default function Header() {
+const Header = () => {
   return (
     <header className="border-border-subtle bg-background/80 fixed top-0 right-0 left-0 z-50 border-b backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -34,4 +34,6 @@ export default function Header() {
       </div>
     </header>
   );
-}
+};
+
+export default Header;

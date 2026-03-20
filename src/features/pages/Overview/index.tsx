@@ -357,16 +357,18 @@ const overviewColumns: ColumnDef<Expense, unknown>[] = [
 ];
 
 // ─── Main page ──────────────────────────────────────────────────────────────────
-function Dashboard() {
+const Dashboard = () => {
+  // Queries
   const { data: summary, isLoading: summaryLoading } = useSummary();
   const { data: expensesData, isLoading: expensesLoading } = useAllExpenses();
+  // States
   const [dateRange, setDateRange] = useState<DateRange>('30D');
 
+  // Variables
   const expenses: Expense[] = expensesData ?? [];
   const isLoading = summaryLoading || expensesLoading;
 
-  // ── Derived data ──────────────────────────────────────────────────────────────
-  /** Last 5 expenses, newest first */
+  // Memos
   const recentTransactions = useMemo(() => {
     return [...expenses]
       .sort((a, b) => {
@@ -376,11 +378,9 @@ function Dashboard() {
       .slice(0, 7);
   }, [expenses]);
 
-  /** Expenses filtered by the selected date range (for spending trend chart) */
   const filteredExpenses = useMemo(() => filterExpensesByDateRange(expenses, dateRange), [expenses, dateRange]);
   const granularity = useMemo(() => getChartGranularity(dateRange), [dateRange]);
 
-  /** Aggregated spending trend for area chart */
   const spendingTrend = useMemo(() => {
     if (filteredExpenses.length === 0) return [];
 
@@ -417,7 +417,6 @@ function Dashboard() {
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [filteredExpenses, granularity]);
 
-  // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       <div className="mx-auto max-w-[1600px] p-8 px-6">
@@ -590,6 +589,6 @@ function Dashboard() {
       </div>
     </div>
   );
-}
+};
 
 export default Dashboard;

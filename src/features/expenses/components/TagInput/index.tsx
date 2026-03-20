@@ -16,20 +16,26 @@ interface TagInputProps {
 }
 
 const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
+  // Queries
   const { data: allTags = [] } = useTags();
+
+  // Mutations
   const createTag = useCreateTag();
   const updateTag = useUpdateTag();
 
+  // States
   const [inputValue, setInputValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [editingTagId, setEditingTagId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState('');
   const [editError, setEditError] = useState('');
+
+  // References
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
 
-  // Filter tags based on input
+  // Memos
   const filteredTags = useMemo(() => {
     if (inputValue.trim()) {
       const search = inputValue.toLowerCase();
@@ -40,7 +46,7 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
     return allTags.filter((tag) => !selectedTags.some((selected) => selected.id === tag.id));
   }, [inputValue, allTags, selectedTags]);
 
-  // Close suggestions when clicking outside
+  // Effects
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (

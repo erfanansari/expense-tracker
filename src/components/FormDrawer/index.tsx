@@ -14,11 +14,14 @@ interface FormDrawerProps {
   isDirty?: boolean;
 }
 
-export default function FormDrawer({ isOpen, onClose, title, titleFa, children }: FormDrawerProps) {
+const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerProps) => {
+  // References
   const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  // States
   const [isMobile, setIsMobile] = useState(false);
 
-  // Detect screen size
+  // Effects
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -29,11 +32,11 @@ export default function FormDrawer({ isOpen, onClose, title, titleFa, children }
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Callbacks
   const handleClose = useCallback(() => {
     onClose();
   }, [onClose]);
 
-  // Handle ESC key
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -117,4 +120,6 @@ export default function FormDrawer({ isOpen, onClose, title, titleFa, children }
       </Drawer.Portal>
     </Drawer.Root>
   );
-}
+};
+
+export default FormDrawer;

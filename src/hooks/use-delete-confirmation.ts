@@ -6,10 +6,12 @@ interface UseDeleteConfirmationOptions {
 }
 
 export function useDeleteConfirmation<T extends { id: number }>(options: UseDeleteConfirmationOptions) {
+  // States
   const [itemToDelete, setItemToDelete] = useState<T | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
+  // Callbacks
   const openModal = useCallback((item: T) => {
     setItemToDelete(item);
     setIsModalOpen(true);

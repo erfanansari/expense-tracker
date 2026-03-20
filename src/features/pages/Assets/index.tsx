@@ -164,14 +164,17 @@ function buildAssetColumns(
   ];
 }
 
-export default function AssetsPage() {
+const AssetsPage = () => {
+  // States
+  const [editingAsset, setEditingAsset] = useState<Asset | undefined>(undefined);
+
+  // Queries
   const { data: assets = [], isLoading, error } = useAssets();
   const deleteAsset = useDeleteAsset();
+
+  // Customs
   const { showToast } = useToast();
-
-  const [editingAsset, setEditingAsset] = useState<Asset | undefined>(undefined);
   const { isOpen: isDrawerOpen, isDirty, openDrawer, closeDrawer, setIsDirty } = useDrawer();
-
   const {
     itemToDelete: assetToDelete,
     isModalOpen: isDeleteModalOpen,
@@ -184,6 +187,7 @@ export default function AssetsPage() {
     onError: (err) => showToast(ensureError(err).message, 'error'),
   });
 
+  // Callbacks
   const handleAssetChange = useCallback(() => {
     setEditingAsset(undefined);
     closeDrawer();
@@ -202,16 +206,16 @@ export default function AssetsPage() {
     openDrawer();
   }, [openDrawer]);
 
+  // Memos
   const assetColumns = useMemo(
     () => buildAssetColumns(handleEdit, openDeleteModal, deletingId),
     [handleEdit, openDeleteModal, deletingId]
   );
 
-  // Calculate totals
+  // Variables
   const totalValueUsd = assets.reduce((sum, a) => sum + a.totalValueUsd, 0);
   const totalValueToman = assets.reduce((sum, a) => sum + a.totalValueToman, 0);
 
-  // Group by category
   const assetsByCategory = assets.reduce(
     (acc, asset) => {
       const category = asset.category || 'other';
@@ -226,7 +230,6 @@ export default function AssetsPage() {
     {} as Record<string, { assets: Asset[]; totalUsd: number; totalToman: number }>
   );
 
-  // Prepare chart data
   const chartData = Object.entries(assetsByCategory).map(([category, data]) => ({
     name: getAssetCategoryLabel(category).en,
     nameFa: getAssetCategoryLabel(category).fa,
@@ -428,4 +431,6 @@ export default function AssetsPage() {
       </FormDrawer>
     </div>
   );
-}
+};
+
+export default AssetsPage;

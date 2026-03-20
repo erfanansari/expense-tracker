@@ -21,8 +21,10 @@ export const useToast = () => {
 };
 
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
+  // States
   const [toasts, setToasts] = useState<Toast[]>([]);
 
+  // Callbacks
   const showToast = useCallback((message: string, type: ToastType = 'info') => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts((prev) => [...prev, { id, message, type }]);

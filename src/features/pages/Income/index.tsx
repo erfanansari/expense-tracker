@@ -156,14 +156,17 @@ function buildIncomeColumns(
   ];
 }
 
-export default function IncomePage() {
+const IncomePage = () => {
+  // States
+  const [editingIncome, setEditingIncome] = useState<Income | undefined>(undefined);
+
+  // Queries
   const { data: incomes = [], isLoading, error } = useIncomes();
   const deleteIncome = useDeleteIncome();
+
+  // Customs
   const { showToast } = useToast();
-
-  const [editingIncome, setEditingIncome] = useState<Income | undefined>(undefined);
   const { isOpen: isDrawerOpen, isDirty, openDrawer, closeDrawer, setIsDirty } = useDrawer();
-
   const {
     itemToDelete: incomeToDelete,
     isModalOpen: isDeleteModalOpen,
@@ -176,6 +179,7 @@ export default function IncomePage() {
     onError: (err) => showToast(ensureError(err).message, 'error'),
   });
 
+  // Callbacks
   const handleIncomeChange = useCallback(() => {
     setEditingIncome(undefined);
     closeDrawer();
@@ -194,12 +198,13 @@ export default function IncomePage() {
     openDrawer();
   }, [openDrawer]);
 
+  // Memos
   const incomeColumns = useMemo(
     () => buildIncomeColumns(handleEdit, openDeleteModal, deletingId),
     [handleEdit, openDeleteModal, deletingId]
   );
 
-  // Calculate summary stats
+  // Variables
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
 
@@ -215,11 +220,9 @@ export default function IncomePage() {
   const totalIncomeAllTime = incomes.reduce((sum, inc) => sum + inc.amountUsd, 0);
   const totalIncomeAllTimeToman = incomes.reduce((sum, inc) => sum + inc.amountToman, 0);
 
-  // True monthly average: total ÷ number of distinct year-month combinations
   const distinctMonths = new Set(incomes.map((inc) => `${inc.year}-${inc.month}`)).size;
   const avgMonthlyIncome = distinctMonths > 0 ? totalIncomeAllTime / distinctMonths : 0;
 
-  // Group incomes by year
   const incomesByYear = incomes.reduce(
     (acc, income) => {
       if (!acc[income.year]) {
@@ -389,4 +392,6 @@ export default function IncomePage() {
       </FormDrawer>
     </div>
   );
-}
+};
+
+export default IncomePage;

@@ -9,7 +9,7 @@ interface FeatureCardProps {
   index: number;
 }
 
-export default function FeatureCard({ icon, title, titleFa, description, descriptionFa, index }: FeatureCardProps) {
+const FeatureCard = ({ icon, title, titleFa, description, descriptionFa, index }: FeatureCardProps) => {
   // Alternate accent position for visual variety
   const isHighlighted = index === 0 || index === 3;
 
@@ -52,4 +52,6 @@ export default function FeatureCard({ icon, title, titleFa, description, descrip
       </div>
     </div>
   );
-}
+};
+
+export default FeatureCard;

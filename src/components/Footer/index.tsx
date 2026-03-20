@@ -6,7 +6,7 @@ import { NAV_ITEMS } from '@constants';
 
 import pkg from '../../../package.json';
 
-export default function Footer() {
+const Footer = () => {
   const commitSha = process.env.NEXT_PUBLIC_COMMIT_SHA || 'dev';
 
   return (
@@ -51,4 +51,6 @@ export default function Footer() {
       </div>
     </footer>
   );
-}
+};
+
+export default Footer;

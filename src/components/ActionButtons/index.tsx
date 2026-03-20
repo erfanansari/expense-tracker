@@ -9,7 +9,7 @@ interface ActionButtonsProps {
   editTitle?: string;
 }
 
-export default function ActionButtons({ onEdit, onDelete, isDeleting, editTitle = 'Edit' }: ActionButtonsProps) {
+const ActionButtons = ({ onEdit, onDelete, isDeleting, editTitle = 'Edit' }: ActionButtonsProps) => {
   return (
     <div className="flex items-center justify-center gap-1">
       <button
@@ -35,4 +35,6 @@ export default function ActionButtons({ onEdit, onDelete, isDeleting, editTitle 
       </button>
     </div>
   );
-}
+};
+
+export default ActionButtons;

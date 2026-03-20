@@ -13,15 +13,15 @@ import Loading from '@components/Loading';
 import { resetPassword } from '@/lib/api/auth';
 
 function ResetPasswordContent() {
+  // States
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const searchParams = useSearchParams();
   const router = useRouter();
-  const token = searchParams.get('token');
-  const tokenValid = !!token;
 
+  // Mutations
   const resetMutation = useMutation({
     mutationFn: ({ token, password }: { token: string; password: string }) => resetPassword(token, password),
     onSuccess: () => {
@@ -35,7 +35,10 @@ function ResetPasswordContent() {
     },
   });
 
+  // Variables
   const loading = resetMutation.isPending;
+  const token = searchParams.get('token');
+  const tokenValid = !!token;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -128,10 +131,12 @@ function ResetPasswordContent() {
   );
 }
 
-export default function ResetPassword() {
+const ResetPassword = () => {
   return (
     <Suspense fallback={<Loading message="Loading..." />}>
       <ResetPasswordContent />
     </Suspense>
   );
-}
+};
+
+export default ResetPassword;

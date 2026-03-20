@@ -11,12 +11,14 @@ import { DEMO_EMAIL, DEMO_PASSWORD } from '@constants';
 
 import { login } from '@/lib/api/auth';
 
-export default function Login() {
+const Login = () => {
+  // States
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
+  // Mutations
   const loginMutation = useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) => login(email, password),
     onSuccess: () => {
@@ -27,6 +29,7 @@ export default function Login() {
     },
   });
 
+  // Variables
   const loading = loginMutation.isPending;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -137,4 +140,6 @@ export default function Login() {
       </button>
     </>
   );
-}
+};
+
+export default Login;

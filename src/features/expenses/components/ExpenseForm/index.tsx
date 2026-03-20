@@ -34,11 +34,14 @@ interface ExpenseFormProps {
 }
 
 const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty }: ExpenseFormProps) => {
+  // Customs
   const { showToast } = useToast();
+
+  // Mutations
   const createExpense = useCreateExpense();
   const updateExpense = useUpdateExpense();
 
-  // Derive editing rate from existing expense prices
+  // Variables
   const editingRate =
     editingExpense?.price_toman && editingExpense?.price_usd
       ? Math.round(editingExpense.price_toman / editingExpense.price_usd)
@@ -73,6 +76,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
     tagIds: expense.tags?.map((t) => t.id) || [],
   });
 
+  // States
   const [formData, setFormData] = useState<CreateExpenseInput>(
     editingExpense ? buildFormData(editingExpense) : defaultFormData
   );
@@ -104,7 +108,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
     setInitialFormData(defaultFormData);
   }
 
-  // Track form changes and update dirty state
+  // Effects
   useEffect(() => {
     if (!initialFormData || !setIsDirty) return;
 
@@ -123,6 +127,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
     setIsDirty(isDirty);
   }, [formData, initialFormData, setIsDirty]);
 
+  // Memos
   const numberToPersianWord = useMemo(
     () => (formData.price_toman > 0 ? `${numberToWords(formData.price_toman)} تومان` : ''),
     [formData.price_toman]

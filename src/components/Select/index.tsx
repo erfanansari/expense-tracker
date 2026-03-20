@@ -20,16 +20,21 @@ interface SelectProps {
   className?: string;
 }
 
-export default function Select({ value, onChange, options, placeholder, disabled, className }: SelectProps) {
+const Select = ({ value, onChange, options, placeholder, disabled, className }: SelectProps) => {
+  // States
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
+
+  // References
   const containerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const listboxId = useId();
 
+  // Variables
   const selectedOption = options.find((o) => o.value === value);
 
+  // Callbacks
   const close = useCallback(() => {
     setIsOpen(false);
     setHighlightedIndex(-1);
@@ -60,7 +65,7 @@ export default function Select({ value, onChange, options, placeholder, disabled
     close();
   };
 
-  // Click outside
+  // Effects
   useEffect(() => {
     if (!isOpen) return;
 
@@ -109,7 +114,6 @@ export default function Select({ value, onChange, options, placeholder, disabled
     }
   };
 
-  // Scroll highlighted item into view
   useEffect(() => {
     if (!isOpen || highlightedIndex < 0 || !listRef.current) return;
     const item = listRef.current.children[highlightedIndex] as HTMLElement;
@@ -178,4 +182,6 @@ export default function Select({ value, onChange, options, placeholder, disabled
       )}
     </div>
   );
-}
+};
+
+export default Select;

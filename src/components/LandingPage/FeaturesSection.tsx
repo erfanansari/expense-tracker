@@ -2,7 +2,7 @@ import { BarChart3, DollarSign, LayoutDashboard, PieChart, TrendingUp, Wallet } 
 
 import FeatureCard from './FeatureCard';
 
-export default function FeaturesSection() {
+const FeaturesSection = () => {
   const features = [
     {
       icon: <Wallet className="h-5 w-5" />,
@@ -73,4 +73,6 @@ export default function FeaturesSection() {
       </div>
     </section>
   );
-}
+};
+
+export default FeaturesSection;

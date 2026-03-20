@@ -202,7 +202,7 @@ function FilterToolbar<TData extends RowData>({
 }
 
 // ─── Main DataTable ───────────────────────────────────────────────────────────
-export default function DataTable<TData extends RowData>({
+const DataTable = <TData extends RowData>({
   data,
   columns,
   onRowClick,
@@ -214,7 +214,7 @@ export default function DataTable<TData extends RowData>({
   header,
   filterBar,
   filterRow,
-}: DataTableProps<TData>) {
+}: DataTableProps<TData>) => {
   const [filterState, setFilterState] = useState<FilterState>({});
 
   const table = useReactTable({
@@ -307,4 +307,6 @@ export default function DataTable<TData extends RowData>({
       {footer}
     </>
   );
-}
+};
+
+export default DataTable;

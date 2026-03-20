@@ -77,7 +77,7 @@ function DashboardMockup() {
   );
 }
 
-export default function Hero() {
+const Hero = () => {
   return (
     <section className="relative overflow-hidden pt-16">
       {/* Subtle grid background */}
@@ -159,4 +159,6 @@ export default function Hero() {
       </div>
     </section>
   );
-}
+};
+
+export default Hero;

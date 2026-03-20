@@ -10,7 +10,8 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 import { signup } from '@/lib/api/auth';
 
-export default function Signup() {
+const Signup = () => {
+  // States
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,6 +22,7 @@ export default function Signup() {
   const [error, setError] = useState('');
   const router = useRouter();
 
+  // Mutations
   const signupMutation = useMutation({
     mutationFn: ({
       name,
@@ -41,6 +43,7 @@ export default function Signup() {
     },
   });
 
+  // Variables
   const loading = signupMutation.isPending;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -201,4 +204,6 @@ export default function Signup() {
       </form>
     </>
   );
-}
+};
+
+export default Signup;
