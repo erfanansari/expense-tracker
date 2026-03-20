@@ -4,7 +4,7 @@ import Alert from '@components/Alert';
 
 import { useAuth } from '@hooks/use-auth';
 
-export default function DemoBanner() {
+const DemoBanner = () => {
   const { user } = useAuth();
 
   if (!user || !user.isDemo) return null;
@@ -14,4 +14,6 @@ export default function DemoBanner() {
       <Alert variant="info" description="You're exploring a demo account — data may be reset at any time." />
     </div>
   );
-}
+};
+
+export default DemoBanner;

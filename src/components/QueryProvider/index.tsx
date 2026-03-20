@@ -7,7 +7,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { makeQueryClient } from '@/lib/query-client';
 
-export default function QueryProvider({ children }: { children: React.ReactNode }) {
+const QueryProvider = ({ children }: { children: React.ReactNode }) => {
   const [queryClient] = useState(() => makeQueryClient());
 
   return (
@@ -16,4 +16,6 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
-}
+};
+
+export default QueryProvider;

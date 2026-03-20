@@ -48,14 +48,17 @@ function SettingsSkeleton() {
   );
 }
 
-export default function SettingsPage() {
-  const { user, loading } = useAuth();
-  const { showToast } = useToast();
-  const updateProfile = useUpdateUserProfile();
+const SettingsPage = () => {
+  // States
   const [editedName, setEditedName] = useState('');
   const [isEditing, setIsEditing] = useState(false);
 
-  // Derive displayed name: use server state when not editing, local state when editing
+  // Customs
+  const { user, loading } = useAuth();
+  const { showToast } = useToast();
+  const updateProfile = useUpdateUserProfile();
+
+  // Variables
   const nameValue = isEditing ? editedName : (user?.name ?? '');
 
   const handleEdit = () => {
@@ -391,4 +394,6 @@ export default function SettingsPage() {
       </div>
     </div>
   );
-}
+};
+
+export default SettingsPage;

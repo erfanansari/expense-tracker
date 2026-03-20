@@ -17,9 +17,10 @@ interface ModalProps {
 }
 
 const Modal = ({ isOpen, onClose, title, titleFa, children, className, showCloseButton = true }: ModalProps) => {
+  // References
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Handle ESC key to close modal
+  // Callbacks
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -29,7 +30,6 @@ const Modal = ({ isOpen, onClose, title, titleFa, children, className, showClose
     [onClose]
   );
 
-  // Handle click outside to close modal
   const handleOverlayClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       if (event.target === event.currentTarget) {
@@ -39,7 +39,7 @@ const Modal = ({ isOpen, onClose, title, titleFa, children, className, showClose
     [onClose]
   );
 
-  // Add/remove event listeners and manage body scroll
+  // Effects
   useEffect(() => {
     if (isOpen) {
       document.addEventListener('keydown', handleKeyDown);
@@ -52,7 +52,6 @@ const Modal = ({ isOpen, onClose, title, titleFa, children, className, showClose
     };
   }, [isOpen, handleKeyDown]);
 
-  // Focus trap - focus modal when opened
   useEffect(() => {
     if (isOpen && modalRef.current) {
       modalRef.current.focus();

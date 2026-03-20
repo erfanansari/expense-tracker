@@ -33,7 +33,7 @@ const stats = [
   },
 ];
 
-export default function StatsSection() {
+const StatsSection = () => {
   return (
     <section className="bg-background py-14 sm:py-20">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -59,4 +59,6 @@ export default function StatsSection() {
       </div>
     </section>
   );
-}
+};
+
+export default StatsSection;

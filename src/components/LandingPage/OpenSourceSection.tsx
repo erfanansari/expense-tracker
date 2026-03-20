@@ -1,6 +1,6 @@
 import { Github, Heart } from 'lucide-react';
 
-export default function OpenSourceSection() {
+const OpenSourceSection = () => {
   return (
     <section className="bg-background-secondary py-14 sm:py-20">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -31,4 +31,6 @@ export default function OpenSourceSection() {
       </div>
     </section>
   );
-}
+};
+
+export default OpenSourceSection;

@@ -42,6 +42,7 @@ function CommandPaletteInner({ children }: { children: ReactNode }) {
     visualState: state.visualState,
   }));
 
+  // Memos
   const contextValue = useMemo<CommandPaletteContextType>(
     () => ({
       isOpen: visualState !== VisualState.hidden,

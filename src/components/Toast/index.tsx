@@ -18,6 +18,7 @@ interface ToastItemProps {
 }
 
 const ToastItem = ({ toast, onClose }: ToastItemProps) => {
+  // Effects
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose(toast.id);

@@ -19,12 +19,12 @@ interface TooltipProps {
 }
 
 const Tooltip = ({ content, position = 'top', children, className }: TooltipProps) => {
+  // States
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
 
-  // Check if there's actual content
+  // Variables
   const hasContent = content && (typeof content === 'string' ? content.trim().length > 0 : true);
-  // Show tooltip only when user is interacting AND there's content
   const isVisible = hasContent && (isHovered || isFocused);
 
   // Position-specific classes

@@ -39,6 +39,7 @@ function formatDateString(date: Date): string {
 }
 
 const DatePicker = ({ value, onChange, required, placeholder, isClearable, wrapperClassName }: DatePickerProps) => {
+  // Variables
   const selected = value ? new Date(`${value}T00:00:00`) : null;
 
   const handleChange = (date: Date | null) => {
@@ -49,13 +50,15 @@ const DatePicker = ({ value, onChange, required, placeholder, isClearable, wrapp
     onChange(formatDateString(date));
   };
 
-  // Stable ref so the CalendarContainer closure always sees the latest onChange
+  // References
   const onChangeRef = useRef(onChange);
+
+  // Effects
   useEffect(() => {
     onChangeRef.current = onChange;
   });
 
-  // Stable component — defined once, reads onChange via ref
+  // Memos
   const CalendarContainer = useMemo(
     () =>
       function CalendarContainerInner({ className, children }: { className: string; children: React.ReactNode }) {

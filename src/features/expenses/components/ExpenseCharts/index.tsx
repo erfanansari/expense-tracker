@@ -64,7 +64,7 @@ const CustomTooltip = ({
 };
 
 export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseChartsProps) {
-  // Calculate category totals
+  // Variables
   const categoryTotals = expenses.reduce(
     (acc, exp) => {
       const existing = acc.find((item) => item.category === exp.category);

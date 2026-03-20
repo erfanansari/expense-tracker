@@ -27,12 +27,18 @@ const navItems: NavItem[] = [
 ];
 
 const TopNav: FC = () => {
+  // Customs
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { toggle: toggleCommandPalette } = useCommandPalette();
+
+  // States
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+  // References
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // Effects
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {

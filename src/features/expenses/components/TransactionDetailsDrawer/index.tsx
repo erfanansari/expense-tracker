@@ -36,11 +36,14 @@ const DetailRow = ({ icon, label, value }: DetailRowProps) => (
   </div>
 );
 
-export default function TransactionDetailsDrawer({ expense, isOpen, onClose }: TransactionDetailsDrawerProps) {
+const TransactionDetailsDrawer = ({ expense, isOpen, onClose }: TransactionDetailsDrawerProps) => {
+  // References
   const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  // States
   const [isMobile, setIsMobile] = useState(false);
 
-  // Detect screen size
+  // Effects
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -51,11 +54,11 @@ export default function TransactionDetailsDrawer({ expense, isOpen, onClose }: T
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Callbacks
   const handleClose = useCallback(() => {
     onClose();
   }, [onClose]);
 
-  // Handle ESC key
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -77,7 +80,7 @@ export default function TransactionDetailsDrawer({ expense, isOpen, onClose }: T
     };
   }, [isOpen, handleClose]);
 
-  // Compute values only when expense exists
+  // Variables
   const categoryLabels = expense ? getCategoryLabel(expense.category) : null;
   const farsiDate = expense ? formatToFarsiDate(expense.date) : '';
   const exchangeRate = expense ? Math.round(expense.price_toman / expense.price_usd) : 0;
@@ -239,4 +242,6 @@ export default function TransactionDetailsDrawer({ expense, isOpen, onClose }: T
       </Drawer.Portal>
     </Drawer.Root>
   );
-}
+};
+
+export default TransactionDetailsDrawer;

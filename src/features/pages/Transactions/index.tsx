@@ -165,29 +165,21 @@ function buildTransactionColumns(
   ];
 }
 
-export default function TransactionsPage() {
+const TransactionsPage = () => {
+  // States
   const [filters, setFilters] = useState<ExpenseFilters>({});
-  // Local input value for description — debounced before sending to BE
   const [descInput, setDescInput] = useState('');
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilters((f) => ({ ...f, description: descInput || undefined }));
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [descInput]);
-
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useInfiniteExpenses(filters);
-  const deleteExpense = useDeleteExpense();
-  const { showToast } = useToast();
-
-  const expenses: Expense[] = data?.pages.flatMap((p) => p.expenses) ?? [];
-
   const [editingExpense, setEditingExpense] = useState<Expense | undefined>(undefined);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { isOpen: isDrawerOpen, isDirty, openDrawer, closeDrawer, setIsDirty } = useDrawer();
 
+  // Queries
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useInfiniteExpenses(filters);
+  const deleteExpense = useDeleteExpense();
+
+  // Customs
+  const { showToast } = useToast();
+  const { isOpen: isDrawerOpen, isDirty, openDrawer, closeDrawer, setIsDirty } = useDrawer();
   const {
     itemToDelete: expenseToDelete,
     isModalOpen: isDeleteModalOpen,
@@ -200,6 +192,18 @@ export default function TransactionsPage() {
     onError: (err) => showToast(ensureError(err).message, 'error'),
   });
 
+  // Variables
+  const expenses: Expense[] = data?.pages.flatMap((p) => p.expenses) ?? [];
+
+  // Effects
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFilters((f) => ({ ...f, description: descInput || undefined }));
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [descInput]);
+
+  // Callbacks
   const handleRowClick = (expense: Expense) => {
     setSelectedExpense(expense);
     setIsModalOpen(true);
@@ -229,6 +233,7 @@ export default function TransactionsPage() {
     openDrawer();
   }, [openDrawer]);
 
+  // Memos
   const transactionColumns = useMemo(
     () => buildTransactionColumns(handleEdit, openDeleteModal, deletingId),
     [handleEdit, openDeleteModal, deletingId]
@@ -412,4 +417,6 @@ export default function TransactionsPage() {
       </FormDrawer>
     </div>
   );
-}
+};
+
+export default TransactionsPage;

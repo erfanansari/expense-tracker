@@ -4,7 +4,7 @@ import { ArrowRight, Zap } from 'lucide-react';
 
 import Button from '@components/Button';
 
-export default function CtaSection() {
+const CtaSection = () => {
   return (
     <section className="bg-background py-16 sm:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -59,4 +59,6 @@ export default function CtaSection() {
       </div>
     </section>
   );
-}
+};
+
+export default CtaSection;

@@ -13,11 +13,15 @@ import { ensureError } from '@utils';
 import type { TagWithUsage } from '@/@types/expense';
 
 const TagManagementList = () => {
+  // Queries
   const { data: tags = [], isLoading } = useTagsWithUsage();
+
+  // Mutations
   const createTag = useCreateTag();
   const updateTag = useUpdateTag();
   const deleteTag = useDeleteTag();
 
+  // States
   const [searchQuery, setSearchQuery] = useState('');
   const [editingTagId, setEditingTagId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState('');
@@ -26,7 +30,7 @@ const TagManagementList = () => {
   const [newTagName, setNewTagName] = useState('');
   const [createError, setCreateError] = useState('');
 
-  // Filter tags based on search
+  // Variables
   const filteredTags = tags.filter((tag) => tag.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   const startEdit = (tag: TagWithUsage) => {

@@ -30,7 +30,10 @@ interface IncomeFormProps {
 }
 
 const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: IncomeFormProps) => {
+  // Customs
   const { showToast } = useToast();
+
+  // Mutations
   const createIncome = useCreateIncome();
   const updateIncome = useUpdateIncome();
 
@@ -38,6 +41,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
     editingRate: editingIncome?.exchangeRateUsed,
   });
 
+  // Variables
   const currentDate = new Date();
 
   const defaultFormData: CreateIncomeInput = {
@@ -62,6 +66,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
     notes: income.notes || '',
   });
 
+  // States
   const [formData, setFormData] = useState<CreateIncomeInput>(
     editingIncome ? buildFormData(editingIncome) : defaultFormData
   );
@@ -91,7 +96,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
     setInitialFormData({ ...defaultFormData, exchangeRateUsed: exchangeRate });
   }
 
-  // Track form changes and update dirty state
+  // Effects
   useEffect(() => {
     if (!initialFormData || !setIsDirty) return;
 

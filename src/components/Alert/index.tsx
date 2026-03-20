@@ -32,7 +32,7 @@ const variantStyles = {
   },
 };
 
-export default function Alert({ variant = 'info', description, action, className = '' }: AlertProps) {
+const Alert = ({ variant = 'info', description, action, className = '' }: AlertProps) => {
   const { container, iconClass, icon: Icon } = variantStyles[variant];
 
   return (
@@ -42,4 +42,6 @@ export default function Alert({ variant = 'info', description, action, className
       {action && <div className="ml-auto flex shrink-0 items-center gap-2">{action}</div>}
     </div>
   );
-}
+};
+
+export default Alert;

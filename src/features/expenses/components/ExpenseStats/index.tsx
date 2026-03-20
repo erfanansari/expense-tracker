@@ -11,6 +11,7 @@ interface ExpenseStatsProps {
 }
 
 const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
+  // Variables
   const totalToman = expenses.reduce((sum, exp) => sum + exp.price_toman, 0);
   const totalUsd = expenses.reduce((sum, exp) => sum + exp.price_usd, 0);
 

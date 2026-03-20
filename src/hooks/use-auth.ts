@@ -14,6 +14,7 @@ export function useAuth() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
+  // Queries
   const {
     data: user,
     isLoading: loading,
@@ -25,6 +26,7 @@ export function useAuth() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
+  // Callbacks
   const logout = useCallback(async () => {
     try {
       await logoutApi();

@@ -7,11 +7,13 @@ import { Loader2 } from 'lucide-react';
 
 import { forgotPassword } from '@/lib/api/auth';
 
-export default function ForgotPassword() {
+const ForgotPassword = () => {
+  // States
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
+  // Mutations
   const forgotPasswordMutation = useMutation({
     mutationFn: (email: string) => forgotPassword(email),
     onSuccess: (data) => {
@@ -23,6 +25,7 @@ export default function ForgotPassword() {
     },
   });
 
+  // Variables
   const loading = forgotPasswordMutation.isPending;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -85,4 +88,6 @@ export default function ForgotPassword() {
       </form>
     </>
   );
-}
+};
+
+export default ForgotPassword;

@@ -8,7 +8,7 @@ import Hero from '@components/LandingPage/Hero';
 import OpenSourceSection from '@components/LandingPage/OpenSourceSection';
 import StatsSection from '@components/LandingPage/StatsSection';
 
-export default function Landing() {
+const Landing = () => {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -22,4 +22,6 @@ export default function Landing() {
       <Footer />
     </div>
   );
-}
+};
+
+export default Landing;

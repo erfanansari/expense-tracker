@@ -57,11 +57,17 @@ function ReportsSkeleton() {
   );
 }
 
-export default function ReportsPage() {
-  const { data: expensesData, isLoading } = useAllExpenses();
-  const expenses: Expense[] = expensesData ?? [];
+const ReportsPage = () => {
+  // States
   const [dateRange, setDateRange] = useState<DateRange>('ALL_TIME');
 
+  // Queries
+  const { data: expensesData, isLoading } = useAllExpenses();
+
+  // Variables
+  const expenses: Expense[] = expensesData ?? [];
+
+  // Memos
   const filteredExpenses = useMemo(() => {
     return filterExpensesByDateRange(expenses, dateRange);
   }, [expenses, dateRange]);
@@ -134,4 +140,6 @@ export default function ReportsPage() {
       </div>
     </div>
   );
-}
+};
+
+export default ReportsPage;
