@@ -4,6 +4,30 @@ This document provides AI coding agents with the context needed to work effectiv
 
 ---
 
+## Business Domain
+
+Kharji is a **personal finance tracker** for Persian-speaking users. It tracks expenses, income, and assets with multi-currency support and Jalali (Persian) calendar.
+
+### Core Entities
+
+| Entity      | Purpose                                                               |
+| ----------- | --------------------------------------------------------------------- |
+| **Expense** | Spending record with amount, category, tags, optional exchange rate   |
+| **Income**  | Income record with source type, amount, currency                      |
+| **Asset**   | Owned asset (property, vehicle, investment) with valuations over time |
+| **Tag**     | User-defined label attached to expenses for finer categorization      |
+| **Summary** | Aggregated totals across all domains (used by Overview page)          |
+
+### Key Domain Rules
+
+- All monetary values are stored in the user's base currency; foreign amounts carry a `amountUsd` equivalent
+- Exchange rates can be fetched automatically or overridden by the user (`useExchangeRateForm`)
+- Dates are displayed in Jalali format using helpers in `src/utils/date/`
+- The app is bilingual: every category/type constant has both an English label and a Persian (`labelFa`) translation
+- All data is user-scoped — every DB query filters by `user_id` (enforced via `verifyOwnership`)
+
+---
+
 ## Technology Stack
 
 | Library                  | Version | Purpose                                       |
@@ -138,6 +162,33 @@ src/features/expenses/
 - Helper components (skeletons, tooltips) stay as function declarations inside the file that uses them
 - Column builder functions go in `constants/index.ts` when they are large, or stay in the component file when small
 
+### Adding a New Page
+
+Follow this exact sequence:
+
+1. **App router entry** — `src/app/(dashboard)/[route]/page.tsx`:
+
+   ```typescript
+   import type { Metadata } from 'next';
+   import MyFeature from '@features/pages/MyFeature';
+
+   export const metadata: Metadata = { title: 'My Feature' };
+   const MyFeaturePage = () => <MyFeature />;
+   export default MyFeaturePage;
+   ```
+
+2. **Feature module** — `src/features/pages/MyFeature/index.tsx` (composition root: queries, state here; sub-components receive props)
+
+3. **API route** — `src/app/api/my-feature/route.ts` using `withAuth` wrapper (see API Route Pattern)
+
+4. **Client API functions** — `src/lib/api/my-feature.ts` using `apiFetch` / `apiMutate`
+
+5. **Query keys** — add to `src/lib/query-keys.ts` under a new domain key
+
+6. **Mutation hooks** — add to `src/hooks/use-my-feature.ts` using `useMutationWithInvalidation`
+
+7. **Navigation** — add link to the sidebar/nav component if the page should appear in the menu
+
 ---
 
 ## Code Style
@@ -153,6 +204,9 @@ const MyComponent = ({ prop1, prop2 }: MyComponentProps) => {
   // States
   const [value, setValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+
+  // References
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Customs
   const { showToast } = useToast();
@@ -559,6 +613,18 @@ Props: `items` (array of `{ value, label, labelFa? }`), `defaultValue`, `onValue
 ---
 
 ## Commands
+
+### Environment Variables
+
+| Variable             | Purpose                                      |
+| -------------------- | -------------------------------------------- |
+| `TURSO_DATABASE_URL` | Turso database connection URL                |
+| `TURSO_AUTH_TOKEN`   | Turso authentication token                   |
+| `AUTH_SECRET`        | Secret used for JWT session signing (`jose`) |
+
+These must be set in `.env.local` for local dev. Production values are set in the deployment environment.
+
+### Scripts
 
 ```bash
 pnpm dev          # Development server (localhost:3000)
