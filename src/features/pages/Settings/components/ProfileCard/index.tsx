@@ -99,8 +99,8 @@ const ProfileCard = () => {
             ) : (
               <>
                 <Button variant="primary" onClick={handleSave} disabled={updateProfile.isPending}>
-                  {updateProfile.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
+                  {updateProfile.isPending && <Loader2 className="h-4 w-4 shrink-0 animate-spin" />}
+                  <span>{updateProfile.isPending ? 'Saving...' : 'Save Changes'}</span>
                 </Button>
                 <Button variant="outline" onClick={handleCancel} disabled={updateProfile.isPending}>
                   Cancel

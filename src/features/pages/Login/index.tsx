@@ -112,8 +112,8 @@ const Login = () => {
         >
           {loading ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Signing in...
+              <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+              <span>Signing in...</span>
             </>
           ) : (
             'Sign In'
