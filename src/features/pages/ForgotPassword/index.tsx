@@ -78,8 +78,8 @@ const ForgotPassword = () => {
         >
           {loading ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Sending...
+              <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+              <span>Sending...</span>
             </>
           ) : (
             'Send Reset Link'

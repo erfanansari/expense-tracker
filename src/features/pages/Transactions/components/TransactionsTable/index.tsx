@@ -182,8 +182,8 @@ const TransactionsTable = ({
               <Button onClick={onLoadMore} disabled={isFetchingNextPage} variant="outline" className="w-full">
                 {isFetchingNextPage ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading...
+                    <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                    <span>Loading...</span>
                   </>
                 ) : (
                   'Load More'

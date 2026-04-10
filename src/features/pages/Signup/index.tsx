@@ -194,8 +194,8 @@ const Signup = () => {
         >
           {loading ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Creating account...
+              <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+              <span>Creating account...</span>
             </>
           ) : (
             'Create Account'

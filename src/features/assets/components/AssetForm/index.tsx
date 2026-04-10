@@ -371,23 +371,23 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
               if (isFetchingRate) {
                 return (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading...
+                    <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                    <span>Loading...</span>
                   </>
                 );
               }
               if (isSubmitting) {
                 return (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Saving...
+                    <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                    <span>Saving...</span>
                   </>
                 );
               }
               return (
                 <>
-                  {editingAsset ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                  {editingAsset ? 'Update' : 'Add'}
+                  {editingAsset ? <Save className="h-4 w-4 shrink-0" /> : <Plus className="h-4 w-4 shrink-0" />}
+                  <span>{editingAsset ? 'Update' : 'Add'}</span>
                 </>
               );
             })()}

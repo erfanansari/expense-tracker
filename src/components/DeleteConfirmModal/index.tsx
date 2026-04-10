@@ -58,8 +58,8 @@ const DeleteConfirmModal = ({
           >
             {isDeleting ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Deleting...
+                <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                <span>Deleting...</span>
               </>
             ) : (
               'Delete'

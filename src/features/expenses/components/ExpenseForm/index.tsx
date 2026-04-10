@@ -335,23 +335,23 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
             if (isFetchingRate) {
               return (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Loading rate...
+                  <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                  <span>Loading rate...</span>
                 </>
               );
             }
             if (isSubmitting) {
               return (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Saving...
+                  <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                  <span>Saving...</span>
                 </>
               );
             }
             return (
               <>
-                {editingExpense ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                {editingExpense ? 'Update' : 'Add'}
+                {editingExpense ? <Save className="h-4 w-4 shrink-0" /> : <Plus className="h-4 w-4 shrink-0" />}
+                <span>{editingExpense ? 'Update' : 'Add'}</span>
               </>
             );
           })()}
