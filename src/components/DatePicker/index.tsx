@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef } from 'react';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ReactDatePicker from 'react-datepicker';
+import type { DatePicker as ReactDatePickerType } from 'react-datepicker';
 
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -52,6 +53,8 @@ const DatePicker = ({ value, onChange, required, placeholder, isClearable, wrapp
 
   // References
   const onChangeRef = useRef(onChange);
+  const pickerRef = useRef<ReactDatePickerType>(null);
+  const closeRef = useRef(() => pickerRef.current?.setOpen(false));
 
   // Effects
   useEffect(() => {
@@ -84,7 +87,10 @@ const DatePicker = ({ value, onChange, required, placeholder, isClearable, wrapp
                 <button
                   key={label}
                   type="button"
-                  onClick={() => onChangeRef.current(formatDateString(date))}
+                  onClick={() => {
+                    onChangeRef.current(formatDateString(date));
+                    closeRef.current();
+                  }}
                   className="hover:bg-background-elevated flex w-full items-center rounded-lg px-3 py-2 transition-colors"
                 >
                   <span className="text-text-primary text-sm font-medium">{label}</span>
@@ -103,6 +109,7 @@ const DatePicker = ({ value, onChange, required, placeholder, isClearable, wrapp
   return (
     <div className={`datepicker-wrapper${wrapperClassName ? ` ${wrapperClassName}` : ''}`}>
       <ReactDatePicker
+        ref={pickerRef}
         selected={selected}
         onChange={handleChange}
         dateFormat="yyyy-MM-dd"
