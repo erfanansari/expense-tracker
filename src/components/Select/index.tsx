@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 
+import { createPortal } from 'react-dom';
+
 import { Check, ChevronDown } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
@@ -24,7 +26,13 @@ const Select = ({ value, onChange, options, placeholder, disabled, className }: 
   // States
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [dropdownPos, setDropdownPos] = useState<{
+    top?: number;
+    bottom?: number;
+    left: number;
+    width: number;
+    maxHeight: number;
+  } | null>(null);
 
   // References
   const containerRef = useRef<HTMLDivElement>(null);
@@ -44,7 +52,22 @@ const Select = ({ value, onChange, options, placeholder, disabled, className }: 
   const openDropdown = useCallback(() => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (rect) {
-      setDropdownPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+      const GAP = 4;
+      const MIN_HEIGHT = 120;
+      const PREFERRED_HEIGHT = 240;
+      const viewportHeight = window.innerHeight;
+
+      const spaceBelow = viewportHeight - rect.bottom - GAP;
+      const spaceAbove = rect.top - GAP;
+
+      const openBelow = spaceBelow >= MIN_HEIGHT || spaceBelow >= spaceAbove;
+      const maxHeight = Math.min(PREFERRED_HEIGHT, openBelow ? spaceBelow : spaceAbove);
+
+      if (openBelow) {
+        setDropdownPos({ top: rect.bottom + GAP, left: rect.left, width: rect.width, maxHeight });
+      } else {
+        setDropdownPos({ bottom: viewportHeight - rect.top + GAP, left: rect.left, width: rect.width, maxHeight });
+      }
     }
     setIsOpen(true);
     const idx = options.findIndex((o) => o.value === value);
@@ -70,7 +93,10 @@ const Select = ({ value, onChange, options, placeholder, disabled, className }: 
     if (!isOpen) return;
 
     const handleClick = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const clickedInsideTrigger = containerRef.current?.contains(target);
+      const clickedInsideList = listRef.current?.contains(target);
+      if (!clickedInsideTrigger && !clickedInsideList) {
         close();
       }
     };
@@ -120,6 +146,44 @@ const Select = ({ value, onChange, options, placeholder, disabled, className }: 
     item?.scrollIntoView({ block: 'nearest' });
   }, [highlightedIndex, isOpen]);
 
+  const dropdown =
+    isOpen && dropdownPos
+      ? createPortal(
+          <ul
+            ref={listRef}
+            id={listboxId}
+            role="listbox"
+            className="border-border-subtle bg-background fixed z-[9999] overflow-auto rounded-lg border py-1 shadow-lg"
+            style={{
+              top: dropdownPos.top,
+              bottom: dropdownPos.bottom,
+              left: dropdownPos.left,
+              width: dropdownPos.width,
+              maxHeight: dropdownPos.maxHeight,
+            }}
+          >
+            {options.map((option, index) => (
+              <li
+                key={option.value}
+                role="option"
+                aria-selected={option.value === value}
+                className={twMerge(
+                  'text-text-primary flex cursor-pointer items-center justify-between px-3 py-2 text-sm transition-colors',
+                  index === highlightedIndex && 'bg-background-elevated',
+                  option.value === value && 'font-medium'
+                )}
+                onClick={() => select(option.value)}
+                onMouseEnter={() => setHighlightedIndex(index)}
+              >
+                <span className="truncate">{option.label}</span>
+                {option.value === value && <Check className="text-blue ml-2 h-4 w-4 shrink-0" />}
+              </li>
+            ))}
+          </ul>,
+          document.body
+        )
+      : null;
+
   return (
     <div ref={containerRef} className={twMerge('relative', className)}>
       {/* Trigger */}
@@ -148,38 +212,7 @@ const Select = ({ value, onChange, options, placeholder, disabled, className }: 
         />
       </button>
 
-      {/* Dropdown */}
-      {isOpen && dropdownPos && (
-        <ul
-          ref={listRef}
-          id={listboxId}
-          role="listbox"
-          className="border-border-subtle bg-background fixed z-9999 max-h-60 overflow-auto rounded-lg border py-1 shadow-lg"
-          style={{
-            top: dropdownPos.top,
-            left: dropdownPos.left,
-            width: dropdownPos.width,
-          }}
-        >
-          {options.map((option, index) => (
-            <li
-              key={option.value}
-              role="option"
-              aria-selected={option.value === value}
-              className={twMerge(
-                'text-text-primary flex cursor-pointer items-center justify-between px-3 py-2 text-sm transition-colors',
-                index === highlightedIndex && 'bg-background-elevated',
-                option.value === value && 'font-medium'
-              )}
-              onClick={() => select(option.value)}
-              onMouseEnter={() => setHighlightedIndex(index)}
-            >
-              <span className="truncate">{option.label}</span>
-              {option.value === value && <Check className="text-blue ml-2 h-4 w-4 shrink-0" />}
-            </li>
-          ))}
-        </ul>
-      )}
+      {dropdown}
     </div>
   );
 };
