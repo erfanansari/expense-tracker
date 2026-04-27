@@ -20,6 +20,9 @@ export const queryKeys = {
   summary: {
     all: () => ['summary'] as const,
   },
+  netWorth: {
+    history: (from: string, to: string) => ['netWorth', 'history', from, to] as const,
+  },
   exchangeRate: {
     current: () => ['exchangeRate', 'current'] as const,
   },
