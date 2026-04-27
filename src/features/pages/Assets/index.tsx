@@ -25,6 +25,7 @@ import type { CategoryData, ChartEntry } from './@types';
 import AssetsDistribution from './components/AssetsDistribution';
 import AssetsSummary from './components/AssetsSummary';
 import AssetsTable from './components/AssetsTable';
+import NetWorthChart from './components/NetWorthChart';
 
 const CATEGORY_COLORS = ASSET_CATEGORY_COLORS as Record<AssetCategory, string>;
 
@@ -149,9 +150,14 @@ const AssetsPage = () => {
         />
 
         {assets.length > 0 && (
-          <div className="mt-6">
-            <AssetsDistribution chartData={chartData} totalValueUsd={totalValueUsd} />
-          </div>
+          <>
+            <div className="mt-6">
+              <AssetsDistribution chartData={chartData} totalValueUsd={totalValueUsd} />
+            </div>
+            <div className="mt-6">
+              <NetWorthChart />
+            </div>
+          </>
         )}
 
         {/* Delete Confirmation Modal */}
