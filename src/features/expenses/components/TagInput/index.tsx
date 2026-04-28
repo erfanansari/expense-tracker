@@ -1,8 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 import { Check, Edit2, Loader2, Plus, Tag as TagIcon, X } from 'lucide-react';
+import type { CSSObjectWithLabel, MultiValue, MultiValueGenericProps, OptionProps, StylesConfig } from 'react-select';
+import CreatableSelect from 'react-select/creatable';
+import { twMerge } from 'tailwind-merge';
 
 import { useCreateTag, useTags, useUpdateTag } from '@hooks/use-tags';
 
@@ -10,116 +13,234 @@ import { ensureError } from '@utils';
 
 import { type Tag } from '@/@types/expense';
 
+// ─── Types ──────────────────────────────────────────────────────────────────
+
+interface TagOption {
+  value: string;
+  label: string;
+  tag?: Tag;
+}
+
+interface TagEditState {
+  editingTagId: number | null;
+  editingName: string;
+  editError: string;
+  isSaving: boolean;
+  onStartEdit: (tag: Tag) => void;
+  onCancelEdit: () => void;
+  onSaveEdit: (tagId: number) => Promise<void>;
+  onEditNameChange: (name: string) => void;
+}
+
+// ─── Context ─────────────────────────────────────────────────────────────────
+// React context is preserved through React.createPortal, which react-select uses
+// for menuPortalTarget, so TagOptionComponent can access TagEditContext.
+
+const TagEditContext = createContext<TagEditState | null>(null);
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const selectStyles: StylesConfig<any, any, any> = {
+  menuPortal: (base: CSSObjectWithLabel) => ({ ...base, zIndex: 9999, pointerEvents: 'auto' }),
+  // Remove react-select's default 2px margin/padding on the Input container
+  // so the control height matches other inputs in the form.
+  input: () => ({ color: 'inherit', fontSize: 'inherit', margin: 0, padding: 0 }),
+};
+
+const controlClass = (isFocused: boolean) =>
+  twMerge(
+    'border-border-subtle bg-background flex w-full items-center rounded-lg border px-3 py-2 text-sm transition-all cursor-text gap-1.5',
+    isFocused && 'border-blue'
+  );
+
+// ─── Custom Option ───────────────────────────────────────────────────────────
+
+const TagOptionComponent = ({ data, isFocused, innerProps, innerRef }: OptionProps<TagOption, true>) => {
+  const edit = useContext(TagEditContext);
+  const isNew = (data as TagOption & { __isNew__?: boolean }).__isNew__;
+  const isEditing = edit?.editingTagId != null && edit.editingTagId === data.tag?.id;
+
+  if (isNew) {
+    return (
+      <div
+        {...innerProps}
+        ref={innerRef}
+        className={twMerge(
+          'text-blue border-border-subtle flex cursor-pointer items-center gap-2 border-t px-3 py-2 text-xs transition-colors',
+          isFocused && 'bg-blue/10'
+        )}
+      >
+        <Plus className="h-3.5 w-3.5 shrink-0" />
+        <span>Create &ldquo;{data.label}&rdquo;</span>
+      </div>
+    );
+  }
+
+  if (isEditing && data.tag && edit) {
+    const tagId = data.tag.id;
+    return (
+      <div
+        ref={innerRef}
+        className="flex items-center gap-2 px-3 py-2"
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <TagIcon className="text-text-muted h-3.5 w-3.5 shrink-0" />
+        <div className="min-w-0 flex-1">
+          <input
+            type="text"
+            value={edit.editingName}
+            onChange={(e) => edit.onEditNameChange(e.target.value)}
+            onKeyDown={(e) => {
+              e.stopPropagation();
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                edit.onSaveEdit(tagId);
+              }
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                edit.onCancelEdit();
+              }
+            }}
+            className="border-blue bg-background text-text-primary w-full rounded border px-2 py-0.5 text-xs outline-none"
+          />
+          {edit.editError && <p className="text-danger mt-0.5 text-xs">{edit.editError}</p>}
+        </div>
+        <div className="flex shrink-0 gap-1">
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.stopPropagation();
+              edit.onSaveEdit(tagId);
+            }}
+            disabled={edit.isSaving}
+            className="border-border-subtle bg-background text-success flex h-6 w-6 items-center justify-center rounded border transition-colors disabled:opacity-50"
+            aria-label="Save"
+          >
+            {edit.isSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+          </button>
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.stopPropagation();
+              edit.onCancelEdit();
+            }}
+            disabled={edit.isSaving}
+            className="border-border-subtle bg-background text-text-secondary flex h-6 w-6 items-center justify-center rounded border transition-colors disabled:opacity-50"
+            aria-label="Cancel"
+          >
+            <X className="h-3 w-3" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      {...innerProps}
+      ref={innerRef}
+      className={twMerge(
+        'text-text-primary flex cursor-pointer items-center gap-2 px-3 py-1.5 text-xs transition-colors',
+        isFocused && 'bg-background-elevated'
+      )}
+    >
+      <TagIcon className="text-text-muted h-3.5 w-3.5 shrink-0" />
+      <span className="min-w-0 flex-1 truncate">{data.label}</span>
+      {/* Always rendered to prevent layout shift on hover; hidden when not focused */}
+      {data.tag && edit && (
+        <button
+          type="button"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            edit.onStartEdit(data.tag!);
+          }}
+          className={twMerge(
+            'text-text-muted hover:text-text-secondary shrink-0 rounded p-1 transition-colors',
+            !isFocused && 'invisible'
+          )}
+          aria-label={`Rename ${data.label}`}
+          tabIndex={-1}
+        >
+          <Edit2 className="h-3 w-3" />
+        </button>
+      )}
+    </div>
+  );
+};
+
+// ─── Tag pill label ──────────────────────────────────────────────────────────
+
+const TagMultiValueLabel = ({ data }: MultiValueGenericProps<TagOption, true>) => (
+  <span className="flex items-center gap-1">
+    <TagIcon className="h-3 w-3 shrink-0" />
+    <span>{data.label}</span>
+  </span>
+);
+
+// ─── Main component ──────────────────────────────────────────────────────────
+
 interface TagInputProps {
   selectedTags: Tag[];
   onTagsChange: (tags: Tag[]) => void;
 }
 
-const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
-  // Queries
-  const { data: allTags = [] } = useTags();
+const tagToOption = (tag: Tag): TagOption => ({ value: String(tag.id), label: tag.name, tag });
 
-  // Mutations
+const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
+  const { data: allTags = [] } = useTags();
   const createTag = useCreateTag();
   const updateTag = useUpdateTag();
 
-  // States
-  const [inputValue, setInputValue] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [editingTagId, setEditingTagId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState('');
   const [editError, setEditError] = useState('');
 
-  // References
-  const inputRef = useRef<HTMLInputElement>(null);
-  const suggestionsRef = useRef<HTMLDivElement>(null);
-  const editInputRef = useRef<HTMLInputElement>(null);
+  const handleChange = (newValue: MultiValue<TagOption>) => {
+    onTagsChange(newValue.flatMap((o) => (o.tag ? [o.tag] : [])));
+  };
 
-  // Memos
-  const filteredTags = useMemo(() => {
-    if (inputValue.trim()) {
-      const search = inputValue.toLowerCase();
-      return allTags.filter(
-        (tag) => tag.name.toLowerCase().includes(search) && !selectedTags.some((selected) => selected.id === tag.id)
-      );
-    }
-    return allTags.filter((tag) => !selectedTags.some((selected) => selected.id === tag.id));
-  }, [inputValue, allTags, selectedTags]);
-
-  // Effects
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        suggestionsRef.current &&
-        !suggestionsRef.current.contains(event.target as Node) &&
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
-      ) {
-        setShowSuggestions(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleCreateTag = async (name: string) => {
-    if (!name.trim()) return;
-
+  const handleCreate = async (inputValue: string) => {
     try {
-      const newTag = await createTag.mutateAsync(name.trim());
+      const newTag = await createTag.mutateAsync(inputValue.trim());
       onTagsChange([...selectedTags, newTag]);
-      setInputValue('');
-      setShowSuggestions(false);
     } catch (error) {
       console.error('Failed to create tag:', error);
     }
   };
 
-  const selectTag = (tag: Tag) => {
-    onTagsChange([...selectedTags, tag]);
-    setInputValue('');
-    setShowSuggestions(false);
-    inputRef.current?.focus();
-  };
-
-  const unselectTag = (tagId: number) => {
-    onTagsChange(selectedTags.filter((tag) => tag.id !== tagId));
-  };
-
-  const startEditInDropdown = (tag: Tag, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const startEdit = (tag: Tag) => {
     setEditingTagId(tag.id);
     setEditingName(tag.name);
     setEditError('');
   };
 
-  const cancelEditInDropdown = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const cancelEdit = () => {
     setEditingTagId(null);
     setEditingName('');
     setEditError('');
   };
 
-  const saveEditInDropdown = async (tagId: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-
+  const saveEdit = async (tagId: number) => {
     if (!editingName.trim()) {
       setEditError('Tag name is required');
       return;
     }
-
     const isDuplicate = allTags.some(
-      (tag) => tag.id !== tagId && tag.name.toLowerCase() === editingName.trim().toLowerCase()
+      (t) => t.id !== tagId && t.name.toLowerCase() === editingName.trim().toLowerCase()
     );
-
     if (isDuplicate) {
-      setEditError(`Tag "${editingName.trim()}" already exists`);
+      setEditError(`"${editingName.trim()}" already exists`);
       return;
     }
-
     setEditError('');
-
     try {
       await updateTag.mutateAsync({ id: tagId, name: editingName.trim() });
       setEditingTagId(null);
@@ -129,157 +250,59 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
     }
   };
 
-  const handleEditKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, tagId: number) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      saveEditInDropdown(tagId, e as unknown as React.MouseEvent);
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      cancelEditInDropdown(e as unknown as React.MouseEvent);
-    }
+  const editState: TagEditState = {
+    editingTagId,
+    editingName,
+    editError,
+    isSaving: updateTag.isPending,
+    onStartEdit: startEdit,
+    onCancelEdit: cancelEdit,
+    onSaveEdit: saveEdit,
+    onEditNameChange: setEditingName,
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && inputValue.trim()) {
-      e.preventDefault();
-
-      const exactMatch = filteredTags.find((tag) => tag.name.toLowerCase() === inputValue.toLowerCase());
-
-      if (exactMatch) {
-        selectTag(exactMatch);
-      } else {
-        handleCreateTag(inputValue);
-      }
-    } else if (e.key === 'Backspace' && !inputValue && selectedTags.length > 0) {
-      unselectTag(selectedTags[selectedTags.length - 1].id);
-    }
-  };
-
-  const hasExactMatch = filteredTags.some((tag) => tag.name.toLowerCase() === inputValue.toLowerCase());
-  const isCreating = createTag.isPending;
-  const isSaving = updateTag.isPending;
+  const options = allTags.filter((tag) => !selectedTags.some((s) => s.id === tag.id)).map(tagToOption);
 
   return (
-    <div className="relative">
-      {/* Selected Tags + Input */}
-      <div className="border-border-subtle bg-background focus-within:border-blue flex min-h-[36px] flex-wrap items-center gap-1.5 rounded-lg border px-3 py-2 transition-all">
-        {selectedTags.map((tag) => (
-          <div
-            key={tag.id}
-            className="group border-border-subtle bg-background-elevated text-text-secondary hover:border-border-default flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-sm font-medium transition-all"
-          >
-            <TagIcon className="h-3.5 w-3.5" />
-            <span>{tag.name}</span>
-            <button
-              type="button"
-              onClick={() => unselectTag(tag.id)}
-              className="hover:bg-border-subtle ml-0.5 rounded p-0.5 transition-colors"
-              aria-label={`Remove ${tag.name} tag`}
-            >
-              <X className="h-3 w-3" />
-            </button>
-          </div>
-        ))}
-
-        <input
-          ref={inputRef}
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onFocus={() => setShowSuggestions(true)}
-          placeholder={selectedTags.length === 0 ? 'Add tags...' : ''}
-          className="text-text-primary placeholder:text-text-muted min-w-[100px] flex-1 bg-transparent text-sm outline-none"
-        />
-      </div>
-
-      {/* Suggestions Dropdown */}
-      {showSuggestions && (
-        <div
-          ref={suggestionsRef}
-          className="border-border-subtle bg-background absolute top-full right-0 left-0 z-20 mt-2 max-h-48 overflow-y-auto rounded-lg border shadow-lg"
-        >
-          {filteredTags.map((tag) => (
-            <div
-              key={tag.id}
-              className="group border-border-subtle hover:bg-background-elevated flex items-center gap-2.5 border-b px-4 py-2.5 transition-colors first:rounded-t-lg last:border-0"
-            >
-              {editingTagId === tag.id ? (
-                <>
-                  <TagIcon className="text-text-muted h-4 w-4 shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <input
-                      ref={editInputRef}
-                      type="text"
-                      value={editingName}
-                      onChange={(e) => setEditingName(e.target.value)}
-                      onKeyDown={(e) => handleEditKeyDown(e, tag.id)}
-                      onClick={(e) => e.stopPropagation()}
-                      autoFocus
-                      className="border-blue bg-background text-text-primary w-full rounded border px-2 py-1 text-sm outline-none"
-                    />
-                    {editError && <p className="text-danger mt-1 text-xs">{editError}</p>}
-                  </div>
-                  <div className="flex shrink-0 gap-1">
-                    <button
-                      onClick={(e) => saveEditInDropdown(tag.id, e)}
-                      disabled={isSaving}
-                      className="border-border-subtle bg-background text-success hover:bg-success-light flex h-7 w-7 items-center justify-center rounded border transition-colors disabled:opacity-50"
-                      aria-label="Save changes"
-                    >
-                      {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-                    </button>
-                    <button
-                      onClick={cancelEditInDropdown}
-                      disabled={isSaving}
-                      className="border-border-subtle bg-background text-text-secondary hover:bg-background-elevated flex h-7 w-7 items-center justify-center rounded border transition-colors disabled:opacity-50"
-                      aria-label="Cancel editing"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => selectTag(tag)}
-                    className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
-                  >
-                    <TagIcon className="text-text-muted h-4 w-4 shrink-0" />
-                    <span className="text-text-primary truncate text-sm">{tag.name}</span>
-                  </button>
-                  <button
-                    onClick={(e) => startEditInDropdown(tag, e)}
-                    className="text-text-muted hover:bg-background hover:text-text-primary shrink-0 rounded p-1.5 opacity-0 transition-all group-hover:opacity-100"
-                    aria-label={`Rename tag ${tag.name}`}
-                  >
-                    <Edit2 className="h-3.5 w-3.5" />
-                  </button>
-                </>
-              )}
-            </div>
-          ))}
-
-          {/* Create new tag option */}
-          {inputValue.trim() && !hasExactMatch && (
-            <button
-              type="button"
-              onClick={() => handleCreateTag(inputValue)}
-              disabled={isCreating}
-              className="border-border-subtle text-blue hover:bg-blue/10 flex w-full items-center gap-2.5 border-t px-4 py-2.5 text-left text-sm transition-colors last:rounded-b-lg disabled:opacity-50"
-            >
-              {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-              {isCreating ? 'Creating...' : `Create "${inputValue}"`}
-            </button>
-          )}
-
-          {filteredTags.length === 0 && !inputValue.trim() && (
-            <div className="text-text-muted px-4 py-3 text-sm">No tags yet. Start typing to create one...</div>
-          )}
-        </div>
-      )}
-    </div>
+    <TagEditContext.Provider value={editState}>
+      <CreatableSelect<TagOption, true>
+        isMulti
+        value={selectedTags.map(tagToOption)}
+        onChange={handleChange}
+        options={options}
+        onCreateOption={handleCreate}
+        isLoading={createTag.isPending}
+        placeholder="Add tags..."
+        isSearchable
+        closeMenuOnSelect={false}
+        createOptionPosition="last"
+        menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+        menuPosition="fixed"
+        onMenuClose={cancelEdit}
+        unstyled
+        styles={selectStyles}
+        components={{
+          Option: TagOptionComponent,
+          MultiValueLabel: TagMultiValueLabel,
+          DropdownIndicator: () => null,
+          IndicatorSeparator: () => null,
+        }}
+        classNames={{
+          control: ({ isFocused }) => controlClass(isFocused),
+          valueContainer: () => 'flex items-center gap-1.5 flex-1 overflow-x-hidden',
+          menu: () => 'border-border-subtle bg-background mt-1 rounded-lg border py-1 shadow-lg',
+          placeholder: () => 'text-text-muted text-sm',
+          input: () => 'text-text-primary text-sm flex-1 min-w-[80px]',
+          multiValue: () =>
+            'group border-border-subtle bg-background-elevated text-text-secondary hover:border-border-default flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium transition-all',
+          multiValueLabel: () => 'flex items-center gap-1',
+          multiValueRemove: () =>
+            'text-text-muted hover:text-text-primary hover:bg-background-elevated ml-0.5 rounded p-0.5 transition-colors cursor-pointer',
+          noOptionsMessage: () => 'text-text-muted px-4 py-3 text-xs',
+          loadingMessage: () => 'text-text-muted px-4 py-3 text-xs',
+        }}
+      />
+    </TagEditContext.Provider>
   );
 };
 
