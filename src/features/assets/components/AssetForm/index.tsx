@@ -10,6 +10,7 @@ import { createAssetSchema } from '@schemas';
 
 import { usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
 
+import AmountInput from '@components/AmountInput';
 import Button from '@components/Button';
 import Select from '@components/Select';
 import { useToast } from '@components/Toast/ToastProvider';
@@ -240,14 +241,11 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
               <Package className="text-text-muted h-4 w-4" />
               Quantity
             </label>
-            <input
-              type="number"
-              placeholder="1"
+            <AmountInput
+              placeholder="e.g. 1, 2.5k"
               required
-              min="0"
-              step="any"
-              value={formData.quantity || ''}
-              onChange={(e) => handleQuantityChange(parseFloat(e.target.value) || 0)}
+              value={formData.quantity}
+              onChange={handleQuantityChange}
               className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
             />
           </div>
@@ -272,13 +270,10 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
             <DollarSign className="text-blue h-4 w-4" />
             Unit Value (USD)
           </label>
-          <input
-            type="number"
-            placeholder="100"
-            min="0"
-            step="0.01"
-            value={formData.unitValueUsd || ''}
-            onChange={(e) => handleUnitValueChange(parseFloat(e.target.value) || 0)}
+          <AmountInput
+            placeholder="e.g. 93k, 100"
+            value={formData.unitValueUsd ?? 0}
+            onChange={handleUnitValueChange}
             className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
           />
         </div>
@@ -311,14 +306,11 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
               <DollarSign className="text-blue h-4 w-4" />
               Total Value (USD)
             </label>
-            <input
-              type="number"
-              placeholder="1000"
+            <AmountInput
+              placeholder="e.g. 1k, 50m"
               required
-              min="0"
-              step="0.01"
-              value={formData.totalValueUsd || ''}
-              onChange={(e) => handleTotalValueChange(parseFloat(e.target.value) || 0)}
+              value={formData.totalValueUsd}
+              onChange={handleTotalValueChange}
               className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
             />
           </div>
@@ -331,14 +323,11 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
             Exchange Rate
             {isFetchingRate && <Loader2 className="text-text-muted h-3 w-3 animate-spin" />}
           </label>
-          <input
-            type="number"
-            placeholder="130000"
+          <AmountInput
+            placeholder="e.g. 130k"
             required
-            min="1"
-            step="1"
-            value={exchangeRate || ''}
-            onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
+            value={exchangeRate}
+            onChange={(v) => handleRateChange(v || exchangeRate)}
             disabled={isFetchingRate}
             className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
           />

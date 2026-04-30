@@ -10,6 +10,7 @@ import { createIncomeSchema } from '@schemas';
 
 import { tomanToUsd, usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
 
+import AmountInput from '@components/AmountInput';
 import Button from '@components/Button';
 import Select from '@components/Select';
 import { useToast } from '@components/Toast/ToastProvider';
@@ -283,14 +284,11 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
             Amount (Toman)
           </label>
           <Tooltip content={numberToPersianWord} position="top">
-            <input
-              type="number"
-              placeholder="390000000"
+            <AmountInput
+              placeholder="e.g. 390m, 4.5b"
               required
-              min="0"
-              step="1"
-              value={formData.amountToman || ''}
-              onChange={(e) => handleTomanChange(parseFloat(e.target.value) || 0)}
+              value={formData.amountToman}
+              onChange={handleTomanChange}
               className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-success w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
             />
           </Tooltip>
@@ -302,14 +300,11 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
             <DollarSign className="text-blue h-4 w-4" />
             Amount (USD)
           </label>
-          <input
-            type="number"
-            placeholder="3000"
+          <AmountInput
+            placeholder="e.g. 3k, 1.5m"
             required
-            min="0"
-            step="0.01"
-            value={formData.amountUsd || ''}
-            onChange={(e) => handleUsdChange(parseFloat(e.target.value) || 0)}
+            value={formData.amountUsd}
+            onChange={handleUsdChange}
             className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
           />
         </div>
@@ -322,14 +317,11 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
           Exchange Rate
           {isFetchingRate && <Loader2 className="text-text-muted h-3 w-3 animate-spin" />}
         </label>
-        <input
-          type="number"
-          placeholder="130000"
+        <AmountInput
+          placeholder="e.g. 130k"
           required
-          min="1"
-          step="1"
-          value={exchangeRate || ''}
-          onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
+          value={exchangeRate}
+          onChange={(v) => handleRateChange(v || exchangeRate)}
           disabled={isFetchingRate}
           className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
         />

@@ -11,6 +11,7 @@ import { EXPENSE_CATEGORIES } from '@constants';
 
 import { tomanToUsd, usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
 
+import AmountInput from '@components/AmountInput';
 import Button from '@components/Button';
 import DatePicker from '@components/DatePicker';
 import Select from '@components/Select';
@@ -271,14 +272,11 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
             Price (Toman)
           </label>
           <Tooltip content={numberToPersianWord} position="top">
-            <input
-              type="number"
-              placeholder="60000"
+            <AmountInput
+              placeholder="e.g. 60k, 1.5m"
               required
-              min="0"
-              step="1"
-              value={formData.price_toman || ''}
-              onChange={(e) => handleTomanChange(parseFloat(e.target.value) || 0)}
+              value={formData.price_toman}
+              onChange={handleTomanChange}
               className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-success w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
             />
           </Tooltip>
@@ -290,14 +288,11 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
             <DollarSign className="text-blue h-4 w-4" />
             Price (USD)
           </label>
-          <input
-            type="number"
-            placeholder="0.00"
+          <AmountInput
+            placeholder="e.g. 3.2k, 1m"
             required
-            min="0"
-            step="0.01"
-            value={formData.price_usd || ''}
-            onChange={(e) => handleUsdChange(parseFloat(e.target.value) || 0)}
+            value={formData.price_usd}
+            onChange={handleUsdChange}
             className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
           />
         </div>
@@ -310,14 +305,11 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
           Rate (Toman/USD)
           {isFetchingRate && <Loader2 className="text-text-muted h-3 w-3 animate-spin" />}
         </label>
-        <input
-          type="number"
-          placeholder="130100"
+        <AmountInput
+          placeholder="e.g. 130k"
           required
-          min="1"
-          step="1"
-          value={exchangeRate || ''}
-          onChange={(e) => handleRateChange(parseFloat(e.target.value) || exchangeRate)}
+          value={exchangeRate}
+          onChange={(v) => handleRateChange(v || exchangeRate)}
           disabled={isFetchingRate}
           className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none disabled:cursor-wait disabled:opacity-50"
         />
