@@ -2,7 +2,7 @@
 
 import { ChevronDown } from 'lucide-react';
 import ReactSelect, { components } from 'react-select';
-import type { CSSObjectWithLabel, DropdownIndicatorProps, StylesConfig } from 'react-select';
+import type { CSSObjectWithLabel, DropdownIndicatorProps, MenuListProps, StylesConfig } from 'react-select';
 import { twMerge } from 'tailwind-merge';
 
 export interface SelectOption {
@@ -24,6 +24,17 @@ interface SelectProps {
 const selectStyles: StylesConfig<any, any, any> = {
   menuPortal: (base: CSSObjectWithLabel) => ({ ...base, zIndex: 9999, pointerEvents: 'auto' }),
 };
+
+const MenuList = (props: MenuListProps<SelectOption, false>) => (
+  <components.MenuList
+    {...props}
+    innerProps={{
+      ...props.innerProps,
+      onWheel: (e) => e.stopPropagation(),
+      onTouchMove: (e) => e.stopPropagation(),
+    }}
+  />
+);
 
 const DropdownIndicator = (props: DropdownIndicatorProps<SelectOption, false>) => (
   <components.DropdownIndicator {...props}>
@@ -51,7 +62,7 @@ const Select = ({ value, onChange, options, placeholder, disabled, className }: 
       menuPosition="fixed"
       unstyled
       styles={selectStyles}
-      components={{ DropdownIndicator, IndicatorSeparator: () => null }}
+      components={{ DropdownIndicator, MenuList, IndicatorSeparator: () => null }}
       className={className}
       classNames={{
         control: ({ isFocused, isDisabled }) =>
