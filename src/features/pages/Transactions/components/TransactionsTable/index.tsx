@@ -1,7 +1,12 @@
-import { useMemo } from 'react';
+'use client';
+
+import { useMemo, useRef } from 'react';
 
 import { EXPENSE_CATEGORIES } from '@constants/categories';
-import { FileText, Loader2, X } from 'lucide-react';
+import { Calendar, FileText, Loader2, Search, Tag as TagIcon, X } from 'lucide-react';
+import type { DatePicker as ReactDatePickerType } from 'react-datepicker';
+import type { MultiValue } from 'react-select';
+import Select2 from 'react-select';
 
 import Button from '@components/Button';
 import DataTable from '@components/DataTable';
@@ -9,8 +14,97 @@ import DatePicker from '@components/DatePicker';
 import Select from '@components/Select';
 import Pulse from '@components/Skeleton';
 
+import { useTags } from '@hooks/use-tags';
+
+import type { Tag } from '@/@types/expense';
+
 import type { TransactionsTableProps } from '../../@types';
 import { buildTransactionColumns } from '../../constants';
+
+// ─── TagFilterSelect ──────────────────────────────────────────────────────────
+
+interface TagOption {
+  value: number;
+  label: string;
+}
+
+interface TagFilterSelectProps {
+  value: Tag[];
+  onChange: (tags: Tag[]) => void;
+}
+
+const tagSelectStyles = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  menuPortal: (base: any) => ({ ...base, zIndex: 9999, pointerEvents: 'auto' }),
+
+  input: () => ({ color: 'inherit', fontSize: 'inherit', margin: 0, padding: 0 }),
+};
+
+function TagFilterSelect({ value, onChange }: TagFilterSelectProps) {
+  const { data: allTags = [] } = useTags();
+
+  const options: TagOption[] = allTags.map((t) => ({ value: t.id, label: t.name }));
+  const selected: TagOption[] = value.map((t) => ({ value: t.id, label: t.name }));
+
+  const handleChange = (newValue: MultiValue<TagOption>) => {
+    const tags = newValue.map((o) => allTags.find((t) => t.id === o.value)).filter(Boolean) as Tag[];
+    onChange(tags);
+  };
+
+  return (
+    <Select2<TagOption, true>
+      isMulti
+      value={selected}
+      onChange={handleChange}
+      options={options}
+      placeholder={
+        <span className="flex items-center gap-1.5">
+          <TagIcon className="h-3.5 w-3.5" />
+          <span>Tags</span>
+        </span>
+      }
+      isSearchable
+      closeMenuOnSelect={false}
+      menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+      menuPosition="fixed"
+      unstyled
+      styles={tagSelectStyles}
+      classNames={{
+        control: ({ isFocused }) =>
+          `border rounded-lg px-3 py-2 text-sm transition-all cursor-pointer flex items-center gap-1.5 bg-background ${
+            isFocused ? 'border-blue' : 'border-border-subtle'
+          }`,
+        valueContainer: () => 'flex items-center gap-1 flex-1 overflow-hidden',
+        placeholder: () => 'text-text-muted text-sm whitespace-nowrap',
+        input: () => 'text-text-primary text-sm min-w-[40px]',
+        menu: () => 'border-border-subtle bg-background mt-1 rounded-lg border py-1 shadow-lg min-w-[160px]',
+        option: ({ isFocused }) =>
+          `flex items-center gap-2 px-3 py-2 text-xs text-text-primary cursor-pointer transition-colors ${
+            isFocused ? 'bg-background-elevated' : ''
+          }`,
+        multiValue: () =>
+          'border-border-subtle bg-background-elevated text-text-secondary flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-xs font-medium',
+        multiValueLabel: () => 'flex items-center gap-1',
+        multiValueRemove: () =>
+          'text-text-muted hover:text-text-primary ml-0.5 rounded p-0.5 transition-colors cursor-pointer',
+        noOptionsMessage: () => 'text-text-muted px-4 py-3 text-xs',
+        dropdownIndicator: () => 'hidden',
+        indicatorSeparator: () => 'hidden',
+        clearIndicator: () => 'hidden',
+      }}
+    />
+  );
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function formatChipDate(iso: string) {
+  const [, mm, dd] = iso.split('-');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${months[parseInt(mm, 10) - 1]} ${parseInt(dd, 10)}`;
+}
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function TransactionsSkeleton() {
   return (
@@ -54,6 +148,8 @@ function TransactionsSkeleton() {
   );
 }
 
+// ─── Main component ───────────────────────────────────────────────────────────
+
 const TransactionsTable = ({
   expenses,
   isLoading,
@@ -70,8 +166,31 @@ const TransactionsTable = ({
   isFetchingNextPage,
   onLoadMore,
 }: TransactionsTableProps) => {
-  // Variables
-  const hasActiveFilter = !!(filters.description || filters.category || filters.dateFrom || filters.dateTo);
+  // References
+  const toPickerRef = useRef<ReactDatePickerType>(null);
+
+  // Derived state
+  const { data: allTags = [] } = useTags();
+  const selectedTagObjects: Tag[] = useMemo(
+    () => (filters.tagIds ?? []).map((id) => allTags.find((t) => t.id === id)).filter(Boolean) as Tag[],
+    [filters.tagIds, allTags]
+  );
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (descInput) count++;
+    if (filters.category) count++;
+    if (filters.dateFrom || filters.dateTo) count++;
+    count += (filters.tagIds ?? []).length;
+    return count;
+  }, [descInput, filters]);
+
+  const hasActiveFilter = activeFilterCount > 0;
+
+  const categoryLabel = useMemo(
+    () => EXPENSE_CATEGORIES.find((c) => c.value === filters.category)?.label,
+    [filters.category]
+  );
 
   // Memos
   const transactionColumns = useMemo(
@@ -94,6 +213,11 @@ const TransactionsTable = ({
     );
   }
 
+  const handleClearAll = () => {
+    onFiltersChange(() => ({}));
+    onDescInputChange('');
+  };
+
   return (
     <DataTable
       data={expenses}
@@ -103,58 +227,154 @@ const TransactionsTable = ({
       minimal={true}
       minWidth="min-w-[560px]"
       filterBar={
-        <div className="border-border-subtle flex flex-wrap items-center gap-2 border-b px-4 py-3">
-          {/* Description */}
-          <input
-            type="text"
-            placeholder="Search transactions..."
-            value={descInput}
-            onChange={(e) => onDescInputChange(e.target.value)}
-            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue min-w-[140px] flex-[2] rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
-          />
-          {/* Category */}
-          <Select
-            value={filters.category ?? ''}
-            onChange={(val) => onFiltersChange((f) => ({ ...f, category: val || undefined }))}
-            options={[
-              { value: '', label: 'All categories' },
-              ...EXPENSE_CATEGORIES.map((c) => ({ value: c.value, label: c.label })),
-            ]}
-            placeholder="All categories"
-            className="min-w-[130px] flex-1"
-          />
-          {/* Date range */}
-          <div className="flex min-w-[200px] flex-1 flex-wrap items-center gap-1.5">
-            <DatePicker
-              value={filters.dateFrom ?? ''}
-              onChange={(date) => onFiltersChange((f) => ({ ...f, dateFrom: date || undefined }))}
-              placeholder="From"
-              isClearable
-              wrapperClassName="min-w-[90px] flex-1"
-            />
-            <span className="text-text-muted shrink-0 text-xs">–</span>
-            <DatePicker
-              value={filters.dateTo ?? ''}
-              onChange={(date) => onFiltersChange((f) => ({ ...f, dateTo: date || undefined }))}
-              placeholder="To"
-              isClearable
-              wrapperClassName="min-w-[90px] flex-1"
-            />
+        <div className="border-border-subtle border-b">
+          {/* Row 1: Search */}
+          <div className="border-border-subtle border-b px-4 pt-3 pb-2.5">
+            <div className="border-border-subtle bg-background text-text-primary focus-within:border-blue flex items-center gap-2 rounded-lg border px-3 py-2 transition-all">
+              <Search className="text-text-muted h-4 w-4 shrink-0" />
+              <input
+                type="text"
+                placeholder="Search by description..."
+                value={descInput}
+                onChange={(e) => onDescInputChange(e.target.value)}
+                className="placeholder:text-text-muted w-full bg-transparent text-sm outline-none"
+              />
+              {descInput && (
+                <button
+                  onClick={() => onDescInputChange('')}
+                  className="text-text-muted hover:text-text-primary rounded p-0.5 transition-colors"
+                  aria-label="Clear search"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
           </div>
-          {/* Clear all */}
-          {hasActiveFilter && (
-            <button
-              onClick={() => {
-                onFiltersChange(() => ({}));
-                onDescInputChange('');
-              }}
-              className="text-text-muted hover:text-text-primary flex shrink-0 items-center gap-1 rounded-lg px-2 py-1.5 text-xs transition-colors"
-              title="Clear filters"
-            >
-              <X className="h-3.5 w-3.5" />
-              Clear
-            </button>
-          )}
+
+          {/* Row 2: Filter controls */}
+          <div className="flex flex-wrap items-center gap-2 px-4 py-2.5">
+            {/* Category */}
+            <Select
+              value={filters.category ?? ''}
+              onChange={(val) => onFiltersChange((f) => ({ ...f, category: val || undefined }))}
+              options={[
+                { value: '', label: 'All categories' },
+                ...EXPENSE_CATEGORIES.map((c) => ({ value: c.value, label: c.label })),
+              ]}
+              placeholder="All categories"
+              className="min-w-[130px] flex-1"
+            />
+
+            {/* Date range */}
+            <div className="border-border-subtle bg-background focus-within:border-blue flex min-w-[200px] flex-1 items-center gap-1 rounded-lg border px-2 py-1 transition-all">
+              <Calendar className="text-text-muted h-3.5 w-3.5 shrink-0" />
+              <DatePicker
+                value={filters.dateFrom ?? ''}
+                onChange={(date) => {
+                  onFiltersChange((f) => ({ ...f, dateFrom: date || undefined }));
+                  if (date) setTimeout(() => toPickerRef.current?.setOpen(true), 50);
+                }}
+                placeholder="From"
+                isClearable
+                wrapperClassName="flex-1 min-w-[80px] [&_input]:border-0 [&_input]:bg-transparent [&_input]:px-1 [&_input]:py-0 [&_input]:shadow-none [&_input]:rounded-none"
+              />
+              <span className="text-text-muted shrink-0 text-xs">→</span>
+              <DatePicker
+                ref={toPickerRef}
+                value={filters.dateTo ?? ''}
+                onChange={(date) => onFiltersChange((f) => ({ ...f, dateTo: date || undefined }))}
+                placeholder="To"
+                isClearable
+                wrapperClassName="flex-1 min-w-[80px] [&_input]:border-0 [&_input]:bg-transparent [&_input]:px-1 [&_input]:py-0 [&_input]:shadow-none [&_input]:rounded-none"
+              />
+            </div>
+
+            {/* Tag filter */}
+            <div className="min-w-[120px] flex-1">
+              <TagFilterSelect
+                value={selectedTagObjects}
+                onChange={(tags) =>
+                  onFiltersChange((f) => ({
+                    ...f,
+                    tagIds: tags.length ? tags.map((t) => t.id) : undefined,
+                  }))
+                }
+              />
+            </div>
+
+            {/* Clear all */}
+            {hasActiveFilter && (
+              <button
+                onClick={handleClearAll}
+                className="border-border-subtle text-text-secondary hover:bg-background-elevated flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-medium transition-colors"
+                title="Clear all filters"
+              >
+                <X className="h-3.5 w-3.5" />
+                <span>Clear</span>
+                <span className="bg-background-elevated text-text-secondary rounded px-1 py-0.5 text-[10px] leading-none font-semibold">
+                  {activeFilterCount}
+                </span>
+              </button>
+            )}
+          </div>
+
+          {/* Row 3: Active filter chips */}
+          {hasActiveFilter &&
+            (categoryLabel || filters.dateFrom || filters.dateTo || selectedTagObjects.length > 0) && (
+              <div className="flex flex-wrap items-center gap-1.5 px-4 pb-2.5">
+                {/* Category chip */}
+                {categoryLabel && (
+                  <span className="border-border-subtle bg-background-secondary text-text-secondary flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs">
+                    {categoryLabel}
+                    <button
+                      onClick={() => onFiltersChange((f) => ({ ...f, category: undefined }))}
+                      className="text-text-muted hover:text-text-primary ml-0.5 transition-colors"
+                      aria-label={`Remove category filter: ${categoryLabel}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+                {/* Date chip */}
+                {(filters.dateFrom || filters.dateTo) && (
+                  <span className="border-border-subtle bg-background-secondary text-text-secondary flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs">
+                    <Calendar className="h-3 w-3 shrink-0" />
+                    {filters.dateFrom ? formatChipDate(filters.dateFrom) : '…'}
+                    {' – '}
+                    {filters.dateTo ? formatChipDate(filters.dateTo) : '…'}
+                    <button
+                      onClick={() => onFiltersChange((f) => ({ ...f, dateFrom: undefined, dateTo: undefined }))}
+                      className="text-text-muted hover:text-text-primary ml-0.5 transition-colors"
+                      aria-label="Remove date filter"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+                {/* Tag chips */}
+                {selectedTagObjects.map((tag) => (
+                  <span
+                    key={tag.id}
+                    className="border-border-subtle bg-background-secondary text-text-secondary flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs"
+                  >
+                    <TagIcon className="h-3 w-3 shrink-0" />
+                    {tag.name}
+                    <button
+                      onClick={() =>
+                        onFiltersChange((f) => ({
+                          ...f,
+                          tagIds: f.tagIds?.filter((id) => id !== tag.id),
+                        }))
+                      }
+                      className="text-text-muted hover:text-text-primary ml-0.5 transition-colors"
+                      aria-label={`Remove tag filter: ${tag.name}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
         </div>
       }
       emptyState={
