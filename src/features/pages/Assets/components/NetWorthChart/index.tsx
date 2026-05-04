@@ -103,113 +103,130 @@ const NetWorthChart = () => {
     [isShortRange]
   );
 
-  // Don't render anything if we have fewer than 2 data points
-  if (!isLoading && !isError && (!data || data.length < 2)) {
-    return null;
-  }
+  const hasData = !isLoading && !isError && data && data.length >= 2;
+  const isEmpty = !isLoading && !isError && (!data || data.length < 2);
+
+  // Card shell — always rendered so range tabs stay accessible
+  const cardHeader = (
+    <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center gap-3">
+        <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+          <TrendingUp className="text-success h-5 w-5" />
+        </div>
+        <h2 className="text-text-primary text-lg font-semibold">Net Worth</h2>
+      </div>
+      <div className="bg-background-secondary flex gap-1 self-start rounded-lg p-1 sm:self-auto">
+        {RANGES.map((r) => (
+          <button
+            key={r}
+            onClick={() => setRange(r)}
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+              range === r ? 'bg-text-primary text-background shadow-sm' : 'text-text-muted hover:text-text-secondary'
+            }`}
+          >
+            {r === 'ALL' ? 'All' : r}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 
   if (isLoading) {
     return (
       <div className="border-border-subtle bg-background rounded-xl border p-5 shadow-sm sm:p-6">
-        <div className="mb-5 flex items-center justify-between">
+        {/* Header skeleton — matches actual two-row mobile / one-row desktop layout */}
+        <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <Pulse className="h-10 w-10" />
-            <Pulse className="h-5 w-32" />
+            <Pulse className="h-10 w-10 shrink-0 rounded-lg" />
+            <Pulse className="h-5 w-28" />
           </div>
-          <Pulse className="h-8 w-48" />
+          <Pulse className="h-8 w-40 self-start rounded-lg sm:self-auto" />
         </div>
-        <Pulse className="h-[300px] w-full" />
+        <Pulse className="h-[300px] w-full rounded-lg" />
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="border-border-subtle bg-background flex h-[380px] items-center justify-center rounded-xl border p-5 shadow-sm sm:p-6">
-        <p className="text-danger text-sm">Failed to load net worth history.</p>
+      <div className="border-border-subtle bg-background rounded-xl border p-5 shadow-sm sm:p-6">
+        {cardHeader}
+        <div className="flex h-[300px] items-center justify-center">
+          <p className="text-danger text-sm">Failed to load net worth history.</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="border-border-subtle bg-background rounded-xl border p-5 shadow-sm sm:p-6">
-      {/* Header */}
-      <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-            <TrendingUp className="text-success h-5 w-5" />
-          </div>
-          <h2 className="text-text-primary text-lg font-semibold">Net Worth</h2>
-        </div>
-        <div className="bg-background-secondary flex gap-1 rounded-lg p-1">
-          {RANGES.map((r) => (
-            <button
-              key={r}
-              onClick={() => setRange(r)}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                range === r ? 'bg-text-primary text-background shadow-sm' : 'text-text-muted hover:text-text-secondary'
-              }`}
-            >
-              {r === 'ALL' ? 'All' : r}
-            </button>
-          ))}
-        </div>
-      </div>
+      {cardHeader}
 
       {/* Delta badge */}
-      {data && data.length >= 2 && (
+      {hasData && (
         <div className="mb-4">
-          <DeltaBadge data={data} />
+          <DeltaBadge data={data ?? []} />
+        </div>
+      )}
+
+      {/* Empty state */}
+      {isEmpty && (
+        <div className="flex h-[300px] items-center justify-center">
+          <p className="text-text-muted text-sm">
+            Not enough data to display chart. Update an asset value to record a snapshot.
+          </p>
         </div>
       )}
 
       {/* Chart */}
-      <div className="h-[300px]">
-        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-          <AreaChart data={data} margin={{ left: 0, right: 20, top: 10, bottom: 0 }}>
-            <defs>
-              <linearGradient id="colorNetWorth" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10b981" stopOpacity={0.2} />
-                <stop offset="50%" stopColor="#10b981" stopOpacity={0.1} />
-                <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" opacity={0.5} vertical={false} />
-            <XAxis
-              dataKey="date"
-              stroke="#e5e5e5"
-              tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
-              axisLine={{ stroke: '#e5e5e5' }}
-              tickLine={{ stroke: '#e5e5e5' }}
-              ticks={xTicks}
-              tickFormatter={formatXTick}
-            />
-            <YAxis
-              stroke="#e5e5e5"
-              tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
-              axisLine={{ stroke: '#e5e5e5' }}
-              tickLine={{ stroke: '#e5e5e5' }}
-              tickFormatter={(v: number) =>
-                v >= 1_000_000 ? `${(v / 1_000_000).toFixed(0)}M` : v >= 1_000 ? `${(v / 1_000).toFixed(0)}K` : `${v}`
-              }
-            />
-            <RechartsTooltip
-              content={<NetWorthTooltip />}
-              cursor={{ stroke: '#10b981', strokeWidth: 1, strokeDasharray: '4 4' }}
-            />
-            <Area
-              type="monotone"
-              dataKey="valueUsd"
-              stroke="#10b981"
-              strokeWidth={2}
-              fillOpacity={1}
-              fill="url(#colorNetWorth)"
-              animationDuration={1000}
-              animationEasing="ease-out"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+      {hasData && (
+        <div className="h-[300px]">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+            <AreaChart data={data} margin={{ left: 0, right: 20, top: 10, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorNetWorth" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.2} />
+                  <stop offset="50%" stopColor="#10b981" stopOpacity={0.1} />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" opacity={0.5} vertical={false} />
+              <XAxis
+                dataKey="date"
+                stroke="#e5e5e5"
+                tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: '#e5e5e5' }}
+                tickLine={{ stroke: '#e5e5e5' }}
+                ticks={xTicks}
+                tickFormatter={formatXTick}
+              />
+              <YAxis
+                stroke="#e5e5e5"
+                tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: '#e5e5e5' }}
+                tickLine={{ stroke: '#e5e5e5' }}
+                tickFormatter={(v: number) =>
+                  v >= 1_000_000 ? `${(v / 1_000_000).toFixed(0)}M` : v >= 1_000 ? `${(v / 1_000).toFixed(0)}K` : `${v}`
+                }
+              />
+              <RechartsTooltip
+                content={<NetWorthTooltip />}
+                cursor={{ stroke: '#10b981', strokeWidth: 1, strokeDasharray: '4 4' }}
+              />
+              <Area
+                type="monotone"
+                dataKey="valueUsd"
+                stroke="#10b981"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorNetWorth)"
+                animationDuration={1000}
+                animationEasing="ease-out"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 };
