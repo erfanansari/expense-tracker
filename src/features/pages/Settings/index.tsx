@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Database, Globe, HelpCircle, Lock, Palette } from 'lucide-react';
+import { Bell, Globe, HelpCircle, Lock, Palette } from 'lucide-react';
 
 import Button from '@components/Button';
 import Select from '@components/Select';
@@ -8,6 +8,7 @@ import Pulse from '@components/Skeleton';
 
 import { useAuth } from '@hooks/use-auth';
 
+import DataManagement from './components/DataManagement';
 import ProfileCard from './components/ProfileCard';
 import TagManagement from './components/TagManagement';
 
@@ -206,34 +207,7 @@ const SettingsPage = () => {
             </div>
 
             {/* Data Management */}
-            <div className="border-border-subtle bg-background rounded-xl border opacity-60 shadow-sm">
-              <div className="border-border-subtle border-b p-6">
-                <div className="flex items-center gap-3">
-                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-                    <Database className="text-text-secondary h-5 w-5" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-text-primary text-lg font-semibold">Data Management</h2>
-                      <span className="bg-background-elevated text-text-muted rounded px-2 py-0.5 text-xs font-medium">
-                        Coming Soon
-                      </span>
-                    </div>
-                    <p className="text-text-muted text-sm">Export or delete your data</p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="flex max-w-2xl flex-col gap-3 sm:flex-row">
-                  <Button variant="outline" disabled className="cursor-not-allowed opacity-50">
-                    Export Data
-                  </Button>
-                  <Button variant="danger" disabled className="cursor-not-allowed opacity-50">
-                    Delete All Data
-                  </Button>
-                </div>
-              </div>
-            </div>
+            <DataManagement />
 
             {/* Help & Support */}
             <div className="border-border-subtle bg-background rounded-xl border shadow-sm">

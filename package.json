@@ -33,6 +33,7 @@
     "kbar": "0.1.0-beta.48",
     "lucide-react": "^0.561.0",
     "next": "16.0.10",
+    "papaparse": "^5.5.3",
     "react": "19.2.3",
     "react-datepicker": "^9.1.0",
     "react-dom": "19.2.3",
@@ -40,6 +41,7 @@
     "recharts": "^3.5.1",
     "tailwind-merge": "^3.4.0",
     "vaul": "^1.1.2",
+    "xlsx": "^0.18.5",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -50,6 +52,7 @@
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.3",
+    "@types/papaparse": "^5.5.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@typescript-eslint/eslint-plugin": "^8.52.0",

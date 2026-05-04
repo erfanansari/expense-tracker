@@ -17,6 +17,7 @@ import Pulse from '@components/Skeleton';
 
 import { useAllExpenses } from '@hooks/use-all-expenses';
 
+import ExportModal from './components/ExportModal';
 import ReportsCharts from './components/ReportsCharts';
 import ReportsStats from './components/ReportsStats';
 
@@ -57,6 +58,7 @@ function ReportsSkeleton() {
 const ReportsPage = () => {
   // States
   const [dateRange, setDateRange] = useState<DateRange>('ALL_TIME');
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   // Queries
   const { data: expensesData, isLoading } = useAllExpenses();
@@ -83,7 +85,7 @@ const ReportsPage = () => {
               <Filter className="h-4 w-4" />
               <span className="hidden sm:inline">Filter</span>
             </Button>
-            <Button variant="primary" className="shrink-0">
+            <Button variant="primary" className="shrink-0" onClick={() => setIsExportOpen(true)}>
               <Download className="h-4 w-4" />
               <span className="hidden sm:inline">Export</span>
             </Button>
@@ -99,6 +101,13 @@ const ReportsPage = () => {
           </>
         )}
       </div>
+
+      <ExportModal
+        isOpen={isExportOpen}
+        onClose={() => setIsExportOpen(false)}
+        expenses={filteredExpenses}
+        dateRange={dateRange}
+      />
     </div>
   );
 };
