@@ -51,9 +51,10 @@ const TagEditContext = createContext<TagEditState | null>(null);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const selectStyles: StylesConfig<any, any, any> = {
   menuPortal: (base: CSSObjectWithLabel) => ({ ...base, zIndex: 9999, pointerEvents: 'auto' }),
-  // Remove react-select's default 2px margin/padding on the Input container
-  // so the control height matches other inputs in the form.
   input: () => ({ color: 'inherit', fontSize: 'inherit', margin: 0, padding: 0 }),
+  control: () => ({ minHeight: 'unset' }),
+  // Explicitly remove valueContainer padding — react-select keeps residual padding even in unstyled mode
+  valueContainer: () => ({ display: 'flex', alignItems: 'center', flex: 1, overflow: 'hidden', padding: 0 }),
 };
 
 const controlClass = (isFocused: boolean) =>
@@ -288,12 +289,13 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
     <TagEditContext.Provider value={editState}>
       <CreatableSelect<TagOption, true>
         isMulti
+        classNamePrefix="ti"
         value={selectedTags.map(tagToOption)}
         onChange={handleChange}
         options={options}
         onCreateOption={handleCreate}
         isLoading={createTag.isPending}
-        placeholder="Add tags..."
+        placeholder="Tags"
         isSearchable
         closeMenuOnSelect={false}
         createOptionPosition="last"
@@ -308,13 +310,14 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
           MultiValueLabel: TagMultiValueLabel,
           DropdownIndicator: () => null,
           IndicatorSeparator: () => null,
+          ClearIndicator: () => null,
         }}
         classNames={{
           control: ({ isFocused }) => controlClass(isFocused),
-          valueContainer: () => 'flex items-center gap-1.5 flex-1 overflow-x-hidden',
+          valueContainer: () => 'gap-1.5 flex-wrap',
           menu: () => 'border-border-subtle bg-background mt-1 rounded-lg border py-1 shadow-lg',
           placeholder: () => 'text-text-muted text-sm',
-          input: () => 'text-text-primary text-sm flex-1 min-w-[80px]',
+          input: () => 'text-text-primary text-sm',
           multiValue: () =>
             'group border-border-subtle bg-background-elevated text-text-secondary hover:border-border-default flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium transition-all',
           multiValueLabel: () => 'flex items-center gap-1',
