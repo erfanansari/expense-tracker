@@ -255,13 +255,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
       </div>
 
       {/* Tags */}
-      <div className="space-y-1">
-        <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
-          <span className="text-text-muted">#</span>
-          Tags
-        </label>
-        <TagInput selectedTags={selectedTags} onTagsChange={setSelectedTags} />
-      </div>
+      <TagInput selectedTags={selectedTags} onTagsChange={setSelectedTags} />
 
       {/* Prices */}
       <div className="grid grid-cols-1 gap-3">

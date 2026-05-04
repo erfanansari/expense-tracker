@@ -391,6 +391,54 @@ textarea:focus {
   display: none !important;
 }
 
+/* Tag input height normalization — forces single-row height matching other inputs.
+   classNamePrefix="ti" for form TagInput, "tf" for filter TagFilterSelect.
+   These !important overrides beat any residual react-select inline styles. */
+.ti__value-container,
+.tf__value-container {
+  padding: 0 !important;
+  min-height: unset !important;
+}
+
+.ti__input,
+.ti__input-container,
+.tf__input,
+.tf__input-container {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Clear button — styled to match the app's custom X icon buttons */
+.react-datepicker__close-icon {
+  padding: 0 4px 0 0 !important;
+  background: transparent !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer;
+}
+
+.react-datepicker__close-icon::after {
+  background-color: transparent !important;
+  color: var(--color-text-muted) !important;
+  border-radius: 4px !important;
+  height: auto !important;
+  width: auto !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+  padding: 1px !important;
+  display: block !important;
+  content: '×' !important;
+  transition: color 0.15s;
+}
+
+.react-datepicker__close-icon:hover::after {
+  background-color: transparent !important;
+  color: var(--color-text-primary) !important;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;

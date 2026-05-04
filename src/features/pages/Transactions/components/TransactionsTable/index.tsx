@@ -33,11 +33,20 @@ interface TagFilterSelectProps {
   onChange: (tags: Tag[]) => void;
 }
 
-const tagSelectStyles = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const tagSelectStyles: any = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   menuPortal: (base: any) => ({ ...base, zIndex: 9999, pointerEvents: 'auto' }),
-
   input: () => ({ color: 'inherit', fontSize: 'inherit', margin: 0, padding: 0 }),
+  control: () => ({ minHeight: 'unset', maxHeight: '36px', overflow: 'hidden' }),
+  valueContainer: () => ({
+    display: 'flex',
+    alignItems: 'center',
+    flex: 1,
+    overflow: 'hidden',
+    flexWrap: 'nowrap',
+    padding: 0,
+  }),
 };
 
 function TagFilterSelect({ value, onChange }: TagFilterSelectProps) {
@@ -54,43 +63,41 @@ function TagFilterSelect({ value, onChange }: TagFilterSelectProps) {
   return (
     <Select2<TagOption, true>
       isMulti
+      classNamePrefix="tf"
       value={selected}
       onChange={handleChange}
       options={options}
-      placeholder={
-        <span className="flex items-center gap-1.5">
-          <TagIcon className="h-3.5 w-3.5" />
-          <span>Tags</span>
-        </span>
-      }
+      placeholder="Tags"
       isSearchable
       closeMenuOnSelect={false}
       menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
       menuPosition="fixed"
       unstyled
       styles={tagSelectStyles}
+      components={{
+        DropdownIndicator: () => null,
+        IndicatorSeparator: () => null,
+        ClearIndicator: () => null,
+      }}
       classNames={{
         control: ({ isFocused }) =>
-          `border rounded-lg px-3 py-2 text-sm transition-all cursor-pointer flex items-center gap-1.5 bg-background ${
+          `border rounded-lg px-3 py-2 text-sm transition-all cursor-pointer flex items-center bg-background ${
             isFocused ? 'border-blue' : 'border-border-subtle'
           }`,
-        valueContainer: () => 'flex items-center gap-1 flex-1 overflow-hidden',
+        valueContainer: () => 'gap-1',
         placeholder: () => 'text-text-muted text-sm whitespace-nowrap',
-        input: () => 'text-text-primary text-sm min-w-[40px]',
+        input: () => 'text-text-primary text-sm shrink-0 min-w-0',
         menu: () => 'border-border-subtle bg-background mt-1 rounded-lg border py-1 shadow-lg min-w-[160px]',
         option: ({ isFocused }) =>
           `flex items-center gap-2 px-3 py-2 text-xs text-text-primary cursor-pointer transition-colors ${
             isFocused ? 'bg-background-elevated' : ''
           }`,
         multiValue: () =>
-          'border-border-subtle bg-background-elevated text-text-secondary flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-xs font-medium',
+          'border-border-subtle bg-background-elevated text-text-secondary flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 text-xs font-medium',
         multiValueLabel: () => 'flex items-center gap-1',
         multiValueRemove: () =>
           'text-text-muted hover:text-text-primary ml-0.5 rounded p-0.5 transition-colors cursor-pointer',
         noOptionsMessage: () => 'text-text-muted px-4 py-3 text-xs',
-        dropdownIndicator: () => 'hidden',
-        indicatorSeparator: () => 'hidden',
-        clearIndicator: () => 'hidden',
       }}
     />
   );
