@@ -13,6 +13,7 @@ export interface ExpenseFilters {
   category?: string;
   dateFrom?: string;
   dateTo?: string;
+  tagIds?: number[];
 }
 
 export async function fetchExpensesPage(cursor?: string, limit = 20, filters?: ExpenseFilters): Promise<ExpensesPage> {
@@ -22,6 +23,7 @@ export async function fetchExpensesPage(cursor?: string, limit = 20, filters?: E
   if (filters?.category) params.set('category', filters.category);
   if (filters?.dateFrom) params.set('dateFrom', filters.dateFrom);
   if (filters?.dateTo) params.set('dateTo', filters.dateTo);
+  if (filters?.tagIds?.length) params.set('tagIds', filters.tagIds.join(','));
   return apiFetch<ExpensesPage>(`/api/expenses?${params}`);
 }
 

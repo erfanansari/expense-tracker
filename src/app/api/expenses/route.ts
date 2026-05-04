@@ -21,6 +21,8 @@ export const GET = withAuth(async (user, request) => {
   const category = searchParams.get('category')?.trim() || null;
   const dateFrom = searchParams.get('dateFrom')?.trim() || null;
   const dateTo = searchParams.get('dateTo')?.trim() || null;
+  const tagIdsParam = searchParams.get('tagIds')?.trim() || null;
+  const tagIds = tagIdsParam ? tagIdsParam.split(',').map(Number).filter(Boolean) : [];
 
   // Backward compatibility: if no limit is specified, return all expenses in old format (array)
   // This is used by the page component for stats and charts
@@ -59,6 +61,10 @@ export const GET = withAuth(async (user, request) => {
   if (dateTo) {
     sql += ' AND date <= ?';
     args.push(dateTo);
+  }
+  if (tagIds.length > 0) {
+    sql += ` AND EXISTS (SELECT 1 FROM expense_tags et WHERE et.expense_id = expenses.id AND et.tag_id IN (${tagIds.map(() => '?').join(',')}))`;
+    args.push(...tagIds);
   }
 
   // Apply cursor-based pagination
