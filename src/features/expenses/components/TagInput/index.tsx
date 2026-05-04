@@ -3,7 +3,15 @@
 import { createContext, useContext, useState } from 'react';
 
 import { Check, Edit2, Loader2, Plus, Tag as TagIcon, X } from 'lucide-react';
-import type { CSSObjectWithLabel, MultiValue, MultiValueGenericProps, OptionProps, StylesConfig } from 'react-select';
+import { components as rsComponents } from 'react-select';
+import type {
+  CSSObjectWithLabel,
+  MenuListProps,
+  MultiValue,
+  MultiValueGenericProps,
+  OptionProps,
+  StylesConfig,
+} from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 import { twMerge } from 'tailwind-merge';
 
@@ -176,6 +184,19 @@ const TagOptionComponent = ({ data, isFocused, innerProps, innerRef }: OptionPro
   );
 };
 
+// ─── Menu list (scroll fix for vaul drawer) ───────────────────────────────────
+
+const TagMenuList = (props: MenuListProps<TagOption, true>) => (
+  <rsComponents.MenuList
+    {...props}
+    innerProps={{
+      ...props.innerProps,
+      onWheel: (e) => e.stopPropagation(),
+      onTouchMove: (e) => e.stopPropagation(),
+    }}
+  />
+);
+
 // ─── Tag pill label ──────────────────────────────────────────────────────────
 
 const TagMultiValueLabel = ({ data }: MultiValueGenericProps<TagOption, true>) => (
@@ -283,6 +304,7 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
         styles={selectStyles}
         components={{
           Option: TagOptionComponent,
+          MenuList: TagMenuList,
           MultiValueLabel: TagMultiValueLabel,
           DropdownIndicator: () => null,
           IndicatorSeparator: () => null,
