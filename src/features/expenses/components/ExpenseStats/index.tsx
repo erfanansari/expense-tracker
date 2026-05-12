@@ -43,10 +43,6 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
             <TrendingUp className="text-blue h-5 w-5" />
           </div>
-          <div className="border-success/20 bg-success-light text-success flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium">
-            <ArrowUpRight className="h-3 w-3" />
-            <span>12.5%</span>
-          </div>
         </div>
 
         <div>
@@ -64,10 +60,6 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
             <Hash className="text-success h-5 w-5" />
           </div>
-          <div className="border-blue/20 bg-blue/10 text-blue flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium">
-            <Sparkles className="h-3 w-3" />
-            <span>Active</span>
-          </div>
         </div>
 
         <div>
@@ -82,10 +74,6 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
         <div className="mb-4 flex items-center justify-between">
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
             <BarChart3 className="text-text-secondary h-5 w-5" />
-          </div>
-          <div className="border-danger/20 bg-danger-light text-danger flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium">
-            <ArrowDownRight className="h-3 w-3" />
-            <span>3.2%</span>
           </div>
         </div>
 

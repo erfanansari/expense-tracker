@@ -1,23 +1,12 @@
 'use client';
 
-import { createContext, useContext, useState } from 'react';
-
-import { Check, Edit2, Loader2, Plus, Tag as TagIcon, X } from 'lucide-react';
+import { Check, Plus } from 'lucide-react';
 import { components as rsComponents } from 'react-select';
-import type {
-  CSSObjectWithLabel,
-  MenuListProps,
-  MultiValue,
-  MultiValueGenericProps,
-  OptionProps,
-  StylesConfig,
-} from 'react-select';
+import type { CSSObjectWithLabel, MenuListProps, MultiValue, OptionProps, StylesConfig } from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 import { twMerge } from 'tailwind-merge';
 
-import { useCreateTag, useTags, useUpdateTag } from '@hooks/use-tags';
-
-import { ensureError } from '@utils';
+import { useCreateTag, useTags } from '@hooks/use-tags';
 
 import { type Tag } from '@/@types/expense';
 
@@ -29,28 +18,13 @@ interface TagOption {
   tag?: Tag;
 }
 
-interface TagEditState {
-  editingTagId: number | null;
-  editingName: string;
-  editError: string;
-  isSaving: boolean;
-  onStartEdit: (tag: Tag) => void;
-  onCancelEdit: () => void;
-  onSaveEdit: (tagId: number) => Promise<void>;
-  onEditNameChange: (name: string) => void;
-}
-
-// ─── Context ─────────────────────────────────────────────────────────────────
-// React context is preserved through React.createPortal, which react-select uses
-// for menuPortalTarget, so TagOptionComponent can access TagEditContext.
-
-const TagEditContext = createContext<TagEditState | null>(null);
-
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const selectStyles: StylesConfig<any, any, any> = {
   menuPortal: (base: CSSObjectWithLabel) => ({ ...base, zIndex: 9999, pointerEvents: 'auto' }),
+  // Allow the menu to grow wider than the control so long tags never wrap.
+  menu: (base: CSSObjectWithLabel) => ({ ...base, width: 'max-content', minWidth: '100%' }),
   input: () => ({ color: 'inherit', fontSize: 'inherit', margin: 0, padding: 0 }),
   control: () => ({ minHeight: 'unset' }),
   // Explicitly remove valueContainer padding — react-select keeps residual padding even in unstyled mode
@@ -60,15 +34,13 @@ const selectStyles: StylesConfig<any, any, any> = {
 const controlClass = (isFocused: boolean) =>
   twMerge(
     'border-border-subtle bg-background flex w-full items-center rounded-lg border px-3 py-2 text-sm transition-all cursor-text gap-1.5',
-    isFocused && 'border-blue'
+    isFocused && 'border-blue ring-2 ring-blue/15'
   );
 
 // ─── Custom Option ───────────────────────────────────────────────────────────
 
-const TagOptionComponent = ({ data, isFocused, innerProps, innerRef }: OptionProps<TagOption, true>) => {
-  const edit = useContext(TagEditContext);
+const TagOptionComponent = ({ data, isFocused, isSelected, innerProps, innerRef }: OptionProps<TagOption, true>) => {
   const isNew = (data as TagOption & { __isNew__?: boolean }).__isNew__;
-  const isEditing = edit?.editingTagId != null && edit.editingTagId === data.tag?.id;
 
   if (isNew) {
     return (
@@ -76,7 +48,7 @@ const TagOptionComponent = ({ data, isFocused, innerProps, innerRef }: OptionPro
         {...innerProps}
         ref={innerRef}
         className={twMerge(
-          'text-blue border-border-subtle flex cursor-pointer items-center gap-2 border-t px-3 py-2 text-xs transition-colors',
+          'text-blue mt-1 flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors duration-100',
           isFocused && 'bg-blue/10'
         )}
       >
@@ -86,101 +58,18 @@ const TagOptionComponent = ({ data, isFocused, innerProps, innerRef }: OptionPro
     );
   }
 
-  if (isEditing && data.tag && edit) {
-    const tagId = data.tag.id;
-    return (
-      <div
-        ref={innerRef}
-        className="flex items-center gap-2 px-3 py-2"
-        onMouseDown={(e) => e.stopPropagation()}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <TagIcon className="text-text-muted h-3.5 w-3.5 shrink-0" />
-        <div className="min-w-0 flex-1">
-          <input
-            type="text"
-            value={edit.editingName}
-            onChange={(e) => edit.onEditNameChange(e.target.value)}
-            onKeyDown={(e) => {
-              e.stopPropagation();
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                edit.onSaveEdit(tagId);
-              }
-              if (e.key === 'Escape') {
-                e.preventDefault();
-                edit.onCancelEdit();
-              }
-            }}
-            className="border-blue bg-background text-text-primary w-full rounded border px-2 py-0.5 text-xs outline-none"
-          />
-          {edit.editError && <p className="text-danger mt-0.5 text-xs">{edit.editError}</p>}
-        </div>
-        <div className="flex shrink-0 gap-1">
-          <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={(e) => {
-              e.stopPropagation();
-              edit.onSaveEdit(tagId);
-            }}
-            disabled={edit.isSaving}
-            className="border-border-subtle bg-background text-success flex h-6 w-6 items-center justify-center rounded border transition-colors disabled:opacity-50"
-            aria-label="Save"
-          >
-            {edit.isSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
-          </button>
-          <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={(e) => {
-              e.stopPropagation();
-              edit.onCancelEdit();
-            }}
-            disabled={edit.isSaving}
-            className="border-border-subtle bg-background text-text-secondary flex h-6 w-6 items-center justify-center rounded border transition-colors disabled:opacity-50"
-            aria-label="Cancel"
-          >
-            <X className="h-3 w-3" />
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
       {...innerProps}
       ref={innerRef}
       className={twMerge(
-        'text-text-primary flex cursor-pointer items-center gap-2 px-3 py-1.5 text-xs transition-colors',
-        isFocused && 'bg-background-elevated'
+        'text-text-secondary flex cursor-pointer items-center justify-between gap-6 rounded-md px-2.5 py-1.5 text-[13px] whitespace-nowrap transition-colors duration-100',
+        isFocused && 'bg-background-elevated text-text-primary',
+        isSelected && 'text-text-primary font-medium'
       )}
     >
-      <TagIcon className="text-text-muted h-3.5 w-3.5 shrink-0" />
-      <span className="min-w-0 flex-1 truncate">{data.label}</span>
-      {/* Always rendered to prevent layout shift on hover; hidden when not focused */}
-      {data.tag && edit && (
-        <button
-          type="button"
-          onMouseDown={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-            edit.onStartEdit(data.tag!);
-          }}
-          className={twMerge(
-            'text-text-muted hover:text-text-secondary shrink-0 rounded p-1 transition-colors',
-            !isFocused && 'invisible'
-          )}
-          aria-label={`Rename ${data.label}`}
-          tabIndex={-1}
-        >
-          <Edit2 className="h-3 w-3" />
-        </button>
-      )}
+      <span className="truncate">{data.label}</span>
+      {isSelected && <Check className="text-blue h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
     </div>
   );
 };
@@ -198,15 +87,6 @@ const TagMenuList = (props: MenuListProps<TagOption, true>) => (
   />
 );
 
-// ─── Tag pill label ──────────────────────────────────────────────────────────
-
-const TagMultiValueLabel = ({ data }: MultiValueGenericProps<TagOption, true>) => (
-  <span className="flex items-center gap-1">
-    <TagIcon className="h-3 w-3 shrink-0" />
-    <span>{data.label}</span>
-  </span>
-);
-
 // ─── Main component ──────────────────────────────────────────────────────────
 
 interface TagInputProps {
@@ -219,11 +99,6 @@ const tagToOption = (tag: Tag): TagOption => ({ value: String(tag.id), label: ta
 const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
   const { data: allTags = [] } = useTags();
   const createTag = useCreateTag();
-  const updateTag = useUpdateTag();
-
-  const [editingTagId, setEditingTagId] = useState<number | null>(null);
-  const [editingName, setEditingName] = useState('');
-  const [editError, setEditError] = useState('');
 
   const handleChange = (newValue: MultiValue<TagOption>) => {
     onTagsChange(newValue.flatMap((o) => (o.tag ? [o.tag] : [])));
@@ -238,96 +113,48 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
     }
   };
 
-  const startEdit = (tag: Tag) => {
-    setEditingTagId(tag.id);
-    setEditingName(tag.name);
-    setEditError('');
-  };
-
-  const cancelEdit = () => {
-    setEditingTagId(null);
-    setEditingName('');
-    setEditError('');
-  };
-
-  const saveEdit = async (tagId: number) => {
-    if (!editingName.trim()) {
-      setEditError('Tag name is required');
-      return;
-    }
-    const isDuplicate = allTags.some(
-      (t) => t.id !== tagId && t.name.toLowerCase() === editingName.trim().toLowerCase()
-    );
-    if (isDuplicate) {
-      setEditError(`"${editingName.trim()}" already exists`);
-      return;
-    }
-    setEditError('');
-    try {
-      await updateTag.mutateAsync({ id: tagId, name: editingName.trim() });
-      setEditingTagId(null);
-      setEditingName('');
-    } catch (error) {
-      setEditError(ensureError(error).message);
-    }
-  };
-
-  const editState: TagEditState = {
-    editingTagId,
-    editingName,
-    editError,
-    isSaving: updateTag.isPending,
-    onStartEdit: startEdit,
-    onCancelEdit: cancelEdit,
-    onSaveEdit: saveEdit,
-    onEditNameChange: setEditingName,
-  };
-
   const options = allTags.filter((tag) => !selectedTags.some((s) => s.id === tag.id)).map(tagToOption);
 
   return (
-    <TagEditContext.Provider value={editState}>
-      <CreatableSelect<TagOption, true>
-        isMulti
-        classNamePrefix="ti"
-        value={selectedTags.map(tagToOption)}
-        onChange={handleChange}
-        options={options}
-        onCreateOption={handleCreate}
-        isLoading={createTag.isPending}
-        placeholder="Tags"
-        isSearchable
-        closeMenuOnSelect={false}
-        createOptionPosition="last"
-        menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
-        menuPosition="fixed"
-        onMenuClose={cancelEdit}
-        unstyled
-        styles={selectStyles}
-        components={{
-          Option: TagOptionComponent,
-          MenuList: TagMenuList,
-          MultiValueLabel: TagMultiValueLabel,
-          DropdownIndicator: () => null,
-          IndicatorSeparator: () => null,
-          ClearIndicator: () => null,
-        }}
-        classNames={{
-          control: ({ isFocused }) => controlClass(isFocused),
-          valueContainer: () => 'gap-1.5 flex-wrap',
-          menu: () => 'border-border-subtle bg-background mt-1 rounded-lg border py-1 shadow-lg',
-          placeholder: () => 'text-text-muted text-sm',
-          input: () => 'text-text-primary text-sm',
-          multiValue: () =>
-            'group border-border-subtle bg-background-elevated text-text-secondary hover:border-border-default flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium transition-all',
-          multiValueLabel: () => 'flex items-center gap-1',
-          multiValueRemove: () =>
-            'text-text-muted hover:text-text-primary hover:bg-background-elevated ml-0.5 rounded p-0.5 transition-colors cursor-pointer',
-          noOptionsMessage: () => 'text-text-muted px-4 py-3 text-xs',
-          loadingMessage: () => 'text-text-muted px-4 py-3 text-xs',
-        }}
-      />
-    </TagEditContext.Provider>
+    <CreatableSelect<TagOption, true>
+      isMulti
+      classNamePrefix="ti"
+      value={selectedTags.map(tagToOption)}
+      onChange={handleChange}
+      options={options}
+      onCreateOption={handleCreate}
+      isLoading={createTag.isPending}
+      placeholder="Tags"
+      isSearchable
+      closeMenuOnSelect={false}
+      createOptionPosition="last"
+      menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+      menuPosition="fixed"
+      unstyled
+      styles={selectStyles}
+      components={{
+        Option: TagOptionComponent,
+        MenuList: TagMenuList,
+        DropdownIndicator: () => null,
+        IndicatorSeparator: () => null,
+        ClearIndicator: () => null,
+      }}
+      classNames={{
+        control: ({ isFocused }) => controlClass(isFocused),
+        valueContainer: () => 'gap-1.5 flex-wrap',
+        menu: () =>
+          'border-border-subtle bg-background mt-1.5 rounded-xl border p-1 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.18),0_4px_8px_-4px_rgba(0,0,0,0.08)] animate-dropdown-pop overflow-hidden',
+        menuList: () => 'flex flex-col gap-0.5 max-h-80 overflow-y-auto',
+        placeholder: () => 'text-text-muted text-sm',
+        input: () => 'text-text-primary text-sm',
+        multiValue: () =>
+          'border-border-subtle bg-background-elevated text-text-secondary hover:border-border-default flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium transition-all',
+        multiValueRemove: () =>
+          'text-text-muted hover:text-text-primary hover:bg-background-elevated ml-0.5 rounded p-0.5 transition-colors cursor-pointer',
+        noOptionsMessage: () => 'text-text-muted px-3 py-3 text-[13px]',
+        loadingMessage: () => 'text-text-muted px-3 py-3 text-[13px]',
+      }}
+    />
   );
 };
 
