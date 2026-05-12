@@ -37,6 +37,9 @@ interface TagFilterSelectProps {
 const tagSelectStyles: any = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   menuPortal: (base: any) => ({ ...base, zIndex: 9999, pointerEvents: 'auto' }),
+  // Allow the menu to grow wider than the control so long tags never wrap.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  menu: (base: any) => ({ ...base, width: 'max-content', minWidth: '100%' }),
   input: () => ({ color: 'inherit', fontSize: 'inherit', margin: 0, padding: 0 }),
   control: () => ({ minHeight: 'unset', maxHeight: '36px', overflow: 'hidden' }),
   valueContainer: () => ({
@@ -82,22 +85,24 @@ function TagFilterSelect({ value, onChange }: TagFilterSelectProps) {
       classNames={{
         control: ({ isFocused }) =>
           `border rounded-lg px-3 py-2 text-sm transition-all cursor-pointer flex items-center bg-background ${
-            isFocused ? 'border-blue' : 'border-border-subtle'
+            isFocused ? 'border-blue ring-2 ring-blue/15' : 'border-border-subtle hover:border-border-default'
           }`,
         valueContainer: () => 'gap-1',
         placeholder: () => 'text-text-muted text-sm whitespace-nowrap',
         input: () => 'text-text-primary text-sm shrink-0 min-w-0',
-        menu: () => 'border-border-subtle bg-background mt-1 rounded-lg border py-1 shadow-lg min-w-[160px]',
-        option: ({ isFocused }) =>
-          `flex items-center gap-2 px-3 py-2 text-xs text-text-primary cursor-pointer transition-colors ${
-            isFocused ? 'bg-background-elevated' : ''
-          }`,
+        menu: () =>
+          'border-border-subtle bg-background mt-1.5 rounded-xl border p-1 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.18),0_4px_8px_-4px_rgba(0,0,0,0.08)] animate-dropdown-pop overflow-hidden min-w-[180px]',
+        menuList: () => 'flex flex-col gap-0.5 max-h-80 overflow-y-auto',
+        option: ({ isFocused, isSelected }) =>
+          `flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[13px] whitespace-nowrap text-text-secondary cursor-pointer transition-colors duration-100 ${
+            isFocused ? 'bg-background-elevated text-text-primary' : ''
+          } ${isSelected ? 'text-text-primary font-medium' : ''}`,
         multiValue: () =>
           'border-border-subtle bg-background-elevated text-text-secondary flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 text-xs font-medium',
         multiValueLabel: () => 'flex items-center gap-1',
         multiValueRemove: () =>
           'text-text-muted hover:text-text-primary ml-0.5 rounded p-0.5 transition-colors cursor-pointer',
-        noOptionsMessage: () => 'text-text-muted px-4 py-3 text-xs',
+        noOptionsMessage: () => 'text-text-muted px-3 py-3 text-[13px]',
       }}
     />
   );
