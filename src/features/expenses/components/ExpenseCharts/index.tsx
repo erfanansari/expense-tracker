@@ -1,5 +1,6 @@
 'use client';
 
+import { format, parseISO, startOfWeek } from 'date-fns';
 import { BarChart3, PieChartIcon, TrendingUp } from 'lucide-react';
 import {
   Area,
@@ -89,13 +90,7 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
   categoryTotals.sort((a, b) => b.value - a.value);
 
   // Helper functions for date formatting
-  const getWeekKey = (date: Date): string => {
-    const year = date.getFullYear();
-    const firstDayOfYear = new Date(year, 0, 1);
-    const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
-    const weekNum = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-    return `${year}-W${weekNum.toString().padStart(2, '0')}`;
-  };
+  const getWeekKey = (date: Date): string => format(startOfWeek(date), 'yyyy-MM-dd');
 
   const getMonthKey = (date: Date): string => {
     return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
@@ -281,13 +276,11 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
                 tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
                 axisLine={{ stroke: '#e5e5e5' }}
                 tickLine={{ stroke: '#e5e5e5' }}
+                minTickGap={40}
+                interval="preserveStartEnd"
                 tickFormatter={(value: string) => {
-                  if (granularity === 'monthly') {
-                    return value.slice(5);
-                  } else if (granularity === 'weekly') {
-                    return value.split('-W')[1];
-                  }
-                  return value.slice(5);
+                  if (granularity === 'monthly') return format(parseISO(`${value}-01`), 'MMM yyyy');
+                  return format(parseISO(value), 'MMM d');
                 }}
               />
               <YAxis

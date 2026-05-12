@@ -1,7 +1,5 @@
 'use client';
 
-import { Calendar } from 'lucide-react';
-
 import Select from '@components/Select';
 
 export type DateRange = '7D' | '30D' | 'THIS_MONTH' | 'LAST_MONTH' | 'YTD' | 'ALL_TIME';
@@ -23,7 +21,6 @@ const DateRangeSelector = ({ value, onChange }: DateRangeSelectorProps) => {
 
   return (
     <div className="flex items-center gap-2">
-      <Calendar className="text-blue h-4 w-4 shrink-0" />
       <Select
         value={value}
         onChange={(val) => onChange(val as DateRange)}
