@@ -17,6 +17,34 @@ import OverviewStats from './components/OverviewStats';
 import RecentTransactions from './components/RecentTransactions';
 import SpendingTrendChart from './components/SpendingTrendChart';
 
+const SKELETON_BAR_HEIGHTS = [
+  'h-[28%]',
+  'h-[22%]',
+  'h-[35%]',
+  'h-[48%]',
+  'h-[65%]',
+  'h-[80%]',
+  'h-[92%]',
+  'h-[70%]',
+  'h-[50%]',
+  'h-[38%]',
+  'h-[55%]',
+  'h-[72%]',
+  'h-[60%]',
+  'h-[42%]',
+  'h-[30%]',
+  'h-[45%]',
+  'h-[62%]',
+  'h-[78%]',
+  'h-[55%]',
+  'h-[38%]',
+  'h-[28%]',
+  'h-[35%]',
+  'h-[48%]',
+  'h-[40%]',
+  'h-[32%]',
+];
+
 function OverviewSkeleton() {
   return (
     <>
@@ -43,7 +71,30 @@ function OverviewSkeleton() {
             </div>
             <Pulse className="h-8 w-24 sm:h-9 sm:w-32" />
           </div>
-          <Pulse className="h-[220px] w-full sm:h-[300px]" />
+          <div className="flex h-[450px] gap-3 sm:gap-4">
+            <div className="flex w-8 flex-col justify-between py-2 sm:w-10">
+              <Pulse className="h-3 w-full" />
+              <Pulse className="h-3 w-full" />
+              <Pulse className="h-3 w-full" />
+              <Pulse className="h-3 w-full" />
+              <Pulse className="h-3 w-full" />
+            </div>
+            <div className="flex flex-1 flex-col gap-3">
+              <div className="flex flex-1 items-end gap-1 sm:gap-1.5">
+                {SKELETON_BAR_HEIGHTS.map((h, i) => (
+                  <Pulse key={i} className={`flex-1 rounded-md ${h}`} />
+                ))}
+              </div>
+              <div className="flex justify-between">
+                <Pulse className="h-3 w-10" />
+                <Pulse className="h-3 w-10" />
+                <Pulse className="h-3 w-10" />
+                <Pulse className="h-3 w-10" />
+                <Pulse className="h-3 w-10" />
+                <Pulse className="h-3 w-10" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Recent transactions skeleton */}

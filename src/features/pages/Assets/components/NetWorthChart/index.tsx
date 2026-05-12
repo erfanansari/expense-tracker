@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
+import { format, parseISO } from 'date-fns';
 import { TrendingUp } from 'lucide-react';
 import {
   Area,
@@ -69,37 +70,14 @@ function DeltaBadge({ data }: { data: Array<{ valueUsd: number }> }) {
   );
 }
 
-const MAX_TICKS = 8;
-
 const NetWorthChart = () => {
   const [range, setRange] = useState<NetWorthRange>('6M');
   const { data, isLoading, isError } = useNetWorthHistory(range);
 
   const isShortRange = range === '1M' || range === '3M';
 
-  // Compute evenly-spaced tick values to avoid duplicate labels
-  const xTicks = useMemo(() => {
-    if (!data || data.length <= MAX_TICKS) return undefined;
-    const step = Math.ceil(data.length / MAX_TICKS);
-    const ticks: string[] = [];
-    for (let i = 0; i < data.length; i += step) {
-      ticks.push(data[i].date);
-    }
-    // Always include the last point
-    if (ticks[ticks.length - 1] !== data[data.length - 1].date) {
-      ticks.push(data[data.length - 1].date);
-    }
-    return ticks;
-  }, [data]);
-
   const formatXTick = useCallback(
-    (value: string) => {
-      const d = new Date(`${value}T00:00:00`);
-      if (isShortRange) {
-        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      }
-      return d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-    },
+    (value: string) => format(parseISO(value), isShortRange ? 'MMM d' : "MMM ''yy"),
     [isShortRange]
   );
 
@@ -197,7 +175,8 @@ const NetWorthChart = () => {
                 tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
                 axisLine={{ stroke: '#e5e5e5' }}
                 tickLine={{ stroke: '#e5e5e5' }}
-                ticks={xTicks}
+                minTickGap={40}
+                interval="preserveStartEnd"
                 tickFormatter={formatXTick}
               />
               <YAxis

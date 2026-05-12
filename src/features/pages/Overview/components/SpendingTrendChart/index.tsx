@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 
+import { format, parseISO, startOfWeek } from 'date-fns';
 import { TrendingUp } from 'lucide-react';
 import {
   Area,
@@ -44,11 +45,7 @@ function SpendingTooltip({
 
 // ─── Aggregation helpers ────────────────────────────────────────────────────────
 function getWeekKey(date: Date): string {
-  const year = date.getFullYear();
-  const firstDayOfYear = new Date(year, 0, 1);
-  const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
-  const weekNum = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-  return `${year}-W${weekNum.toString().padStart(2, '0')}`;
+  return format(startOfWeek(date), 'yyyy-MM-dd');
 }
 
 function getMonthKey(date: Date): string {
@@ -128,10 +125,11 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
               tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
               axisLine={{ stroke: '#e5e5e5' }}
               tickLine={{ stroke: '#e5e5e5' }}
+              minTickGap={40}
+              interval="preserveStartEnd"
               tickFormatter={(value: string) => {
-                if (granularity === 'monthly') return value.slice(5);
-                if (granularity === 'weekly') return value.split('-W')[1];
-                return value.slice(5);
+                if (granularity === 'monthly') return format(parseISO(`${value}-01`), 'MMM yyyy');
+                return format(parseISO(value), 'MMM d');
               }}
             />
             <YAxis
