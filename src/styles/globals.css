@@ -292,17 +292,21 @@ textarea:focus {
 .react-datepicker {
   font-family: var(--font-geist-sans), sans-serif !important;
   border: 1px solid var(--color-border-subtle) !important;
-  border-radius: var(--radius-lg) !important;
+  border-radius: 12px !important;
   background: var(--color-background) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+  box-shadow:
+    0 10px 30px -12px rgba(0, 0, 0, 0.18),
+    0 4px 8px -4px rgba(0, 0, 0, 0.08) !important;
   overflow: hidden;
+  animation: dropdownPop 0.14s ease-out;
+  transform-origin: top center;
 }
 
 .react-datepicker__header {
   background: var(--color-background-secondary) !important;
   border-bottom: 1px solid var(--color-border-subtle) !important;
-  padding-top: 10px !important;
-  padding-bottom: 0 !important;
+  padding-top: 12px !important;
+  padding-bottom: 4px !important;
 }
 
 /* Hidden when renderCustomHeader is used */
@@ -591,6 +595,34 @@ textarea:focus {
 .animate-dropdown-pop {
   animation: dropdownPop 0.14s ease-out;
   transform-origin: top center;
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-modal-pop {
+  animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes backdropFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-backdrop-fade {
+  animation: backdropFade 0.2s ease-out;
 }
 
 /* Chart tooltip override */
