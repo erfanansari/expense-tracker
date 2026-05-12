@@ -85,7 +85,7 @@ const DatePicker = forwardRef<ReactDatePickerType, DatePickerProps>(
           return (
             <div className={className}>
               {/* Quick shortcuts */}
-              <div className="border-border-subtle border-b px-2 py-1.5">
+              <div className="border-border-subtle flex flex-col gap-0.5 border-b p-1">
                 {shortcuts.map(({ label, date }) => (
                   <button
                     key={label}
@@ -94,9 +94,9 @@ const DatePicker = forwardRef<ReactDatePickerType, DatePickerProps>(
                       onChangeRef.current(formatDateString(date));
                       closeRef.current();
                     }}
-                    className="hover:bg-background-elevated flex w-full items-center rounded-lg px-3 py-2 transition-colors"
+                    className="text-text-secondary hover:bg-background-elevated hover:text-text-primary flex w-full items-center rounded-md px-2.5 py-1.5 text-[13px] transition-colors duration-100"
                   >
-                    <span className="text-text-primary text-sm font-medium">{label}</span>
+                    <span className="font-medium">{label}</span>
                     <span className="text-text-muted ml-auto text-xs">{weekday(date)}</span>
                   </button>
                 ))}
