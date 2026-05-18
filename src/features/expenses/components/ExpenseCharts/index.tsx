@@ -17,7 +17,7 @@ import {
   YAxis,
 } from 'recharts';
 
-import { formatNumber, getCategoryLabel } from '@utils';
+import { formatChartTooltipDate, formatNumber, getCategoryLabel } from '@utils';
 
 import { type Expense } from '@/@types/expense';
 
@@ -38,13 +38,13 @@ const COLORS = [
   '#171717', // black
 ];
 
-// Custom tooltip component
-const CustomTooltip = ({
+// Tooltip for pie / bar (category-based)
+const CategoryTooltip = ({
   active,
   payload,
 }: {
   active?: boolean;
-  payload?: Array<{ value: number; payload: { nameFa?: string; usdValue?: number } }>;
+  payload?: ReadonlyArray<{ value: number; payload: { name?: string; usdValue?: number } }>;
 }) => {
   if (active && payload && payload.length) {
     const data = payload[0];
@@ -53,15 +53,36 @@ const CustomTooltip = ({
       <div className="border-border-subtle bg-background rounded-lg border p-4 shadow-lg">
         <p className="text-text-primary text-lg font-bold">{formatNumber(data.value)} Toman</p>
         <p className="text-text-muted mt-1.5 text-sm font-medium">${usdValue.toFixed(2)} USD</p>
-        {data.payload.nameFa && (
-          <p className="text-blue mt-2 text-sm font-medium" dir="rtl">
-            {data.payload.nameFa}
-          </p>
-        )}
+        {data.payload.name && <p className="text-blue mt-2 text-sm font-medium">{data.payload.name}</p>}
       </div>
     );
   }
   return null;
+};
+
+// Tooltip for the time-series area chart (date-based)
+const AreaTooltip = ({
+  active,
+  payload,
+  label,
+  granularity,
+}: {
+  active?: boolean;
+  payload?: ReadonlyArray<{ value: number; payload: { usdValue?: number } }>;
+  label?: string | number;
+  granularity: 'daily' | 'weekly' | 'monthly';
+}) => {
+  if (!active || !payload?.length) return null;
+  const usdValue = payload[0].payload.usdValue || 0;
+  return (
+    <div className="border-border-subtle bg-background rounded-lg border p-4 shadow-lg">
+      <p className="text-text-primary text-lg font-bold">{formatNumber(payload[0].value)} Toman</p>
+      <p className="text-text-muted mt-1.5 text-sm font-medium">${usdValue.toFixed(2)} USD</p>
+      {label != null && (
+        <p className="text-blue mt-2 text-sm font-medium">{formatChartTooltipDate(String(label), granularity)}</p>
+      )}
+    </div>
+  );
 };
 
 export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseChartsProps) {
@@ -77,14 +98,13 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
         acc.push({
           category: exp.category,
           name: labels.en,
-          nameFa: labels.fa,
           value: exp.price_toman,
           usdValue: exp.price_usd,
         });
       }
       return acc;
     },
-    [] as Array<{ category: string; name: string; nameFa: string; value: number; usdValue: number }>
+    [] as Array<{ category: string; name: string; value: number; usdValue: number }>
   );
 
   categoryTotals.sort((a, b) => b.value - a.value);
@@ -143,12 +163,7 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
             <PieChartIcon className="text-blue h-5 w-5" />
           </div>
-          <div>
-            <h3 className="text-text-primary text-lg font-bold">By Category</h3>
-            <p className="text-text-muted text-sm" dir="rtl">
-              بر اساس دسته‌بندی
-            </p>
-          </div>
+          <h3 className="text-text-primary text-lg font-semibold">By Category</h3>
         </div>
 
         <div className="h-[280px]">
@@ -171,7 +186,7 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CategoryTooltip />} />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -195,20 +210,15 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
       </div>
 
       {/* Bar Chart */}
-      <div className="border-border-subtle bg-background relative rounded-xl border p-6 shadow-sm">
-        <div className="mb-6 flex items-center gap-3">
+      <div className="border-border-subtle bg-background relative flex h-full flex-col rounded-xl border p-6 shadow-sm">
+        <div className="mb-6 flex shrink-0 items-center gap-3">
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
             <BarChart3 className="text-success h-5 w-5" />
           </div>
-          <div>
-            <h3 className="text-text-primary text-lg font-bold">Category Comparison</h3>
-            <p className="text-text-muted text-sm" dir="rtl">
-              مقایسه دسته‌بندی
-            </p>
-          </div>
+          <h3 className="text-text-primary text-lg font-semibold">Category Comparison</h3>
         </div>
 
-        <div className="h-[400px]">
+        <div className="min-h-[320px] flex-1">
           <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <BarChart data={categoryTotals} layout="vertical" margin={{ left: 0, right: 20 }}>
               <XAxis
@@ -221,14 +231,14 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
               />
               <YAxis
                 type="category"
-                dataKey="nameFa"
-                width={80}
+                dataKey="name"
+                width={100}
                 stroke="#e5e5e5"
                 tick={{ fill: '#525252', fontSize: 12, fontWeight: 500 }}
                 axisLine={{ stroke: '#e5e5e5' }}
                 tickLine={{ stroke: '#e5e5e5' }}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: '#fafafa' }} />
+              <Tooltip content={<CategoryTooltip />} cursor={{ fill: '#fafafa' }} />
               <Bar dataKey="value" radius={[0, 8, 8, 0]} animationDuration={800}>
                 {categoryTotals.map((_, index) => (
                   <Cell key={`bar-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -245,18 +255,11 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
             <TrendingUp className="text-blue h-5 w-5" />
           </div>
-          <div>
-            <h3 className="text-text-primary text-lg font-bold">
-              {granularity === 'daily' && 'Daily Spending Trend'}
-              {granularity === 'weekly' && 'Weekly Spending Trend'}
-              {granularity === 'monthly' && 'Monthly Spending Trend'}
-            </h3>
-            <p className="text-text-muted text-sm" dir="rtl">
-              {granularity === 'daily' && 'روند هزینه روزانه'}
-              {granularity === 'weekly' && 'روند هزینه هفتگی'}
-              {granularity === 'monthly' && 'روند هزینه ماهانه'}
-            </p>
-          </div>
+          <h3 className="text-text-primary text-lg font-semibold">
+            {granularity === 'daily' && 'Daily Spending Trend'}
+            {granularity === 'weekly' && 'Weekly Spending Trend'}
+            {granularity === 'monthly' && 'Monthly Spending Trend'}
+          </h3>
         </div>
 
         <div className="h-[280px]">
@@ -291,7 +294,7 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
                 tickFormatter={(value: number) => `${Math.round(value / 1_000_000)}M`}
               />
               <Tooltip
-                content={<CustomTooltip />}
+                content={(props) => <AreaTooltip {...props} granularity={granularity} />}
                 cursor={{ stroke: '#0070f3', strokeWidth: 1, strokeDasharray: '4 4' }}
               />
               <Area

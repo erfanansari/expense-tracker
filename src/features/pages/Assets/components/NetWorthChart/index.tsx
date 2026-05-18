@@ -19,7 +19,7 @@ import Pulse from '@components/Skeleton';
 
 import { type NetWorthRange, useNetWorthHistory } from '@hooks/use-net-worth-history';
 
-import { formatNumber } from '@utils';
+import { formatChartTooltipDate, formatNumber } from '@utils';
 
 const RANGES: NetWorthRange[] = ['1M', '3M', '6M', '1Y', 'ALL'];
 
@@ -30,8 +30,8 @@ function NetWorthTooltip({
   label,
 }: {
   active?: boolean;
-  payload?: Array<{ value: number; payload: { valueUsd: number; valueToman: number } }>;
-  label?: string;
+  payload?: ReadonlyArray<{ value: number; payload: { valueUsd: number; valueToman: number } }>;
+  label?: string | number;
 }) {
   if (!active || !payload?.length) return null;
   const point = payload[0].payload;
@@ -41,7 +41,9 @@ function NetWorthTooltip({
         ${point.valueUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
       </p>
       <p className="text-text-muted mt-1.5 text-sm font-medium">{formatNumber(point.valueToman)} Toman</p>
-      {label && <p className="text-success mt-2 text-sm font-medium">{label}</p>}
+      {label != null && (
+        <p className="text-success mt-2 text-sm font-medium">{formatChartTooltipDate(String(label), 'daily')}</p>
+      )}
     </div>
   );
 }
