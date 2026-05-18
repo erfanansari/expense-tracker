@@ -3,11 +3,12 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 
 import { type ColumnDef } from '@tanstack/react-table';
-import { ArrowRight, Tag } from 'lucide-react';
+import { ArrowRight, Receipt, Tag } from 'lucide-react';
 
 import type { Expense } from '@types';
 
 import DataTable from '@components/DataTable';
+import EmptyState from '@components/EmptyState';
 
 import { formatNumber } from '@utils';
 
@@ -86,7 +87,13 @@ const RecentTransactions = ({ expenses }: RecentTransactionsProps) => {
           </Link>
         </div>
       }
-      emptyState={<p className="text-text-muted text-sm">No transactions yet</p>}
+      emptyState={
+        <EmptyState
+          icon={Receipt}
+          title="No transactions yet"
+          description="Your most recent expenses will appear here."
+        />
+      }
     />
   );
 };

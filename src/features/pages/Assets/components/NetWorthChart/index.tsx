@@ -14,6 +14,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import EmptyState from '@components/EmptyState';
 import Pulse from '@components/Skeleton';
 
 import { type NetWorthRange, useNetWorthHistory } from '@hooks/use-net-worth-history';
@@ -149,11 +150,12 @@ const NetWorthChart = () => {
 
       {/* Empty state */}
       {isEmpty && (
-        <div className="flex h-[280px] items-center justify-center">
-          <p className="text-text-muted text-sm">
-            Not enough data to display chart. Update an asset value to record a snapshot.
-          </p>
-        </div>
+        <EmptyState
+          icon={TrendingUp}
+          title="No history yet"
+          description="Update an asset value to record a snapshot and start charting your net worth."
+          className="min-h-[280px]"
+        />
       )}
 
       {/* Chart */}
