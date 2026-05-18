@@ -118,58 +118,74 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
         <DateRangeSelector value={dateRange} onChange={setDateRange} />
       </div>
 
-      <div className="min-h-[320px] flex-1">
-        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-          <AreaChart data={spendingTrend} margin={{ left: 0, right: 20, top: 8, bottom: 0 }}>
-            <defs>
-              <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#0070f3" stopOpacity={0.2} />
-                <stop offset="50%" stopColor="#0070f3" stopOpacity={0.1} />
-                <stop offset="100%" stopColor="#0070f3" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" opacity={0.5} vertical={false} />
-            <XAxis
-              dataKey="date"
-              stroke="#e5e5e5"
-              tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
-              axisLine={{ stroke: '#e5e5e5' }}
-              tickLine={{ stroke: '#e5e5e5' }}
-              tickMargin={8}
-              height={28}
-              minTickGap={40}
-              interval="preserveStartEnd"
-              tickFormatter={(value: string) => {
-                if (granularity === 'monthly') return format(parseISO(`${value}-01`), 'MMM yyyy');
-                return format(parseISO(value), 'MMM d');
-              }}
-            />
-            <YAxis
-              stroke="#e5e5e5"
-              tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
-              axisLine={{ stroke: '#e5e5e5' }}
-              tickLine={{ stroke: '#e5e5e5' }}
-              tickFormatter={(v: number) =>
-                v >= 1_000_000 ? `${(v / 1_000_000).toFixed(0)}M` : v >= 1_000 ? `${(v / 1_000).toFixed(0)}K` : `${v}`
-              }
-            />
-            <RechartsTooltip
-              content={(props) => <SpendingTooltip {...props} granularity={granularity} />}
-              cursor={{ stroke: '#0070f3', strokeWidth: 1, strokeDasharray: '4 4' }}
-            />
-            <Area
-              type="monotone"
-              dataKey="amount"
-              stroke="#0070f3"
-              strokeWidth={2}
-              fillOpacity={1}
-              fill="url(#colorAmount)"
-              animationDuration={1000}
-              animationEasing="ease-out"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+      {spendingTrend.length === 0 ? (
+        <div className="flex min-h-[320px] flex-1 flex-col items-center justify-center gap-3 px-6 py-10 text-center">
+          <div className="border-border-subtle bg-background-secondary rounded-full border p-3">
+            <TrendingUp className="text-text-muted h-6 w-6" aria-hidden="true" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-text-primary text-sm font-medium">No spending to show</p>
+            <p className="text-text-muted text-xs">
+              {expenses.length === 0
+                ? 'Add your first expense to start tracking your spending trend.'
+                : 'No spending recorded in this date range. Try a wider range.'}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="min-h-[320px] flex-1">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+            <AreaChart data={spendingTrend} margin={{ left: 0, right: 20, top: 8, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#0070f3" stopOpacity={0.2} />
+                  <stop offset="50%" stopColor="#0070f3" stopOpacity={0.1} />
+                  <stop offset="100%" stopColor="#0070f3" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" opacity={0.5} vertical={false} />
+              <XAxis
+                dataKey="date"
+                stroke="#e5e5e5"
+                tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: '#e5e5e5' }}
+                tickLine={{ stroke: '#e5e5e5' }}
+                tickMargin={8}
+                height={28}
+                minTickGap={40}
+                interval="preserveStartEnd"
+                tickFormatter={(value: string) => {
+                  if (granularity === 'monthly') return format(parseISO(`${value}-01`), 'MMM yyyy');
+                  return format(parseISO(value), 'MMM d');
+                }}
+              />
+              <YAxis
+                stroke="#e5e5e5"
+                tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: '#e5e5e5' }}
+                tickLine={{ stroke: '#e5e5e5' }}
+                tickFormatter={(v: number) =>
+                  v >= 1_000_000 ? `${(v / 1_000_000).toFixed(0)}M` : v >= 1_000 ? `${(v / 1_000).toFixed(0)}K` : `${v}`
+                }
+              />
+              <RechartsTooltip
+                content={(props) => <SpendingTooltip {...props} granularity={granularity} />}
+                cursor={{ stroke: '#0070f3', strokeWidth: 1, strokeDasharray: '4 4' }}
+              />
+              <Area
+                type="monotone"
+                dataKey="amount"
+                stroke="#0070f3"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorAmount)"
+                animationDuration={1000}
+                animationEasing="ease-out"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 };
