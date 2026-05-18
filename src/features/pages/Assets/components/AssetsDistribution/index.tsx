@@ -1,32 +1,23 @@
-import Pulse from '@components/Skeleton';
+import { PieChart } from 'lucide-react';
+
+import EmptyState from '@components/EmptyState';
 
 import { formatNumber } from '@utils';
 
 import type { AssetsDistributionProps } from '../../@types';
 
-function DistributionSkeleton() {
-  return (
-    <div className="border-border-subtle bg-background rounded-xl border p-6 shadow-sm">
-      <Pulse className="mb-5 h-5 w-36" />
-      <Pulse className="mb-6 h-3 w-full rounded-full" />
-      <div className="grid grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-3 lg:grid-cols-4">
-        {[...Array(5)].map((_, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <Pulse className="h-2.5 w-2.5 shrink-0 rounded-full" />
-            <div className="flex flex-col gap-1">
-              <Pulse className="h-3 w-20" />
-              <Pulse className="h-3 w-16" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 const AssetsDistribution = ({ chartData, totalValueUsd }: AssetsDistributionProps) => {
   if (chartData.length === 0) {
-    return <DistributionSkeleton />;
+    return (
+      <div className="border-border-subtle bg-background rounded-xl border p-6 shadow-sm">
+        <h3 className="text-text-primary mb-2 text-lg font-semibold">Asset Distribution</h3>
+        <EmptyState
+          icon={PieChart}
+          title="No assets to distribute"
+          description="Add an asset to see how your wealth is split across categories."
+        />
+      </div>
+    );
   }
 
   const sorted = [...chartData].sort((a, b) => b.value - a.value);

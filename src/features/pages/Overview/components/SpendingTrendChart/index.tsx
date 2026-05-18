@@ -18,6 +18,8 @@ import DateRangeSelector, {
   getChartGranularity,
 } from '@features/expenses/components/DateRangeSelector';
 
+import EmptyState from '@components/EmptyState';
+
 import { formatNumber } from '@utils';
 
 import type { SpendingTrendChartProps } from '../../@types';
@@ -119,19 +121,16 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
       </div>
 
       {spendingTrend.length === 0 ? (
-        <div className="flex min-h-[320px] flex-1 flex-col items-center justify-center gap-3 px-6 py-10 text-center">
-          <div className="border-border-subtle bg-background-secondary rounded-full border p-3">
-            <TrendingUp className="text-text-muted h-6 w-6" aria-hidden="true" />
-          </div>
-          <div className="space-y-1">
-            <p className="text-text-primary text-sm font-medium">No spending to show</p>
-            <p className="text-text-muted text-xs">
-              {expenses.length === 0
-                ? 'Add your first expense to start tracking your spending trend.'
-                : 'No spending recorded in this date range. Try a wider range.'}
-            </p>
-          </div>
-        </div>
+        <EmptyState
+          icon={TrendingUp}
+          title="No spending to show"
+          description={
+            expenses.length === 0
+              ? 'Add your first expense to start tracking your spending trend.'
+              : 'No spending recorded in this date range. Try a wider range.'
+          }
+          className="min-h-[320px]"
+        />
       ) : (
         <div className="min-h-[320px] flex-1">
           <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
