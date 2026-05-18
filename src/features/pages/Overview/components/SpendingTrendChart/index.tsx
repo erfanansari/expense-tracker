@@ -20,17 +20,11 @@ import DateRangeSelector, {
 
 import EmptyState from '@components/EmptyState';
 
-import { formatNumber } from '@utils';
+import { formatChartTooltipDate, formatNumber } from '@utils';
 
 import type { SpendingTrendChartProps } from '../../@types';
 
 // ─── Custom recharts tooltip ────────────────────────────────────────────────────
-function formatTooltipLabel(label: string, granularity: 'daily' | 'weekly' | 'monthly'): string {
-  if (granularity === 'monthly') return format(parseISO(`${label}-01`), 'MMMM yyyy');
-  if (granularity === 'weekly') return `Week of ${format(parseISO(label), 'MMM d, yyyy')}`;
-  return format(parseISO(label), 'EEE, MMM d, yyyy');
-}
-
 function SpendingTooltip({
   active,
   payload,
@@ -49,7 +43,7 @@ function SpendingTooltip({
       <p className="text-text-primary text-lg font-bold">{formatNumber(payload[0].value)} Toman</p>
       <p className="text-text-muted mt-1.5 text-sm font-medium">${usdValue.toFixed(2)} USD</p>
       {label != null && (
-        <p className="text-blue mt-2 text-sm font-medium">{formatTooltipLabel(String(label), granularity)}</p>
+        <p className="text-blue mt-2 text-sm font-medium">{formatChartTooltipDate(String(label), granularity)}</p>
       )}
     </div>
   );

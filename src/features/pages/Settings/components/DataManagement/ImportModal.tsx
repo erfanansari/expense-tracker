@@ -158,7 +158,7 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Import Expenses" titleFa="وارد کردن هزینه‌ها">
+    <Modal isOpen={isOpen} onClose={handleClose} title="Import Expenses">
       {step === 'upload' && (
         <div className="space-y-4">
           <p className="text-text-secondary text-sm">

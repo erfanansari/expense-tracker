@@ -1,3 +1,13 @@
+import { format, parseISO } from 'date-fns';
+
+// Format a chart bucket key (yyyy-MM-dd or yyyy-MM) into a tooltip-friendly label
+// based on the chart's aggregation granularity.
+export function formatChartTooltipDate(label: string, granularity: 'daily' | 'weekly' | 'monthly'): string {
+  if (granularity === 'monthly') return format(parseISO(`${label}-01`), 'MMMM yyyy');
+  if (granularity === 'weekly') return `Week of ${format(parseISO(label), 'MMM d, yyyy')}`;
+  return format(parseISO(label), 'EEE, MMM d, yyyy');
+}
+
 // Convert Gregorian to Jalali/Persian (Farsi) date
 export function formatToFarsiDate(dateStr: string): string {
   const date = new Date(dateStr);
