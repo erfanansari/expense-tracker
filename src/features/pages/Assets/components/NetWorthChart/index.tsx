@@ -120,7 +120,7 @@ const NetWorthChart = () => {
           </div>
           <Pulse className="h-8 w-40 self-start rounded-lg sm:self-auto" />
         </div>
-        <Pulse className="h-[300px] w-full rounded-lg" />
+        <Pulse className="h-[280px] w-full rounded-lg" />
       </div>
     );
   }
@@ -129,7 +129,7 @@ const NetWorthChart = () => {
     return (
       <div className="border-border-subtle bg-background rounded-xl border p-5 shadow-sm sm:p-6">
         {cardHeader}
-        <div className="flex h-[300px] items-center justify-center">
+        <div className="flex h-[280px] items-center justify-center">
           <p className="text-danger text-sm">Failed to load net worth history.</p>
         </div>
       </div>
@@ -149,7 +149,7 @@ const NetWorthChart = () => {
 
       {/* Empty state */}
       {isEmpty && (
-        <div className="flex h-[300px] items-center justify-center">
+        <div className="flex h-[280px] items-center justify-center">
           <p className="text-text-muted text-sm">
             Not enough data to display chart. Update an asset value to record a snapshot.
           </p>
@@ -158,9 +158,9 @@ const NetWorthChart = () => {
 
       {/* Chart */}
       {hasData && (
-        <div className="h-[300px]">
+        <div className="h-[280px]">
           <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-            <AreaChart data={data} margin={{ left: 0, right: 20, top: 10, bottom: 0 }}>
+            <AreaChart data={data} margin={{ left: 0, right: 20, top: 8, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorNetWorth" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#10b981" stopOpacity={0.2} />
@@ -175,6 +175,8 @@ const NetWorthChart = () => {
                 tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
                 axisLine={{ stroke: '#e5e5e5' }}
                 tickLine={{ stroke: '#e5e5e5' }}
+                tickMargin={8}
+                height={28}
                 minTickGap={40}
                 interval="preserveStartEnd"
                 tickFormatter={formatXTick}
