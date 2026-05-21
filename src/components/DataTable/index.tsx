@@ -12,9 +12,10 @@ import {
   type RowData,
   useReactTable,
 } from '@tanstack/react-table';
-import { X } from 'lucide-react';
+import { Inbox, X } from 'lucide-react';
 
 import DatePicker from '@components/DatePicker';
+import EmptyState from '@components/EmptyState';
 import Select, { type SelectOption } from '@components/Select';
 
 // ─── Module augmentation for typed column meta & custom filter fns ────────────
@@ -275,8 +276,8 @@ const DataTable = <TData extends RowData>({
             <tbody>
               {table.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} className="px-6 py-12 text-center">
-                    {emptyState ?? <p className="text-text-muted text-sm">No results found</p>}
+                  <td colSpan={columns.length} className="px-6 py-6">
+                    {emptyState ?? <EmptyState icon={Inbox} title="No results" />}
                   </td>
                 </tr>
               ) : (

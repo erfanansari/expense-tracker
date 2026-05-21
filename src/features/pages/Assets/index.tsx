@@ -1,18 +1,14 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-
 import { ASSET_CATEGORY_COLORS, getAssetCategoryLabel } from '@constants/assets';
 import { Plus } from 'lucide-react';
 
 import type { Asset, AssetCategory } from '@types';
 
-import AssetForm from '@features/assets/components/AssetForm';
+import { useGlobalDrawer } from '@features/drawers/GlobalDrawerProvider';
 
 import Button from '@components/Button';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
-import FormDrawer from '@components/FormDrawer';
-import useDrawer from '@components/FormDrawer/useDrawer';
 import Pulse from '@components/Skeleton';
 import { useToast } from '@components/Toast/ToastProvider';
 
@@ -45,16 +41,13 @@ function AssetsSummarySkeleton() {
 }
 
 const AssetsPage = () => {
-  // States
-  const [editingAsset, setEditingAsset] = useState<Asset | undefined>(undefined);
-
   // Queries
   const { data: assets = [], isLoading, error } = useAssets();
   const deleteAsset = useDeleteAsset();
 
   // Customs
   const { showToast } = useToast();
-  const { isOpen: isDrawerOpen, isDirty, openDrawer, closeDrawer, setIsDirty } = useDrawer();
+  const { openAssetDrawer } = useGlobalDrawer();
   const {
     itemToDelete: assetToDelete,
     isModalOpen: isDeleteModalOpen,
@@ -66,25 +59,6 @@ const AssetsPage = () => {
     onDelete: (id) => deleteAsset.mutateAsync(id),
     onError: (err) => showToast(ensureError(err).message, 'error'),
   });
-
-  // Callbacks
-  const handleAssetChange = useCallback(() => {
-    setEditingAsset(undefined);
-    closeDrawer();
-  }, [closeDrawer]);
-
-  const handleEdit = useCallback(
-    (asset: Asset) => {
-      setEditingAsset(asset);
-      openDrawer();
-    },
-    [openDrawer]
-  );
-
-  const handleAddAsset = useCallback(() => {
-    setEditingAsset(undefined);
-    openDrawer();
-  }, [openDrawer]);
 
   // Variables
   const totalValueUsd = assets.reduce((sum, a) => sum + a.totalValueUsd, 0);
@@ -120,10 +94,10 @@ const AssetsPage = () => {
         {/* Page Header */}
         <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
           <div className="min-w-0 flex-1">
-            <h1 className="text-text-primary text-xl font-bold sm:text-2xl md:text-3xl">Assets</h1>
+            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">Assets</h1>
             <p className="text-text-muted mt-1 text-xs sm:text-sm">Track your wealth portfolio</p>
           </div>
-          <Button variant="primary" onClick={handleAddAsset} className="shrink-0">
+          <Button variant="primary" onClick={() => openAssetDrawer()} className="shrink-0">
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Add Asset</span>
           </Button>
@@ -144,7 +118,7 @@ const AssetsPage = () => {
           isLoading={showingSkeleton}
           error={error}
           assetsCount={assets.length}
-          onEdit={handleEdit}
+          onEdit={openAssetDrawer}
           onDelete={openDeleteModal}
           deletingId={deletingId}
         />
@@ -171,21 +145,6 @@ const AssetsPage = () => {
           isDeleting={deletingId === assetToDelete?.id}
         />
       </div>
-
-      {/* Asset Form Drawer */}
-      <FormDrawer
-        isOpen={isDrawerOpen}
-        onClose={closeDrawer}
-        title={editingAsset ? 'Edit Asset' : 'Add New Asset'}
-        isDirty={isDirty}
-      >
-        <AssetForm
-          onAssetAdded={handleAssetChange}
-          editingAsset={editingAsset}
-          onCancelEdit={closeDrawer}
-          setIsDirty={setIsDirty}
-        />
-      </FormDrawer>
     </div>
   );
 };

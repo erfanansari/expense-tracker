@@ -1,18 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Plus } from 'lucide-react';
 
 import { type Expense } from '@types';
 
-import ExpenseForm from '@features/expenses/components/ExpenseForm';
+import { useGlobalDrawer } from '@features/drawers/GlobalDrawerProvider';
 import TransactionDetailsDrawer from '@features/expenses/components/TransactionDetailsDrawer';
 
 import Button from '@components/Button';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
-import FormDrawer from '@components/FormDrawer';
-import useDrawer from '@components/FormDrawer/useDrawer';
 import { useToast } from '@components/Toast/ToastProvider';
 
 import { useDeleteConfirmation } from '@hooks/use-delete-confirmation';
@@ -28,7 +26,6 @@ const TransactionsPage = () => {
   // States
   const [filters, setFilters] = useState<ExpenseFilters>({});
   const [descInput, setDescInput] = useState('');
-  const [editingExpense, setEditingExpense] = useState<Expense | undefined>(undefined);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -38,7 +35,7 @@ const TransactionsPage = () => {
 
   // Customs
   const { showToast } = useToast();
-  const { isOpen: isDrawerOpen, isDirty, openDrawer, closeDrawer, setIsDirty } = useDrawer();
+  const { openExpenseDrawer } = useGlobalDrawer();
   const {
     itemToDelete: expenseToDelete,
     isModalOpen: isDeleteModalOpen,
@@ -73,34 +70,16 @@ const TransactionsPage = () => {
     setSelectedExpense(null);
   };
 
-  const handleExpenseChange = useCallback(() => {
-    setEditingExpense(undefined);
-    closeDrawer();
-  }, [closeDrawer]);
-
-  const handleEdit = useCallback(
-    (expense: Expense) => {
-      setEditingExpense(expense);
-      openDrawer();
-    },
-    [openDrawer]
-  );
-
-  const handleAddExpense = useCallback(() => {
-    setEditingExpense(undefined);
-    openDrawer();
-  }, [openDrawer]);
-
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-[1600px] px-6 py-8">
         {/* Page Header */}
         <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
           <div className="min-w-0 flex-1">
-            <h1 className="text-text-primary text-xl font-bold sm:text-2xl md:text-3xl">Transactions</h1>
+            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">Transactions</h1>
             <p className="text-text-muted mt-1 text-xs sm:text-sm">Manage and track all your expenses</p>
           </div>
-          <Button variant="primary" onClick={handleAddExpense} className="shrink-0">
+          <Button variant="primary" onClick={() => openExpenseDrawer()} className="shrink-0">
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Add Transaction</span>
           </Button>
@@ -116,7 +95,7 @@ const TransactionsPage = () => {
           onDescInputChange={setDescInput}
           onFiltersChange={setFilters}
           onRowClick={handleRowClick}
-          onEdit={handleEdit}
+          onEdit={openExpenseDrawer}
           onDelete={openDeleteModal}
           deletingId={deletingId}
           hasNextPage={hasNextPage ?? false}
@@ -138,21 +117,6 @@ const TransactionsPage = () => {
           isDeleting={deletingId === expenseToDelete?.id}
         />
       </div>
-
-      {/* Expense Form Drawer */}
-      <FormDrawer
-        isOpen={isDrawerOpen}
-        onClose={closeDrawer}
-        title={editingExpense ? 'Edit Expense' : 'Add New Expense'}
-        isDirty={isDirty}
-      >
-        <ExpenseForm
-          onExpenseAdded={handleExpenseChange}
-          editingExpense={editingExpense}
-          onCancelEdit={closeDrawer}
-          setIsDirty={setIsDirty}
-        />
-      </FormDrawer>
     </div>
   );
 };

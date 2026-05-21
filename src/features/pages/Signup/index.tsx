@@ -65,7 +65,7 @@ const Signup = () => {
 
   return (
     <>
-      <h1 className="text-text-primary mb-1.5 text-center text-lg font-bold sm:mb-2 sm:text-xl">Create Account</h1>
+      <h1 className="text-text-primary mb-1.5 text-center text-lg font-semibold sm:mb-2 sm:text-xl">Create Account</h1>
       <p className="text-text-tertiary mb-5 text-center text-xs sm:mb-6 sm:text-sm">
         Start tracking your expenses today
       </p>

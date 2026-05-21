@@ -18,6 +18,7 @@ import DateRangeSelector, {
   getChartGranularity,
 } from '@features/expenses/components/DateRangeSelector';
 
+import ChartTooltip from '@components/ChartTooltip';
 import EmptyState from '@components/EmptyState';
 
 import { formatChartTooltipDate, formatNumber } from '@utils';
@@ -39,13 +40,11 @@ function SpendingTooltip({
   if (!active || !payload?.length) return null;
   const usdValue = payload[0]?.payload?.usdValue || 0;
   return (
-    <div className="border-border-subtle bg-background rounded-lg border p-4 shadow-lg">
-      <p className="text-text-primary text-lg font-bold">{formatNumber(payload[0].value)} Toman</p>
-      <p className="text-text-muted mt-1.5 text-sm font-medium">${usdValue.toFixed(2)} USD</p>
-      {label != null && (
-        <p className="text-blue mt-2 text-sm font-medium">{formatChartTooltipDate(String(label), granularity)}</p>
-      )}
-    </div>
+    <ChartTooltip
+      primary={`${formatNumber(payload[0].value)} Toman`}
+      secondary={`$${usdValue.toFixed(2)} USD`}
+      accent={label != null ? { text: formatChartTooltipDate(String(label), granularity), tone: 'blue' } : undefined}
+    />
   );
 }
 
@@ -104,7 +103,7 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
 
   return (
     <div className="border-border-subtle bg-background relative flex h-full flex-col rounded-xl border p-5 shadow-sm sm:p-6 lg:col-span-2">
-      <div className="mb-5 flex shrink-0 items-center justify-between">
+      <div className="mb-5 flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
             <TrendingUp className="text-blue h-5 w-5" />
@@ -131,18 +130,18 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
             <AreaChart data={spendingTrend} margin={{ left: 0, right: 20, top: 8, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#0070f3" stopOpacity={0.2} />
-                  <stop offset="50%" stopColor="#0070f3" stopOpacity={0.1} />
-                  <stop offset="100%" stopColor="#0070f3" stopOpacity={0} />
+                  <stop offset="0%" stopColor="var(--color-blue)" stopOpacity={0.2} />
+                  <stop offset="50%" stopColor="var(--color-blue)" stopOpacity={0.1} />
+                  <stop offset="100%" stopColor="var(--color-blue)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" opacity={0.5} vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" opacity={0.5} vertical={false} />
               <XAxis
                 dataKey="date"
-                stroke="#e5e5e5"
-                tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
-                axisLine={{ stroke: '#e5e5e5' }}
-                tickLine={{ stroke: '#e5e5e5' }}
+                stroke="var(--color-border-subtle)"
+                tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: 'var(--color-border-subtle)' }}
+                tickLine={{ stroke: 'var(--color-border-subtle)' }}
                 tickMargin={8}
                 height={28}
                 minTickGap={40}
@@ -153,22 +152,22 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
                 }}
               />
               <YAxis
-                stroke="#e5e5e5"
-                tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
-                axisLine={{ stroke: '#e5e5e5' }}
-                tickLine={{ stroke: '#e5e5e5' }}
+                stroke="var(--color-border-subtle)"
+                tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: 'var(--color-border-subtle)' }}
+                tickLine={{ stroke: 'var(--color-border-subtle)' }}
                 tickFormatter={(v: number) =>
                   v >= 1_000_000 ? `${(v / 1_000_000).toFixed(0)}M` : v >= 1_000 ? `${(v / 1_000).toFixed(0)}K` : `${v}`
                 }
               />
               <RechartsTooltip
                 content={(props) => <SpendingTooltip {...props} granularity={granularity} />}
-                cursor={{ stroke: '#0070f3', strokeWidth: 1, strokeDasharray: '4 4' }}
+                cursor={{ stroke: 'var(--color-blue)', strokeWidth: 1, strokeDasharray: '4 4' }}
               />
               <Area
                 type="monotone"
                 dataKey="amount"
-                stroke="#0070f3"
+                stroke="var(--color-blue)"
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorAmount)"

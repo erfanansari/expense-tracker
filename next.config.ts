@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_COMMIT_SHA: getCommitSha(),
   },
+  devIndicators: false,
 };
 
 export default nextConfig;

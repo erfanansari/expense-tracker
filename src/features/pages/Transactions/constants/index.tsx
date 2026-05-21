@@ -57,12 +57,11 @@ export function buildTransactionColumns(
       meta: { widthClass: 'w-[18%]' },
       cell: ({ row }) => {
         const expense = row.original;
-        const farsiDate = formatToFarsiDate(expense.date);
         return (
           <div className="flex flex-col">
             <span className="text-text-primary text-sm">{expense.date}</span>
             <span className="text-text-muted text-xs" dir="rtl">
-              {farsiDate}
+              {formatToFarsiDate(expense.date)}
             </span>
           </div>
         );

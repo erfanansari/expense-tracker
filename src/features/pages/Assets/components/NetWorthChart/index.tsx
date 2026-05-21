@@ -14,7 +14,9 @@ import {
   YAxis,
 } from 'recharts';
 
+import ChartTooltip from '@components/ChartTooltip';
 import EmptyState from '@components/EmptyState';
+import SegmentedSelector from '@components/SegmentedSelector';
 import Pulse from '@components/Skeleton';
 
 import { type NetWorthRange, useNetWorthHistory } from '@hooks/use-net-worth-history';
@@ -36,15 +38,11 @@ function NetWorthTooltip({
   if (!active || !payload?.length) return null;
   const point = payload[0].payload;
   return (
-    <div className="border-border-subtle bg-background rounded-lg border p-4 shadow-lg">
-      <p className="text-text-primary text-lg font-bold">
-        ${point.valueUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-      </p>
-      <p className="text-text-muted mt-1.5 text-sm font-medium">{formatNumber(point.valueToman)} Toman</p>
-      {label != null && (
-        <p className="text-success mt-2 text-sm font-medium">{formatChartTooltipDate(String(label), 'daily')}</p>
-      )}
-    </div>
+    <ChartTooltip
+      primary={`$${point.valueUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+      secondary={`${formatNumber(point.valueToman)} Toman`}
+      accent={label != null ? { text: formatChartTooltipDate(String(label), 'daily'), tone: 'success' } : undefined}
+    />
   );
 }
 
@@ -87,6 +85,22 @@ const NetWorthChart = () => {
   const hasData = !isLoading && !isError && data && data.length >= 2;
   const isEmpty = !isLoading && !isError && (!data || data.length < 2);
 
+  // For long ranges (6M+), emit one tick per month — otherwise Recharts repeats
+  // the same "MMM 'yy" label across adjacent daily points.
+  const xAxisTicks = useMemo(() => {
+    if (isShortRange || !data || data.length === 0) return undefined;
+    const seen = new Set<string>();
+    const ticks: string[] = [];
+    for (const point of data) {
+      const monthKey = point.date.slice(0, 7);
+      if (!seen.has(monthKey)) {
+        seen.add(monthKey);
+        ticks.push(point.date);
+      }
+    }
+    return ticks;
+  }, [data, isShortRange]);
+
   // Card shell — always rendered so range tabs stay accessible
   const cardHeader = (
     <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between">
@@ -96,19 +110,12 @@ const NetWorthChart = () => {
         </div>
         <h2 className="text-text-primary text-lg font-semibold">Net Worth</h2>
       </div>
-      <div className="bg-background-secondary flex gap-1 self-start rounded-lg p-1 sm:self-auto">
-        {RANGES.map((r) => (
-          <button
-            key={r}
-            onClick={() => setRange(r)}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-              range === r ? 'bg-text-primary text-background shadow-sm' : 'text-text-muted hover:text-text-secondary'
-            }`}
-          >
-            {r === 'ALL' ? 'All' : r}
-          </button>
-        ))}
-      </div>
+      <SegmentedSelector<NetWorthRange>
+        value={range}
+        onChange={setRange}
+        options={RANGES.map((r) => ({ value: r, label: r === 'ALL' ? 'All' : r }))}
+        ariaLabel="Net worth range"
+      />
     </div>
   );
 
@@ -167,41 +174,42 @@ const NetWorthChart = () => {
             <AreaChart data={data} margin={{ left: 0, right: 20, top: 8, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorNetWorth" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.2} />
-                  <stop offset="50%" stopColor="#10b981" stopOpacity={0.1} />
-                  <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                  <stop offset="0%" stopColor="var(--color-success)" stopOpacity={0.2} />
+                  <stop offset="50%" stopColor="var(--color-success)" stopOpacity={0.1} />
+                  <stop offset="100%" stopColor="var(--color-success)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" opacity={0.5} vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" opacity={0.5} vertical={false} />
               <XAxis
                 dataKey="date"
-                stroke="#e5e5e5"
-                tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
-                axisLine={{ stroke: '#e5e5e5' }}
-                tickLine={{ stroke: '#e5e5e5' }}
+                stroke="var(--color-border-subtle)"
+                tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: 'var(--color-border-subtle)' }}
+                tickLine={{ stroke: 'var(--color-border-subtle)' }}
                 tickMargin={8}
                 height={28}
                 minTickGap={40}
-                interval="preserveStartEnd"
+                interval={xAxisTicks ? 0 : 'preserveStartEnd'}
+                ticks={xAxisTicks}
                 tickFormatter={formatXTick}
               />
               <YAxis
-                stroke="#e5e5e5"
-                tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
-                axisLine={{ stroke: '#e5e5e5' }}
-                tickLine={{ stroke: '#e5e5e5' }}
+                stroke="var(--color-border-subtle)"
+                tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: 'var(--color-border-subtle)' }}
+                tickLine={{ stroke: 'var(--color-border-subtle)' }}
                 tickFormatter={(v: number) =>
                   v >= 1_000_000 ? `${(v / 1_000_000).toFixed(0)}M` : v >= 1_000 ? `${(v / 1_000).toFixed(0)}K` : `${v}`
                 }
               />
               <RechartsTooltip
                 content={<NetWorthTooltip />}
-                cursor={{ stroke: '#10b981', strokeWidth: 1, strokeDasharray: '4 4' }}
+                cursor={{ stroke: 'var(--color-success)', strokeWidth: 1, strokeDasharray: '4 4' }}
               />
               <Area
                 type="monotone"
                 dataKey="valueUsd"
-                stroke="#10b981"
+                stroke="var(--color-success)"
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorNetWorth)"

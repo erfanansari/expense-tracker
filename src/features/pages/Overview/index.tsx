@@ -144,7 +144,7 @@ const Dashboard = () => {
         {/* Header */}
         <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <h1 className="text-text-primary text-xl font-bold sm:text-2xl md:text-3xl">Overview</h1>
+            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">Overview</h1>
             <p className="text-text-muted mt-1 text-xs sm:text-sm">
               Welcome back! Here&apos;s your financial overview.
             </p>

@@ -51,7 +51,7 @@ function ResetPasswordContent() {
   if (!tokenValid) {
     return (
       <>
-        <h1 className="mb-4 text-center text-2xl font-bold text-[var(--foreground)]">Invalid reset link</h1>
+        <h1 className="text-text-primary mb-4 text-center text-2xl font-semibold">Invalid reset link</h1>
         <p className="mb-6 text-center text-[var(--foreground-secondary)]">
           This password reset link is invalid or has expired. Please request a new one.
         </p>
@@ -64,7 +64,7 @@ function ResetPasswordContent() {
 
   return (
     <>
-      <h1 className="mb-2 text-center text-2xl font-bold text-[var(--foreground)]">Reset your password</h1>
+      <h1 className="text-text-primary mb-2 text-center text-2xl font-semibold">Reset your password</h1>
       <p className="mb-6 text-center text-[var(--foreground-secondary)]">Create a new password below</p>
 
       {error && (
