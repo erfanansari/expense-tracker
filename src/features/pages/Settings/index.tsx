@@ -1,15 +1,16 @@
 'use client';
 
-import { Bell, Globe, HelpCircle, Lock, Palette } from 'lucide-react';
-
-import Button from '@components/Button';
-import Select from '@components/Select';
 import Pulse from '@components/Skeleton';
 
 import { useAuth } from '@hooks/use-auth';
 
+import AppearanceSection from './components/AppearanceSection';
 import DataManagement from './components/DataManagement';
+import HelpSection from './components/HelpSection';
+import LanguageSection from './components/LanguageSection';
+import NotificationsSection from './components/NotificationsSection';
 import ProfileCard from './components/ProfileCard';
+import SecuritySection from './components/SecuritySection';
 import TagManagement from './components/TagManagement';
 
 function SettingsSkeleton() {
@@ -42,16 +43,14 @@ function SettingsSkeleton() {
 }
 
 const SettingsPage = () => {
-  // Customs
   const { loading } = useAuth();
 
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-[1600px] px-6 py-8">
-        {/* Page Header */}
         <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
           <div className="min-w-0 flex-1">
-            <h1 className="text-text-primary text-xl font-bold sm:text-2xl md:text-3xl">Settings</h1>
+            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">Settings</h1>
             <p className="text-text-muted mt-1 text-xs sm:text-sm">Manage your account and preferences</p>
           </div>
         </div>
@@ -60,191 +59,18 @@ const SettingsPage = () => {
           <SettingsSkeleton />
         ) : (
           <div className="grid gap-6">
-            {/* Profile */}
             <ProfileCard />
-
-            {/* Tags */}
             <TagManagement />
 
-            {/* Preferences */}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {/* Language */}
-              <div className="border-border-subtle bg-background rounded-xl border opacity-60 shadow-sm">
-                <div className="border-border-subtle border-b p-6">
-                  <div className="flex items-center gap-3">
-                    <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-                      <Globe className="text-text-secondary h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h2 className="text-text-primary text-lg font-semibold">Language</h2>
-                        <span className="bg-background-elevated text-text-muted rounded px-2 py-0.5 text-xs font-medium">
-                          Coming Soon
-                        </span>
-                      </div>
-                      <p className="text-text-muted text-sm">Select your preferred language</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <Select
-                    value="en"
-                    onChange={() => {}}
-                    options={[
-                      { value: 'en', label: 'English' },
-                      { value: 'fa', label: 'فارسی (Persian)' },
-                    ]}
-                    disabled
-                  />
-                </div>
-              </div>
-
-              {/* Appearance */}
-              <div className="border-border-subtle bg-background rounded-xl border opacity-60 shadow-sm">
-                <div className="border-border-subtle border-b p-6">
-                  <div className="flex items-center gap-3">
-                    <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-                      <Palette className="text-text-secondary h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h2 className="text-text-primary text-lg font-semibold">Appearance</h2>
-                        <span className="bg-background-elevated text-text-muted rounded px-2 py-0.5 text-xs font-medium">
-                          Coming Soon
-                        </span>
-                      </div>
-                      <p className="text-text-muted text-sm">Customize the look and feel</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <Select
-                    value="light"
-                    onChange={() => {}}
-                    options={[
-                      { value: 'light', label: 'Light Mode' },
-                      { value: 'dark', label: 'Dark Mode' },
-                    ]}
-                    disabled
-                  />
-                </div>
-              </div>
+              <LanguageSection />
+              <AppearanceSection />
             </div>
 
-            {/* Notifications */}
-            <div className="border-border-subtle bg-background rounded-xl border opacity-60 shadow-sm">
-              <div className="border-border-subtle border-b p-6">
-                <div className="flex items-center gap-3">
-                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-                    <Bell className="text-text-secondary h-5 w-5" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-text-primary text-lg font-semibold">Notifications</h2>
-                      <span className="bg-background-elevated text-text-muted rounded px-2 py-0.5 text-xs font-medium">
-                        Coming Soon
-                      </span>
-                    </div>
-                    <p className="text-text-muted text-sm">Manage your notification preferences</p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="max-w-2xl space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-text-muted text-sm font-medium">Email Notifications</p>
-                      <p className="text-text-muted mt-0.5 text-xs">Receive email updates about your expenses</p>
-                    </div>
-                    <button
-                      disabled
-                      className="bg-background-secondary relative inline-flex h-6 w-11 cursor-not-allowed items-center rounded-full"
-                    >
-                      <span className="bg-background-elevated inline-block h-4 w-4 translate-x-1 transform rounded-full" />
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-text-muted text-sm font-medium">Weekly Reports</p>
-                      <p className="text-text-muted mt-0.5 text-xs">Get weekly expense summaries</p>
-                    </div>
-                    <button
-                      disabled
-                      className="bg-background-secondary relative inline-flex h-6 w-11 cursor-not-allowed items-center rounded-full"
-                    >
-                      <span className="bg-background-elevated inline-block h-4 w-4 translate-x-1 transform rounded-full" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Security */}
-            <div className="border-border-subtle bg-background rounded-xl border opacity-60 shadow-sm">
-              <div className="border-border-subtle border-b p-6">
-                <div className="flex items-center gap-3">
-                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-                    <Lock className="text-text-secondary h-5 w-5" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-text-primary text-lg font-semibold">Security</h2>
-                      <span className="bg-background-elevated text-text-muted rounded px-2 py-0.5 text-xs font-medium">
-                        Coming Soon
-                      </span>
-                    </div>
-                    <p className="text-text-muted text-sm">Manage your password and security settings</p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="max-w-2xl">
-                  <Button variant="outline" disabled className="cursor-not-allowed opacity-50">
-                    Change Password
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Data Management */}
+            <NotificationsSection />
+            <SecuritySection />
             <DataManagement />
-
-            {/* Help & Support */}
-            <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
-              <div className="border-border-subtle border-b p-6">
-                <div className="flex items-center gap-3">
-                  <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-                    <HelpCircle className="text-text-secondary h-5 w-5" />
-                  </div>
-                  <div>
-                    <h2 className="text-text-primary text-lg font-semibold">Help & Support</h2>
-                    <p className="text-text-muted text-sm">Get help or send feedback</p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="space-y-4">
-                  <div className="flex flex-col gap-3 sm:flex-row">
-                    <a
-                      href="https://github.com/erfanansari/kharji#readme"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="border-button-outline-border bg-background hover:bg-button-outline-bg-hover text-button-outline-text hover:text-button-outline-text-hover inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-all"
-                    >
-                      Documentation
-                    </a>
-                    <a
-                      href="https://github.com/erfanansari/kharji/issues"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="border-button-outline-border bg-background hover:bg-button-outline-bg-hover text-button-outline-text hover:text-button-outline-text-hover inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-all"
-                    >
-                      Contact Support
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <HelpSection />
           </div>
         )}
       </div>

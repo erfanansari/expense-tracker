@@ -17,6 +17,8 @@ import {
   YAxis,
 } from 'recharts';
 
+import ChartTooltip from '@components/ChartTooltip';
+
 import { formatChartTooltipDate, formatNumber, getCategoryLabel } from '@utils';
 
 import { type Expense } from '@/@types/expense';
@@ -44,20 +46,19 @@ const CategoryTooltip = ({
   payload,
 }: {
   active?: boolean;
-  payload?: ReadonlyArray<{ value: number; payload: { name?: string; usdValue?: number } }>;
+  payload?: ReadonlyArray<{ value: number; payload: { name?: string; nameFa?: string; usdValue?: number } }>;
 }) => {
-  if (active && payload && payload.length) {
-    const data = payload[0];
-    const usdValue = data.payload.usdValue || 0;
-    return (
-      <div className="border-border-subtle bg-background rounded-lg border p-4 shadow-lg">
-        <p className="text-text-primary text-lg font-bold">{formatNumber(data.value)} Toman</p>
-        <p className="text-text-muted mt-1.5 text-sm font-medium">${usdValue.toFixed(2)} USD</p>
-        {data.payload.name && <p className="text-blue mt-2 text-sm font-medium">{data.payload.name}</p>}
-      </div>
-    );
-  }
-  return null;
+  if (!active || !payload?.length) return null;
+  const data = payload[0];
+  const usdValue = data.payload.usdValue || 0;
+  const accentText = data.payload.nameFa ?? data.payload.name;
+  return (
+    <ChartTooltip
+      primary={`${formatNumber(data.value)} Toman`}
+      secondary={`$${usdValue.toFixed(2)} USD`}
+      accent={accentText ? { text: accentText, tone: 'blue' } : undefined}
+    />
+  );
 };
 
 // Tooltip for the time-series area chart (date-based)
@@ -75,13 +76,11 @@ const AreaTooltip = ({
   if (!active || !payload?.length) return null;
   const usdValue = payload[0].payload.usdValue || 0;
   return (
-    <div className="border-border-subtle bg-background rounded-lg border p-4 shadow-lg">
-      <p className="text-text-primary text-lg font-bold">{formatNumber(payload[0].value)} Toman</p>
-      <p className="text-text-muted mt-1.5 text-sm font-medium">${usdValue.toFixed(2)} USD</p>
-      {label != null && (
-        <p className="text-blue mt-2 text-sm font-medium">{formatChartTooltipDate(String(label), granularity)}</p>
-      )}
-    </div>
+    <ChartTooltip
+      primary={`${formatNumber(payload[0].value)} Toman`}
+      secondary={`$${usdValue.toFixed(2)} USD`}
+      accent={label != null ? { text: formatChartTooltipDate(String(label), granularity), tone: 'blue' } : undefined}
+    />
   );
 };
 
@@ -98,13 +97,14 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
         acc.push({
           category: exp.category,
           name: labels.en,
+          nameFa: labels.fa,
           value: exp.price_toman,
           usdValue: exp.price_usd,
         });
       }
       return acc;
     },
-    [] as Array<{ category: string; name: string; value: number; usdValue: number }>
+    [] as Array<{ category: string; name: string; nameFa: string; value: number; usdValue: number }>
   );
 
   categoryTotals.sort((a, b) => b.value - a.value);
@@ -163,7 +163,12 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
             <PieChartIcon className="text-blue h-5 w-5" />
           </div>
-          <h3 className="text-text-primary text-lg font-semibold">By Category</h3>
+          <div>
+            <h3 className="text-text-primary text-lg font-semibold">By Category</h3>
+            <p className="text-text-muted text-sm" dir="rtl">
+              بر اساس دسته‌بندی
+            </p>
+          </div>
         </div>
 
         <div className="h-[280px]">
@@ -177,7 +182,7 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
                 outerRadius={110}
                 paddingAngle={4}
                 dataKey="value"
-                stroke="#ffffff"
+                stroke="var(--color-background)"
                 strokeWidth={2}
                 animationDuration={800}
                 animationEasing="ease-out"
@@ -215,7 +220,12 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
             <BarChart3 className="text-success h-5 w-5" />
           </div>
-          <h3 className="text-text-primary text-lg font-semibold">Category Comparison</h3>
+          <div>
+            <h3 className="text-text-primary text-lg font-semibold">Category Comparison</h3>
+            <p className="text-text-muted text-sm" dir="rtl">
+              مقایسه دسته‌بندی
+            </p>
+          </div>
         </div>
 
         <div className="min-h-[320px] flex-1">
@@ -224,21 +234,21 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
               <XAxis
                 type="number"
                 tickFormatter={(value: number) => `${Math.round(value / 1_000_000)}M`}
-                stroke="#e5e5e5"
-                tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
-                axisLine={{ stroke: '#e5e5e5' }}
-                tickLine={{ stroke: '#e5e5e5' }}
+                stroke="var(--color-border-subtle)"
+                tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: 'var(--color-border-subtle)' }}
+                tickLine={{ stroke: 'var(--color-border-subtle)' }}
               />
               <YAxis
                 type="category"
-                dataKey="name"
-                width={100}
-                stroke="#e5e5e5"
-                tick={{ fill: '#525252', fontSize: 12, fontWeight: 500 }}
-                axisLine={{ stroke: '#e5e5e5' }}
-                tickLine={{ stroke: '#e5e5e5' }}
+                dataKey="nameFa"
+                width={80}
+                stroke="var(--color-border-subtle)"
+                tick={{ fill: 'var(--color-text-secondary)', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: 'var(--color-border-subtle)' }}
+                tickLine={{ stroke: 'var(--color-border-subtle)' }}
               />
-              <Tooltip content={<CategoryTooltip />} cursor={{ fill: '#fafafa' }} />
+              <Tooltip content={<CategoryTooltip />} cursor={{ fill: 'var(--color-background-secondary)' }} />
               <Bar dataKey="value" radius={[0, 8, 8, 0]} animationDuration={800}>
                 {categoryTotals.map((_, index) => (
                   <Cell key={`bar-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -255,11 +265,18 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
             <TrendingUp className="text-blue h-5 w-5" />
           </div>
-          <h3 className="text-text-primary text-lg font-semibold">
-            {granularity === 'daily' && 'Daily Spending Trend'}
-            {granularity === 'weekly' && 'Weekly Spending Trend'}
-            {granularity === 'monthly' && 'Monthly Spending Trend'}
-          </h3>
+          <div>
+            <h3 className="text-text-primary text-lg font-semibold">
+              {granularity === 'daily' && 'Daily Spending Trend'}
+              {granularity === 'weekly' && 'Weekly Spending Trend'}
+              {granularity === 'monthly' && 'Monthly Spending Trend'}
+            </h3>
+            <p className="text-text-muted text-sm" dir="rtl">
+              {granularity === 'daily' && 'روند هزینه روزانه'}
+              {granularity === 'weekly' && 'روند هزینه هفتگی'}
+              {granularity === 'monthly' && 'روند هزینه ماهانه'}
+            </p>
+          </div>
         </div>
 
         <div className="h-[280px]">
@@ -267,18 +284,18 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
             <AreaChart data={timeSeriesTotals} margin={{ left: 0, right: 20, top: 10, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#0070f3" stopOpacity={0.2} />
-                  <stop offset="50%" stopColor="#0070f3" stopOpacity={0.1} />
-                  <stop offset="100%" stopColor="#0070f3" stopOpacity={0} />
+                  <stop offset="0%" stopColor="var(--color-blue)" stopOpacity={0.2} />
+                  <stop offset="50%" stopColor="var(--color-blue)" stopOpacity={0.1} />
+                  <stop offset="100%" stopColor="var(--color-blue)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" opacity={0.5} vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" opacity={0.5} vertical={false} />
               <XAxis
                 dataKey="date"
-                stroke="#e5e5e5"
-                tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
-                axisLine={{ stroke: '#e5e5e5' }}
-                tickLine={{ stroke: '#e5e5e5' }}
+                stroke="var(--color-border-subtle)"
+                tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: 'var(--color-border-subtle)' }}
+                tickLine={{ stroke: 'var(--color-border-subtle)' }}
                 minTickGap={40}
                 interval="preserveStartEnd"
                 tickFormatter={(value: string) => {
@@ -287,20 +304,20 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
                 }}
               />
               <YAxis
-                stroke="#e5e5e5"
-                tick={{ fill: '#a3a3a3', fontSize: 12, fontWeight: 500 }}
-                axisLine={{ stroke: '#e5e5e5' }}
-                tickLine={{ stroke: '#e5e5e5' }}
+                stroke="var(--color-border-subtle)"
+                tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: 'var(--color-border-subtle)' }}
+                tickLine={{ stroke: 'var(--color-border-subtle)' }}
                 tickFormatter={(value: number) => `${Math.round(value / 1_000_000)}M`}
               />
               <Tooltip
                 content={(props) => <AreaTooltip {...props} granularity={granularity} />}
-                cursor={{ stroke: '#0070f3', strokeWidth: 1, strokeDasharray: '4 4' }}
+                cursor={{ stroke: 'var(--color-blue)', strokeWidth: 1, strokeDasharray: '4 4' }}
               />
               <Area
                 type="monotone"
                 dataKey="amount"
-                stroke="#0070f3"
+                stroke="var(--color-blue)"
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorAmount)"

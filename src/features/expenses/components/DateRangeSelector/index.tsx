@@ -9,26 +9,18 @@ interface DateRangeSelectorProps {
   onChange: (range: DateRange) => void;
 }
 
-const DateRangeSelector = ({ value, onChange }: DateRangeSelectorProps) => {
-  const options: { value: DateRange; label: string; labelFa: string }[] = [
-    { value: '7D', label: '7 Days', labelFa: '۷ روز' },
-    { value: '30D', label: '30 Days', labelFa: '۳۰ روز' },
-    { value: 'THIS_MONTH', label: 'This Month', labelFa: 'این ماه' },
-    { value: 'LAST_MONTH', label: 'Last Month', labelFa: 'ماه گذشته' },
-    { value: 'YTD', label: 'Year to Date', labelFa: 'از ابتدای سال' },
-    { value: 'ALL_TIME', label: 'All Time', labelFa: 'همه' },
-  ];
+const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
+  { value: '7D', label: '7 Days' },
+  { value: '30D', label: '30 Days' },
+  { value: 'THIS_MONTH', label: 'This Month' },
+  { value: 'LAST_MONTH', label: 'Last Month' },
+  { value: 'YTD', label: 'Year to Date' },
+  { value: 'ALL_TIME', label: 'All Time' },
+];
 
-  return (
-    <div className="flex items-center gap-2">
-      <Select
-        value={value}
-        onChange={(val) => onChange(val as DateRange)}
-        options={options.map((o) => ({ value: o.value, label: o.label }))}
-      />
-    </div>
-  );
-};
+const DateRangeSelector = ({ value, onChange }: DateRangeSelectorProps) => (
+  <Select value={value} onChange={(val) => onChange(val as DateRange)} options={DATE_RANGE_OPTIONS} />
+);
 
 export function getDateRangeFilter(range: DateRange): { start: Date; end: Date } | null {
   const today = new Date();

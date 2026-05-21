@@ -1,18 +1,14 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-
 import { getIncomeTypeLabel, getMonthLabel } from '@constants/income';
 import { Plus } from 'lucide-react';
 
 import type { Income } from '@types';
 
-import IncomeForm from '@features/income/components/IncomeForm';
+import { useGlobalDrawer } from '@features/drawers/GlobalDrawerProvider';
 
 import Button from '@components/Button';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
-import FormDrawer from '@components/FormDrawer';
-import useDrawer from '@components/FormDrawer/useDrawer';
 import Pulse from '@components/Skeleton';
 import { useToast } from '@components/Toast/ToastProvider';
 
@@ -40,16 +36,13 @@ function IncomeSummarySkeleton() {
 }
 
 const IncomePage = () => {
-  // States
-  const [editingIncome, setEditingIncome] = useState<Income | undefined>(undefined);
-
   // Queries
   const { data: incomes = [], isLoading, error } = useIncomes();
   const deleteIncome = useDeleteIncome();
 
   // Customs
   const { showToast } = useToast();
-  const { isOpen: isDrawerOpen, isDirty, openDrawer, closeDrawer, setIsDirty } = useDrawer();
+  const { openIncomeDrawer } = useGlobalDrawer();
   const {
     itemToDelete: incomeToDelete,
     isModalOpen: isDeleteModalOpen,
@@ -61,25 +54,6 @@ const IncomePage = () => {
     onDelete: (id) => deleteIncome.mutateAsync(id),
     onError: (err) => showToast(ensureError(err).message, 'error'),
   });
-
-  // Callbacks
-  const handleIncomeChange = useCallback(() => {
-    setEditingIncome(undefined);
-    closeDrawer();
-  }, [closeDrawer]);
-
-  const handleEdit = useCallback(
-    (income: Income) => {
-      setEditingIncome(income);
-      openDrawer();
-    },
-    [openDrawer]
-  );
-
-  const handleAddIncome = useCallback(() => {
-    setEditingIncome(undefined);
-    openDrawer();
-  }, [openDrawer]);
 
   // Variables
   const incomesByYear = incomes.reduce(
@@ -103,10 +77,10 @@ const IncomePage = () => {
         {/* Page Header */}
         <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
           <div className="min-w-0 flex-1">
-            <h1 className="text-text-primary text-xl font-bold sm:text-2xl md:text-3xl">Income</h1>
+            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">Income</h1>
             <p className="text-text-muted mt-1 text-xs sm:text-sm">Track your monthly earnings</p>
           </div>
-          <Button variant="primary" onClick={handleAddIncome} className="shrink-0">
+          <Button variant="primary" onClick={() => openIncomeDrawer()} className="shrink-0">
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Add Income</span>
           </Button>
@@ -119,7 +93,7 @@ const IncomePage = () => {
           sortedYears={sortedYears}
           isLoading={isLoading && incomes.length === 0}
           error={error}
-          onEdit={handleEdit}
+          onEdit={openIncomeDrawer}
           onDelete={openDeleteModal}
           deletingId={deletingId}
         />
@@ -139,21 +113,6 @@ const IncomePage = () => {
           isDeleting={deletingId === incomeToDelete?.id}
         />
       </div>
-
-      {/* Income Form Drawer */}
-      <FormDrawer
-        isOpen={isDrawerOpen}
-        onClose={closeDrawer}
-        title={editingIncome ? 'Edit Income' : 'Add New Income'}
-        isDirty={isDirty}
-      >
-        <IncomeForm
-          onIncomeAdded={handleIncomeChange}
-          editingIncome={editingIncome}
-          onCancelEdit={closeDrawer}
-          setIsDirty={setIsDirty}
-        />
-      </FormDrawer>
     </div>
   );
 };
