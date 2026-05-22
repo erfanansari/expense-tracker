@@ -4,7 +4,17 @@
  */
 import { ApiError } from '@core/errors';
 
+import { triggerUnauthorized } from './auth-handler';
+
 export { ApiError };
+
+/**
+ * 401s from auth endpoints (e.g. wrong login password) are surfaced to the form
+ * and must not trigger the global signed-out toast/redirect.
+ */
+function isAuthEndpoint(url: string): boolean {
+  return url.startsWith('/api/auth/');
+}
 
 /**
  * Fetch wrapper for GET requests that returns typed JSON.
@@ -14,6 +24,7 @@ export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T
   const response = await fetch(url, options);
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
+    if (response.status === 401 && !isAuthEndpoint(url)) triggerUnauthorized();
     throw new ApiError(body.error || `Request failed`, response.status);
   }
   return response.json();
@@ -32,6 +43,7 @@ export async function apiMutate<T>(url: string, method: string, body?: unknown):
   const response = await fetch(url, options);
   const json = await response.json().catch(() => ({}));
   if (!response.ok) {
+    if (response.status === 401 && !isAuthEndpoint(url)) triggerUnauthorized();
     throw new ApiError(json.error || `Request failed`, response.status);
   }
   return json as T;
