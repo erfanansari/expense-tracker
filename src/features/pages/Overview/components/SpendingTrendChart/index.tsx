@@ -33,15 +33,20 @@ function SpendingTooltip({
   granularity,
 }: {
   active?: boolean;
-  payload?: ReadonlyArray<{ value: number; payload: { usdValue?: number } }>;
+  payload?: ReadonlyArray<{
+    value?: number | string | ReadonlyArray<number | string>;
+    payload?: { usdValue?: number };
+  }>;
   label?: string | number;
   granularity: 'daily' | 'weekly' | 'monthly';
 }) {
   if (!active || !payload?.length) return null;
   const usdValue = payload[0]?.payload?.usdValue || 0;
+  const rawValue = payload[0].value;
+  const numericValue = typeof rawValue === 'number' ? rawValue : Number(rawValue) || 0;
   return (
     <ChartTooltip
-      primary={`${formatNumber(payload[0].value)} Toman`}
+      primary={`${formatNumber(numericValue)} Toman`}
       secondary={`$${usdValue.toFixed(2)} USD`}
       accent={label != null ? { text: formatChartTooltipDate(String(label), granularity), tone: 'blue' } : undefined}
     />

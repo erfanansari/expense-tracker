@@ -23,6 +23,11 @@ const eslintConfig = defineConfig([
 
   {
     files: ['**/*.{js,jsx,ts,tsx,mjs}'],
+    settings: {
+      react: {
+        version: '19.2.6',
+      },
+    },
     rules: {
       // Prettier integration (rely on editor/pre-commit hooks)
       // TypeScript rules
