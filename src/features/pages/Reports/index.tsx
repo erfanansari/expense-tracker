@@ -95,13 +95,16 @@ const ReportsPage = () => {
     <div className="min-h-screen">
       <div className="mx-auto max-w-[1600px] px-6 py-8">
         {/* Page Header */}
-        <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
+        <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
+          <div className="min-w-0 flex-1">
             <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">Reports</h1>
             <p className="text-text-muted mt-1 text-xs sm:text-sm">Analyze your spending patterns</p>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <DateRangeSelector value={dateRange} onChange={setDateRange} />
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            {/* Date range — inline on desktop, dropped below on mobile */}
+            <div className="hidden w-[150px] sm:block">
+              <DateRangeSelector value={dateRange} onChange={setDateRange} />
+            </div>
             <div className="relative">
               <Button
                 variant="outline"
@@ -133,6 +136,11 @@ const ReportsPage = () => {
               <span className="hidden sm:inline">Export</span>
             </Button>
           </div>
+        </div>
+
+        {/* Mobile-only date range row */}
+        <div className="mb-6 sm:hidden">
+          <DateRangeSelector value={dateRange} onChange={setDateRange} />
         </div>
 
         {isLoading ? (
