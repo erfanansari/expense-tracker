@@ -6,6 +6,8 @@ import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
+import { useLockBodyScroll } from '@hooks/use-lock-body-scroll';
+
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -39,17 +41,14 @@ const Modal = ({ isOpen, onClose, title, titleFa, children, className, showClose
     [onClose]
   );
 
+  // Lock page scroll while open (no layout shift)
+  useLockBodyScroll(isOpen);
+
   // Effects
   useEffect(() => {
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'unset';
-    };
+    if (!isOpen) return;
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, handleKeyDown]);
 
   useEffect(() => {
