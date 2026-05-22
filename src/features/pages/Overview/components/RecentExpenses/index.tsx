@@ -57,13 +57,13 @@ const overviewColumns: ColumnDef<Expense, unknown>[] = [
   },
 ];
 
-interface RecentTransactionsProps {
+interface RecentExpensesProps {
   expenses: Expense[];
 }
 
-const RecentTransactions = ({ expenses }: RecentTransactionsProps) => {
+const RecentExpenses = ({ expenses }: RecentExpensesProps) => {
   // Memos
-  const recentTransactions = useMemo(() => {
+  const recentExpenses = useMemo(() => {
     return [...expenses]
       .sort((a, b) => {
         if (a.date !== b.date) return new Date(b.date).getTime() - new Date(a.date).getTime();
@@ -74,28 +74,24 @@ const RecentTransactions = ({ expenses }: RecentTransactionsProps) => {
 
   return (
     <DataTable
-      data={recentTransactions}
+      data={recentExpenses}
       columns={overviewColumns}
       minimal={true}
       minWidth="min-w-[480px]"
       header={
         <div className="flex items-center justify-between px-6 py-5">
-          <h2 className="text-text-primary text-lg font-semibold">Recent Transactions</h2>
-          <Link href="/transactions" className="text-blue flex items-center gap-1 text-sm font-medium hover:underline">
+          <h2 className="text-text-primary text-lg font-semibold">Recent Expenses</h2>
+          <Link href="/expenses" className="text-blue flex items-center gap-1 text-sm font-medium hover:underline">
             View all
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       }
       emptyState={
-        <EmptyState
-          icon={Receipt}
-          title="No transactions yet"
-          description="Your most recent expenses will appear here."
-        />
+        <EmptyState icon={Receipt} title="No expenses yet" description="Your most recent expenses will appear here." />
       }
     />
   );
 };
 
-export default RecentTransactions;
+export default RecentExpenses;

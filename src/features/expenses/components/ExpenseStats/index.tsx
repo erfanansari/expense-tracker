@@ -54,7 +54,7 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
         </div>
       </div>
 
-      {/* Number of Transactions */}
+      {/* Number of Expenses */}
       <div className="border-border-subtle bg-background relative rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
         <div className="mb-4 flex items-center justify-between">
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
@@ -63,9 +63,9 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
         </div>
 
         <div>
-          <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Transactions</p>
+          <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Expenses</p>
           <p className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl">{expenses.length}</p>
-          <p className="text-text-secondary mt-1.5 text-sm font-medium">Transactions</p>
+          <p className="text-text-secondary mt-1.5 text-sm font-medium">Expenses</p>
         </div>
       </div>
 

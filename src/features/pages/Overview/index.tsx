@@ -14,7 +14,7 @@ import { useSummary } from '@hooks/use-summary';
 
 import ExchangeRateCard from './components/ExchangeRateCard';
 import OverviewStats from './components/OverviewStats';
-import RecentTransactions from './components/RecentTransactions';
+import RecentExpenses from './components/RecentExpenses';
 import SpendingTrendChart from './components/SpendingTrendChart';
 
 const SKELETON_BAR_HEIGHTS = [
@@ -97,7 +97,7 @@ function OverviewSkeleton() {
           </div>
         </div>
 
-        {/* Recent transactions skeleton */}
+        {/* Recent expenses skeleton */}
         <div className="border-border-subtle bg-background overflow-hidden rounded-xl border shadow-sm">
           <div className="flex items-center justify-between px-6 py-5">
             <Pulse className="h-5 w-40" />
@@ -149,9 +149,9 @@ const Dashboard = () => {
               Welcome back! Here&apos;s your financial overview.
             </p>
           </div>
-          <Link href="/transactions" className={getButtonClasses('primary', 'shrink-0')}>
+          <Link href="/expenses" className={getButtonClasses('primary', 'shrink-0')}>
             <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Add Transaction</span>
+            <span className="hidden sm:inline">Add Expense</span>
           </Link>
         </div>
 
@@ -168,7 +168,7 @@ const Dashboard = () => {
             {/* Charts row */}
             <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-3">
               <SpendingTrendChart expenses={expenses} />
-              <RecentTransactions expenses={expenses} />
+              <RecentExpenses expenses={expenses} />
             </div>
           </>
         )}

@@ -8,6 +8,8 @@ import type { DatePicker as ReactDatePickerType } from 'react-datepicker';
 import type { MultiValue } from 'react-select';
 import Select2 from 'react-select';
 
+import { ApiError } from '@core/errors';
+
 import Button from '@components/Button';
 import DataTable from '@components/DataTable';
 import DatePicker from '@components/DatePicker';
@@ -18,8 +20,8 @@ import { useTags } from '@hooks/use-tags';
 
 import type { Tag } from '@/@types/expense';
 
-import type { TransactionsTableProps } from '../../@types';
-import { buildTransactionColumns } from '../../constants';
+import type { ExpensesTableProps } from '../../@types';
+import { buildExpenseColumns } from '../../constants';
 
 // ─── TagFilterSelect ──────────────────────────────────────────────────────────
 
@@ -118,7 +120,7 @@ function formatChipDate(iso: string) {
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
-function TransactionsSkeleton() {
+function ExpensesSkeleton() {
   return (
     <div className="border-border-subtle bg-background overflow-hidden rounded-xl border shadow-sm">
       <div className="bg-background-secondary px-4 py-3.5 sm:px-6">
@@ -162,7 +164,7 @@ function TransactionsSkeleton() {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-const TransactionsTable = ({
+const ExpensesTable = ({
   expenses,
   isLoading,
   error,
@@ -177,7 +179,7 @@ const TransactionsTable = ({
   hasNextPage,
   isFetchingNextPage,
   onLoadMore,
-}: TransactionsTableProps) => {
+}: ExpensesTableProps) => {
   // References
   const toPickerRef = useRef<ReactDatePickerType>(null);
 
@@ -205,16 +207,17 @@ const TransactionsTable = ({
   );
 
   // Memos
-  const transactionColumns = useMemo(
-    () => buildTransactionColumns(onEdit, onDelete, deletingId),
+  const expenseColumns = useMemo(
+    () => buildExpenseColumns(onEdit, onDelete, deletingId),
     [onEdit, onDelete, deletingId]
   );
 
   if (isLoading && expenses.length === 0) {
-    return <TransactionsSkeleton />;
+    return <ExpensesSkeleton />;
   }
 
   if (error && expenses.length === 0) {
+    if (error instanceof ApiError && error.status === 401) return null;
     return (
       <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
         <div className="border-danger bg-danger-light mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
@@ -233,7 +236,7 @@ const TransactionsTable = ({
   return (
     <DataTable
       data={expenses}
-      columns={transactionColumns}
+      columns={expenseColumns}
       onRowClick={onRowClick}
       getRowId={(row) => String(row.id)}
       minimal={true}
@@ -394,15 +397,15 @@ const TransactionsTable = ({
           {isLoading && <Loader2 className="text-text-muted h-6 w-6 animate-spin" />}
           {!isLoading && hasActiveFilter && (
             <>
-              <p className="text-text-secondary font-medium">No transactions found</p>
+              <p className="text-text-secondary font-medium">No expenses found</p>
               <p className="text-text-muted text-sm">Try adjusting your filters</p>
             </>
           )}
           {!isLoading && !hasActiveFilter && (
             <>
               <FileText className="text-text-muted h-8 w-8" />
-              <p className="text-text-secondary font-medium">No transactions yet</p>
-              <p className="text-text-muted text-sm">Add your first transaction above!</p>
+              <p className="text-text-secondary font-medium">No expenses yet</p>
+              <p className="text-text-muted text-sm">Add your first expense above!</p>
             </>
           )}
         </div>
@@ -426,7 +429,7 @@ const TransactionsTable = ({
           {!hasNextPage && expenses.length > 0 && (
             <div className="text-text-muted mt-6 flex items-center justify-center gap-2 py-4">
               <div className="bg-border-subtle h-px w-12" />
-              <p className="text-sm">End of transactions</p>
+              <p className="text-sm">End of expenses</p>
               <div className="bg-border-subtle h-px w-12" />
             </div>
           )}
@@ -436,4 +439,4 @@ const TransactionsTable = ({
   );
 };
 
-export default TransactionsTable;
+export default ExpensesTable;
