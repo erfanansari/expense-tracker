@@ -9,7 +9,7 @@ import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@utils';
 
 import { type Expense } from '@/@types/expense';
 
-interface TransactionDetailsDrawerProps {
+interface ExpenseDetailsDrawerProps {
   expense: Expense | null;
   isOpen: boolean;
   onClose: () => void;
@@ -36,7 +36,7 @@ const DetailRow = ({ icon, label, value }: DetailRowProps) => (
   </div>
 );
 
-const TransactionDetailsDrawer = ({ expense, isOpen, onClose }: TransactionDetailsDrawerProps) => {
+const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawerProps) => {
   // References
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
@@ -105,7 +105,7 @@ const TransactionDetailsDrawer = ({ expense, isOpen, onClose }: TransactionDetai
           }
         >
           {/* Accessibility: Title must be direct child for screen readers */}
-          <Drawer.Title className="sr-only">Transaction Details</Drawer.Title>
+          <Drawer.Title className="sr-only">Expense Details</Drawer.Title>
 
           {/* Header with drag handle */}
           <div className="border-border-subtle shrink-0 border-b">
@@ -121,7 +121,7 @@ const TransactionDetailsDrawer = ({ expense, isOpen, onClose }: TransactionDetai
               className={`bg-background-secondary flex items-center justify-between px-4 pb-4 md:px-6 md:pb-5 ${!isMobile ? 'pt-4 md:pt-5' : ''}`}
             >
               <div className="min-w-0 flex-1">
-                <h2 className="text-text-primary text-base font-semibold sm:text-lg">Transaction Details</h2>
+                <h2 className="text-text-primary text-base font-semibold sm:text-lg">Expense Details</h2>
               </div>
               <button
                 onClick={handleClose}
@@ -244,4 +244,4 @@ const TransactionDetailsDrawer = ({ expense, isOpen, onClose }: TransactionDetai
   );
 };
 
-export default TransactionDetailsDrawer;
+export default ExpenseDetailsDrawer;

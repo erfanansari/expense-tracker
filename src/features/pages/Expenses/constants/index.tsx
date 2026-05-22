@@ -7,7 +7,7 @@ import ActionButtons from '@components/ActionButtons';
 
 import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@utils';
 
-export function buildTransactionColumns(
+export function buildExpenseColumns(
   handleEdit: (expense: Expense) => void,
   openDeleteModal: (expense: Expense) => void,
   deletingId: number | null

@@ -2,7 +2,7 @@ import type { Expense } from '@types';
 
 import type { ExpenseFilters } from '@/lib/api/expenses';
 
-export interface TransactionsTableProps {
+export interface ExpensesTableProps {
   expenses: Expense[];
   isLoading: boolean;
   error: Error | null;

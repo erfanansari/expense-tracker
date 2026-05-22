@@ -157,9 +157,9 @@ export const CommandPaletteProvider = ({ children }: { children: ReactNode }) =>
     const navActions = [
       { id: 'nav-overview', name: 'Go to Overview', path: '/overview', icon: <LayoutDashboard className="h-4 w-4" /> },
       {
-        id: 'nav-transactions',
-        name: 'Go to Transactions',
-        path: '/transactions',
+        id: 'nav-expenses',
+        name: 'Go to Expenses',
+        path: '/expenses',
         icon: <Receipt className="h-4 w-4" />,
       },
       { id: 'nav-income', name: 'Go to Income', path: '/income', icon: <DollarSign className="h-4 w-4" /> },
@@ -179,11 +179,11 @@ export const CommandPaletteProvider = ({ children }: { children: ReactNode }) =>
     const createActions: Action[] = [
       {
         id: 'create-expense',
-        name: 'Add Transaction',
+        name: 'Add Expense',
         section: 'Create',
         icon: <Plus className="h-4 w-4" />,
-        shortcut: ['t'],
-        keywords: 'add new expense transaction spend',
+        shortcut: ['e'],
+        keywords: 'add new expense spend',
         perform: () => openExpenseDrawer(),
       },
       {
