@@ -1,4 +1,4 @@
-import { Github } from 'lucide-react';
+import GithubIcon from '@components/Icons/GithubIcon';
 
 import pkg from '../../../package.json';
 
@@ -22,7 +22,7 @@ const LandingFooter = () => {
             className="text-text-secondary hover:text-text-primary transition-colors"
             aria-label="View on GitHub"
           >
-            <Github className="h-5 w-5" aria-hidden="true" />
+            <GithubIcon className="h-5 w-5" aria-hidden="true" />
           </a>
         </div>
       </div>

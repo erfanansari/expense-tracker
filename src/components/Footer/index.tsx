@@ -1,8 +1,10 @@
 import Link from 'next/link';
 
-import { Github, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
 
 import { NAV_ITEMS } from '@constants';
+
+import GithubIcon from '@components/Icons/GithubIcon';
 
 import pkg from '../../../package.json';
 
@@ -45,7 +47,7 @@ const Footer = () => {
             className="text-text-secondary hover:text-text-primary transition-colors"
             aria-label="View on GitHub"
           >
-            <Github className="h-5 w-5" aria-hidden="true" />
+            <GithubIcon className="h-5 w-5" aria-hidden="true" />
           </a>
         </div>
       </div>

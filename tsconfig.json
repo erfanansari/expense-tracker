@@ -37,7 +37,10 @@
       "@utils/*": ["./src/utils/*"],
       "@/*": ["./src/*"]
     },
-    "baseUrl": "."
+    "baseUrl": ".",
+    "rootDir": ".",
+    "ignoreDeprecations": "6.0",
+    "types": ["node", "jest", "@testing-library/jest-dom"]
   },
   "include": [
     "next-env.d.ts",
