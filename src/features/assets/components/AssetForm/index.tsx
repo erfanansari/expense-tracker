@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { ASSET_CATEGORIES } from '@constants/assets';
 import { numberToWords } from '@persian-tools/persian-tools';
-import { DollarSign, FileText, Loader2, Package, Plus, Save } from 'lucide-react';
+import { DollarSign, FileText, Loader2, Package, Plus } from 'lucide-react';
 
 import { createAssetSchema } from '@schemas';
 
@@ -375,7 +375,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
               }
               return (
                 <>
-                  {editingAsset ? <Save className="h-4 w-4 shrink-0" /> : <Plus className="h-4 w-4 shrink-0" />}
+                  {!editingAsset && <Plus className="h-4 w-4 shrink-0" />}
                   <span>{editingAsset ? 'Update' : 'Add'}</span>
                 </>
               );

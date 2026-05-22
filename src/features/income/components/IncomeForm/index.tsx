@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { INCOME_TYPES, MONTHS } from '@constants/income';
 import { numberToWords } from '@persian-tools/persian-tools';
-import { Briefcase, Calendar, DollarSign, FileText, Loader2, Plus, Save } from 'lucide-react';
+import { Briefcase, Calendar, DollarSign, FileText, Loader2, Plus } from 'lucide-react';
 
 import { createIncomeSchema } from '@schemas';
 
@@ -354,7 +354,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
             }
             return (
               <>
-                {editingIncome ? <Save className="h-4 w-4 shrink-0" /> : <Plus className="h-4 w-4 shrink-0" />}
+                {!editingIncome && <Plus className="h-4 w-4 shrink-0" />}
                 <span>{editingIncome ? 'Update' : 'Add'}</span>
               </>
             );

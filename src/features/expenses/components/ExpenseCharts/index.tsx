@@ -46,12 +46,12 @@ const CategoryTooltip = ({
   payload,
 }: {
   active?: boolean;
-  payload?: ReadonlyArray<{ value: number; payload: { name?: string; nameFa?: string; usdValue?: number } }>;
+  payload?: ReadonlyArray<{ value: number; payload: { name?: string; usdValue?: number } }>;
 }) => {
   if (!active || !payload?.length) return null;
   const data = payload[0];
   const usdValue = data.payload.usdValue || 0;
-  const accentText = data.payload.nameFa ?? data.payload.name;
+  const accentText = data.payload.name;
   return (
     <ChartTooltip
       primary={`${formatNumber(data.value)} Toman`}
@@ -97,14 +97,13 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
         acc.push({
           category: exp.category,
           name: labels.en,
-          nameFa: labels.fa,
           value: exp.price_toman,
           usdValue: exp.price_usd,
         });
       }
       return acc;
     },
-    [] as Array<{ category: string; name: string; nameFa: string; value: number; usdValue: number }>
+    [] as Array<{ category: string; name: string; value: number; usdValue: number }>
   );
 
   categoryTotals.sort((a, b) => b.value - a.value);
@@ -163,12 +162,7 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
             <PieChartIcon className="text-blue h-5 w-5" />
           </div>
-          <div>
-            <h3 className="text-text-primary text-lg font-semibold">By Category</h3>
-            <p className="text-text-muted text-sm" dir="rtl">
-              بر اساس دسته‌بندی
-            </p>
-          </div>
+          <h3 className="text-text-primary text-lg font-semibold">By Category</h3>
         </div>
 
         <div className="h-[280px]">
@@ -220,12 +214,7 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
             <BarChart3 className="text-success h-5 w-5" />
           </div>
-          <div>
-            <h3 className="text-text-primary text-lg font-semibold">Category Comparison</h3>
-            <p className="text-text-muted text-sm" dir="rtl">
-              مقایسه دسته‌بندی
-            </p>
-          </div>
+          <h3 className="text-text-primary text-lg font-semibold">Category Comparison</h3>
         </div>
 
         <div className="min-h-[320px] flex-1">
@@ -241,8 +230,8 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
               />
               <YAxis
                 type="category"
-                dataKey="nameFa"
-                width={80}
+                dataKey="name"
+                width={100}
                 stroke="var(--color-border-subtle)"
                 tick={{ fill: 'var(--color-text-secondary)', fontSize: 12, fontWeight: 500 }}
                 axisLine={{ stroke: 'var(--color-border-subtle)' }}
@@ -265,18 +254,11 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
             <TrendingUp className="text-blue h-5 w-5" />
           </div>
-          <div>
-            <h3 className="text-text-primary text-lg font-semibold">
-              {granularity === 'daily' && 'Daily Spending Trend'}
-              {granularity === 'weekly' && 'Weekly Spending Trend'}
-              {granularity === 'monthly' && 'Monthly Spending Trend'}
-            </h3>
-            <p className="text-text-muted text-sm" dir="rtl">
-              {granularity === 'daily' && 'روند هزینه روزانه'}
-              {granularity === 'weekly' && 'روند هزینه هفتگی'}
-              {granularity === 'monthly' && 'روند هزینه ماهانه'}
-            </p>
-          </div>
+          <h3 className="text-text-primary text-lg font-semibold">
+            {granularity === 'daily' && 'Daily Spending Trend'}
+            {granularity === 'weekly' && 'Weekly Spending Trend'}
+            {granularity === 'monthly' && 'Monthly Spending Trend'}
+          </h3>
         </div>
 
         <div className="h-[280px]">

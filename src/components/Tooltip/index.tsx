@@ -77,7 +77,7 @@ const Tooltip = ({ content, position = 'top', children, className }: TooltipProp
           role="tooltip"
           aria-live="polite"
           className={twMerge(
-            'bg-primary pointer-events-none absolute z-50 min-w-max rounded-lg px-3 py-2 text-sm font-medium text-white shadow-lg transition-opacity duration-200',
+            'bg-primary pointer-events-none absolute z-50 max-w-[min(20rem,calc(100vw-2rem))] rounded-lg px-3 py-2 text-sm leading-relaxed font-medium break-words whitespace-normal text-white shadow-lg transition-opacity duration-200',
             positionClasses[position],
             isVisible ? 'opacity-100' : 'opacity-0',
             className
