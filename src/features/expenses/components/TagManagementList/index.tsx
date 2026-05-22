@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Check, Edit2, Loader2, Plus, Search, Tag as TagIcon, Trash2, X } from 'lucide-react';
 
 import DeleteTagModal from '@components/DeleteTagModal';
+import { useToast } from '@components/Toast/ToastProvider';
 
 import { useCreateTag, useDeleteTag, useTagsWithUsage, useUpdateTag } from '@hooks/use-tags';
 
@@ -20,6 +21,9 @@ const TagManagementList = () => {
   const createTag = useCreateTag();
   const updateTag = useUpdateTag();
   const deleteTag = useDeleteTag();
+
+  // Customs
+  const { showToast } = useToast();
 
   // States
   const [searchQuery, setSearchQuery] = useState('');
@@ -66,6 +70,7 @@ const TagManagementList = () => {
       await updateTag.mutateAsync({ id: tagId, name: editingName.trim() });
       setEditingTagId(null);
       setEditingName('');
+      showToast('Tag renamed.', 'info');
     } catch (error) {
       setEditError(ensureError(error).message);
     }
@@ -91,10 +96,12 @@ const TagManagementList = () => {
     if (!deletingTag) return;
 
     try {
+      const tagName = deletingTag.name;
       await deleteTag.mutateAsync(deletingTag.id);
       setDeletingTag(null);
+      showToast(`Tag "${tagName}" deleted.`, 'info');
     } catch (error) {
-      console.error('Failed to delete tag:', error);
+      showToast(ensureError(error).message, 'error');
     }
   };
 
@@ -114,9 +121,10 @@ const TagManagementList = () => {
     setCreateError('');
 
     try {
-      await createTag.mutateAsync(newTagName.trim());
+      const created = await createTag.mutateAsync(newTagName.trim());
       setNewTagName('');
       setCreateError('');
+      showToast(`Tag "${created.name}" created.`, 'success');
     } catch (error) {
       setCreateError(ensureError(error).message);
     }

@@ -56,7 +56,10 @@ const AssetsPage = () => {
     closeModal: closeDeleteModal,
     confirmDelete,
   } = useDeleteConfirmation<Asset>({
-    onDelete: (id) => deleteAsset.mutateAsync(id),
+    onDelete: async (id) => {
+      await deleteAsset.mutateAsync(id);
+      showToast('Asset deleted.', 'info');
+    },
     onError: (err) => showToast(ensureError(err).message, 'error'),
   });
 

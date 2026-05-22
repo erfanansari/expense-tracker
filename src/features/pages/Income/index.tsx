@@ -51,7 +51,10 @@ const IncomePage = () => {
     closeModal: closeDeleteModal,
     confirmDelete,
   } = useDeleteConfirmation<Income>({
-    onDelete: (id) => deleteIncome.mutateAsync(id),
+    onDelete: async (id) => {
+      await deleteIncome.mutateAsync(id);
+      showToast('Income entry deleted.', 'info');
+    },
     onError: (err) => showToast(ensureError(err).message, 'error'),
   });
 
