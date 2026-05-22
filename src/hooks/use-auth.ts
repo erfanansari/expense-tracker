@@ -6,13 +6,17 @@ import { useRouter } from 'next/navigation';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { useToast } from '@components/Toast/ToastProvider';
+
 import { fetchMe, logout as logoutApi } from '@/lib/api/auth';
 import type { AuthUser } from '@/lib/api/auth';
+import { suppressNextSignoutToast } from '@/lib/api/auth-handler';
 import { queryKeys } from '@/lib/query-keys';
 
 export function useAuth() {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const { showToast } = useToast();
 
   // Queries
   const {
@@ -31,12 +35,16 @@ export function useAuth() {
   const logout = useCallback(async () => {
     try {
       await logoutApi();
+      // Intentional signout — don't let AuthGuard fire its "signed out" toast
+      // on top of our success toast.
+      suppressNextSignoutToast();
       queryClient.clear();
+      showToast('Signed out. See you next time!', 'info');
       router.push('/login');
     } catch {
       // ignore logout errors
     }
-  }, [queryClient, router]);
+  }, [queryClient, router, showToast]);
 
   const updateUser = useCallback(
     (updates: Partial<AuthUser>) => {

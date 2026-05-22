@@ -44,7 +44,10 @@ const ExpensesPage = () => {
     closeModal: closeDeleteModal,
     confirmDelete,
   } = useDeleteConfirmation<Expense>({
-    onDelete: (id) => deleteExpense.mutateAsync(id),
+    onDelete: async (id) => {
+      await deleteExpense.mutateAsync(id);
+      showToast('Expense deleted.', 'info');
+    },
     onError: (err) => showToast(ensureError(err).message, 'error'),
   });
 

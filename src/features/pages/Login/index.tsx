@@ -3,15 +3,24 @@
 import { useState } from 'react';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 import { DEMO_EMAIL, DEMO_PASSWORD } from '@constants';
 
+import { useToast } from '@components/Toast/ToastProvider';
+
 import { login } from '@/lib/api/auth';
+import { queryKeys } from '@/lib/query-keys';
 
 const Login = () => {
+  // Customs
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
+
   // States
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,8 +30,10 @@ const Login = () => {
   // Mutations
   const loginMutation = useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) => login(email, password),
-    onSuccess: () => {
-      window.location.href = '/overview';
+    onSuccess: (user) => {
+      queryClient.setQueryData(queryKeys.auth.me(), user);
+      showToast(`Welcome back${user.name ? `, ${user.name}` : ''}!`, 'success');
+      router.push('/overview');
     },
     onError: (err: Error) => {
       setError(err.message || 'Login failed');

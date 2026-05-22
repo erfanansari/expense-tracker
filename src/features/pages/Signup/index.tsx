@@ -5,10 +5,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
+import { useToast } from '@components/Toast/ToastProvider';
+
 import { signup } from '@/lib/api/auth';
+import { queryKeys } from '@/lib/query-keys';
 
 const Signup = () => {
   // States
@@ -21,6 +24,8 @@ const Signup = () => {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
 
   // Mutations
   const signupMutation = useMutation({
@@ -35,7 +40,9 @@ const Signup = () => {
       password: string;
       passwordConfirm: string;
     }) => signup(name, email, password, passwordConfirm),
-    onSuccess: () => {
+    onSuccess: (user) => {
+      queryClient.setQueryData(queryKeys.auth.me(), user);
+      showToast('Account created. Welcome to Kharji!', 'success');
       router.push('/overview');
     },
     onError: (err: Error) => {

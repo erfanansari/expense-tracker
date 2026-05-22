@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 
 import { signupSchema } from '@schemas';
 
+import { DEMO_EMAIL } from '@constants';
+
 import { hashPassword } from '@core/auth/password';
 import { validatePassword } from '@core/auth/validation';
 import { db } from '@core/database/client';
@@ -49,7 +51,17 @@ export async function POST(request: NextRequest) {
     // Create session (sets cookie automatically)
     await createSession(userId, normalizedEmail);
 
-    return NextResponse.json({ message: 'User created successfully', userId }, { status: 201 });
+    return NextResponse.json(
+      {
+        user: {
+          id: userId,
+          email: normalizedEmail,
+          name: name || null,
+          isDemo: normalizedEmail === DEMO_EMAIL,
+        },
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Signup error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
