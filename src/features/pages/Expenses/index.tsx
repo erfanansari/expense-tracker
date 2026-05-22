@@ -7,7 +7,7 @@ import { Plus } from 'lucide-react';
 import { type Expense } from '@types';
 
 import { useGlobalDrawer } from '@features/drawers/GlobalDrawerProvider';
-import TransactionDetailsDrawer from '@features/expenses/components/TransactionDetailsDrawer';
+import ExpenseDetailsDrawer from '@features/expenses/components/ExpenseDetailsDrawer';
 
 import Button from '@components/Button';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
@@ -20,9 +20,9 @@ import { ensureError } from '@utils';
 
 import { type ExpenseFilters } from '@/lib/api/expenses';
 
-import TransactionsTable from './components/TransactionsTable';
+import ExpensesTable from './components/ExpensesTable';
 
-const TransactionsPage = () => {
+const ExpensesPage = () => {
   // States
   const [filters, setFilters] = useState<ExpenseFilters>({});
   const [descInput, setDescInput] = useState('');
@@ -76,17 +76,17 @@ const TransactionsPage = () => {
         {/* Page Header */}
         <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
           <div className="min-w-0 flex-1">
-            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">Transactions</h1>
+            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">Expenses</h1>
             <p className="text-text-muted mt-1 text-xs sm:text-sm">Manage and track all your expenses</p>
           </div>
           <Button variant="primary" onClick={() => openExpenseDrawer()} className="shrink-0">
             <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Add Transaction</span>
+            <span className="hidden sm:inline">Add Expense</span>
           </Button>
         </div>
 
-        {/* Transactions Table */}
-        <TransactionsTable
+        {/* Expenses Table */}
+        <ExpensesTable
           expenses={expenses}
           isLoading={isLoading}
           error={error}
@@ -103,8 +103,8 @@ const TransactionsPage = () => {
           onLoadMore={() => fetchNextPage()}
         />
 
-        {/* Transaction Details Drawer */}
-        <TransactionDetailsDrawer expense={selectedExpense} isOpen={isModalOpen} onClose={handleCloseModal} />
+        {/* Expense Details Drawer */}
+        <ExpenseDetailsDrawer expense={selectedExpense} isOpen={isModalOpen} onClose={handleCloseModal} />
 
         {/* Delete Confirmation Modal */}
         <DeleteConfirmModal
@@ -121,4 +121,4 @@ const TransactionsPage = () => {
   );
 };
 
-export default TransactionsPage;
+export default ExpensesPage;

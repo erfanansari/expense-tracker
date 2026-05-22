@@ -18,7 +18,7 @@ const ReportsCharts = ({ expenses, granularity }: ReportsChartsProps) => {
         <EmptyState
           icon={Sparkles}
           title="No data available"
-          description="No transactions found for the selected period. Try adjusting your date range."
+          description="No expenses found for the selected period. Try adjusting your date range."
           className="py-20"
         />
       </div>
