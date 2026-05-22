@@ -4,7 +4,7 @@ const FEATURES = [
   {
     icon: Banknote,
     title: 'Dual currency',
-    description: 'Every transaction in USD and Toman, side-by-side. Live conversion, manual override when you need it.',
+    description: 'Every expense in USD and Toman, side-by-side. Live conversion, manual override when you need it.',
   },
   {
     icon: LineChart,

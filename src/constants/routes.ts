@@ -5,7 +5,7 @@ export const ROUTES = {
   FORGOT_PASSWORD: '/forgot-password',
   RESET_PASSWORD: '/reset-password',
   OVERVIEW: '/overview',
-  TRANSACTIONS: '/transactions',
+  EXPENSES: '/expenses',
   INCOME: '/income',
   REPORTS: '/reports',
   ASSETS: '/assets',
@@ -14,7 +14,7 @@ export const ROUTES = {
 
 export const NAV_ITEMS = [
   { label: 'Overview', href: ROUTES.OVERVIEW },
-  { label: 'Transactions', href: ROUTES.TRANSACTIONS },
+  { label: 'Expenses', href: ROUTES.EXPENSES },
   { label: 'Income', href: ROUTES.INCOME },
   { label: 'Reports', href: ROUTES.REPORTS },
   { label: 'Assets', href: ROUTES.ASSETS },
