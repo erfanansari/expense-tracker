@@ -115,7 +115,9 @@ const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerPro
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-5 md:px-8 md:py-8">{children}</div>
+          <div className="flex-1 overflow-x-clip overflow-y-auto overscroll-contain px-5 py-5 md:px-8 md:py-8">
+            {children}
+          </div>
         </Drawer.Content>
       </Drawer.Portal>
     </Drawer.Root>

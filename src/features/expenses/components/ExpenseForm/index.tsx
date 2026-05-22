@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { numberToWords } from '@persian-tools/persian-tools';
-import { Calendar, DollarSign, FileText, Layers, Loader2, Plus, Save } from 'lucide-react';
+import { Calendar, DollarSign, FileText, Layers, Loader2, Plus } from 'lucide-react';
 
 import { createExpenseSchema } from '@schemas';
 
@@ -336,7 +336,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
             }
             return (
               <>
-                {editingExpense ? <Save className="h-4 w-4 shrink-0" /> : <Plus className="h-4 w-4 shrink-0" />}
+                {!editingExpense && <Plus className="h-4 w-4 shrink-0" />}
                 <span>{editingExpense ? 'Update' : 'Add'}</span>
               </>
             );
