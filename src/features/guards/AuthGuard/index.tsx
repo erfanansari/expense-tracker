@@ -20,7 +20,13 @@ const AuthGuard: FC<PropsWithChildren> = ({ children }) => {
     if (loading || user || firedRef.current) return;
     firedRef.current = true;
     showToast("You've been signed out.", 'error');
-    router.replace('/login');
+    // Clear the (possibly stale/invalid) cookie before redirect so proxy.ts
+    // doesn't bounce /login back to /overview.
+    void fetch('/api/auth/logout', { method: 'POST' })
+      .catch(() => {})
+      .finally(() => {
+        router.replace('/login');
+      });
   }, [user, loading, router, showToast]);
 
   if (loading) return <FullPageLoader />;
