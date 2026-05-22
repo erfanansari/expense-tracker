@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 
 import { DollarSign, FileText } from 'lucide-react';
 
+import { ApiError } from '@core/errors';
+
 import DataTable from '@components/DataTable';
 import Pulse from '@components/Skeleton';
 
@@ -66,6 +68,7 @@ const IncomeTable = ({
   }
 
   if (error) {
+    if (error instanceof ApiError && error.status === 401) return null;
     return (
       <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
         <div className="border-danger bg-danger-light mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">

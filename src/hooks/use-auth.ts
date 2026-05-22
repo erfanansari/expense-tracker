@@ -24,6 +24,7 @@ export function useAuth() {
     queryKey: queryKeys.auth.me(),
     queryFn: fetchMe,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: true,
   });
 
   // Callbacks

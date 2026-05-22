@@ -6,6 +6,8 @@ import { CommandPaletteProvider } from '@components/CommandPalette/CommandPalett
 import QueryProvider from '@components/QueryProvider';
 import { ToastProvider } from '@components/Toast/ToastProvider';
 
+import UnauthorizedListener from './UnauthorizedListener';
+
 interface ProvidersProps {
   children: React.ReactNode;
 }
@@ -13,6 +15,7 @@ interface ProvidersProps {
 const Providers = ({ children }: ProvidersProps) => (
   <QueryProvider>
     <ToastProvider>
+      <UnauthorizedListener />
       <GlobalDrawerProvider>
         <CommandPaletteProvider>{children}</CommandPaletteProvider>
       </GlobalDrawerProvider>
