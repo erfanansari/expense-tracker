@@ -3,8 +3,6 @@
 import { useEffect, useRef } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 
-import { useRouter } from 'next/navigation';
-
 import FullPageLoader from '@components/FullPageLoader';
 import { useToast } from '@components/Toast/ToastProvider';
 
@@ -14,7 +12,6 @@ import { consumeSignoutToastSuppression } from '@/lib/api/auth-handler';
 
 const AuthGuard: FC<PropsWithChildren> = ({ children }) => {
   const { user, loading } = useAuth();
-  const router = useRouter();
   const { showToast } = useToast();
   const firedRef = useRef(false);
 
@@ -25,19 +22,26 @@ const AuthGuard: FC<PropsWithChildren> = ({ children }) => {
     if (!suppressed) {
       showToast("You've been signed out.", 'error');
     }
-    // Clear the (possibly stale/invalid) cookie before redirect so proxy.ts
-    // doesn't bounce /login back to /overview. Skip when an intentional
-    // logout already cleared it — calling again is harmless but wasteful.
+
+    const redirect = () => {
+      // Hard navigation guarantees the proxy re-evaluates the cookie state
+      // fresh server-side. router.replace has been observed to leave the
+      // dashboard stuck on a blank screen when the client router state and
+      // the cookie state disagree during a logout transition.
+      window.location.href = '/login';
+    };
+
     if (suppressed) {
-      router.replace('/login');
+      // Intentional logout already deleted the cookie — just redirect.
+      redirect();
     } else {
+      // Cookie may still be present but invalid (expired JWT). Clear it first
+      // so the proxy doesn't bounce /login back to /overview.
       void fetch('/api/auth/logout', { method: 'POST' })
         .catch(() => {})
-        .finally(() => {
-          router.replace('/login');
-        });
+        .finally(redirect);
     }
-  }, [user, loading, router, showToast]);
+  }, [user, loading, showToast]);
 
   if (loading) return <FullPageLoader />;
 

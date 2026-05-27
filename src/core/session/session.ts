@@ -34,7 +34,17 @@ export async function getSession(): Promise<UserPayload | null> {
 
 export async function deleteSession(): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.delete(authConfig.cookie.name);
+  // Set the cookie to empty with matching attributes so the browser actually
+  // overwrites it. `cookieStore.delete()` alone has been unreliable across
+  // environments — explicit set with maxAge:0 + same path/secure/sameSite
+  // guarantees the Set-Cookie header matches the original.
+  cookieStore.set(authConfig.cookie.name, '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 0,
+    path: '/',
+  });
 }
 
 // Helper to get current user from session
