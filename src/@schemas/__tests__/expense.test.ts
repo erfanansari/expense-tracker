@@ -3,7 +3,7 @@ import { createExpenseSchema } from '../expense';
 describe('createExpenseSchema', () => {
   const validExpense = {
     date: '2024-01-15',
-    category: 'food',
+    categoryId: 1,
     description: 'Lunch',
     price_toman: 150000,
     price_usd: 3.5,
@@ -21,6 +21,17 @@ describe('createExpenseSchema', () => {
 
   it('rejects missing date', () => {
     const result = createExpenseSchema.safeParse({ ...validExpense, date: '' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects missing categoryId', () => {
+    const { categoryId: _omit, ...withoutCategory } = validExpense;
+    const result = createExpenseSchema.safeParse(withoutCategory);
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects zero categoryId', () => {
+    const result = createExpenseSchema.safeParse({ ...validExpense, categoryId: 0 });
     expect(result.success).toBe(false);
   });
 

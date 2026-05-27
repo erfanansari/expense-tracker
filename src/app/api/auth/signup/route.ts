@@ -7,6 +7,7 @@ import { DEMO_EMAIL } from '@constants';
 
 import { hashPassword } from '@core/auth/password';
 import { validatePassword } from '@core/auth/validation';
+import { seedDefaultCategoriesForUser } from '@core/database/categories';
 import { db } from '@core/database/client';
 import { createSession } from '@core/session/session';
 
@@ -47,6 +48,10 @@ export async function POST(request: NextRequest) {
     });
 
     const userId = Number(result.lastInsertRowid);
+
+    // Seed the 12 default categories so new accounts can start adding expenses
+    // immediately without first visiting Settings.
+    await seedDefaultCategoriesForUser(userId);
 
     // Create session (sets cookie automatically)
     await createSession(userId, normalizedEmail);

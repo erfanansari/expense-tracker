@@ -5,6 +5,7 @@ import Pulse from '@components/Skeleton';
 import { useAuth } from '@hooks/use-auth';
 
 import AppearanceSection from './components/AppearanceSection';
+import CategoryManagement from './components/CategoryManagement';
 import DataManagement from './components/DataManagement';
 import HelpSection from './components/HelpSection';
 import LanguageSection from './components/LanguageSection';
@@ -60,6 +61,7 @@ const SettingsPage = () => {
         ) : (
           <div className="grid gap-6">
             <ProfileCard />
+            <CategoryManagement />
             <TagManagement />
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

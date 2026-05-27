@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { withAuth } from '@core/api/utils';
+import { fetchCategoriesForExpenses } from '@core/database/categories';
 import { db } from '@core/database/client';
 import { mapRowToAsset, mapRowToExpense, mapRowToIncome } from '@core/database/mappers';
 import { fetchTagsForExpenses } from '@core/database/tags';
@@ -18,8 +19,15 @@ export const GET = withAuth(async (user) => {
     db.execute({ sql: 'SELECT * FROM assets WHERE userId = ? ORDER BY category, name', args: [user.userId] }),
   ]);
 
-  const tagsMap = await fetchTagsForExpenses(expensesResult.rows.map((r) => r.id));
-  const expenses = expensesResult.rows.map((r) => mapRowToExpense(r, tagsMap[r.id as number]));
+  const ids = expensesResult.rows.map((r) => r.id);
+  const [tagsMap, categoriesMap] = await Promise.all([fetchTagsForExpenses(ids), fetchCategoriesForExpenses(ids)]);
+  const expenses = expensesResult.rows
+    .map((r) => {
+      const cat = categoriesMap[r.id as number];
+      if (!cat) return null;
+      return mapRowToExpense(r, cat, tagsMap[r.id as number]);
+    })
+    .filter((e): e is NonNullable<typeof e> => e !== null);
   const incomes = incomesResult.rows.map(mapRowToIncome);
   const assets = assetsResult.rows.map(mapRowToAsset);
 
@@ -30,7 +38,7 @@ export const GET = withAuth(async (user) => {
     ...expenses.map((e) => [
       e.id,
       e.date,
-      e.category,
+      e.category.name,
       e.description,
       e.price_toman,
       e.price_usd,

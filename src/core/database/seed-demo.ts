@@ -112,6 +112,8 @@ const CATEGORY_TAG_AFFINITY: Record<string, string[]> = {
 // ─── Expense categories with frequency and price ranges ─────────────────────
 interface ExpenseCategory {
   name: string;
+  icon: string;
+  color: string;
   minPerMonth: number;
   maxPerMonth: number;
   minUsd: number;
@@ -122,6 +124,8 @@ interface ExpenseCategory {
 const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   {
     name: 'Groceries',
+    icon: 'ShoppingCart',
+    color: 'green',
     minPerMonth: 6,
     maxPerMonth: 10,
     minUsd: 15,
@@ -139,6 +143,8 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   },
   {
     name: 'Dining Out',
+    icon: 'Utensils',
+    color: 'orange',
     minPerMonth: 3,
     maxPerMonth: 7,
     minUsd: 8,
@@ -156,6 +162,8 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   },
   {
     name: 'Transportation',
+    icon: 'Car',
+    color: 'sky',
     minPerMonth: 3,
     maxPerMonth: 6,
     minUsd: 5,
@@ -164,6 +172,8 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   },
   {
     name: 'Rent',
+    icon: 'Home',
+    color: 'blue',
     minPerMonth: 1,
     maxPerMonth: 1,
     minUsd: 1200,
@@ -172,6 +182,8 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   },
   {
     name: 'Utilities',
+    icon: 'Zap',
+    color: 'amber',
     minPerMonth: 1,
     maxPerMonth: 1,
     minUsd: 80,
@@ -180,6 +192,8 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   },
   {
     name: 'Subscriptions',
+    icon: 'CreditCard',
+    color: 'indigo',
     minPerMonth: 1,
     maxPerMonth: 1,
     minUsd: 10,
@@ -188,6 +202,8 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   },
   {
     name: 'Travel',
+    icon: 'Plane',
+    color: 'cyan',
     minPerMonth: 0,
     maxPerMonth: 0,
     minUsd: 200,
@@ -203,6 +219,8 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   },
   {
     name: 'Electronics',
+    icon: 'Laptop',
+    color: 'slate',
     minPerMonth: 0,
     maxPerMonth: 0,
     minUsd: 30,
@@ -219,6 +237,8 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   },
   {
     name: 'Healthcare',
+    icon: 'Heart',
+    color: 'rose',
     minPerMonth: 0,
     maxPerMonth: 0,
     minUsd: 20,
@@ -227,6 +247,8 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   },
   {
     name: 'Clothing',
+    icon: 'Shirt',
+    color: 'violet',
     minPerMonth: 0,
     maxPerMonth: 0,
     minUsd: 25,
@@ -235,6 +257,8 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   },
   {
     name: 'Education',
+    icon: 'GraduationCap',
+    color: 'teal',
     minPerMonth: 0,
     maxPerMonth: 0,
     minUsd: 15,
@@ -243,6 +267,8 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   },
   {
     name: 'Gifts Given',
+    icon: 'Gift',
+    color: 'pink',
     minPerMonth: 0,
     maxPerMonth: 0,
     minUsd: 20,
@@ -251,6 +277,8 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   },
   {
     name: 'Home',
+    icon: 'Home',
+    color: 'emerald',
     minPerMonth: 0,
     maxPerMonth: 0,
     minUsd: 15,
@@ -266,6 +294,8 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   },
   {
     name: 'Personal Care',
+    icon: 'Sparkles',
+    color: 'lime',
     minPerMonth: 1,
     maxPerMonth: 2,
     minUsd: 10,
@@ -274,6 +304,8 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   },
   {
     name: 'Entertainment',
+    icon: 'Film',
+    color: 'red',
     minPerMonth: 1,
     maxPerMonth: 3,
     minUsd: 10,
@@ -428,7 +460,8 @@ async function seedDemo() {
       console.log(`Created demo user (id: ${userId})`);
     }
 
-    // 2. Clear existing data (idempotent)
+    // 2. Clear existing data (idempotent). Expenses must go before categories
+    // because expenses.category_id has ON DELETE RESTRICT.
     console.log('Clearing existing demo data...');
     await client.batch(
       [
@@ -437,6 +470,7 @@ async function seedDemo() {
           args: [userId],
         },
         { sql: 'DELETE FROM expenses WHERE user_id = ?', args: [userId] },
+        { sql: 'DELETE FROM categories WHERE user_id = ?', args: [userId] },
         { sql: 'DELETE FROM tags WHERE user_id = ?', args: [userId] },
         { sql: 'DELETE FROM incomes WHERE userId = ?', args: [userId] },
         {
@@ -447,6 +481,25 @@ async function seedDemo() {
       ],
       'write'
     );
+
+    // 2b. Insert categories and build a name -> id lookup. This must run
+    // before expenses since expenses.category_id is a FK.
+    console.log('Inserting categories...');
+    const categoryStatements: InStatement[] = EXPENSE_CATEGORIES.map((cat, idx) => ({
+      sql: 'INSERT INTO categories (user_id, name, icon, color, sort_order) VALUES (?, ?, ?, ?, ?)',
+      args: [userId, cat.name, cat.icon, cat.color, idx],
+    }));
+    await executeBatch(client, categoryStatements);
+
+    const categoriesResult = await client.execute({
+      sql: 'SELECT id, name FROM categories WHERE user_id = ?',
+      args: [userId],
+    });
+    const categoryMap: Record<string, number> = {};
+    for (const row of categoriesResult.rows) {
+      categoryMap[row.name as string] = row.id as number;
+    }
+    console.log(`  Created ${EXPENSE_CATEGORIES.length} categories`);
 
     // 3. Insert tags
     console.log('Inserting tags...');
@@ -497,14 +550,14 @@ async function seedDemo() {
             const description = pick(cat.descriptions);
 
             expenseStatements.push({
-              sql: `INSERT INTO expenses (user_id, description, price_usd, price_toman, category, date, created_at)
+              sql: `INSERT INTO expenses (user_id, description, price_usd, price_toman, category_id, date, created_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?)`,
               args: [
                 userId,
                 description,
                 amountUsd,
                 amountToman,
-                cat.name,
+                categoryMap[cat.name],
                 date,
                 `${date}T${String(randInt(8, 22)).padStart(2, '0')}:${String(randInt(0, 59)).padStart(2, '0')}:00`,
               ],

@@ -5,7 +5,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowLeftRight, Calendar, Clock, DollarSign, FileText, FolderOpen, Tag, X } from 'lucide-react';
 import { Drawer } from 'vaul';
 
-import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@utils';
+import CategoryBadge from '@components/CategoryBadge';
+
+import { formatNumber, formatToFarsiDate } from '@utils';
 
 import { type Expense } from '@/@types/expense';
 
@@ -81,7 +83,6 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
   }, [isOpen, handleClose]);
 
   // Variables
-  const categoryLabels = expense ? getCategoryLabel(expense.category) : null;
   const farsiDate = expense ? formatToFarsiDate(expense.date) : '';
   const exchangeRate = expense ? Math.round(expense.price_toman / expense.price_usd) : 0;
 
@@ -149,7 +150,7 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
                 <DetailRow
                   icon={<FolderOpen className="text-text-secondary h-4 w-4" />}
                   label="Category"
-                  value={<span>{categoryLabels?.en}</span>}
+                  value={<CategoryBadge category={expense.category} size="md" />}
                 />
 
                 {/* Date */}
