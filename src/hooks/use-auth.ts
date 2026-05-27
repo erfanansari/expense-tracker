@@ -2,8 +2,6 @@
 
 import { useCallback } from 'react';
 
-import { useRouter } from 'next/navigation';
-
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useToast } from '@components/Toast/ToastProvider';
@@ -15,7 +13,6 @@ import { queryKeys } from '@/lib/query-keys';
 
 export function useAuth() {
   const queryClient = useQueryClient();
-  const router = useRouter();
   const { showToast } = useToast();
 
   // Queries
@@ -40,11 +37,14 @@ export function useAuth() {
       suppressNextSignoutToast();
       queryClient.clear();
       showToast('Signed out. See you next time!', 'info');
-      router.push('/login');
+      // Hard navigation rather than router.push: guarantees a fresh request
+      // so the proxy re-evaluates the (now-deleted) cookie server-side and
+      // there's no client-side router state left to confuse the next page.
+      window.location.href = '/login';
     } catch {
       // ignore logout errors
     }
-  }, [queryClient, router, showToast]);
+  }, [queryClient, showToast]);
 
   const updateUser = useCallback(
     (updates: Partial<AuthUser>) => {

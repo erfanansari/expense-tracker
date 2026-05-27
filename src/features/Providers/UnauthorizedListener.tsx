@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -11,10 +11,7 @@ import { useToast } from '@components/Toast/ToastProvider';
 import { setUnauthorizedHandler } from '@/lib/api/auth-handler';
 import { queryKeys } from '@/lib/query-keys';
 
-const RESET_MS = 1500;
-
 const UnauthorizedListener = () => {
-  const router = useRouter();
   const pathname = usePathname();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
@@ -27,26 +24,30 @@ const UnauthorizedListener = () => {
   }, [pathname]);
 
   useEffect(() => {
-    setUnauthorizedHandler(() => {
+    setUnauthorizedHandler(async () => {
       if (firedRef.current) return;
       firedRef.current = true;
 
       queryClient.setQueryData(queryKeys.auth.me(), null);
       queryClient.clear();
 
-      // Clear the (now-invalid) cookie so proxy doesn't bounce /login back to /overview.
-      void fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+      // Clear the (now-invalid) cookie BEFORE navigating so the proxy doesn't
+      // bounce /login back to /overview. Await it so the browser actually
+      // processes the Set-Cookie before the next request.
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+      } catch {
+        // ignore — best-effort
+      }
 
       if (pathRef.current !== '/login') {
         showToast("You've been signed out.", 'error');
-        router.replace('/login');
       }
-
-      setTimeout(() => {
-        firedRef.current = false;
-      }, RESET_MS);
+      // Hard navigation guarantees the proxy re-evaluates fresh server-side
+      // and clears any client-router state from the (now-invalid) session.
+      window.location.href = '/login';
     });
-  }, [queryClient, router, showToast]);
+  }, [queryClient, showToast]);
 
   return null;
 };
