@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { format, parseISO } from 'date-fns';
 import { TrendingUp } from 'lucide-react';
@@ -29,11 +29,12 @@ const RANGES: NetWorthRange[] = ['1M', '3M', '6M', '1Y', 'ALL'];
 function NetWorthTooltip({
   active,
   payload,
-  label,
 }: {
   active?: boolean;
-  payload?: ReadonlyArray<{ value: number; payload: { valueUsd: number; valueToman: number } }>;
-  label?: string | number;
+  payload?: ReadonlyArray<{
+    value: number;
+    payload: { date: string; valueUsd: number; valueToman: number };
+  }>;
 }) {
   if (!active || !payload?.length) return null;
   const point = payload[0].payload;
@@ -41,7 +42,7 @@ function NetWorthTooltip({
     <ChartTooltip
       primary={`$${point.valueUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
       secondary={`${formatNumber(point.valueToman)} Toman`}
-      accent={label != null ? { text: formatChartTooltipDate(String(label), 'daily'), tone: 'success' } : undefined}
+      accent={{ text: formatChartTooltipDate(point.date, 'daily'), tone: 'success' }}
     />
   );
 }
@@ -77,29 +78,72 @@ const NetWorthChart = () => {
 
   const isShortRange = range === '1M' || range === '3M';
 
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const [chartWidth, setChartWidth] = useState(0);
+
+  useEffect(() => {
+    const node = chartContainerRef.current;
+    if (!node) return;
+    setChartWidth(node.clientWidth);
+    const observer = new ResizeObserver((entries) => {
+      setChartWidth(entries[0].contentRect.width);
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   const formatXTick = useCallback(
-    (value: string) => format(parseISO(value), isShortRange ? 'MMM d' : "MMM ''yy"),
+    (value: number) => format(value, isShortRange ? 'MMM d' : "MMM ''yy"),
     [isShortRange]
   );
 
   const hasData = !isLoading && !isError && data && data.length >= 2;
   const isEmpty = !isLoading && !isError && (!data || data.length < 2);
 
-  // For long ranges (6M+), emit one tick per month — otherwise Recharts repeats
-  // the same "MMM 'yy" label across adjacent daily points.
-  const xAxisTicks = useMemo(() => {
-    if (isShortRange || !data || data.length === 0) return undefined;
-    const seen = new Set<string>();
-    const ticks: string[] = [];
-    for (const point of data) {
-      const monthKey = point.date.slice(0, 7);
-      if (!seen.has(monthKey)) {
-        seen.add(monthKey);
-        ticks.push(point.date);
-      }
+  // Project each point to an epoch-ms timestamp so the X-axis can use a real
+  // time scale; categorical positioning made clustered snapshots collapse on top
+  // of each other on narrow screens.
+  const chartData = useMemo(() => (data ?? []).map((p) => ({ ...p, timestamp: parseISO(p.date).getTime() })), [data]);
+
+  const xDomain = useMemo<[number, number] | undefined>(() => {
+    if (chartData.length === 0) return undefined;
+    return [chartData[0].timestamp, chartData[chartData.length - 1].timestamp];
+  }, [chartData]);
+
+  // Build tick timestamps based on range: daily for short ranges anchor on first/last
+  // and intermediate ticks; monthly for long ranges. Subsampled to fit width.
+  const xAxisTicks = useMemo<number[] | undefined>(() => {
+    if (chartData.length === 0 || !xDomain) return undefined;
+
+    const [startTs, endTs] = xDomain;
+    const startDate = new Date(startTs);
+
+    if (isShortRange) {
+      // Let Recharts auto-place ticks for short ranges (it positions them along
+      // the time scale with minTickGap, which handles overlap correctly).
+      return undefined;
     }
-    return ticks;
-  }, [data, isShortRange]);
+
+    // Monthly ticks at the 1st of each month within the visible domain.
+    const monthlyTicks: number[] = [];
+    const cursor = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    // Skip the first month-start if it falls before the domain start.
+    if (cursor.getTime() < startTs) cursor.setMonth(cursor.getMonth() + 1);
+    while (cursor.getTime() <= endTs) {
+      monthlyTicks.push(cursor.getTime());
+      cursor.setMonth(cursor.getMonth() + 1);
+    }
+    if (monthlyTicks.length === 0) return undefined;
+
+    if (chartWidth === 0) return monthlyTicks;
+    // ~70px per "MMM 'yy" label keeps adjacent labels from touching.
+    const LABEL_WIDTH = 70;
+    const maxTicks = Math.max(2, Math.floor(chartWidth / LABEL_WIDTH));
+    if (monthlyTicks.length <= maxTicks) return monthlyTicks;
+
+    const step = Math.ceil(monthlyTicks.length / maxTicks);
+    return monthlyTicks.filter((_, i) => i % step === 0);
+  }, [chartData, xDomain, isShortRange, chartWidth]);
 
   // Card shell — always rendered so range tabs stay accessible
   const cardHeader = (
@@ -169,9 +213,9 @@ const NetWorthChart = () => {
 
       {/* Chart */}
       {hasData && (
-        <div className="h-[280px]">
+        <div ref={chartContainerRef} className="h-[280px]">
           <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-            <AreaChart data={data} margin={{ left: 0, right: 20, top: 8, bottom: 0 }}>
+            <AreaChart data={chartData} margin={{ left: 0, right: 20, top: 8, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorNetWorth" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="var(--color-success)" stopOpacity={0.2} />
@@ -181,7 +225,10 @@ const NetWorthChart = () => {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" opacity={0.5} vertical={false} />
               <XAxis
-                dataKey="date"
+                dataKey="timestamp"
+                type="number"
+                scale="time"
+                domain={xDomain ?? ['dataMin', 'dataMax']}
                 stroke="var(--color-border-subtle)"
                 tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
                 axisLine={{ stroke: 'var(--color-border-subtle)' }}
@@ -189,7 +236,6 @@ const NetWorthChart = () => {
                 tickMargin={8}
                 height={28}
                 minTickGap={40}
-                interval={xAxisTicks ? 0 : 'preserveStartEnd'}
                 ticks={xAxisTicks}
                 tickFormatter={formatXTick}
               />
