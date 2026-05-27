@@ -7,14 +7,11 @@ import { Calendar, DollarSign, FileText, Layers, Loader2, Plus } from 'lucide-re
 
 import { createExpenseSchema } from '@schemas';
 
-import { EXPENSE_CATEGORIES } from '@constants';
-
 import { tomanToUsd, usdToToman } from '@features/ExchangeRate/utils/currency-conversion';
 
 import AmountInput from '@components/AmountInput';
 import Button from '@components/Button';
 import DatePicker from '@components/DatePicker';
-import Select from '@components/Select';
 import { useToast } from '@components/Toast/ToastProvider';
 import Tooltip from '@components/Tooltip';
 
@@ -23,13 +20,26 @@ import { useCreateExpense, useUpdateExpense } from '@hooks/use-expenses';
 
 import { ensureError } from '@utils';
 
-import { type CreateExpenseInput, type Tag } from '@/@types/expense';
+import { type Category, type CreateExpenseInput, type Tag } from '@/@types/expense';
 
+import CategorySelect from '../CategorySelect';
 import TagInput from '../TagInput';
 
 interface ExpenseFormProps {
   onExpenseAdded: () => void;
-  editingExpense?: { id: number; tags?: Tag[] } & CreateExpenseInput;
+  /**
+   * The editing expense. Note: `category` is the full Category object (from
+   * GET /api/expenses), while the form's local `formData` carries just the id.
+   */
+  editingExpense?: {
+    id: number;
+    date: string;
+    category: Category;
+    description: string;
+    price_toman: number;
+    price_usd: number;
+    tags?: Tag[];
+  };
   onCancelEdit?: () => void;
   setIsDirty?: (dirty: boolean) => void;
 }
@@ -54,7 +64,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
 
   const defaultFormData: CreateExpenseInput = {
     date: new Date().toISOString().split('T')[0],
-    category: '',
+    categoryId: 0,
     description: '',
     price_toman: 0,
     price_usd: 0,
@@ -63,14 +73,14 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
 
   const buildFormData = (expense: {
     date: string;
-    category: string;
+    category: Category;
     description: string;
     price_toman: number;
     price_usd: number;
     tags?: Tag[];
   }): CreateExpenseInput => ({
     date: expense.date,
-    category: expense.category,
+    categoryId: expense.category.id,
     description: expense.description,
     price_toman: expense.price_toman,
     price_usd: expense.price_usd,
@@ -119,7 +129,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
 
     const isDirty =
       formData.date !== initialFormData.date ||
-      formData.category !== initialFormData.category ||
+      formData.categoryId !== initialFormData.categoryId ||
       formData.description !== initialFormData.description ||
       formData.price_toman !== initialFormData.price_toman ||
       formData.price_usd !== initialFormData.price_usd ||
@@ -219,12 +229,9 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
             <Layers className="text-text-muted h-4 w-4" />
             Category
           </label>
-          <Select
-            value={formData.category}
-            onChange={(val) => setFormData({ ...formData, category: val })}
-            options={EXPENSE_CATEGORIES.map((cat) => ({ value: cat.value, label: cat.label }))}
-            placeholder="Select category..."
-            required
+          <CategorySelect
+            value={formData.categoryId || null}
+            onChange={(id) => setFormData({ ...formData, categoryId: id ?? 0 })}
           />
         </div>
 

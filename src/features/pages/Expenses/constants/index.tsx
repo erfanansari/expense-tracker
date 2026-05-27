@@ -4,8 +4,9 @@ import { Tag } from 'lucide-react';
 import type { Expense } from '@types';
 
 import ActionButtons from '@components/ActionButtons';
+import CategoryBadge from '@components/CategoryBadge';
 
-import { formatNumber, formatToFarsiDate, getCategoryLabel } from '@utils';
+import { formatNumber, formatToFarsiDate } from '@utils';
 
 export function buildExpenseColumns(
   handleEdit: (expense: Expense) => void,
@@ -45,10 +46,7 @@ export function buildExpenseColumns(
       accessorKey: 'category',
       header: 'Category',
       meta: { widthClass: 'w-[18%]' },
-      cell: ({ row }) => {
-        const categoryLabels = getCategoryLabel(row.original.category);
-        return <span className="text-text-primary text-sm font-medium">{categoryLabels.en}</span>;
-      },
+      cell: ({ row }) => <CategoryBadge category={row.original.category} />,
     },
     {
       id: 'date',

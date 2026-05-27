@@ -1,5 +1,5 @@
 import type { Asset, AssetValuation } from '@/@types/asset';
-import type { Expense, Tag } from '@/@types/expense';
+import type { Category, Expense, Tag } from '@/@types/expense';
 import type { Income } from '@/@types/income';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,11 +55,11 @@ export function mapRowToAssetValuation(row: DbRow): AssetValuation {
   };
 }
 
-export function mapRowToExpense(row: DbRow, tags?: Tag[]): Expense {
+export function mapRowToExpense(row: DbRow, category: Category, tags?: Tag[]): Expense {
   return {
     id: row.id as number,
     date: row.date as string,
-    category: row.category as string,
+    category,
     description: row.description as string,
     price_toman: row.price_toman as number,
     price_usd: row.price_usd as number,

@@ -1,5 +1,6 @@
 'use client';
 
+import { getCategoryColor } from '@constants/categories';
 import { format, parseISO, startOfWeek } from 'date-fns';
 import { BarChart3, PieChartIcon, TrendingUp } from 'lucide-react';
 import {
@@ -19,7 +20,7 @@ import {
 
 import ChartTooltip from '@components/ChartTooltip';
 
-import { formatChartTooltipDate, formatNumber, getCategoryLabel } from '@utils';
+import { formatChartTooltipDate, formatNumber } from '@utils';
 
 import { type Expense } from '@/@types/expense';
 
@@ -27,18 +28,6 @@ interface ExpenseChartsProps {
   expenses: Expense[];
   granularity?: 'daily' | 'weekly' | 'monthly';
 }
-
-// Neutral colors for light mode
-const COLORS = [
-  '#0070f3', // Vercel blue
-  '#525252', // dark gray
-  '#737373', // medium gray
-  '#10b981', // emerald (success)
-  '#3b82f6', // blue
-  '#a3a3a3', // light gray
-  '#2563eb', // darker blue
-  '#171717', // black
-];
 
 // Tooltip for pie / bar (category-based)
 const CategoryTooltip = ({
@@ -90,25 +79,26 @@ const AreaTooltip = ({
 };
 
 export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseChartsProps) {
-  // Variables
+  // Aggregate per category, carrying the category's color through so chart
+  // segments / bars / legend chips all share a single source of truth.
   const categoryTotals = expenses.reduce(
     (acc, exp) => {
-      const existing = acc.find((item) => item.category === exp.category);
+      const existing = acc.find((item) => item.categoryId === exp.category.id);
       if (existing) {
         existing.value += exp.price_toman;
         existing.usdValue += exp.price_usd;
       } else {
-        const labels = getCategoryLabel(exp.category);
         acc.push({
-          category: exp.category,
-          name: labels.en,
+          categoryId: exp.category.id,
+          name: exp.category.name,
+          color: getCategoryColor(exp.category.color).fill,
           value: exp.price_toman,
           usdValue: exp.price_usd,
         });
       }
       return acc;
     },
-    [] as Array<{ category: string; name: string; value: number; usdValue: number }>
+    [] as Array<{ categoryId: number; name: string; color: string; value: number; usdValue: number }>
   );
 
   categoryTotals.sort((a, b) => b.value - a.value);
@@ -186,8 +176,8 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
                 animationDuration={800}
                 animationEasing="ease-out"
               >
-                {categoryTotals.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                {categoryTotals.map((cat) => (
+                  <Cell key={`cell-${cat.categoryId}`} fill={cat.color} />
                 ))}
               </Pie>
               <Tooltip content={<CategoryTooltip />} />
@@ -196,17 +186,12 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-2">
-          {categoryTotals.map((cat, index) => (
+          {categoryTotals.map((cat) => (
             <div
-              key={cat.category}
+              key={cat.categoryId}
               className="border-border-subtle bg-background-secondary hover:bg-background-elevated flex cursor-default items-center gap-2.5 rounded-lg border p-2.5 transition-all duration-200"
             >
-              <div
-                className="h-3 w-3 shrink-0 rounded-full"
-                style={{
-                  backgroundColor: COLORS[index % COLORS.length],
-                }}
-              />
+              <div className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: cat.color }} />
               <span className="text-text-secondary truncate text-sm font-medium">{cat.name}</span>
             </div>
           ))}
@@ -244,8 +229,8 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
               />
               <Tooltip content={<CategoryTooltip />} cursor={{ fill: 'var(--color-background-secondary)' }} />
               <Bar dataKey="value" radius={[0, 8, 8, 0]} animationDuration={800}>
-                {categoryTotals.map((_, index) => (
-                  <Cell key={`bar-${index}`} fill={COLORS[index % COLORS.length]} />
+                {categoryTotals.map((cat) => (
+                  <Cell key={`bar-${cat.categoryId}`} fill={cat.color} />
                 ))}
               </Bar>
             </BarChart>

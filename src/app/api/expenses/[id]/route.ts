@@ -20,15 +20,17 @@ export const PUT = withAuth(async (user, request, { params }) => {
 
   const body = result.data;
 
-  // Update the expense
+  // Verify the category belongs to this user
+  const category = await verifyOwnership('categories', body.categoryId, user.userId, 'user_id');
+  if (category instanceof NextResponse) return category;
+
   await db.execute({
     sql: `UPDATE expenses
-          SET date = ?, category = ?, description = ?, price_toman = ?, price_usd = ?
+          SET date = ?, category_id = ?, description = ?, price_toman = ?, price_usd = ?
           WHERE id = ? AND user_id = ?`,
-    args: [body.date, body.category, body.description, body.price_toman, body.price_usd, id, user.userId],
+    args: [body.date, body.categoryId, body.description, body.price_toman, body.price_usd, id, user.userId],
   });
 
-  // Update tags - delete existing and insert new ones
   await assignTagsToExpense(id, body.tagIds);
 
   return NextResponse.json({ message: 'Expense updated successfully' }, { status: 200 });

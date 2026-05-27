@@ -62,33 +62,33 @@ const ReportsPage = () => {
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterTags, setFilterTags] = useState<Tag[]>([]);
-  const [filterCategories, setFilterCategories] = useState<string[]>([]);
+  const [filterCategoryIds, setFilterCategoryIds] = useState<number[]>([]);
 
   // Queries
   const { data: expensesData, isLoading } = useAllExpenses();
 
   // Variables
   const expenses: Expense[] = expensesData ?? [];
-  const activeFilterCount = filterTags.length + filterCategories.length;
+  const activeFilterCount = filterTags.length + filterCategoryIds.length;
 
   // Memos
   const filteredExpenses = useMemo(() => {
     let result = filterExpensesByDateRange(expenses, dateRange);
-    if (filterCategories.length > 0) {
-      result = result.filter((e) => filterCategories.includes(e.category));
+    if (filterCategoryIds.length > 0) {
+      result = result.filter((e) => filterCategoryIds.includes(e.category.id));
     }
     if (filterTags.length > 0) {
       const tagIds = new Set(filterTags.map((t) => t.id));
       result = result.filter((e) => e.tags?.some((t) => tagIds.has(t.id)));
     }
     return result;
-  }, [expenses, dateRange, filterCategories, filterTags]);
+  }, [expenses, dateRange, filterCategoryIds, filterTags]);
 
   const chartGranularity = useMemo(() => getChartGranularity(dateRange), [dateRange]);
 
   const handleResetFilters = () => {
     setFilterTags([]);
-    setFilterCategories([]);
+    setFilterCategoryIds([]);
   };
 
   return (
@@ -125,9 +125,9 @@ const ReportsPage = () => {
                 isOpen={isFilterOpen}
                 onClose={() => setIsFilterOpen(false)}
                 selectedTags={filterTags}
-                selectedCategories={filterCategories}
+                selectedCategoryIds={filterCategoryIds}
                 onTagsChange={setFilterTags}
-                onCategoriesChange={setFilterCategories}
+                onCategoriesChange={setFilterCategoryIds}
                 onReset={handleResetFilters}
               />
             </div>

@@ -10,7 +10,7 @@ export interface ExpensesPage {
 
 export interface ExpenseFilters {
   description?: string;
-  category?: string;
+  categoryId?: number;
   dateFrom?: string;
   dateTo?: string;
   tagIds?: number[];
@@ -20,7 +20,7 @@ export async function fetchExpensesPage(cursor?: string, limit = 20, filters?: E
   const params = new URLSearchParams({ limit: String(limit) });
   if (cursor) params.set('cursor', cursor);
   if (filters?.description) params.set('description', filters.description);
-  if (filters?.category) params.set('category', filters.category);
+  if (filters?.categoryId) params.set('categoryId', String(filters.categoryId));
   if (filters?.dateFrom) params.set('dateFrom', filters.dateFrom);
   if (filters?.dateTo) params.set('dateTo', filters.dateTo);
   if (filters?.tagIds?.length) params.set('tagIds', filters.tagIds.join(','));

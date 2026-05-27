@@ -24,7 +24,7 @@ export function expensesToCsvString(expenses: Expense[]): string {
   for (const e of expenses) {
     const tags = (e.tags ?? []).map((t) => t.name).join(';');
     rows.push(
-      [e.id, e.date, e.category, e.description, e.price_toman, e.price_usd, tags, e.created_at]
+      [e.id, e.date, e.category.name, e.description, e.price_toman, e.price_usd, tags, e.created_at]
         .map(escapeCsvCell)
         .join(',')
     );
@@ -36,7 +36,7 @@ export function expensesToSheetRows(expenses: Expense[]): (string | number)[][] 
   const rows: (string | number)[][] = [EXPENSE_CSV_HEADERS];
   for (const e of expenses) {
     const tags = (e.tags ?? []).map((t) => t.name).join(';');
-    rows.push([e.id, e.date, e.category, e.description, e.price_toman, e.price_usd, tags, e.created_at]);
+    rows.push([e.id, e.date, e.category.name, e.description, e.price_toman, e.price_usd, tags, e.created_at]);
   }
   return rows;
 }

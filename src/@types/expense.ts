@@ -12,10 +12,36 @@ export interface UpdateTagInput {
   name: string;
 }
 
+export interface Category {
+  id: number;
+  name: string;
+  icon: string;
+  color: string;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface CategoryWithUsage extends Category {
+  usage_count: number;
+}
+
+export interface CreateCategoryInput {
+  name: string;
+  icon?: string;
+  color?: string;
+}
+
+export interface UpdateCategoryInput {
+  name?: string;
+  icon?: string;
+  color?: string;
+  sort_order?: number;
+}
+
 export interface Expense {
   id: number;
   date: string;
-  category: string;
+  category: Category;
   description: string;
   price_toman: number;
   price_usd: number;
@@ -25,7 +51,7 @@ export interface Expense {
 
 export interface CreateExpenseInput {
   date: string;
-  category: string;
+  categoryId: number;
   description: string;
   price_toman: number;
   price_usd: number;

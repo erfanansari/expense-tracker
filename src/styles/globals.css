@@ -106,6 +106,24 @@
   --color-icon-box-bg: #fafafa;
   --color-icon-box-border: #e5e5e5;
 
+  /* Category accent palette (used by user-managed categories) */
+  --color-cat-blue: #0070f3;
+  --color-cat-green: #10b981;
+  --color-cat-amber: #f59e0b;
+  --color-cat-sky: #0ea5e9;
+  --color-cat-rose: #f43f5e;
+  --color-cat-violet: #8b5cf6;
+  --color-cat-orange: #f97316;
+  --color-cat-pink: #ec4899;
+  --color-cat-cyan: #06b6d4;
+  --color-cat-emerald: #059669;
+  --color-cat-slate: #64748b;
+  --color-cat-gray: #6b7280;
+  --color-cat-red: #ef4444;
+  --color-cat-indigo: #6366f1;
+  --color-cat-lime: #84cc16;
+  --color-cat-teal: #14b8a6;
+
   /* ===================================
      SHADOWS
      =================================== */
@@ -201,6 +219,24 @@
 
   --color-icon-box-bg: var(--color-icon-box-bg);
   --color-icon-box-border: var(--color-icon-box-border);
+
+  /* Category accent palette */
+  --color-cat-blue: var(--color-cat-blue);
+  --color-cat-green: var(--color-cat-green);
+  --color-cat-amber: var(--color-cat-amber);
+  --color-cat-sky: var(--color-cat-sky);
+  --color-cat-rose: var(--color-cat-rose);
+  --color-cat-violet: var(--color-cat-violet);
+  --color-cat-orange: var(--color-cat-orange);
+  --color-cat-pink: var(--color-cat-pink);
+  --color-cat-cyan: var(--color-cat-cyan);
+  --color-cat-emerald: var(--color-cat-emerald);
+  --color-cat-slate: var(--color-cat-slate);
+  --color-cat-gray: var(--color-cat-gray);
+  --color-cat-red: var(--color-cat-red);
+  --color-cat-indigo: var(--color-cat-indigo);
+  --color-cat-lime: var(--color-cat-lime);
+  --color-cat-teal: var(--color-cat-teal);
 
   /* Font family */
   --font-sans: var(--font-persian);

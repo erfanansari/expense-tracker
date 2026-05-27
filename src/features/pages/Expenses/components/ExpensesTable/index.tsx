@@ -2,7 +2,6 @@
 
 import { useMemo, useRef } from 'react';
 
-import { EXPENSE_CATEGORIES } from '@constants/categories';
 import { Calendar, FileText, Loader2, Search, Tag as TagIcon, X } from 'lucide-react';
 import type { DatePicker as ReactDatePickerType } from 'react-datepicker';
 import type { MultiValue } from 'react-select';
@@ -11,11 +10,13 @@ import Select2 from 'react-select';
 import { ApiError } from '@core/errors';
 
 import Button from '@components/Button';
+import CategoryBadge from '@components/CategoryBadge';
 import DataTable from '@components/DataTable';
 import DatePicker from '@components/DatePicker';
 import Select from '@components/Select';
 import Pulse from '@components/Skeleton';
 
+import { useCategories } from '@hooks/use-categories';
 import { useTags } from '@hooks/use-tags';
 
 import type { Tag } from '@/@types/expense';
@@ -185,6 +186,7 @@ const ExpensesTable = ({
 
   // Derived state
   const { data: allTags = [] } = useTags();
+  const { data: allCategories = [] } = useCategories();
   const selectedTagObjects: Tag[] = useMemo(
     () => (filters.tagIds ?? []).map((id) => allTags.find((t) => t.id === id)).filter(Boolean) as Tag[],
     [filters.tagIds, allTags]
@@ -193,7 +195,7 @@ const ExpensesTable = ({
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (descInput) count++;
-    if (filters.category) count++;
+    if (filters.categoryId) count++;
     if (filters.dateFrom || filters.dateTo) count++;
     count += (filters.tagIds ?? []).length;
     return count;
@@ -201,9 +203,9 @@ const ExpensesTable = ({
 
   const hasActiveFilter = activeFilterCount > 0;
 
-  const categoryLabel = useMemo(
-    () => EXPENSE_CATEGORIES.find((c) => c.value === filters.category)?.label,
-    [filters.category]
+  const selectedCategory = useMemo(
+    () => (filters.categoryId ? allCategories.find((c) => c.id === filters.categoryId) : undefined),
+    [filters.categoryId, allCategories]
   );
 
   // Memos
@@ -270,11 +272,11 @@ const ExpensesTable = ({
           <div className="flex flex-wrap items-center gap-2 px-4 py-2.5">
             {/* Category */}
             <Select
-              value={filters.category ?? ''}
-              onChange={(val) => onFiltersChange((f) => ({ ...f, category: val || undefined }))}
+              value={filters.categoryId ? String(filters.categoryId) : ''}
+              onChange={(val) => onFiltersChange((f) => ({ ...f, categoryId: val ? Number(val) : undefined }))}
               options={[
                 { value: '', label: 'All categories' },
-                ...EXPENSE_CATEGORIES.map((c) => ({ value: c.value, label: c.label })),
+                ...allCategories.map((c) => ({ value: String(c.id), label: c.name })),
               ]}
               placeholder="All categories"
               className="min-w-[130px] flex-1"
@@ -335,16 +337,16 @@ const ExpensesTable = ({
 
           {/* Row 3: Active filter chips */}
           {hasActiveFilter &&
-            (categoryLabel || filters.dateFrom || filters.dateTo || selectedTagObjects.length > 0) && (
+            (selectedCategory || filters.dateFrom || filters.dateTo || selectedTagObjects.length > 0) && (
               <div className="flex flex-wrap items-center gap-1.5 px-4 pb-2.5">
                 {/* Category chip */}
-                {categoryLabel && (
-                  <span className="border-border-subtle bg-background-secondary text-text-secondary flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs">
-                    {categoryLabel}
+                {selectedCategory && (
+                  <span className="border-border-subtle bg-background-secondary flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs">
+                    <CategoryBadge category={selectedCategory} />
                     <button
-                      onClick={() => onFiltersChange((f) => ({ ...f, category: undefined }))}
+                      onClick={() => onFiltersChange((f) => ({ ...f, categoryId: undefined }))}
                       className="text-text-muted hover:text-text-primary ml-0.5 transition-colors"
-                      aria-label={`Remove category filter: ${categoryLabel}`}
+                      aria-label={`Remove category filter: ${selectedCategory.name}`}
                     >
                       <X className="h-3 w-3" />
                     </button>

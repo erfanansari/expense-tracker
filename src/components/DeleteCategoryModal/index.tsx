@@ -1,0 +1,161 @@
+'use client';
+
+import { createElement, useState } from 'react';
+
+import { getCategoryColor, getCategoryIcon } from '@constants/categories';
+import { AlertTriangle, ArrowRight, Loader2 } from 'lucide-react';
+
+import Button from '@components/Button';
+import CategoryBadge from '@components/CategoryBadge';
+import Modal from '@components/Modal';
+
+import type { CategoryWithUsage } from '@/@types/expense';
+
+interface DeleteCategoryModalProps {
+  isOpen: boolean;
+  category: CategoryWithUsage | null;
+  /** All categories belonging to the user — used to populate the reassign list. */
+  allCategories: CategoryWithUsage[];
+  onConfirm: (reassignToId?: number) => void;
+  onCancel: () => void;
+  isDeleting?: boolean;
+}
+
+const DeleteCategoryModal = ({
+  isOpen,
+  category,
+  allCategories,
+  onConfirm,
+  onCancel,
+  isDeleting = false,
+}: DeleteCategoryModalProps) => {
+  const [reassignToId, setReassignToId] = useState<number | null>(null);
+
+  // Reset selection whenever the modal opens against a new category.
+  // Done as a render-phase comparison to avoid the `setState in useEffect`
+  // cascade flagged by React 19.
+  const trackingKey = isOpen ? (category?.id ?? null) : null;
+  const [prevTrackingKey, setPrevTrackingKey] = useState(trackingKey);
+  if (prevTrackingKey !== trackingKey) {
+    setPrevTrackingKey(trackingKey);
+    setReassignToId(null);
+  }
+
+  if (!category) return null;
+
+  const hasUsage = category.usage_count > 0;
+  const candidates = allCategories.filter((c) => c.id !== category.id);
+  const canConfirm = hasUsage ? reassignToId !== null : true;
+
+  return (
+    <Modal isOpen={isOpen} onClose={isDeleting ? () => {} : onCancel} showCloseButton={false}>
+      <div className="text-center">
+        <div className="bg-danger/10 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+          <AlertTriangle className="text-danger h-6 w-6" aria-hidden="true" />
+        </div>
+
+        <div className="mt-4">
+          <h3 className="text-text-primary text-lg font-semibold">Delete category &ldquo;{category.name}&rdquo;?</h3>
+        </div>
+
+        {hasUsage ? (
+          <div className="mt-3 space-y-3">
+            <p className="text-text-secondary text-sm">
+              This category is used in <span className="font-semibold">{category.usage_count}</span>{' '}
+              {category.usage_count === 1 ? 'expense' : 'expenses'}. Pick a category to move them into:
+            </p>
+
+            <div className="border-border-subtle bg-background-secondary mt-2 max-h-56 overflow-y-auto rounded-lg border p-2 text-left">
+              {candidates.length === 0 ? (
+                <p className="text-text-muted px-2 py-3 text-center text-xs">
+                  No other categories exist — create one first before deleting this.
+                </p>
+              ) : (
+                <ul className="space-y-1">
+                  {candidates.map((c) => {
+                    const iconComp = getCategoryIcon(c.icon);
+                    const color = getCategoryColor(c.color);
+                    const selected = reassignToId === c.id;
+                    return (
+                      <li key={c.id}>
+                        <label
+                          className={`flex cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 transition-colors ${
+                            selected ? 'bg-background-elevated' : 'hover:bg-background-elevated'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="reassignTarget"
+                            value={c.id}
+                            checked={selected}
+                            onChange={() => setReassignToId(c.id)}
+                            className="sr-only"
+                          />
+                          <span
+                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${color.pill}`}
+                          >
+                            {createElement(iconComp, { className: 'h-3.5 w-3.5' })}
+                          </span>
+                          <span className="text-text-primary flex-1 text-sm font-medium">{c.name}</span>
+                          <span className="text-text-muted text-xs">
+                            {c.usage_count} {c.usage_count === 1 ? 'expense' : 'expenses'}
+                          </span>
+                          {selected && (
+                            <span className="text-blue text-xs font-semibold" aria-hidden="true">
+                              <ArrowRight className="h-3.5 w-3.5" />
+                            </span>
+                          )}
+                        </label>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+
+            {reassignToId !== null && (
+              <p className="text-text-secondary flex flex-wrap items-center justify-center gap-1.5 text-xs">
+                <CategoryBadge category={category} />
+                <ArrowRight className="text-text-muted h-3 w-3" aria-hidden="true" />
+                {(() => {
+                  const target = candidates.find((c) => c.id === reassignToId);
+                  return target ? <CategoryBadge category={target} /> : null;
+                })()}
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="mt-3 space-y-2">
+            <p className="text-text-secondary text-sm">This category is not used by any expenses.</p>
+            <p className="text-text-secondary text-sm font-medium">This action cannot be undone.</p>
+          </div>
+        )}
+
+        <div className="mt-6 flex gap-3">
+          <Button variant="outline" onClick={onCancel} disabled={isDeleting} className="flex-1">
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => onConfirm(reassignToId ?? undefined)}
+            disabled={isDeleting || !canConfirm}
+            className="bg-danger hover:bg-danger-hover flex-1"
+          >
+            {isDeleting ? (
+              <>
+                <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                <span>Deleting...</span>
+              </>
+            ) : hasUsage ? (
+              'Reassign & Delete'
+            ) : (
+              'Delete'
+            )}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+export default DeleteCategoryModal;

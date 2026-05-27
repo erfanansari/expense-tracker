@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import { EXPENSE_CATEGORIES } from '@constants/categories';
 import { Check, X } from 'lucide-react';
 import { components as rsComponents } from 'react-select';
 import type { CSSObjectWithLabel, MenuListProps, MultiValue, OptionProps, StylesConfig } from 'react-select';
@@ -12,6 +11,7 @@ import { twMerge } from 'tailwind-merge';
 import Button from '@components/Button';
 import Modal from '@components/Modal';
 
+import { useCategories } from '@hooks/use-categories';
 import { useTags } from '@hooks/use-tags';
 
 import type { Tag } from '@/@types/expense';
@@ -20,9 +20,9 @@ interface ReportsFilterPopoverProps {
   isOpen: boolean;
   onClose: () => void;
   selectedTags: Tag[];
-  selectedCategories: string[];
+  selectedCategoryIds: number[];
   onTagsChange: (tags: Tag[]) => void;
-  onCategoriesChange: (categories: string[]) => void;
+  onCategoriesChange: (categoryIds: number[]) => void;
   onReset: () => void;
 }
 
@@ -31,7 +31,7 @@ interface TagOption {
   label: string;
 }
 interface CategoryOption {
-  value: string;
+  value: number;
   label: string;
 }
 
@@ -210,12 +210,13 @@ const ReportsFilterPopover = ({
   isOpen,
   onClose,
   selectedTags,
-  selectedCategories,
+  selectedCategoryIds,
   onTagsChange,
   onCategoriesChange,
   onReset,
 }: ReportsFilterPopoverProps) => {
   const { data: allTags = [] } = useTags();
+  const { data: allCategories = [] } = useCategories();
   const popoverRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -254,8 +255,10 @@ const ReportsFilterPopover = ({
 
   const tagOptions: TagOption[] = allTags.map((t) => ({ value: t.id, label: t.name }));
   const selectedTagOptions: TagOption[] = selectedTags.map((t) => ({ value: t.id, label: t.name }));
-  const categoryOptions: CategoryOption[] = EXPENSE_CATEGORIES.map((c) => ({ value: c.value, label: c.label }));
-  const selectedCategoryOptions: CategoryOption[] = categoryOptions.filter((c) => selectedCategories.includes(c.value));
+  const categoryOptions: CategoryOption[] = allCategories.map((c) => ({ value: c.id, label: c.name }));
+  const selectedCategoryOptions: CategoryOption[] = categoryOptions.filter((c) =>
+    selectedCategoryIds.includes(c.value)
+  );
 
   const handleTagsChange = (next: MultiValue<TagOption>) => {
     const tags = next.map((o) => allTags.find((t) => t.id === o.value)).filter(Boolean) as Tag[];
@@ -266,7 +269,7 @@ const ReportsFilterPopover = ({
     onCategoriesChange(next.map((o) => o.value));
   };
 
-  const activeCount = selectedTags.length + selectedCategories.length;
+  const activeCount = selectedTags.length + selectedCategoryIds.length;
 
   const bodyProps = {
     tagOptions,

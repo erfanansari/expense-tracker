@@ -17,6 +17,10 @@ export const queryKeys = {
     all: () => ['tags'] as const,
     withUsage: () => ['tags', 'withUsage'] as const,
   },
+  categories: {
+    all: () => ['categories'] as const,
+    withUsage: () => ['categories', 'withUsage'] as const,
+  },
   summary: {
     all: () => ['summary'] as const,
   },

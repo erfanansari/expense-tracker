@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 
 import { createExpenseSchema } from '@schemas';
 
-import { getSearchParams, validateBody, withAuth } from '@core/api/utils';
+import { getSearchParams, validateBody, verifyOwnership, withAuth } from '@core/api/utils';
+import { fetchCategoriesForExpenses } from '@core/database/categories';
 import { db } from '@core/database/client';
 import { mapRowToExpense } from '@core/database/mappers';
 import { assignTagsToExpense, fetchTagsForExpenses } from '@core/database/tags';
@@ -11,6 +12,7 @@ import { assignTagsToExpense, fetchTagsForExpenses } from '@core/database/tags';
 // Query parameters:
 //   - limit: number of expenses to fetch (default: all expenses, for backward compatibility)
 //   - cursor: pagination cursor in format "date:created_at:id" (optional)
+//   - categoryId: filter by category id
 // If limit is not provided, returns all expenses in the old format (backward compatible)
 // If limit is provided, returns paginated format: { expenses, nextCursor, hasMore }
 export const GET = withAuth(async (user, request) => {
@@ -18,23 +20,29 @@ export const GET = withAuth(async (user, request) => {
   const limitParam = searchParams.get('limit');
   const cursor = searchParams.get('cursor');
   const description = searchParams.get('description')?.trim() || null;
-  const category = searchParams.get('category')?.trim() || null;
+  const categoryIdParam = searchParams.get('categoryId')?.trim() || null;
+  const categoryId = categoryIdParam ? Number(categoryIdParam) : null;
   const dateFrom = searchParams.get('dateFrom')?.trim() || null;
   const dateTo = searchParams.get('dateTo')?.trim() || null;
   const tagIdsParam = searchParams.get('tagIds')?.trim() || null;
   const tagIds = tagIdsParam ? tagIdsParam.split(',').map(Number).filter(Boolean) : [];
 
-  // Backward compatibility: if no limit is specified, return all expenses in old format (array)
-  // This is used by the page component for stats and charts
+  // Backward compatibility: if no limit is specified, return all expenses
   if (!limitParam || limitParam === '') {
     const result = await db.execute({
       sql: 'SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC, created_at DESC',
       args: [user.userId],
     });
 
-    // Fetch tags for all expenses
-    const tagsMap = await fetchTagsForExpenses(result.rows.map((row) => row.id));
-    const expenses = result.rows.map((row) => mapRowToExpense(row, tagsMap[row.id as number]));
+    const ids = result.rows.map((row) => row.id);
+    const [tagsMap, categoriesMap] = await Promise.all([fetchTagsForExpenses(ids), fetchCategoriesForExpenses(ids)]);
+    const expenses = result.rows
+      .map((row) => {
+        const cat = categoriesMap[row.id as number];
+        if (!cat) return null;
+        return mapRowToExpense(row, cat, tagsMap[row.id as number]);
+      })
+      .filter((e): e is NonNullable<typeof e> => e !== null);
 
     return NextResponse.json(expenses);
   }
@@ -45,14 +53,13 @@ export const GET = withAuth(async (user, request) => {
   let sql = 'SELECT * FROM expenses WHERE user_id = ?';
   const args: (string | number)[] = [user.userId];
 
-  // Apply text/category/date filters
   if (description) {
     sql += ' AND description LIKE ?';
     args.push(`%${description}%`);
   }
-  if (category) {
-    sql += ' AND category = ?';
-    args.push(category);
+  if (categoryId) {
+    sql += ' AND category_id = ?';
+    args.push(categoryId);
   }
   if (dateFrom) {
     sql += ' AND date >= ?';
@@ -67,7 +74,6 @@ export const GET = withAuth(async (user, request) => {
     args.push(...tagIds);
   }
 
-  // Apply cursor-based pagination
   if (cursor) {
     const [cursorDate, cursorCreatedAt, cursorId] = cursor.split(':');
     sql += ` AND (date < ? OR (date = ? AND created_at < ?) OR (date = ? AND created_at = ? AND id < ?))`;
@@ -75,19 +81,23 @@ export const GET = withAuth(async (user, request) => {
   }
 
   sql += ' ORDER BY date DESC, created_at DESC, id DESC LIMIT ?';
-  args.push(limit + 1); // Fetch one extra to check if there's a next page
+  args.push(limit + 1);
 
   const result = await db.execute({ sql, args });
 
-  // Check if there are more items
   const hasMore = result.rows.length > limit;
   const expensesToReturn = hasMore ? result.rows.slice(0, limit) : result.rows;
 
-  // Fetch tags for all expenses
-  const tagsMap = await fetchTagsForExpenses(expensesToReturn.map((row) => row.id));
-  const expenses = expensesToReturn.map((row) => mapRowToExpense(row, tagsMap[row.id as number]));
+  const ids = expensesToReturn.map((row) => row.id);
+  const [tagsMap, categoriesMap] = await Promise.all([fetchTagsForExpenses(ids), fetchCategoriesForExpenses(ids)]);
+  const expenses = expensesToReturn
+    .map((row) => {
+      const cat = categoriesMap[row.id as number];
+      if (!cat) return null;
+      return mapRowToExpense(row, cat, tagsMap[row.id as number]);
+    })
+    .filter((e): e is NonNullable<typeof e> => e !== null);
 
-  // Generate next cursor from the last item
   let nextCursor: string | null = null;
   if (hasMore && expenses.length > 0) {
     const lastExpense = expenses[expenses.length - 1];
@@ -109,15 +119,17 @@ export const POST = withAuth(async (user, request) => {
 
   const body = result.data;
 
-  // Insert the expense with user_id
+  // Verify the category belongs to this user
+  const category = await verifyOwnership('categories', body.categoryId, user.userId, 'user_id');
+  if (category instanceof NextResponse) return category;
+
   const expenseResult = await db.execute({
-    sql: 'INSERT INTO expenses (user_id, date, category, description, price_toman, price_usd) VALUES (?, ?, ?, ?, ?, ?) RETURNING id',
-    args: [user.userId, body.date, body.category, body.description, body.price_toman, body.price_usd],
+    sql: 'INSERT INTO expenses (user_id, date, category_id, description, price_toman, price_usd) VALUES (?, ?, ?, ?, ?, ?) RETURNING id',
+    args: [user.userId, body.date, body.categoryId, body.description, body.price_toman, body.price_usd],
   });
 
   const expenseId = expenseResult.rows[0].id as number;
 
-  // Insert tags if provided
   await assignTagsToExpense(expenseId, body.tagIds);
 
   return NextResponse.json({ message: 'Expense created successfully', id: expenseId }, { status: 201 });
