@@ -16,6 +16,7 @@ import {
 
 import ChartTooltip from '@components/ChartTooltip';
 import EmptyState from '@components/EmptyState';
+import ErrorState from '@components/ErrorState';
 import SegmentedSelector from '@components/SegmentedSelector';
 import Pulse from '@components/Skeleton';
 
@@ -74,7 +75,7 @@ function DeltaBadge({ data }: { data: Array<{ valueUsd: number }> }) {
 
 const NetWorthChart = () => {
   const [range, setRange] = useState<NetWorthRange>('6M');
-  const { data, isLoading, isError } = useNetWorthHistory(range);
+  const { data, isLoading, isError, error, refetch } = useNetWorthHistory(range);
 
   const isShortRange = range === '1M' || range === '3M';
 
@@ -183,9 +184,12 @@ const NetWorthChart = () => {
     return (
       <div className="border-border-subtle bg-background rounded-xl border p-5 shadow-sm sm:p-6">
         {cardHeader}
-        <div className="flex h-[280px] items-center justify-center">
-          <p className="text-danger text-sm">Failed to load net worth history.</p>
-        </div>
+        <ErrorState
+          title="Couldn't load net worth history"
+          description={error?.message ?? 'An unexpected error occurred while loading this data.'}
+          onRetry={() => refetch()}
+          className="min-h-[280px]"
+        />
       </div>
     );
   }

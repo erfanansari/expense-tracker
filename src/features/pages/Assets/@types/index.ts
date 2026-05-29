@@ -28,6 +28,7 @@ export interface AssetsTableProps {
   onEdit: (asset: Asset) => void;
   onDelete: (asset: Asset) => void;
   deletingId: number | null;
+  onRetry: () => void;
 }
 
 export interface AssetsDistributionProps {

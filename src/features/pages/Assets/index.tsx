@@ -42,7 +42,7 @@ function AssetsSummarySkeleton() {
 
 const AssetsPage = () => {
   // Queries
-  const { data: assets = [], isLoading, error } = useAssets();
+  const { data: assets = [], isLoading, error, refetch } = useAssets();
   const deleteAsset = useDeleteAsset();
 
   // Customs
@@ -124,6 +124,7 @@ const AssetsPage = () => {
           onEdit={openAssetDrawer}
           onDelete={openDeleteModal}
           deletingId={deletingId}
+          onRetry={() => refetch()}
         />
 
         {assets.length > 0 && (

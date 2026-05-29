@@ -37,7 +37,7 @@ function IncomeSummarySkeleton() {
 
 const IncomePage = () => {
   // Queries
-  const { data: incomes = [], isLoading, error } = useIncomes();
+  const { data: incomes = [], isLoading, error, refetch } = useIncomes();
   const deleteIncome = useDeleteIncome();
 
   // Customs
@@ -99,6 +99,7 @@ const IncomePage = () => {
           onEdit={openIncomeDrawer}
           onDelete={openDeleteModal}
           deletingId={deletingId}
+          onRetry={() => refetch()}
         />
 
         {/* Delete Confirmation Modal */}
