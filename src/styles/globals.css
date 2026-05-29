@@ -106,23 +106,26 @@
   --color-icon-box-bg: #fafafa;
   --color-icon-box-border: #e5e5e5;
 
-  /* Category accent palette (used by user-managed categories) */
-  --color-cat-blue: #0070f3;
-  --color-cat-green: #10b981;
-  --color-cat-amber: #f59e0b;
-  --color-cat-sky: #0ea5e9;
-  --color-cat-rose: #f43f5e;
-  --color-cat-violet: #8b5cf6;
-  --color-cat-orange: #f97316;
-  --color-cat-pink: #ec4899;
-  --color-cat-cyan: #06b6d4;
-  --color-cat-emerald: #059669;
-  --color-cat-slate: #64748b;
-  --color-cat-gray: #6b7280;
-  --color-cat-red: #ef4444;
-  --color-cat-indigo: #6366f1;
-  --color-cat-lime: #84cc16;
-  --color-cat-teal: #14b8a6;
+  /* Category accent palette (used by user-managed categories).
+     Tuned to match the design tokens above: deeper, less candy-saturated than
+     raw Tailwind defaults so the pills sit well next to the Vercel-style chrome.
+     blue / green / amber / violet / red map 1:1 to the semantic design tokens. */
+  --color-cat-blue: #0070f3; /* matches --color-blue */
+  --color-cat-green: #10b981; /* matches --color-success */
+  --color-cat-amber: #f59e0b; /* matches --color-warning */
+  --color-cat-violet: #8b5cf6; /* matches --color-info */
+  --color-cat-red: #ea001d; /* matches --color-danger */
+  --color-cat-sky: #0284c7; /* deeper sky, less competing with brand blue */
+  --color-cat-orange: #c2410c; /* warm rust, not neon */
+  --color-cat-rose: #be123c; /* serious crimson, not candy pink */
+  --color-cat-pink: #be185d; /* deep magenta */
+  --color-cat-cyan: #0e7490; /* deeper, more teal-leaning */
+  --color-cat-emerald: #047857; /* deeper than success green */
+  --color-cat-teal: #0f766e; /* deep teal */
+  --color-cat-indigo: #4338ca; /* deeper indigo */
+  --color-cat-lime: #4d7c0f; /* olive, not neon */
+  --color-cat-slate: #475569; /* cool gray */
+  --color-cat-gray: #4b5563; /* warm neutral gray */
 
   /* ===================================
      SHADOWS
@@ -220,23 +223,24 @@
   --color-icon-box-bg: var(--color-icon-box-bg);
   --color-icon-box-border: var(--color-icon-box-border);
 
-  /* Category accent palette */
-  --color-cat-blue: var(--color-cat-blue);
-  --color-cat-green: var(--color-cat-green);
-  --color-cat-amber: var(--color-cat-amber);
-  --color-cat-sky: var(--color-cat-sky);
-  --color-cat-rose: var(--color-cat-rose);
-  --color-cat-violet: var(--color-cat-violet);
-  --color-cat-orange: var(--color-cat-orange);
-  --color-cat-pink: var(--color-cat-pink);
-  --color-cat-cyan: var(--color-cat-cyan);
-  --color-cat-emerald: var(--color-cat-emerald);
-  --color-cat-slate: var(--color-cat-slate);
-  --color-cat-gray: var(--color-cat-gray);
-  --color-cat-red: var(--color-cat-red);
-  --color-cat-indigo: var(--color-cat-indigo);
-  --color-cat-lime: var(--color-cat-lime);
-  --color-cat-teal: var(--color-cat-teal);
+  /* Category accent palette — values inlined here (not var() refs) because
+     Tailwind v4's @theme inline resolves the literal at build time. */
+  --color-cat-blue: #0070f3;
+  --color-cat-green: #10b981;
+  --color-cat-amber: #f59e0b;
+  --color-cat-violet: #8b5cf6;
+  --color-cat-red: #ea001d;
+  --color-cat-sky: #0284c7;
+  --color-cat-orange: #c2410c;
+  --color-cat-rose: #be123c;
+  --color-cat-pink: #be185d;
+  --color-cat-cyan: #0e7490;
+  --color-cat-emerald: #047857;
+  --color-cat-teal: #0f766e;
+  --color-cat-indigo: #4338ca;
+  --color-cat-lime: #4d7c0f;
+  --color-cat-slate: #475569;
+  --color-cat-gray: #4b5563;
 
   /* Font family */
   --font-sans: var(--font-persian);
