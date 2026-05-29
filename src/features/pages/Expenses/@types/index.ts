@@ -17,4 +17,5 @@ export interface ExpensesTableProps {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   onLoadMore: () => void;
+  onRetry: () => void;
 }

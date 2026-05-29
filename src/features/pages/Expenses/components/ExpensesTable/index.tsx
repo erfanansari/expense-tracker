@@ -13,6 +13,7 @@ import Button from '@components/Button';
 import CategoryBadge from '@components/CategoryBadge';
 import DataTable from '@components/DataTable';
 import DatePicker from '@components/DatePicker';
+import ErrorState from '@components/ErrorState';
 import Select from '@components/Select';
 import Pulse from '@components/Skeleton';
 
@@ -180,6 +181,7 @@ const ExpensesTable = ({
   hasNextPage,
   isFetchingNextPage,
   onLoadMore,
+  onRetry,
 }: ExpensesTableProps) => {
   // References
   const toPickerRef = useRef<ReactDatePickerType>(null);
@@ -221,11 +223,8 @@ const ExpensesTable = ({
   if (error && expenses.length === 0) {
     if (error instanceof ApiError && error.status === 401) return null;
     return (
-      <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
-        <div className="border-danger bg-danger-light mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
-          <FileText className="text-danger h-8 w-8" />
-        </div>
-        <p className="text-danger font-medium">{error.message}</p>
+      <div className="border-border-subtle bg-background relative overflow-hidden rounded-xl border shadow-sm">
+        <ErrorState title="Couldn't load expenses" description={error.message} onRetry={onRetry} />
       </div>
     );
   }

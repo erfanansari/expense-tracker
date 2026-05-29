@@ -30,7 +30,8 @@ const ExpensesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Queries
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useInfiniteExpenses(filters);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error, refetch } =
+    useInfiniteExpenses(filters);
   const deleteExpense = useDeleteExpense();
 
   // Customs
@@ -104,6 +105,7 @@ const ExpensesPage = () => {
           hasNextPage={hasNextPage ?? false}
           isFetchingNextPage={isFetchingNextPage}
           onLoadMore={() => fetchNextPage()}
+          onRetry={() => refetch()}
         />
 
         {/* Expense Details Drawer */}

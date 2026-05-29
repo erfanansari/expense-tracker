@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 
-import { DollarSign, FileText } from 'lucide-react';
+import { DollarSign } from 'lucide-react';
 
 import { ApiError } from '@core/errors';
 
 import DataTable from '@components/DataTable';
+import ErrorState from '@components/ErrorState';
 import Pulse from '@components/Skeleton';
 
 import type { IncomeTableProps } from '../../@types';
@@ -59,6 +60,7 @@ const IncomeTable = ({
   onEdit,
   onDelete,
   deletingId,
+  onRetry,
 }: IncomeTableProps) => {
   // Memos
   const incomeColumns = useMemo(() => buildIncomeColumns(onEdit, onDelete, deletingId), [onEdit, onDelete, deletingId]);
@@ -70,11 +72,8 @@ const IncomeTable = ({
   if (error) {
     if (error instanceof ApiError && error.status === 401) return null;
     return (
-      <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
-        <div className="border-danger bg-danger-light mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
-          <FileText className="text-danger h-8 w-8" />
-        </div>
-        <p className="text-danger font-medium">{error.message}</p>
+      <div className="border-border-subtle bg-background relative overflow-hidden rounded-xl border shadow-sm">
+        <ErrorState title="Couldn't load income" description={error.message} onRetry={onRetry} />
       </div>
     );
   }
