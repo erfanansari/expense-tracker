@@ -41,6 +41,10 @@ type AnyOption = CategoryOption | CreateActionOption;
 const styles: StylesConfig<any, any, any> = {
   menuPortal: (base: CSSObjectWithLabel) => ({ ...base, zIndex: 9999, pointerEvents: 'auto' }),
   menu: (base: CSSObjectWithLabel) => ({ ...base, width: 'max-content', minWidth: '100%' }),
+  // Force flex (not react-select's grid) value container so the searchable input's placeholder isn't clipped.
+  input: () => ({ color: 'inherit', fontSize: 'inherit', margin: 0, padding: 0 }),
+  control: () => ({ minHeight: 'unset' }),
+  valueContainer: () => ({ display: 'flex', alignItems: 'center', flex: 1, overflow: 'hidden', padding: 0 }),
 };
 
 const MenuList = (props: MenuListProps<AnyOption, false>) => (
@@ -184,7 +188,7 @@ const CategorySelect = ({ value, onChange, disabled, placeholder = 'Select categ
           menu: () =>
             'border-border-subtle bg-background mt-1.5 rounded-xl border p-1 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.18),0_4px_8px_-4px_rgba(0,0,0,0.08)] animate-dropdown-pop overflow-hidden',
           menuList: () => 'flex flex-col gap-0.5 max-h-80 overflow-y-auto',
-          placeholder: () => 'text-text-muted text-sm',
+          placeholder: () => 'text-text-muted text-sm whitespace-nowrap',
           input: () => 'text-text-primary text-sm',
           valueContainer: () => 'py-0',
           dropdownIndicator: () => 'ml-1 text-text-muted',
