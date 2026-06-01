@@ -7,6 +7,23 @@ import ActionButtons from '@components/ActionButtons';
 
 import { formatNumber, getJalaliMonthName } from '@utils';
 
+// ─── Table layout config ──────────────────────────────────────────────────────
+// Centralized so column widths can be tuned in one place. Percentages must sum
+// to 100; `INCOME_TABLE_MIN_WIDTH` is the smallest width the table is allowed
+// to shrink to before triggering horizontal scroll on narrow viewports.
+
+export const INCOME_TABLE_MIN_WIDTH = 'min-w-[720px]';
+
+export const INCOME_COLUMN_WIDTHS = {
+  month: 'w-[18%]',
+  type: 'w-[15%]',
+  source: 'w-[24%]',
+  amount: 'w-[32%]',
+  actions: 'w-[11%]',
+} as const;
+
+// ─── Column definitions ───────────────────────────────────────────────────────
+
 export function buildIncomeColumns(
   handleEdit: (income: Income) => void,
   openDeleteModal: (income: Income) => void,
@@ -17,15 +34,15 @@ export function buildIncomeColumns(
       id: 'month',
       accessorKey: 'month',
       header: 'Month',
-      meta: { widthClass: 'w-[22%]' },
+      meta: { widthClass: INCOME_COLUMN_WIDTHS.month },
       cell: ({ row }) => {
         const income = row.original;
         const monthLabels = getMonthLabel(income.month);
         const jalaliMonth = getJalaliMonthName(income.month, income.year);
         return (
           <div className="flex flex-col">
-            <span className="text-text-primary text-sm font-medium">{monthLabels.en}</span>
-            <span className="text-text-muted text-xs" dir="rtl">
+            <span className="text-text-primary text-sm font-medium whitespace-nowrap">{monthLabels.en}</span>
+            <span className="text-text-muted text-xs whitespace-nowrap" dir="rtl">
               {jalaliMonth}
             </span>
           </div>
@@ -36,30 +53,34 @@ export function buildIncomeColumns(
       id: 'incomeType',
       accessorKey: 'incomeType',
       header: 'Type',
-      meta: { widthClass: 'w-[18%]' },
+      meta: { widthClass: INCOME_COLUMN_WIDTHS.type },
       cell: ({ row }) => {
         const typeLabels = getIncomeTypeLabel(row.original.incomeType);
-        return <span className="text-text-primary text-sm font-medium">{typeLabels.en}</span>;
+        return <span className="text-text-primary text-sm font-medium whitespace-nowrap">{typeLabels.en}</span>;
       },
     },
     {
       id: 'source',
       accessorKey: 'source',
       header: 'Source',
-      meta: { widthClass: 'w-[25%]' },
-      cell: ({ row }) => <span className="text-text-secondary text-sm">{row.original.source || '-'}</span>,
+      meta: { widthClass: INCOME_COLUMN_WIDTHS.source },
+      cell: ({ row }) => (
+        <span className="text-text-secondary block truncate text-sm">{row.original.source || '-'}</span>
+      ),
     },
     {
       id: 'amount',
       accessorKey: 'amountUsd',
       header: 'Amount',
-      meta: { widthClass: 'w-[23%]', align: 'right' as const },
+      meta: { widthClass: INCOME_COLUMN_WIDTHS.amount, align: 'right' as const },
       cell: ({ row }) => {
         const income = row.original;
         return (
           <div className="flex flex-col items-end">
-            <span className="text-success text-sm font-semibold">${formatNumber(income.amountUsd)} USD</span>
-            <span className="text-text-muted text-xs">{formatNumber(income.amountToman)} Toman</span>
+            <span className="text-success text-sm font-semibold whitespace-nowrap">
+              ${formatNumber(income.amountUsd)} USD
+            </span>
+            <span className="text-text-muted text-xs whitespace-nowrap">{formatNumber(income.amountToman)} Toman</span>
           </div>
         );
       },
@@ -67,7 +88,7 @@ export function buildIncomeColumns(
     {
       id: 'actions',
       header: 'Actions',
-      meta: { widthClass: 'w-[12%]', align: 'center' as const },
+      meta: { widthClass: INCOME_COLUMN_WIDTHS.actions, align: 'center' as const },
       cell: ({ row }) => {
         const income = row.original;
         return (
