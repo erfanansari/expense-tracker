@@ -137,7 +137,32 @@ Ensure environment variables are set in your Vercel project settings.
 
 ## License
 
-MIT
+Kharji is published under the **Kharji Source-Available License (View-Only) v1.0** — see [LICENSE](./LICENSE) for the full text.
+
+This is **not** an OSI-approved open-source license. The source is public for a specific reason: Kharji handles your personal financial data, and you should be able to read every line of code that touches it before trusting it. Transparency, not free reuse, is the goal.
+
+### What you can do
+
+- ✅ **Read and study** the source code
+- ✅ **Audit it for security** or correctness
+- ✅ **Quote excerpts** for discussion, education, or security disclosure (with attribution)
+- ✅ **Submit pull requests** — contributions are welcome and licensed back under the same terms
+
+### What you cannot do
+
+- ❌ **Run, host, or deploy** the code (even for personal use)
+- ❌ **Use it commercially** in any form
+- ❌ **Copy, fork, or reuse** any part of it in another project
+- ❌ **Redistribute** the code or modified versions
+- ❌ **Use the "Kharji" name** or branding
+
+### Why this license?
+
+Most "no commercial use" licenses (PolyForm Noncommercial, CC BY-NC, etc.) still allow personal forks and self-hosting. Kharji goes stricter because the value of publishing the source here is auditability, not adoption. If you want a finance tracker you can run yourself, build one — and feel free to learn from this codebase by reading it.
+
+### Want to use it for something?
+
+If you'd like to use Kharji (or any part of it) outside the terms above — commercial use, self-hosted deployment, integration into another product — reach out to discuss a separate license: **dev.erfanansari@gmail.com**
 
 ## Credits
 

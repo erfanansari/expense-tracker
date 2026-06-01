@@ -1,0 +1,123 @@
+Kharji Source-Available License (View-Only) v1.0
+
+Copyright (c) 2026 Erfan Ansari
+
+================================================================================
+SUMMARY (non-binding)
+================================================================================
+The source code of Kharji is published so anyone can read, study, and audit it.
+You may NOT run it, host it, deploy it, copy it, modify it, or reuse any part
+of it in another project. Commercial use of any kind is prohibited. Pull
+requests are welcome and, when accepted, are licensed back under these terms.
+
+The legally binding terms follow.
+
+================================================================================
+1. DEFINITIONS
+================================================================================
+"The Software" means the source code, documentation, configuration files, and
+all other materials in this repository.
+
+"The Licensor" means Erfan Ansari, the copyright holder.
+
+"You" means any individual or legal entity accessing the Software.
+
+"Personal Audit Use" means reading, viewing, downloading a local copy for the
+sole purpose of studying or auditing the Software, and discussing it.
+
+"Commercial Use" means any use intended for or directed toward commercial
+advantage or monetary compensation, including but not limited to use within a
+business, paid service, advertised offering, or revenue-generating activity.
+
+================================================================================
+2. GRANT OF RIGHTS
+================================================================================
+Subject to the conditions and restrictions below, the Licensor grants You a
+worldwide, royalty-free, non-exclusive, non-transferable, revocable license
+to:
+
+    (a) View and read the source code of the Software.
+    (b) Download a local copy of the Software for Personal Audit Use.
+    (c) Quote short excerpts of the Software for the purpose of discussion,
+        education, security disclosure, or code review, with attribution to
+        the Licensor and a link to the original repository.
+
+NO OTHER RIGHTS ARE GRANTED. All rights not expressly granted above are
+reserved by the Licensor.
+
+================================================================================
+3. RESTRICTIONS
+================================================================================
+You may NOT, without prior written permission from the Licensor:
+
+    (a) Execute, run, deploy, host, serve, or otherwise operate the Software
+        or any derivative of it, for any purpose, including personal use.
+    (b) Copy, modify, translate, adapt, or create derivative works based on
+        the Software or any portion of it.
+    (c) Use the Software, or any portion of it, as part of, embedded in, or
+        as the basis for any other software project, product, or service.
+    (d) Distribute, sublicense, sell, rent, lease, or otherwise transfer the
+        Software or any derivative of it.
+    (e) Use the Software for any Commercial Use.
+    (f) Remove, alter, or obscure any copyright, license, or attribution
+        notices contained in the Software.
+    (g) Use the name "Kharji", any associated logos, or any trademarks of the
+        Licensor without prior written permission.
+
+================================================================================
+4. CONTRIBUTIONS
+================================================================================
+Contributions submitted to the Software's official repository (for example,
+via pull requests or patches) are welcome.
+
+By submitting a contribution, You:
+
+    (a) Represent that You are the author of the contribution or otherwise
+        have the right to submit it under these terms.
+    (b) License the contribution to the Licensor under the same terms as this
+        License, and additionally grant the Licensor a perpetual, worldwide,
+        royalty-free, irrevocable license to use, modify, sublicense, and
+        relicense Your contribution as part of the Software, including under
+        different license terms in the future.
+
+================================================================================
+5. NO WARRANTY
+================================================================================
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, AND NONINFRINGEMENT.
+
+THE SOFTWARE IS A PERSONAL FINANCE APPLICATION. IT IS PROVIDED FOR
+TRANSPARENCY AND AUDIT PURPOSES ONLY. NOTHING IN THE SOFTWARE CONSTITUTES
+FINANCIAL, TAX, LEGAL, OR INVESTMENT ADVICE.
+
+================================================================================
+6. LIMITATION OF LIABILITY
+================================================================================
+IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM,
+OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OF OR OTHER DEALINGS IN
+THE SOFTWARE, INCLUDING WITHOUT LIMITATION ANY FINANCIAL LOSS.
+
+================================================================================
+7. TERMINATION
+================================================================================
+Any breach of this License automatically terminates Your rights under it.
+Upon termination You must cease all use of the Software and destroy any local
+copies in Your possession.
+
+================================================================================
+8. GOVERNING LAW
+================================================================================
+This License shall be interpreted under generally accepted principles of
+international copyright law. If any provision is held unenforceable, the
+remaining provisions shall remain in full force and effect.
+
+================================================================================
+9. COMMERCIAL OR OTHER LICENSING
+================================================================================
+For permissions outside the scope of this License (for example, commercial
+use, hosted deployment, or incorporation into another project), contact the
+Licensor to discuss a separate agreement.
+
+Contact: dev.erfanansari@gmail.com
