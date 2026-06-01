@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { ArrowLeftRight, Calendar, Clock, DollarSign, FileText, FolderOpen, Tag, X } from 'lucide-react';
+import { ArrowLeftRight, Calendar, Tag as TagIcon, X } from 'lucide-react';
 import { Drawer } from 'vaul';
 
 import CategoryBadge from '@components/CategoryBadge';
@@ -17,26 +17,35 @@ interface ExpenseDetailsDrawerProps {
   onClose: () => void;
 }
 
-interface DetailRowProps {
+interface MetaCellProps {
   icon: React.ReactNode;
   label: string;
-  value: React.ReactNode;
+  primary: React.ReactNode;
+  secondary?: React.ReactNode;
 }
 
-const DetailRow = ({ icon, label, value }: DetailRowProps) => (
-  <div className="flex items-start gap-3 sm:gap-4">
-    <div
-      className="border-border-subtle bg-background-secondary flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border sm:h-10 sm:w-10"
-      aria-hidden="true"
-    >
-      {icon}
+// Compact metadata cell — used inside the 2-column grid below the hero.
+const MetaCell = ({ icon, label, primary, secondary }: MetaCellProps) => (
+  <div className="border-border-subtle bg-background-secondary/60 flex flex-col gap-1 rounded-xl border p-4">
+    <div className="text-text-muted flex items-center gap-1.5 text-[11px] font-medium tracking-wide uppercase">
+      <span aria-hidden="true" className="inline-flex">
+        {icon}
+      </span>
+      {label}
     </div>
-    <div className="min-w-0 flex-1 pt-0.5">
-      <span className="text-text-muted text-xs font-medium">{label}</span>
-      <div className="text-text-primary mt-1 text-sm font-medium sm:text-base">{value}</div>
-    </div>
+    <div className="text-text-primary text-sm font-semibold tabular-nums">{primary}</div>
+    {secondary && <div className="text-text-muted text-xs tabular-nums">{secondary}</div>}
   </div>
 );
+
+const formatCreatedAt = (iso: string) =>
+  new Date(iso).toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
 
 const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawerProps) => {
   // References
@@ -136,106 +145,81 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-5 md:px-8 md:py-8">
+          <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-6 md:px-8 md:py-8">
             {expense && (
-              <div className="flex flex-col gap-5 sm:gap-6">
-                {/* Description */}
-                <DetailRow
-                  icon={<FileText className="text-text-secondary h-4 w-4" />}
-                  label="Description"
-                  value={<span className="break-words">{expense.description}</span>}
-                />
+              <div className="flex flex-col gap-5">
+                {/* ─── Hero: category + description + hero amount ───────── */}
+                <section className="flex flex-col gap-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <CategoryBadge category={expense.category} size="md" />
+                    <time
+                      dateTime={expense.date}
+                      className="text-text-muted shrink-0 text-xs tabular-nums"
+                      title={farsiDate}
+                    >
+                      {expense.date}
+                    </time>
+                  </div>
 
-                {/* Category */}
-                <DetailRow
-                  icon={<FolderOpen className="text-text-secondary h-4 w-4" />}
-                  label="Category"
-                  value={<CategoryBadge category={expense.category} size="md" />}
-                />
+                  <h3 className="text-text-primary text-xl leading-tight font-semibold break-words sm:text-2xl">
+                    {expense.description}
+                  </h3>
 
-                {/* Date */}
-                <DetailRow
-                  icon={<Calendar className="text-text-secondary h-4 w-4" />}
-                  label="Date"
-                  value={
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <span>{expense.date}</span>
-                      <span className="text-text-muted" dir="rtl">
-                        ({farsiDate})
-                      </span>
-                    </div>
-                  }
-                />
-
-                {/* Divider */}
-                <div className="border-border-subtle border-t" role="separator" />
-
-                {/* Amount in Toman */}
-                <DetailRow
-                  icon={<DollarSign className="text-text-secondary h-4 w-4" />}
-                  label="Amount (Toman)"
-                  value={
-                    <span className="text-text-primary font-semibold tabular-nums">
-                      {formatNumber(expense.price_toman)} Toman
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <span className="text-text-primary text-3xl font-semibold tracking-tight tabular-nums sm:text-4xl">
+                      {formatNumber(expense.price_toman)}
                     </span>
-                  }
-                />
+                    <span className="text-text-muted text-sm font-medium">Toman</span>
+                    <span className="text-text-muted text-sm" aria-hidden="true">
+                      ·
+                    </span>
+                    <span className="text-text-secondary text-base font-medium tabular-nums">
+                      ${expense.price_usd.toFixed(2)} <span className="text-text-muted text-xs font-normal">USD</span>
+                    </span>
+                  </div>
+                </section>
 
-                {/* Amount in USD */}
-                <DetailRow
-                  icon={<DollarSign className="text-text-secondary h-4 w-4" />}
-                  label="Amount (USD)"
-                  value={<span className="text-text-primary tabular-nums">${expense.price_usd.toFixed(2)} USD</span>}
-                />
-
-                {/* Exchange Rate */}
-                <DetailRow
-                  icon={<ArrowLeftRight className="text-text-secondary h-4 w-4" />}
-                  label="Exchange Rate"
-                  value={
-                    <span className="text-text-secondary tabular-nums">{formatNumber(exchangeRate)} Toman/USD</span>
-                  }
-                />
-
-                {/* Tags */}
+                {/* ─── Tags row (only when present) ───────────────────── */}
                 {expense.tags && expense.tags.length > 0 && (
-                  <>
-                    {/* Divider */}
-                    <div className="border-border-subtle border-t" role="separator" />
-
-                    <DetailRow
-                      icon={<Tag className="text-text-secondary h-4 w-4" />}
-                      label="Tags"
-                      value={
-                        <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                          {expense.tags.map((tag) => (
-                            <span
-                              key={tag.id}
-                              className="border-border-subtle bg-background-elevated text-text-secondary inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium"
-                            >
-                              <Tag className="h-3 w-3" aria-hidden="true" />
-                              {tag.name}
-                            </span>
-                          ))}
-                        </div>
-                      }
-                    />
-                  </>
+                  <section className="flex flex-wrap gap-1.5">
+                    {expense.tags.map((tag) => (
+                      <span
+                        key={tag.id}
+                        className="border-border-subtle bg-background-elevated text-text-secondary inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium"
+                      >
+                        <TagIcon className="h-3 w-3" aria-hidden="true" />
+                        {tag.name}
+                      </span>
+                    ))}
+                  </section>
                 )}
 
-                {/* Divider */}
-                <div className="border-border-subtle border-t" role="separator" />
+                {/* ─── Metadata grid: date + exchange rate ────────────── */}
+                <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <MetaCell
+                    icon={<Calendar className="text-text-muted h-3 w-3" />}
+                    label="Date"
+                    primary={expense.date}
+                    secondary={
+                      <span dir="rtl" className="block">
+                        {farsiDate}
+                      </span>
+                    }
+                  />
+                  <MetaCell
+                    icon={<ArrowLeftRight className="text-text-muted h-3 w-3" />}
+                    label="Exchange rate"
+                    primary={`${formatNumber(exchangeRate)} T/USD`}
+                  />
+                </section>
 
-                {/* Created At */}
-                <DetailRow
-                  icon={<Clock className="text-text-secondary h-4 w-4" />}
-                  label="Created At"
-                  value={
-                    <time dateTime={expense.created_at} className="text-text-secondary">
-                      {new Date(expense.created_at).toLocaleString()}
-                    </time>
-                  }
-                />
+                {/* ─── Footer metadata ─────────────────────────────────── */}
+                <p className="text-text-muted border-border-subtle/60 mt-1 border-t pt-4 text-xs">
+                  Created{' '}
+                  <time dateTime={expense.created_at} className="text-text-secondary tabular-nums">
+                    {formatCreatedAt(expense.created_at)}
+                  </time>
+                </p>
               </div>
             )}
           </div>
