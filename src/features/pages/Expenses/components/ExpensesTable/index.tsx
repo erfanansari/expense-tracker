@@ -23,7 +23,7 @@ import { useTags } from '@hooks/use-tags';
 import type { Tag } from '@/@types/expense';
 
 import type { ExpensesTableProps } from '../../@types';
-import { buildExpenseColumns } from '../../constants';
+import { buildExpenseColumns, EXPENSE_TABLE_MIN_WIDTH } from '../../constants';
 
 // ─── TagFilterSelect ──────────────────────────────────────────────────────────
 
@@ -241,7 +241,7 @@ const ExpensesTable = ({
       onRowClick={onRowClick}
       getRowId={(row) => String(row.id)}
       minimal={true}
-      minWidth="min-w-[560px]"
+      minWidth={EXPENSE_TABLE_MIN_WIDTH}
       filterBar={
         <div className="border-border-subtle border-b">
           {/* Row 1: Search */}
