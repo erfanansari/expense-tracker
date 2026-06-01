@@ -18,6 +18,22 @@ export const CATEGORY_ICONS: Record<AssetCategory, typeof Wallet> = {
   investment: TrendingUp,
 };
 
+// ─── Table layout config ──────────────────────────────────────────────────────
+// Centralized so column widths can be tuned in one place. Percentages must sum
+// to 100; `ASSETS_TABLE_MIN_WIDTH` is the smallest width the table is allowed
+// to shrink to before triggering horizontal scroll on narrow viewports.
+
+export const ASSETS_TABLE_MIN_WIDTH = 'min-w-[680px]';
+
+export const ASSETS_COLUMN_WIDTHS = {
+  name: 'w-[35%]',
+  quantity: 'w-[18%]',
+  value: 'w-[32%]',
+  actions: 'w-[15%]',
+} as const;
+
+// ─── Column definitions ───────────────────────────────────────────────────────
+
 export function buildAssetColumns(
   handleEdit: (asset: Asset) => void,
   openDeleteModal: (asset: Asset) => void,
@@ -28,13 +44,13 @@ export function buildAssetColumns(
       id: 'name',
       accessorKey: 'name',
       header: 'Asset',
-      meta: { widthClass: 'w-[40%]' },
+      meta: { widthClass: ASSETS_COLUMN_WIDTHS.name },
       cell: ({ row }) => {
         const asset = row.original;
         return (
-          <div className="flex flex-col">
-            <span className="text-text-primary text-sm font-medium">{asset.name}</span>
-            <span className="text-text-muted text-xs">{getAssetCategoryLabel(asset.category).en}</span>
+          <div className="flex min-w-0 flex-col">
+            <span className="text-text-primary truncate text-sm font-medium">{asset.name}</span>
+            <span className="text-text-muted truncate text-xs">{getAssetCategoryLabel(asset.category).en}</span>
           </div>
         );
       },
@@ -43,11 +59,11 @@ export function buildAssetColumns(
       id: 'quantity',
       accessorKey: 'quantity',
       header: 'Quantity',
-      meta: { widthClass: 'w-[20%]' },
+      meta: { widthClass: ASSETS_COLUMN_WIDTHS.quantity },
       cell: ({ row }) => {
         const asset = row.original;
         return (
-          <span className="text-text-secondary text-sm">
+          <span className="text-text-secondary block truncate text-sm whitespace-nowrap">
             {asset.quantity} {asset.unit || 'unit'}
           </span>
         );
@@ -57,13 +73,17 @@ export function buildAssetColumns(
       id: 'value',
       accessorKey: 'totalValueUsd',
       header: 'Value',
-      meta: { widthClass: 'w-[25%]', align: 'right' as const },
+      meta: { widthClass: ASSETS_COLUMN_WIDTHS.value, align: 'right' as const },
       cell: ({ row }) => {
         const asset = row.original;
         return (
           <div className="flex flex-col items-end">
-            <span className="text-text-primary text-sm font-semibold">${formatNumber(asset.totalValueUsd)}</span>
-            <span className="text-text-muted text-xs">{formatNumber(asset.totalValueToman)} Toman</span>
+            <span className="text-text-primary text-sm font-semibold whitespace-nowrap">
+              ${formatNumber(asset.totalValueUsd)}
+            </span>
+            <span className="text-text-muted text-xs whitespace-nowrap">
+              {formatNumber(asset.totalValueToman)} Toman
+            </span>
           </div>
         );
       },
@@ -71,7 +91,7 @@ export function buildAssetColumns(
     {
       id: 'actions',
       header: 'Actions',
-      meta: { widthClass: 'w-[15%]', align: 'center' as const },
+      meta: { widthClass: ASSETS_COLUMN_WIDTHS.actions, align: 'center' as const },
       cell: ({ row }) => {
         const asset = row.original;
         return (

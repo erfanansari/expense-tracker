@@ -12,7 +12,7 @@ import ErrorState from '@components/ErrorState';
 import Pulse from '@components/Skeleton';
 
 import type { AssetsTableProps } from '../../@types';
-import { buildAssetColumns, CATEGORY_ICONS } from '../../constants';
+import { ASSETS_TABLE_MIN_WIDTH, buildAssetColumns, CATEGORY_ICONS } from '../../constants';
 
 const CATEGORY_COLORS = ASSET_CATEGORY_COLORS as Record<AssetCategory, string>;
 
@@ -99,7 +99,7 @@ const AssetsTable = ({
               <DataTable
                 data={data.assets}
                 columns={assetColumns}
-                minWidth="min-w-[480px]"
+                minWidth={ASSETS_TABLE_MIN_WIDTH}
                 getRowId={(row) => String(row.id)}
               />
             </div>

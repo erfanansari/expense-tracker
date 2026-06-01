@@ -12,17 +12,31 @@ import EmptyState from '@components/EmptyState';
 
 import { formatNumber } from '@utils';
 
+// ─── Table layout config ──────────────────────────────────────────────────────
+// Centralized so column widths can be tuned in one place. Percentages must sum
+// to 100; `RECENT_EXPENSES_TABLE_MIN_WIDTH` is the smallest width before the
+// table starts scrolling horizontally on narrow viewports.
+
+export const RECENT_EXPENSES_TABLE_MIN_WIDTH = 'min-w-[480px]';
+
+export const RECENT_EXPENSES_COLUMN_WIDTHS = {
+  description: 'w-[60%]',
+  amount: 'w-[40%]',
+} as const;
+
+// ─── Columns ──────────────────────────────────────────────────────────────────
+
 const overviewColumns: ColumnDef<Expense, unknown>[] = [
   {
     id: 'description',
     accessorKey: 'description',
     header: 'Description',
-    meta: { widthClass: 'w-[60%]' },
+    meta: { widthClass: RECENT_EXPENSES_COLUMN_WIDTHS.description },
     cell: ({ row }) => {
       const expense = row.original;
       return (
-        <div className="flex flex-col gap-2">
-          <span className="text-text-primary text-sm font-medium">{expense.description}</span>
+        <div className="flex min-w-0 flex-col gap-2">
+          <span className="text-text-primary truncate text-sm font-medium">{expense.description}</span>
           {expense.tags && expense.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {expense.tags.map((tag) => (
@@ -44,13 +58,15 @@ const overviewColumns: ColumnDef<Expense, unknown>[] = [
     id: 'amount',
     accessorKey: 'price_toman',
     header: 'Amount',
-    meta: { widthClass: 'w-[40%]', align: 'right' },
+    meta: { widthClass: RECENT_EXPENSES_COLUMN_WIDTHS.amount, align: 'right' },
     cell: ({ row }) => {
       const expense = row.original;
       return (
         <div className="flex flex-col items-end">
-          <span className="text-text-primary text-sm font-semibold">{formatNumber(expense.price_toman)} Toman</span>
-          <span className="text-text-muted text-xs">${expense.price_usd.toFixed(2)} USD</span>
+          <span className="text-text-primary text-sm font-semibold whitespace-nowrap">
+            {formatNumber(expense.price_toman)} Toman
+          </span>
+          <span className="text-text-muted text-xs whitespace-nowrap">${expense.price_usd.toFixed(2)} USD</span>
         </div>
       );
     },
@@ -77,7 +93,7 @@ const RecentExpenses = ({ expenses }: RecentExpensesProps) => {
       data={recentExpenses}
       columns={overviewColumns}
       minimal={true}
-      minWidth="min-w-[480px]"
+      minWidth={RECENT_EXPENSES_TABLE_MIN_WIDTH}
       header={
         <div className="flex items-center justify-between px-6 py-5">
           <h2 className="text-text-primary text-lg font-semibold">Recent Expenses</h2>

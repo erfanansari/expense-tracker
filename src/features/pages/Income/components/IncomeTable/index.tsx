@@ -9,7 +9,7 @@ import ErrorState from '@components/ErrorState';
 import Pulse from '@components/Skeleton';
 
 import type { IncomeTableProps } from '../../@types';
-import { buildIncomeColumns } from '../../constants';
+import { buildIncomeColumns, INCOME_TABLE_MIN_WIDTH } from '../../constants';
 
 function IncomeSkeleton() {
   return (
@@ -98,7 +98,7 @@ const IncomeTable = ({
           <DataTable
             data={[...incomesByYear[year]].sort((a, b) => b.month - a.month)}
             columns={incomeColumns}
-            minWidth="min-w-[480px]"
+            minWidth={INCOME_TABLE_MIN_WIDTH}
             getRowId={(row) => String(row.id)}
           />
         </div>
