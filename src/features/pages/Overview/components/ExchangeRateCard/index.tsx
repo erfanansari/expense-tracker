@@ -61,8 +61,8 @@ const ExchangeRateCard = () => {
   };
 
   const tooltipContent = (
-    <div className="space-y-2 text-xs">
-      <div className="flex items-center justify-between gap-4">
+    <div className="space-y-1.5 text-xs whitespace-nowrap">
+      <div className="flex items-center justify-between gap-6">
         <span className="text-zinc-400">Status</span>
         <span
           className={twMerge(
@@ -73,20 +73,22 @@ const ExchangeRateCard = () => {
           {freshnessLabels[freshness]}
         </span>
       </div>
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-6">
         <span className="text-zinc-400">Source</span>
         <span className="font-medium text-zinc-200">{sourceLabels[rateData._meta?.source || 'cached']}</span>
       </div>
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-6">
         <span className="text-zinc-400">Updated</span>
         <span className="font-medium text-zinc-200">{lastUpdate}</span>
       </div>
       {usage && (
         <>
           <div className="my-1.5 border-t border-zinc-700" />
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-6">
             <span className="text-zinc-400">API Remaining</span>
-            <span className={twMerge('font-medium', usage.remaining < 10 ? 'text-red-400' : 'text-zinc-200')}>
+            <span
+              className={twMerge('font-medium tabular-nums', usage.remaining < 10 ? 'text-red-400' : 'text-zinc-200')}
+            >
               {usage.remaining}/{usage.limit}
             </span>
           </div>
