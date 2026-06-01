@@ -41,8 +41,6 @@ type AnyOption = CategoryOption | CreateActionOption;
 const styles: StylesConfig<any, any, any> = {
   menuPortal: (base: CSSObjectWithLabel) => ({ ...base, zIndex: 9999, pointerEvents: 'auto' }),
   menu: (base: CSSObjectWithLabel) => ({ ...base, width: 'max-content', minWidth: '100%' }),
-  // Force flex (not react-select's grid) value container so the searchable input's placeholder isn't clipped.
-  input: () => ({ color: 'inherit', fontSize: 'inherit', margin: 0, padding: 0 }),
   control: () => ({ minHeight: 'unset' }),
   valueContainer: () => ({ display: 'flex', alignItems: 'center', flex: 1, overflow: 'hidden', padding: 0 }),
 };
@@ -121,11 +119,9 @@ const SingleValue = (props: SingleValueProps<AnyOption, false>) => {
 
   return (
     <components.SingleValue {...props}>
-      <span className="flex items-center gap-2">
-        <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border ${color.pill}`}>
-          {createElement(iconComp, { className: 'h-3 w-3' })}
-        </span>
-        <span className="text-text-primary truncate text-sm font-medium">{data.label}</span>
+      <span className="flex min-w-0 items-center gap-1.5">
+        <span className={`shrink-0 ${color.text}`}>{createElement(iconComp, { className: 'h-4 w-4' })}</span>
+        <span className="text-text-primary min-w-0 truncate text-sm font-medium">{data.label}</span>
       </span>
     </components.SingleValue>
   );
@@ -169,7 +165,7 @@ const CategorySelect = ({ value, onChange, disabled, placeholder = 'Select categ
         options={options}
         placeholder={placeholder}
         isDisabled={disabled}
-        isSearchable
+        isSearchable={false}
         menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
         menuPosition="fixed"
         menuPlacement="auto"
@@ -189,6 +185,7 @@ const CategorySelect = ({ value, onChange, disabled, placeholder = 'Select categ
             'border-border-subtle bg-background mt-1.5 rounded-xl border p-1 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.18),0_4px_8px_-4px_rgba(0,0,0,0.08)] animate-dropdown-pop overflow-hidden',
           menuList: () => 'flex flex-col gap-0.5 max-h-80 overflow-y-auto',
           placeholder: () => 'text-text-muted text-sm whitespace-nowrap',
+          singleValue: () => 'flex-1 min-w-0',
           input: () => 'text-text-primary text-sm',
           valueContainer: () => 'py-0',
           dropdownIndicator: () => 'ml-1 text-text-muted',

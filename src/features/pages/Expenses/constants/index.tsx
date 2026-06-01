@@ -8,6 +8,24 @@ import CategoryBadge from '@components/CategoryBadge';
 
 import { formatNumber, formatToFarsiDate } from '@utils';
 
+// ─── Table layout config ──────────────────────────────────────────────────────
+// Centralized so column widths can be tuned in one place. Percentages must sum
+// to 100; `EXPENSE_TABLE_MIN_WIDTH` is the smallest width the table is allowed
+// to shrink to before triggering horizontal scroll on narrow viewports — bump
+// it when a column needs more room.
+
+export const EXPENSE_TABLE_MIN_WIDTH = 'min-w-[820px]';
+
+export const EXPENSE_COLUMN_WIDTHS = {
+  description: 'w-[24%]',
+  category: 'w-[26%]',
+  date: 'w-[16%]',
+  amount: 'w-[24%]',
+  actions: 'w-[10%]',
+} as const;
+
+// ─── Column definitions ───────────────────────────────────────────────────────
+
 export function buildExpenseColumns(
   handleEdit: (expense: Expense) => void,
   openDeleteModal: (expense: Expense) => void,
@@ -18,7 +36,7 @@ export function buildExpenseColumns(
       id: 'description',
       accessorKey: 'description',
       header: 'Description',
-      meta: { widthClass: 'w-[35%]' },
+      meta: { widthClass: EXPENSE_COLUMN_WIDTHS.description },
       cell: ({ row }) => {
         const expense = row.original;
         return (
@@ -45,20 +63,24 @@ export function buildExpenseColumns(
       id: 'category',
       accessorKey: 'category',
       header: 'Category',
-      meta: { widthClass: 'w-[18%]' },
-      cell: ({ row }) => <CategoryBadge category={row.original.category} />,
+      meta: { widthClass: EXPENSE_COLUMN_WIDTHS.category },
+      cell: ({ row }) => (
+        <div className="flex max-w-full min-w-0">
+          <CategoryBadge category={row.original.category} className="max-w-full" />
+        </div>
+      ),
     },
     {
       id: 'date',
       accessorKey: 'date',
       header: 'Date',
-      meta: { widthClass: 'w-[18%]' },
+      meta: { widthClass: EXPENSE_COLUMN_WIDTHS.date },
       cell: ({ row }) => {
         const expense = row.original;
         return (
           <div className="flex flex-col">
-            <span className="text-text-primary text-sm">{expense.date}</span>
-            <span className="text-text-muted text-xs" dir="rtl">
+            <span className="text-text-primary text-sm whitespace-nowrap">{expense.date}</span>
+            <span className="text-text-muted text-xs whitespace-nowrap" dir="rtl">
               {formatToFarsiDate(expense.date)}
             </span>
           </div>
@@ -69,13 +91,15 @@ export function buildExpenseColumns(
       id: 'amount',
       accessorKey: 'price_toman',
       header: 'Amount',
-      meta: { widthClass: 'w-[19%]', align: 'right' as const },
+      meta: { widthClass: EXPENSE_COLUMN_WIDTHS.amount, align: 'right' as const },
       cell: ({ row }) => {
         const expense = row.original;
         return (
           <div className="flex flex-col items-end">
-            <span className="text-text-primary text-sm font-semibold">{formatNumber(expense.price_toman)} Toman</span>
-            <span className="text-text-muted text-xs">${expense.price_usd.toFixed(2)} USD</span>
+            <span className="text-text-primary text-sm font-semibold whitespace-nowrap">
+              {formatNumber(expense.price_toman)} Toman
+            </span>
+            <span className="text-text-muted text-xs whitespace-nowrap">${expense.price_usd.toFixed(2)} USD</span>
           </div>
         );
       },
@@ -83,7 +107,7 @@ export function buildExpenseColumns(
     {
       id: 'actions',
       header: 'Actions',
-      meta: { widthClass: 'w-[10%]', align: 'center' as const },
+      meta: { widthClass: EXPENSE_COLUMN_WIDTHS.actions, align: 'center' as const },
       cell: ({ row }) => {
         const expense = row.original;
         return (

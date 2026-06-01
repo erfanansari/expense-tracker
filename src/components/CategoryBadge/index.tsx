@@ -34,7 +34,7 @@ const CategoryBadge = ({ category, size = 'sm', className, showIcon = true }: Ca
           className: twMerge('shrink-0', isMd ? 'h-3.5 w-3.5' : 'h-3 w-3'),
           'aria-hidden': true,
         })}
-      <span className="truncate">{category.name}</span>
+      <span className="min-w-0 truncate">{category.name}</span>
     </span>
   );
 };
