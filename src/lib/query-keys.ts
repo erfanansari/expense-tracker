@@ -33,4 +33,7 @@ export const queryKeys = {
   user: {
     profile: () => ['user', 'profile'] as const,
   },
+  notifications: {
+    preferences: () => ['notifications', 'preferences'] as const,
+  },
 } as const;
