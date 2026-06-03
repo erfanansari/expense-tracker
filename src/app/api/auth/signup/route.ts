@@ -9,6 +9,7 @@ import { hashPassword } from '@core/auth/password';
 import { validatePassword } from '@core/auth/validation';
 import { seedDefaultCategoriesForUser } from '@core/database/categories';
 import { db } from '@core/database/client';
+import { createDefaultNotificationPreferences } from '@core/database/notification-preferences';
 import { createSession } from '@core/session/session';
 
 export async function POST(request: NextRequest) {
@@ -52,6 +53,10 @@ export async function POST(request: NextRequest) {
     // Seed the 12 default categories so new accounts can start adding expenses
     // immediately without first visiting Settings.
     await seedDefaultCategoriesForUser(userId);
+
+    // Seed notification preferences (master + monthly + yearly all on) and the
+    // unique unsubscribe token used in email footers.
+    await createDefaultNotificationPreferences(userId);
 
     // Create session (sets cookie automatically)
     await createSession(userId, normalizedEmail);
