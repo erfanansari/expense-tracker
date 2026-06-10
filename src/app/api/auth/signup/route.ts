@@ -10,6 +10,7 @@ import { validatePassword } from '@core/auth/validation';
 import { seedDefaultCategoriesForUser } from '@core/database/categories';
 import { db } from '@core/database/client';
 import { createDefaultNotificationPreferences } from '@core/database/notification-preferences';
+import { sendWelcomeEmail } from '@core/email/welcome';
 import { createSession } from '@core/session/session';
 
 export async function POST(request: NextRequest) {
@@ -57,6 +58,11 @@ export async function POST(request: NextRequest) {
     // Seed notification preferences (master + monthly + yearly all on) and the
     // unique unsubscribe token used in email footers.
     await createDefaultNotificationPreferences(userId);
+
+    // Fire-and-forget welcome email — must never block or fail the signup response.
+    sendWelcomeEmail({ userId, email: normalizedEmail, name: name || null }).catch((err) =>
+      console.error('[signup] welcome email failed:', err)
+    );
 
     // Create session (sets cookie automatically)
     await createSession(userId, normalizedEmail);

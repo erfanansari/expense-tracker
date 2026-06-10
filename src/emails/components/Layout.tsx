@@ -4,13 +4,14 @@ import { Body, Container, Head, Hr, Html, Img, Link, Preview, Section, Tailwind,
 
 interface LayoutProps {
   preview: string;
-  unsubscribeUrl: string;
+  unsubscribeUrl?: string; // omit for transactional emails (welcome, password reset)
   webViewUrl?: string;
   logoUrl: string;
+  footerText?: string; // override the default footer copy
   children: React.ReactNode;
 }
 
-export const Layout = ({ preview, unsubscribeUrl, webViewUrl, logoUrl, children }: LayoutProps) => (
+export const Layout = ({ preview, unsubscribeUrl, webViewUrl, logoUrl, footerText, children }: LayoutProps) => (
   <Html>
     <Head />
     <Preview>{preview}</Preview>
@@ -53,21 +54,25 @@ export const Layout = ({ preview, unsubscribeUrl, webViewUrl, logoUrl, children 
           <Hr className="mx-8 my-0 border-t border-[#e5e5e5]" />
           <Section className="px-8 py-6">
             <Text className="m-0 text-[12px] leading-5 text-[#a3a3a3]">
-              You&apos;re receiving this because you have report emails enabled in your Kharji settings.
+              {footerText ?? "You're receiving this because you have report emails enabled in your Kharji settings."}
             </Text>
-            <Text className="m-0 mt-2 text-[12px] leading-5 text-[#a3a3a3]">
-              {webViewUrl && (
-                <>
-                  <Link href={webViewUrl} className="text-[#525252] underline">
-                    View dashboard
-                  </Link>{' '}
-                  &middot;{' '}
-                </>
-              )}
-              <Link href={unsubscribeUrl} className="text-[#525252] underline">
-                Unsubscribe
-              </Link>
-            </Text>
+            {(webViewUrl || unsubscribeUrl) && (
+              <Text className="m-0 mt-2 text-[12px] leading-5 text-[#a3a3a3]">
+                {webViewUrl && (
+                  <>
+                    <Link href={webViewUrl} className="text-[#525252] underline">
+                      View dashboard
+                    </Link>{' '}
+                    &middot;{' '}
+                  </>
+                )}
+                {unsubscribeUrl && (
+                  <Link href={unsubscribeUrl} className="text-[#525252] underline">
+                    Unsubscribe
+                  </Link>
+                )}
+              </Text>
+            )}
             <Text className="m-0 mt-4 text-[11px] text-[#a3a3a3]">Kharji &middot; Personal Finance Tracker</Text>
           </Section>
         </Container>
