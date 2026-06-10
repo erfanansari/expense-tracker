@@ -1,169 +1,360 @@
 # Kharji / خرجی
 
-A beautiful, bilingual expense tracker built with Next.js. Track your personal expenses in both Toman and USD with real-time exchange rates.
+Personal finance tracker for Iranians living with dual currencies — track expenses, income, and assets in both Toman and USD with real-time exchange rates.
 
-## Features
-
-- 💰 **Dual Currency Support** - Track expenses in both Iranian Toman and USD
-- 📊 **Rich Visualizations** - Interactive charts showing spending by category and daily trends
-- 🌐 **Real-time Exchange Rates** - Automatic fetching from Navasan API with 24-hour caching
-- 🌙 **Dark Mode** - Beautiful dark theme support
-- 🌍 **Bilingual Interface** - Full support for English and Persian (Farsi)
-- 📱 **Responsive Design** - Works perfectly on mobile and desktop
-- ✏️ **Full CRUD Operations** - Add, edit, and delete expenses with ease
-- 📈 **Statistics Overview** - Total expenses, transaction count, and average daily spending
+---
 
 ## Tech Stack
 
-- **Framework:** Next.js 16 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **Database:** Turso (libSQL)
-- **Charts:** Recharts
-- **Icons:** Lucide React
-- **Fonts:** Geist Sans & Vazirmatn (Persian)
+| Layer           | Choice                                |
+| --------------- | ------------------------------------- |
+| Framework       | Next.js 16 (App Router, React 19)     |
+| Language        | TypeScript (strict)                   |
+| Database        | Turso (libSQL / SQLite)               |
+| Styling         | Tailwind CSS v4                       |
+| Charts          | Recharts                              |
+| Tables          | TanStack Table v8                     |
+| Data fetching   | TanStack Query v5                     |
+| Auth            | Custom-built (JWT, HTTP-only cookies) |
+| Email           | Resend + React Email                  |
+| Export          | xlsx                                  |
+| Validation      | Zod                                   |
+| Package manager | pnpm                                  |
 
-## Getting Started
-
-1. Clone the repository:
-
-```bash
-git clone <repository-url>
-cd expense-tracker
-```
-
-2. Install dependencies:
-
-```bash
-pnpm install
-```
-
-3. Set up environment variables:
-
-```bash
-# Create .env.local file with:
-TURSO_DATABASE_URL=your_turso_database_url
-TURSO_AUTH_TOKEN=your_turso_auth_token
-NAVASAN_API_KEY=your_navasan_api_key  # Optional, uses free tier if not provided
-```
-
-4. Run database migrations:
-
-```bash
-pnpm migrate
-```
-
-5. Start the development server:
-
-```bash
-pnpm dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) to see the app.
+---
 
 ## Project Structure
 
 ```
-├── app/
-│   ├── api/
-│   │   ├── expenses/        # CRUD API routes for expenses
-│   │   └── exchange-rate/   # Exchange rate fetching with caching
-│   ├── layout.tsx           # Root layout with fonts and metadata
-│   ├── page.tsx             # Main page component
-│   └── globals.css          # Global styles
-├── components/
-│   ├── expense-form.tsx     # Form for adding/editing expenses
-│   ├── expense-list.tsx     # Table displaying all expenses
-│   ├── expense-stats.tsx    # Statistics cards
-│   └── expense-charts.tsx   # Chart visualizations
-├── lib/
-│   ├── db/                  # Database setup and migrations
-│   ├── types/               # TypeScript type definitions
-│   ├── constants.ts         # Currency conversion utilities
-│   └── utils.ts             # Shared utility functions
+kharji/
+├── src/
+│   ├── @schemas/            Zod validation schemas + unit tests
+│   ├── @types/              TypeScript type definitions
+│   ├── app/
+│   │   ├── (auth)/          Login, signup, forgot/reset-password pages
+│   │   ├── (dashboard)/     All protected app pages (overview, expenses, income, assets, reports, settings)
+│   │   ├── api/             API route handlers
+│   │   ├── layout.tsx       Root layout (fonts, providers, analytics)
+│   │   └── page.tsx         Root redirect
+│   ├── components/          Shared UI primitives (Button, Modal, Toast, DeleteConfirmModal, …)
+│   ├── constants/           Centralised category/type definitions
+│   ├── core/
+│   │   ├── api/             Auth middleware (withAuth) and request helpers
+│   │   └── database/        Turso client + SQL migrations
+│   ├── emails/              React Email templates (MonthlyReport, YearlyReport)
+│   ├── features/            Feature-scoped components (expenses, income, assets)
+│   ├── hooks/               Shared React hooks
+│   ├── styles/              globals.css (Tailwind theme tokens)
+│   └── utils/               Pure utility functions + unit tests
 ```
 
-## Features in Detail
+---
 
-### Expense Management
+## Getting Started
 
-- Add expenses with category, description, date, and dual currency amounts
-- Edit existing expenses inline
-- Delete expenses with confirmation
-- Auto-calculates currency conversion based on current exchange rate
+### Prerequisites
 
-### Statistics
+- Node.js 22+
+- pnpm 10+
+- A [Turso](https://turso.tech) database
 
-- **Total Expenses:** Sum of all expenses in both currencies
-- **Transaction Count:** Number of expense entries
-- **Average Daily Spending:** Calculated from first expense date to today
+### Development
 
-### Visualizations
+```bash
+# Install dependencies
+pnpm install
 
-- **Category Distribution:** Pie chart showing spending breakdown by category
-- **Category Comparison:** Horizontal bar chart for easy comparison
-- **Daily Spending Trend:** Area chart showing spending patterns over time with zero-day filling
+# Copy env template and fill in values
+cp .env.example .env.local
 
-### Exchange Rate Integration
+# Run database migrations
+pnpm migrate
 
-- Fetches live USD/Toman rates from Navasan API
-- 24-hour CDN-level caching to minimize API calls
-- Automatic rate updates in the expense form
-- Respects API rate limits (120 requests/month on free tier)
+# (Optional) seed a demo user
+pnpm db:seed
+
+# Start the dev server — http://localhost:3000
+pnpm dev
+```
+
+### Preview emails
+
+```bash
+pnpm email:dev   # http://localhost:3001
+```
+
+---
+
+## Environment Variables
+
+Copy `.env.example` to `.env.local`. For Vercel deployments, set these in the project settings.
+
+### Required
+
+| Variable             | Description                                                             |
+| -------------------- | ----------------------------------------------------------------------- |
+| `TURSO_DATABASE_URL` | Turso database connection URL                                           |
+| `TURSO_AUTH_TOKEN`   | Turso authentication token                                              |
+| `JWT_SECRET`         | Long random string — signs JWT session tokens                           |
+| `APP_URL`            | Public URL of the app (e.g. `https://kharji.app`) — used in email links |
+
+### Optional: exchange rate
+
+| Variable          | Default | Description                                                                                   |
+| ----------------- | ------- | --------------------------------------------------------------------------------------------- |
+| `NAVASAN_API_KEY` | —       | Navasan API key for live USD/Toman rates. Falls back to free tier (120 req/month) if not set. |
+
+### Optional: email
+
+If `RESEND_API_KEY` is not set, emails are skipped and the app works normally.
+
+| Variable         | Description                             |
+| ---------------- | --------------------------------------- |
+| `RESEND_API_KEY` | Resend API key for transactional emails |
+
+### Optional: cron
+
+| Variable      | Description                                                       |
+| ------------- | ----------------------------------------------------------------- |
+| `CRON_SECRET` | Secret token Vercel sends with cron requests to authenticate them |
+
+### Optional: debugging
+
+| Variable                 | Description                                                                  |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_COMMIT_SHA` | Git commit SHA injected at build time (displayed in footer for traceability) |
+
+---
+
+## Email Notifications
+
+The following emails are sent automatically when `RESEND_API_KEY` is configured:
+
+| Trigger                   | Recipient                    | Description                          |
+| ------------------------- | ---------------------------- | ------------------------------------ |
+| Forgot password           | Requesting user              | Password reset link (expires 1 hour) |
+| Monthly cron (daily 9 AM) | Users with reporting enabled | Monthly expense + income summary     |
+| Yearly cron               | Users with reporting enabled | Annual financial summary             |
+
+Users can manage notification preferences in **Settings → Notifications** and unsubscribe via the link in any email.
+
+---
+
+## Pages & Routes
+
+| Route                    | Description                                                                    |
+| ------------------------ | ------------------------------------------------------------------------------ |
+| `/`                      | Redirect → `/overview` (or `/login` if unauthenticated)                        |
+| `/login`                 | Email + password sign-in                                                       |
+| `/signup`                | New account registration                                                       |
+| `/forgot-password`       | Request a password reset link                                                  |
+| `/reset-password?token=` | Set a new password from emailed link                                           |
+| `/overview`              | Dashboard: monthly summary cards, income vs expenses chart, asset distribution |
+| `/expenses`              | Expense list with date range filter, category filter, tags, export             |
+| `/income`                | Monthly income entries by type (salary, freelance, investment, gift, other)    |
+| `/assets`                | Asset portfolio across 7 categories with valuation history                     |
+| `/reports`               | Spending analysis: charts, category breakdown, daily heatmap                   |
+| `/settings`              | Tags, custom categories, notification preferences, profile                     |
+
+---
+
+## API Routes
+
+### Auth
+
+- `POST /api/auth/signup` — Create account
+- `POST /api/auth/login` — Sign in
+- `POST /api/auth/logout` — Sign out
+- `GET  /api/auth/me` — Current user
+- `POST /api/auth/forgot-password` — Send reset email
+- `POST /api/auth/reset-password` — Apply new password with token
+
+### Expenses
+
+- `GET/POST /api/expenses`
+- `GET/PUT/DELETE /api/expenses/[id]`
+
+### Income
+
+- `GET/POST /api/incomes`
+- `GET/PUT/DELETE /api/incomes/[id]`
+
+### Assets
+
+- `GET/POST /api/assets`
+- `GET/PUT/DELETE /api/assets/[id]`
+
+### Tags
+
+- `GET/POST /api/tags` — supports `?includeUsage=true`
+- `PUT/DELETE /api/tags/[id]`
+
+### Categories
+
+- `GET/POST /api/categories`
+- `PUT/DELETE /api/categories/[id]`
+
+### Other
+
+- `GET /api/exchange-rate` — Live USD/Toman rate with 24-hour caching
+- `GET /api/summary` — Monthly financial overview for dashboard
+- `GET /api/net-worth/history` — Asset value history over time
+- `GET /api/export` — Download expenses as Excel
+- `GET/PUT /api/settings/notifications` — Notification preferences
+- `PUT /api/user/profile` — Update name/email
+- `GET /api/unsubscribe/[token]` — One-click email unsubscribe
+- `POST /api/cron/reports` — Vercel cron trigger (daily 9 AM UTC) for report emails
+
+---
 
 ## Database Schema
 
-```sql
-CREATE TABLE expenses (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  date TEXT NOT NULL,
-  category TEXT NOT NULL,
-  description TEXT NOT NULL,
-  price_toman REAL NOT NULL,
-  price_usd REAL NOT NULL,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-```
+### users
 
-## Deployment
+| Column        | Type    | Notes            |
+| ------------- | ------- | ---------------- |
+| id            | INTEGER | PK               |
+| email         | TEXT    | unique           |
+| password_hash | TEXT    | PBKDF2 with salt |
+| name          | TEXT    | nullable         |
+| created_at    | TEXT    |                  |
+| updated_at    | TEXT    |                  |
 
-The app is optimized for deployment on Vercel:
+### expenses
+
+| Column      | Type    | Notes           |
+| ----------- | ------- | --------------- |
+| id          | INTEGER | PK              |
+| user_id     | INTEGER | FK → users      |
+| date        | TEXT    | YYYY-MM-DD      |
+| category_id | INTEGER | FK → categories |
+| description | TEXT    |                 |
+| price_toman | REAL    |                 |
+| price_usd   | REAL    |                 |
+| created_at  | TEXT    |                 |
+
+### incomes
+
+| Column           | Type    | Notes                                          |
+| ---------------- | ------- | ---------------------------------------------- |
+| id               | INTEGER | PK                                             |
+| userId           | INTEGER | FK → users                                     |
+| amountUsd        | REAL    |                                                |
+| amountToman      | REAL    |                                                |
+| exchangeRateUsed | REAL    |                                                |
+| month            | INTEGER | 1–12                                           |
+| year             | INTEGER |                                                |
+| incomeType       | TEXT    | salary / freelance / investment / gift / other |
+| source           | TEXT    | nullable                                       |
+| notes            | TEXT    | nullable                                       |
+| createdAt        | TEXT    |                                                |
+| updatedAt        | TEXT    |                                                |
+
+### assets
+
+| Column           | Type    | Notes                                                              |
+| ---------------- | ------- | ------------------------------------------------------------------ |
+| id               | INTEGER | PK                                                                 |
+| userId           | INTEGER | FK → users                                                         |
+| category         | TEXT    | cash / crypto / commodity / vehicle / property / bank / investment |
+| name             | TEXT    | user-provided label                                                |
+| quantity         | REAL    |                                                                    |
+| unit             | TEXT    | nullable                                                           |
+| unitValueUsd     | REAL    | nullable                                                           |
+| totalValueUsd    | REAL    |                                                                    |
+| totalValueToman  | REAL    |                                                                    |
+| exchangeRateUsed | REAL    |                                                                    |
+| notes            | TEXT    | nullable                                                           |
+| lastValuedAt     | TEXT    |                                                                    |
+| createdAt        | TEXT    |                                                                    |
+| updatedAt        | TEXT    |                                                                    |
+
+### assetValuations
+
+Snapshot created every time an asset value changes.
+
+| Column           | Type    | Notes                        |
+| ---------------- | ------- | ---------------------------- |
+| id               | INTEGER | PK                           |
+| assetId          | INTEGER | FK → assets (cascade delete) |
+| quantity         | REAL    |                              |
+| unitValueUsd     | REAL    | nullable                     |
+| totalValueUsd    | REAL    |                              |
+| totalValueToman  | REAL    |                              |
+| exchangeRateUsed | REAL    |                              |
+| valuedAt         | TEXT    |                              |
+
+### tags / expense_tags
+
+| Column                  | Type    | Notes                          |
+| ----------------------- | ------- | ------------------------------ |
+| tags.id                 | INTEGER | PK                             |
+| tags.user_id            | INTEGER | FK → users                     |
+| tags.name               | TEXT    | unique per user                |
+| expense_tags.expense_id | INTEGER | FK → expenses (cascade delete) |
+| expense_tags.tag_id     | INTEGER | FK → tags (cascade delete)     |
+
+### categories
+
+User-defined expense categories (replaces hardcoded list).
+
+### exchange_rates
+
+Cached USD/Toman rates fetched from Navasan.
+
+### userNotificationPreferences
+
+Per-user email notification settings.
+
+### password_reset_tokens
+
+Short-lived tokens for the forgot-password flow (1-hour expiry).
+
+---
+
+## Auth
+
+Custom-built authentication — no NextAuth, Better Auth, or Clerk.
+
+- **Tokens**: JWT signed with `JWT_SECRET`
+- **Storage**: HTTP-only cookies (no localStorage exposure)
+- **Session expiry**: 30 days
+- **Passwords**: PBKDF2 with per-user salt
+- **Password requirements**: ≥8 chars, uppercase, lowercase, digit
+- **Reset tokens**: cryptographically random, expire after 1 hour
+
+---
+
+## Testing
 
 ```bash
-pnpm build
+# Run all unit tests
+pnpm test
+
+# Watch mode
+pnpm test:watch
 ```
 
-Ensure environment variables are set in your Vercel project settings.
+Uses **Jest** + **ts-jest** + **jsdom** + **React Testing Library**.
+
+| File                                                                             | What's tested                                                   |
+| -------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `src/@schemas/__tests__/expense.test.ts`                                         | Zod expense schema — valid input, missing fields, invalid types |
+| `src/@schemas/__tests__/income.test.ts`                                          | Zod income schema validation                                    |
+| `src/@schemas/__tests__/asset.test.ts`                                           | Zod asset schema validation                                     |
+| `src/utils/format/__tests__/format.test.ts`                                      | Currency/number formatting helpers                              |
+| `src/utils/date/__tests__/formatChartTooltipDate.test.ts`                        | Date formatting for chart tooltips                              |
+| `src/features/expenses/components/DateRangeSelector/__tests__/dateRange.test.ts` | Date range selection logic                                      |
+
+---
 
 ## License
 
 Kharji is published under the **Kharji Source-Available License (View-Only) v1.0** — see [LICENSE](./LICENSE) for the full text.
 
-This is **not** an OSI-approved open-source license. The source is public for a specific reason: Kharji handles your personal financial data, and you should be able to read every line of code that touches it before trusting it. Transparency, not free reuse, is the goal.
+The source is public for auditability: you should be able to read every line of code that touches your financial data before trusting it. This is not an OSI-approved open-source license.
 
-### What you can do
+**You can:** read, audit, quote excerpts, submit pull requests.
+**You cannot:** run/host/deploy, fork, reuse in another project, redistribute.
 
-- ✅ **Read and study** the source code
-- ✅ **Audit it for security** or correctness
-- ✅ **Quote excerpts** for discussion, education, or security disclosure (with attribution)
-- ✅ **Submit pull requests** — contributions are welcome and licensed back under the same terms
-
-### What you cannot do
-
-- ❌ **Run, host, or deploy** the code (even for personal use)
-- ❌ **Use it commercially** in any form
-- ❌ **Copy, fork, or reuse** any part of it in another project
-- ❌ **Redistribute** the code or modified versions
-- ❌ **Use the "Kharji" name** or branding
-
-### Why this license?
-
-Most "no commercial use" licenses (PolyForm Noncommercial, CC BY-NC, etc.) still allow personal forks and self-hosting. Kharji goes stricter because the value of publishing the source here is auditability, not adoption. If you want a finance tracker you can run yourself, build one — and feel free to learn from this codebase by reading it.
-
-### Want to use it for something?
-
-If you'd like to use Kharji (or any part of it) outside the terms above — commercial use, self-hosted deployment, integration into another product — reach out to discuss a separate license: **dev.erfanansari@gmail.com**
-
-## Credits
-
-Built with ❤️ using modern web technologies.
+To use Kharji outside these terms, contact **dev.erfanansari@gmail.com**.
