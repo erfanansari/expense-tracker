@@ -9,4 +9,7 @@ import { serwist } from '@serwist/next/config';
 export default await serwist({
   swSrc: 'src/app/sw.ts',
   swDest: 'public/sw.js',
+  // iOS launch screens are only used by Safari at startup (before the SW) — no need
+  // to bloat the offline precache with ~1.4 MB of them.
+  globIgnores: ['public/splash/**'],
 });
