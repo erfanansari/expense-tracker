@@ -9,6 +9,8 @@ import Providers from '@features/Providers';
 
 import '@/styles/globals.css';
 
+import AppleSplashScreens from './AppleSplashScreens';
+
 const geistSans = Geist({
   display: 'swap',
   variable: '--font-geist-sans',
@@ -83,6 +85,7 @@ export default function RootLayout({
     <html lang="en" className="bg-background">
       <head>
         <meta name="color-scheme" content="light" />
+        <AppleSplashScreens />
       </head>
       <body className={twMerge(geistSans.variable, persianFont.variable, 'bg-background antialiased')}>
         <SerwistProvider swUrl="/sw.js" disable={process.env.NODE_ENV === 'development'}>
