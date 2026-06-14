@@ -147,17 +147,6 @@ const TagManagementList = () => {
     );
   }
 
-  if (tags.length === 0) {
-    return (
-      <div className="py-12 text-center">
-        <div className="bg-background-elevated mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
-          <TagIcon className="text-text-muted h-6 w-6" />
-        </div>
-        <p className="text-text-muted text-sm">No tags yet. Create tags while adding expenses.</p>
-      </div>
-    );
-  }
-
   const isSaving = updateTag.isPending;
   const isCreating = createTag.isPending;
   const isDeletingInProgress = deleteTag.isPending;
@@ -191,21 +180,33 @@ const TagManagementList = () => {
         {createError && <p className="text-danger text-xs">{createError}</p>}
       </div>
 
+      {/* Empty state — no tags created yet */}
+      {tags.length === 0 && (
+        <div className="py-10 text-center">
+          <div className="bg-background-elevated mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
+            <TagIcon className="text-text-muted h-6 w-6" />
+          </div>
+          <p className="text-text-muted text-sm">No tags yet. Create your first tag above.</p>
+        </div>
+      )}
+
       {/* Search Input */}
-      <div className="relative">
-        <Search className="text-text-muted absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-        <input
-          type="search"
-          placeholder="Search tags..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border py-2.5 pr-4 pl-10 text-sm transition-all outline-none"
-        />
-      </div>
+      {tags.length > 0 && (
+        <div className="relative">
+          <Search className="text-text-muted absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <input
+            type="search"
+            placeholder="Search tags..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border py-2.5 pr-4 pl-10 text-sm transition-all outline-none"
+          />
+        </div>
+      )}
 
       {/* Tags List */}
       <div className="space-y-2">
-        {filteredTags.length === 0 ? (
+        {tags.length > 0 && filteredTags.length === 0 ? (
           <p className="text-text-muted py-8 text-center text-sm">No tags found matching &ldquo;{searchQuery}&rdquo;</p>
         ) : (
           filteredTags.map((tag) => (
