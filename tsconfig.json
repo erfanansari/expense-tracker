@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": ["dom", "dom.iterable", "esnext", "webworker"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -40,7 +40,7 @@
     "baseUrl": ".",
     "rootDir": ".",
     "ignoreDeprecations": "6.0",
-    "types": ["node", "jest", "@testing-library/jest-dom"]
+    "types": ["node", "jest", "@testing-library/jest-dom", "@serwist/next/typings"]
   },
   "include": [
     "next-env.d.ts",

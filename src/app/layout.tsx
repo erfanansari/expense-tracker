@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Vazirmatn } from 'next/font/google';
 
+import { SerwistProvider } from '@serwist/next/react';
 import { Analytics } from '@vercel/analytics/next';
 import { twMerge } from 'tailwind-merge';
 
@@ -22,7 +23,7 @@ const persianFont = Vazirmatn({
   weight: ['300', '400', '500', '600', '700'],
 });
 
-const APP_URL = 'https://kharji.erfanansari.com';
+const APP_URL = 'https://kharji.app';
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
@@ -31,6 +32,16 @@ export const metadata: Metadata = {
     default: 'Kharji',
   },
   description: 'Track expenses, income, and assets — all in one place.',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Kharji',
+  },
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     title: 'Kharji – Personal Finance Tracker',
     description: 'Track expenses, income, and assets — all in one place.',
@@ -60,6 +71,7 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: 'cover',
+  themeColor: '#ffffff',
 };
 
 export default function RootLayout({
@@ -73,10 +85,12 @@ export default function RootLayout({
         <meta name="color-scheme" content="light" />
       </head>
       <body className={twMerge(geistSans.variable, persianFont.variable, 'bg-background antialiased')}>
-        <Providers>
-          {children}
-          <Analytics />
-        </Providers>
+        <SerwistProvider swUrl="/sw.js" disable={process.env.NODE_ENV === 'development'}>
+          <Providers>
+            {children}
+            <Analytics />
+          </Providers>
+        </SerwistProvider>
       </body>
     </html>
   );
