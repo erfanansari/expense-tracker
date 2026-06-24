@@ -139,10 +139,12 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
   }, [formData, initialFormData, setIsDirty]);
 
   // Memos
-  const numberToPersianWord = useMemo(
-    () => (formData.price_toman > 0 ? `${numberToWords(formData.price_toman)} تومان` : ''),
-    [formData.price_toman]
-  );
+  const numberToPersianWord = useMemo(() => {
+    if (formData.price_toman <= 0) return '';
+    // Toman has no fractional sub-unit; numberToWords also requires a safe integer.
+    const rounded = Math.round(formData.price_toman);
+    return Number.isSafeInteger(rounded) ? `${numberToWords(rounded)} تومان` : '';
+  }, [formData.price_toman]);
 
   const handleTomanChange = (value: number) => {
     setFormData({
