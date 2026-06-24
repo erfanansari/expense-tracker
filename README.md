@@ -118,6 +118,17 @@ If `RESEND_API_KEY` is not set, emails are skipped and the app works normally.
 | ------------- | ----------------------------------------------------------------- |
 | `CRON_SECRET` | Secret token Vercel sends with cron requests to authenticate them |
 
+### Optional: database backups (Backblaze B2)
+
+Daily SQL dumps of the whole database are gzipped and uploaded to a B2 bucket via its S3-compatible API; backups older than 30 days are pruned automatically.
+
+| Variable             | Description                                                               |
+| -------------------- | ------------------------------------------------------------------------- |
+| `B2_KEY_ID`          | Backblaze B2 application key ID                                           |
+| `B2_APPLICATION_KEY` | Backblaze B2 application key secret (shown once at creation)              |
+| `B2_BUCKET_NAME`     | B2 bucket to store backups in                                             |
+| `B2_ENDPOINT`        | B2 bucket's S3-compatible endpoint, e.g. `s3.ca-east-006.backblazeb2.com` |
+
 ### Optional: debugging
 
 | Variable                 | Description                                                                  |
@@ -204,6 +215,7 @@ Users can manage notification preferences in **Settings → Notifications** and 
 - `PUT /api/user/profile` — Update name/email
 - `GET /api/unsubscribe/[token]` — One-click email unsubscribe
 - `POST /api/cron/reports` — Vercel cron trigger (daily 9 AM UTC) for report emails
+- `POST /api/cron/backup` — Vercel cron trigger (daily 3 AM UTC) for database backups to Backblaze B2
 
 ---
 

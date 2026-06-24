@@ -19,10 +19,12 @@
     "db:seed": "tsx src/core/database/seed-user.ts",
     "db:test": "tsx src/core/database/test-connection.ts",
     "db:seed-demo": "tsx src/core/database/seed-demo.ts",
+    "db:backup": "tsx src/core/database/run-backup.ts",
     "test": "jest",
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1075.0",
     "@libsql/client": "^0.17.3",
     "@persian-tools/persian-tools": "^4.0.4",
     "@radix-ui/react-tabs": "^1.1.13",
