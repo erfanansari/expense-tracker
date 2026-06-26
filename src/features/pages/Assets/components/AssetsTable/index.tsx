@@ -84,7 +84,7 @@ const AssetsTable = ({
   return (
     <div className="space-y-6">
       {Object.entries(assetsByCategory)
-        .sort(([, a], [, b]) => b.totalUsd - a.totalUsd)
+        .sort(([, a], [, b]) => b.total - a.total)
         .map(([category, data]) => {
           const Icon = CATEGORY_ICONS[category as AssetCategory] || Wallet;
           const labels = getAssetCategoryLabel(category);

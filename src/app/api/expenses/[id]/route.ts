@@ -5,6 +5,7 @@ import { createExpenseSchema } from '@schemas';
 import { parseIdParam, validateBody, verifyOwnership, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
 import { assignTagsToExpense } from '@core/database/tags';
+import { getEntryRate } from '@core/rates';
 
 // PUT /api/expenses/[id] - Update an expense
 export const PUT = withAuth(async (user, request, { params }) => {
@@ -24,11 +25,17 @@ export const PUT = withAuth(async (user, request, { params }) => {
   const category = await verifyOwnership('categories', body.categoryId, user.userId, 'user_id');
   if (category instanceof NextResponse) return category;
 
+  // Re-snapshot the entry rate for the (possibly changed) currency.
+  const entryRate = await getEntryRate(body.currency);
+  if (entryRate === null) {
+    return NextResponse.json({ error: `No exchange rate available for ${body.currency}` }, { status: 422 });
+  }
+
   await db.execute({
     sql: `UPDATE expenses
-          SET date = ?, category_id = ?, description = ?, price_toman = ?, price_usd = ?
+          SET date = ?, category_id = ?, description = ?, amount = ?, currency = ?, entryRate = ?
           WHERE id = ? AND user_id = ?`,
-    args: [body.date, body.categoryId, body.description, body.price_toman, body.price_usd, id, user.userId],
+    args: [body.date, body.categoryId, body.description, body.amount, body.currency, entryRate, id, user.userId],
   });
 
   await assignTagsToExpense(id, body.tagIds);

@@ -1,8 +1,13 @@
 import { Banknote, TrendingDown, TrendingUp } from 'lucide-react';
 
-import { formatNumber } from '@utils';
+import Money from '@components/Money';
+
+import { PIVOT_CURRENCY } from '@/constants/currencies';
 
 import type { OverviewStatsProps } from '../../@types';
+
+const primaryClass = 'text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl';
+const secondaryClass = 'text-text-secondary mt-1.5 text-sm font-medium';
 
 const OverviewStats = ({ summary }: OverviewStatsProps) => {
   return (
@@ -15,12 +20,12 @@ const OverviewStats = ({ summary }: OverviewStatsProps) => {
           </div>
         </div>
         <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Net Worth</p>
-        <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl">
-          {formatNumber(summary?.net_worth_toman ?? 0)} <span className="text-text-muted text-lg">Toman</span>
-        </p>
-        <p className="text-text-secondary mt-1.5 text-sm font-medium">
-          ${(summary?.net_worth_usd ?? 0).toFixed(2)} USD
-        </p>
+        <Money
+          amount={summary?.net_worth ?? 0}
+          currency={PIVOT_CURRENCY}
+          primaryClassName={primaryClass}
+          secondaryClassName={secondaryClass}
+        />
       </div>
 
       {/* Total Income */}
@@ -31,12 +36,12 @@ const OverviewStats = ({ summary }: OverviewStatsProps) => {
           </div>
         </div>
         <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Income</p>
-        <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl">
-          {formatNumber(summary?.total_income_toman ?? 0)} <span className="text-text-muted text-lg">Toman</span>
-        </p>
-        <p className="text-text-secondary mt-1.5 text-sm font-medium">
-          ${(summary?.total_income_usd ?? 0).toFixed(2)} USD
-        </p>
+        <Money
+          amount={summary?.total_income ?? 0}
+          currency={PIVOT_CURRENCY}
+          primaryClassName={primaryClass}
+          secondaryClassName={secondaryClass}
+        />
       </div>
 
       {/* Total Expenses */}
@@ -47,12 +52,12 @@ const OverviewStats = ({ summary }: OverviewStatsProps) => {
           </div>
         </div>
         <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Expenses</p>
-        <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl">
-          {formatNumber(summary?.total_expenses_toman ?? 0)} <span className="text-text-muted text-lg">Toman</span>
-        </p>
-        <p className="text-text-secondary mt-1.5 text-sm font-medium">
-          ${(summary?.total_expenses_usd ?? 0).toFixed(2)} USD
-        </p>
+        <Money
+          amount={summary?.total_expenses ?? 0}
+          currency={PIVOT_CURRENCY}
+          primaryClassName={primaryClass}
+          secondaryClassName={secondaryClass}
+        />
       </div>
     </>
   );

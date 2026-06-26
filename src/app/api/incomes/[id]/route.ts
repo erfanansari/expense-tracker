@@ -5,6 +5,7 @@ import { createIncomeSchema } from '@schemas';
 import { parseIdParam, validateBody, verifyOwnership, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
 import { mapRowToIncome } from '@core/database/mappers';
+import { getEntryRate } from '@core/rates';
 
 // GET /api/incomes/[id] - Get a single income entry
 export const GET = withAuth(async (user, _request, { params }) => {
@@ -35,17 +36,18 @@ export const PUT = withAuth(async (user, request, { params }) => {
   const updates: string[] = [];
   const args: (string | number | null)[] = [];
 
-  if (body.amountUsd !== undefined) {
-    updates.push('amountUsd = ?');
-    args.push(body.amountUsd);
+  if (body.amount !== undefined) {
+    updates.push('amount = ?');
+    args.push(body.amount);
   }
-  if (body.amountToman !== undefined) {
-    updates.push('amountToman = ?');
-    args.push(body.amountToman);
-  }
-  if (body.exchangeRateUsed !== undefined) {
-    updates.push('exchangeRateUsed = ?');
-    args.push(body.exchangeRateUsed);
+  // When the currency changes, re-snapshot its entry rate to the pivot.
+  if (body.currency !== undefined) {
+    const entryRate = await getEntryRate(body.currency);
+    if (entryRate === null) {
+      return NextResponse.json({ error: `No exchange rate available for ${body.currency}` }, { status: 422 });
+    }
+    updates.push('currency = ?', 'entryRate = ?');
+    args.push(body.currency, entryRate);
   }
   if (body.month !== undefined) {
     updates.push('month = ?');

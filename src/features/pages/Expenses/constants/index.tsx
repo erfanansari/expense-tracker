@@ -5,8 +5,9 @@ import type { Expense } from '@types';
 
 import ActionButtons from '@components/ActionButtons';
 import CategoryBadge from '@components/CategoryBadge';
+import Money from '@components/Money';
 
-import { formatNumber, formatToFarsiDate } from '@utils';
+import { formatToFarsiDate } from '@utils';
 
 // ─── Table layout config ──────────────────────────────────────────────────────
 // Centralized so column widths can be tuned in one place. Percentages must sum
@@ -89,18 +90,20 @@ export function buildExpenseColumns(
     },
     {
       id: 'amount',
-      accessorKey: 'price_toman',
+      accessorKey: 'amount',
       header: 'Amount',
       meta: { widthClass: EXPENSE_COLUMN_WIDTHS.amount, align: 'right' as const },
       cell: ({ row }) => {
         const expense = row.original;
         return (
-          <div className="flex flex-col items-end">
-            <span className="text-text-primary text-sm font-semibold whitespace-nowrap">
-              {formatNumber(expense.price_toman)} Toman
-            </span>
-            <span className="text-text-muted text-xs whitespace-nowrap">${expense.price_usd.toFixed(2)} USD</span>
-          </div>
+          <Money
+            amount={expense.amount}
+            currency={expense.currency}
+            date={expense.date}
+            className="items-end"
+            primaryClassName="text-text-primary text-sm font-semibold whitespace-nowrap"
+            secondaryClassName="text-text-muted text-xs whitespace-nowrap"
+          />
         );
       },
     },

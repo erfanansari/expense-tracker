@@ -1,6 +1,7 @@
 'use client';
 
 import { GlobalDrawerProvider } from '@features/drawers/GlobalDrawerProvider';
+import { CurrencyProvider } from '@features/ExchangeRate/CurrencyProvider';
 
 import { CommandPaletteProvider } from '@components/CommandPalette/CommandPaletteProvider';
 import QueryProvider from '@components/QueryProvider';
@@ -12,13 +13,17 @@ interface ProvidersProps {
   children: React.ReactNode;
 }
 
+// CurrencyProvider wraps GlobalDrawerProvider so money components rendered inside
+// global drawers (e.g. the expense/income/asset forms) have currency context too.
 const Providers = ({ children }: ProvidersProps) => (
   <QueryProvider>
     <ToastProvider>
       <UnauthorizedListener />
-      <GlobalDrawerProvider>
-        <CommandPaletteProvider>{children}</CommandPaletteProvider>
-      </GlobalDrawerProvider>
+      <CurrencyProvider>
+        <GlobalDrawerProvider>
+          <CommandPaletteProvider>{children}</CommandPaletteProvider>
+        </GlobalDrawerProvider>
+      </CurrencyProvider>
     </ToastProvider>
   </QueryProvider>
 );

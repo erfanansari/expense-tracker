@@ -43,8 +43,12 @@ export interface Expense {
   date: string;
   category: Category;
   description: string;
-  price_toman: number;
-  price_usd: number;
+  /** Amount in the entry currency. */
+  amount: number;
+  /** Entry currency code (see src/constants/currencies.ts). */
+  currency: string;
+  /** Rate to the pivot at entry time (frozen snapshot). */
+  entryRate: number;
   created_at: string;
   tags?: Tag[];
 }
@@ -53,7 +57,7 @@ export interface CreateExpenseInput {
   date: string;
   categoryId: number;
   description: string;
-  price_toman: number;
-  price_usd: number;
+  amount: number;
+  currency: string;
   tagIds?: number[];
 }

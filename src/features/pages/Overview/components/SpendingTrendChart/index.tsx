@@ -12,6 +12,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
 import DateRangeSelector, {
   type DateRange,
   filterExpensesByDateRange,
@@ -21,11 +22,14 @@ import DateRangeSelector, {
 import ChartTooltip from '@components/ChartTooltip';
 import EmptyState from '@components/EmptyState';
 
-import { formatChartTooltipDate, formatNumber } from '@utils';
+import { formatChartTooltipDate } from '@utils';
+
+import { PIVOT_CURRENCY } from '@/constants/currencies';
 
 import type { SpendingTrendChartProps } from '../../@types';
 
 // ─── Custom recharts tooltip ────────────────────────────────────────────────────
+// Chart values are in the pivot currency; the tooltip converts to primary/secondary.
 function SpendingTooltip({
   active,
   payload,
@@ -33,21 +37,19 @@ function SpendingTooltip({
   granularity,
 }: {
   active?: boolean;
-  payload?: ReadonlyArray<{
-    value?: number | string | ReadonlyArray<number | string>;
-    payload?: { usdValue?: number };
-  }>;
+  payload?: ReadonlyArray<{ value?: number | string | ReadonlyArray<number | string> }>;
   label?: string | number;
   granularity: 'daily' | 'weekly' | 'monthly';
 }) {
+  const { display } = useCurrency();
   if (!active || !payload?.length) return null;
-  const usdValue = payload[0]?.payload?.usdValue || 0;
   const rawValue = payload[0].value;
   const numericValue = typeof rawValue === 'number' ? rawValue : Number(rawValue) || 0;
+  const { primary, secondary } = display(numericValue, PIVOT_CURRENCY);
   return (
     <ChartTooltip
-      primary={`${formatNumber(numericValue)} Toman`}
-      secondary={`$${usdValue.toFixed(2)} USD`}
+      primary={primary}
+      secondary={secondary ?? undefined}
       accent={label != null ? { text: formatChartTooltipDate(String(label), granularity), tone: 'blue' } : undefined}
     />
   );
@@ -73,10 +75,11 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
   const spendingTrend = useMemo(() => {
     if (filteredExpenses.length === 0) return [];
 
-    const aggregated = new Map<string, { amount: number; usdValue: number }>();
+    const aggregated = new Map<string, { amount: number }>();
 
     filteredExpenses.forEach((exp) => {
       const date = new Date(`${exp.date}T00:00:00`);
+      const pivot = exp.amount * exp.entryRate;
       let key: string;
 
       switch (granularity) {
@@ -94,10 +97,9 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
 
       const existing = aggregated.get(key);
       if (existing) {
-        existing.amount += exp.price_toman;
-        existing.usdValue += exp.price_usd;
+        existing.amount += pivot;
       } else {
-        aggregated.set(key, { amount: exp.price_toman, usdValue: exp.price_usd });
+        aggregated.set(key, { amount: pivot });
       }
     });
 

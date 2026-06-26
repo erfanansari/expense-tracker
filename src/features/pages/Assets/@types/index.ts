@@ -1,22 +1,21 @@
 import type { Asset } from '@types';
 
+// Totals are in the pivot currency (amount * entryRate). The Money component
+// converts to the user's primary/secondary currency for display.
 export interface CategoryData {
   assets: Asset[];
-  totalUsd: number;
-  totalToman: number;
+  total: number;
 }
 
 export interface ChartEntry {
   name: string;
   nameFa: string;
   value: number;
-  tomanValue: number;
   color: string;
 }
 
 export interface AssetsSummaryProps {
-  totalValueUsd: number;
-  totalValueToman: number;
+  totalValue: number;
   assetsByCategory: Record<string, CategoryData>;
 }
 
@@ -33,5 +32,5 @@ export interface AssetsTableProps {
 
 export interface AssetsDistributionProps {
   chartData: ChartEntry[];
-  totalValueUsd: number;
+  totalValue: number;
 }

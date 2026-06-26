@@ -3,10 +3,11 @@ import { NextResponse } from 'next/server';
 import { getSearchParams, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
 
+// Net worth over time, in the pivot currency (IRT). The client converts to the
+// user's primary/secondary currency for display.
 interface NetWorthHistoryPoint {
   date: string;
-  valueUsd: number;
-  valueToman: number;
+  value: number;
 }
 
 export const GET = withAuth(async (user, request) => {
@@ -29,27 +30,32 @@ export const GET = withAuth(async (user, request) => {
   // 2. Fetch all valuations for those assets, ordered chronologically
   const placeholders = assetIds.map(() => '?').join(',');
   const valuationsResult = await db.execute({
-    sql: `SELECT assetId, totalValueUsd, totalValueToman, valuedAt
+    sql: `SELECT assetId, amount * entryRate AS value, valuedAt
           FROM assetValuations
           WHERE assetId IN (${placeholders})
           ORDER BY valuedAt ASC, id ASC`,
     args: assetIds,
   });
 
-  // 3. Walk chronologically, maintaining latest value per asset
-  const latestValues = new Map<number, { usd: number; toman: number }>();
-  const datePoints = new Map<string, { valueUsd: number; valueToman: number }>();
+  // 3. Walk chronologically, maintaining latest value per asset (pivot currency)
+  const latestValues = new Map<number, number>();
+  const datePoints = new Map<string, number>();
 
   let emittedRangeStart = false;
 
+  const sumLatest = (): number => {
+    let total = 0;
+    for (const v of latestValues.values()) total += v;
+    return total;
+  };
+
   for (const row of valuationsResult.rows) {
     const assetId = row.assetId as number;
-    const usd = row.totalValueUsd as number;
-    const toman = row.totalValueToman as number;
+    const value = (row.value as number) || 0;
     const valuedAt = (row.valuedAt as string).slice(0, 10);
 
     if (valuedAt < from) {
-      latestValues.set(assetId, { usd, toman });
+      latestValues.set(assetId, value);
       continue;
     }
 
@@ -57,35 +63,19 @@ export const GET = withAuth(async (user, request) => {
     if (!emittedRangeStart) {
       emittedRangeStart = true;
       if (latestValues.size > 0) {
-        let totalUsd = 0;
-        let totalToman = 0;
-        for (const val of latestValues.values()) {
-          totalUsd += val.usd;
-          totalToman += val.toman;
-        }
-        if (totalUsd > 0 || totalToman > 0) {
-          datePoints.set(from, { valueUsd: totalUsd, valueToman: totalToman });
-        }
+        const total = sumLatest();
+        if (total > 0) datePoints.set(from, total);
       }
     }
 
     if (valuedAt > to) break;
 
-    latestValues.set(assetId, { usd, toman });
-
-    // Sum all latest values for this date point
-    let totalUsd = 0;
-    let totalToman = 0;
-    for (const val of latestValues.values()) {
-      totalUsd += val.usd;
-      totalToman += val.toman;
-    }
-
-    datePoints.set(valuedAt, { valueUsd: totalUsd, valueToman: totalToman });
+    latestValues.set(assetId, value);
+    datePoints.set(valuedAt, sumLatest());
   }
 
   const data: NetWorthHistoryPoint[] = Array.from(datePoints.entries())
-    .map(([date, values]) => ({ date, ...values }))
+    .map(([date, value]) => ({ date, value }))
     .sort((a, b) => a.date.localeCompare(b.date));
 
   return NextResponse.json({ data });

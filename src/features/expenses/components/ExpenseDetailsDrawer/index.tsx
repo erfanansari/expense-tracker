@@ -6,8 +6,9 @@ import { ArrowLeftRight, Calendar, Tag as TagIcon, X } from 'lucide-react';
 import { Drawer } from 'vaul';
 
 import CategoryBadge from '@components/CategoryBadge';
+import Money from '@components/Money';
 
-import { formatNumber, formatToFarsiDate } from '@utils';
+import { formatToFarsiDate } from '@utils';
 
 import { type Expense } from '@/@types/expense';
 
@@ -93,7 +94,6 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
 
   // Variables
   const farsiDate = expense ? formatToFarsiDate(expense.date) : '';
-  const exchangeRate = expense ? Math.round(expense.price_toman / expense.price_usd) : 0;
 
   return (
     <Drawer.Root
@@ -165,18 +165,13 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
                     {expense.description}
                   </h3>
 
-                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <span className="text-text-primary text-3xl font-semibold tracking-tight tabular-nums sm:text-4xl">
-                      {formatNumber(expense.price_toman)}
-                    </span>
-                    <span className="text-text-muted text-sm font-medium">Toman</span>
-                    <span className="text-text-muted text-sm" aria-hidden="true">
-                      ·
-                    </span>
-                    <span className="text-text-secondary text-base font-medium tabular-nums">
-                      ${expense.price_usd.toFixed(2)} <span className="text-text-muted text-xs font-normal">USD</span>
-                    </span>
-                  </div>
+                  <Money
+                    amount={expense.amount}
+                    currency={expense.currency}
+                    date={expense.date}
+                    primaryClassName="text-text-primary text-3xl font-semibold tracking-tight tabular-nums sm:text-4xl"
+                    secondaryClassName="text-text-secondary text-base font-medium tabular-nums"
+                  />
                 </section>
 
                 {/* ─── Tags row (only when present) ───────────────────── */}
@@ -208,8 +203,8 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
                   />
                   <MetaCell
                     icon={<ArrowLeftRight className="text-text-muted h-3 w-3" />}
-                    label="Exchange rate"
-                    primary={`${formatNumber(exchangeRate)} T/USD`}
+                    label="Entered in"
+                    primary={expense.currency}
                   />
                 </section>
 

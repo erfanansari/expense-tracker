@@ -546,17 +546,19 @@ async function seedDemo() {
             const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const amountUsd = randFloat(cat.minUsd, cat.maxUsd);
             const rate = getExchangeRate(year, month);
-            const amountToman = Math.round(amountUsd * rate);
             const description = pick(cat.descriptions);
 
+            // Demo records are entered in USD with the period's rate as entryRate
+            // (entryRate = Toman per 1 USD), so the pivot value equals amountUsd * rate.
             expenseStatements.push({
-              sql: `INSERT INTO expenses (user_id, description, price_usd, price_toman, category_id, date, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)`,
+              sql: `INSERT INTO expenses (user_id, description, amount, currency, entryRate, category_id, date, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
               args: [
                 userId,
                 description,
                 amountUsd,
-                amountToman,
+                'USD',
+                rate,
                 categoryMap[cat.name],
                 date,
                 `${date}T${String(randInt(8, 22)).padStart(2, '0')}:${String(randInt(0, 59)).padStart(2, '0')}:00`,
@@ -612,12 +614,12 @@ async function seedDemo() {
         // Monthly salary
         const salaryUsd = randFloat(baseSalary - 100, baseSalary + 100);
         incomeStatements.push({
-          sql: `INSERT INTO incomes (userId, amountUsd, amountToman, exchangeRateUsed, month, year, incomeType, source, notes, createdAt, updatedAt)
+          sql: `INSERT INTO incomes (userId, amount, currency, entryRate, month, year, incomeType, source, notes, createdAt, updatedAt)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           args: [
             userId,
             salaryUsd,
-            Math.round(salaryUsd * rate),
+            'USD',
             rate,
             month,
             year,
@@ -634,12 +636,12 @@ async function seedDemo() {
         if (rand() < 0.25) {
           const freelanceUsd = randFloat(500, 2500);
           incomeStatements.push({
-            sql: `INSERT INTO incomes (userId, amountUsd, amountToman, exchangeRateUsed, month, year, incomeType, source, notes, createdAt, updatedAt)
+            sql: `INSERT INTO incomes (userId, amount, currency, entryRate, month, year, incomeType, source, notes, createdAt, updatedAt)
                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             args: [
               userId,
               freelanceUsd,
-              Math.round(freelanceUsd * rate),
+              'USD',
               rate,
               month,
               year,
@@ -657,12 +659,12 @@ async function seedDemo() {
         if (month === 12) {
           const investmentUsd = randFloat(800, 3000);
           incomeStatements.push({
-            sql: `INSERT INTO incomes (userId, amountUsd, amountToman, exchangeRateUsed, month, year, incomeType, source, notes, createdAt, updatedAt)
+            sql: `INSERT INTO incomes (userId, amount, currency, entryRate, month, year, incomeType, source, notes, createdAt, updatedAt)
                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             args: [
               userId,
               investmentUsd,
-              Math.round(investmentUsd * rate),
+              'USD',
               rate,
               month,
               year,
@@ -680,12 +682,12 @@ async function seedDemo() {
         if (month === 3 || month === 12) {
           const giftUsd = randFloat(50, 300);
           incomeStatements.push({
-            sql: `INSERT INTO incomes (userId, amountUsd, amountToman, exchangeRateUsed, month, year, incomeType, source, notes, createdAt, updatedAt)
+            sql: `INSERT INTO incomes (userId, amount, currency, entryRate, month, year, incomeType, source, notes, createdAt, updatedAt)
                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             args: [
               userId,
               giftUsd,
-              Math.round(giftUsd * rate),
+              'USD',
               rate,
               month,
               year,
@@ -715,10 +717,9 @@ async function seedDemo() {
       const currentUnitValue = asset.baseUnitValueUsd * Math.pow(asset.growth, yearsGrown);
       const totalValueUsd = parseFloat((asset.quantity * currentUnitValue).toFixed(2));
       const rate = getExchangeRate(2026, 1);
-      const totalValueToman = Math.round(totalValueUsd * rate);
 
       assetStatements.push({
-        sql: `INSERT INTO assets (userId, category, name, quantity, unit, unitValueUsd, totalValueUsd, totalValueToman, exchangeRateUsed, notes, lastValuedAt, createdAt, updatedAt)
+        sql: `INSERT INTO assets (userId, category, name, quantity, unit, unitValue, amount, currency, entryRate, notes, lastValuedAt, createdAt, updatedAt)
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [
           userId,
@@ -728,7 +729,7 @@ async function seedDemo() {
           asset.unit,
           parseFloat(currentUnitValue.toFixed(2)),
           totalValueUsd,
-          totalValueToman,
+          'USD',
           rate,
           null,
           now,
@@ -770,17 +771,16 @@ async function seedDemo() {
           const noisyUnitValue = parseFloat((unitValue * noise).toFixed(2));
           const totalUsd = parseFloat((asset.quantity * noisyUnitValue).toFixed(2));
           const rate = getExchangeRate(year, month);
-          const totalToman = Math.round(totalUsd * rate);
 
           valuationStatements.push({
-            sql: `INSERT INTO assetValuations (assetId, quantity, unitValueUsd, totalValueUsd, totalValueToman, exchangeRateUsed, valuedAt, createdAt)
+            sql: `INSERT INTO assetValuations (assetId, quantity, unitValue, amount, currency, entryRate, valuedAt, createdAt)
                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             args: [
               assetId,
               asset.quantity,
               noisyUnitValue,
               totalUsd,
-              totalToman,
+              'USD',
               rate,
               `${year}-${String(month).padStart(2, '0')}-15T10:00:00`,
               `${year}-${String(month).padStart(2, '0')}-15T10:00:00`,
@@ -793,6 +793,31 @@ async function seedDemo() {
 
     await executeBatch(client, valuationStatements);
     console.log(`  Created ${valuationCount} asset valuations`);
+
+    // 9. Seed the USD→IRT rate time series so the demo's USD records convert for
+    //    display (one row per month, plus a current row for "latest" lookups).
+    console.log('Seeding currency rates...');
+    const rateStatements: InStatement[] = [];
+    const nowIso = new Date().toISOString();
+    for (let year = 2021; year <= 2026; year++) {
+      const maxMonth = year === 2026 ? 1 : 12;
+      for (let month = 1; month <= maxMonth; month++) {
+        const rateDate = `${year}-${String(month).padStart(2, '0')}-01`;
+        rateStatements.push({
+          sql: `INSERT OR IGNORE INTO currencyRates (currency, baseCurrency, rate, rateDate, fetchedAt)
+                VALUES ('USD', 'IRT', ?, ?, ?)`,
+          args: [getExchangeRate(year, month), rateDate, nowIso],
+        });
+      }
+    }
+    // A current-dated row so latest-rate lookups resolve.
+    rateStatements.push({
+      sql: `INSERT OR IGNORE INTO currencyRates (currency, baseCurrency, rate, rateDate, fetchedAt)
+            VALUES ('USD', 'IRT', ?, ?, ?)`,
+      args: [getExchangeRate(2026, 1), nowIso.slice(0, 10), nowIso],
+    });
+    await executeBatch(client, rateStatements);
+    console.log(`  Created ${rateStatements.length} currency rate rows`);
 
     // Summary
     console.log('\n✅ Demo seed completed successfully!');

@@ -40,8 +40,9 @@ async function testConnection() {
           date TEXT NOT NULL,
           category TEXT NOT NULL,
           description TEXT NOT NULL,
-          price_toman REAL NOT NULL,
-          price_usd REAL NOT NULL,
+          amount REAL NOT NULL,
+          currency TEXT NOT NULL,
+          entryRate REAL NOT NULL,
           created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
       `);

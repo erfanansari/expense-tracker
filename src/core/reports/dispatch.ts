@@ -3,6 +3,7 @@ import React from 'react';
 import { render } from '@react-email/render';
 
 import { APP_URL, FROM_ADDRESS, LOGO_DATA_URI, REPLY_TO, resend, unsubscribeUrl } from '@core/email/client';
+import { getLatestRates } from '@core/rates';
 
 import { getMonthLabel } from '@/constants/income';
 import MonthlyReport from '@/emails/MonthlyReport';
@@ -11,6 +12,15 @@ import YearlyReport from '@/emails/YearlyReport';
 import type { YearlyReportProps } from '@/emails/YearlyReport';
 
 import type { ReportData } from './aggregate';
+
+/**
+ * Report aggregates are in the pivot currency (Toman). Emails still show a
+ * Toman + USD pair, so we convert pivot→USD with the latest USD rate at send
+ * time. `usd(v)` returns 0 when no USD rate is available.
+ */
+function makeUsdConverter(usdRate: number) {
+  return (pivotValue: number): number => (usdRate > 0 ? Math.round((pivotValue / usdRate) * 100) / 100 : 0);
+}
 
 interface DispatchInput {
   userId: number;
@@ -28,7 +38,7 @@ interface DispatchResult {
   resendId: string;
 }
 
-function buildMonthlyProps(input: DispatchInput): MonthlyReportProps {
+function buildMonthlyProps(input: DispatchInput, usd: (v: number) => number): MonthlyReportProps {
   const { data, userName, unsubscribeToken } = input;
   const [yearStr, monthStr] = data.periodKey.split('-');
   const month = Number(monthStr);
@@ -41,30 +51,30 @@ function buildMonthlyProps(input: DispatchInput): MonthlyReportProps {
     periodLabel: data.periodLabel,
     previousLabel,
     totals: {
-      incomeUsd: data.totals.income.usd,
-      incomeToman: data.totals.income.toman,
-      expensesUsd: data.totals.expenses.usd,
-      expensesToman: data.totals.expenses.toman,
-      netUsd: data.totals.net.usd,
-      netToman: data.totals.net.toman,
+      incomeUsd: usd(data.totals.income.value),
+      incomeToman: data.totals.income.value,
+      expensesUsd: usd(data.totals.expenses.value),
+      expensesToman: data.totals.expenses.value,
+      netUsd: usd(data.totals.net.value),
+      netToman: data.totals.net.value,
     },
     deltaPct: data.deltaPct,
     topCategories: data.topCategories.map((c) => ({
       id: c.id,
       name: c.name,
       color: c.color,
-      valueUsd: c.value.usd,
-      valueToman: c.value.toman,
+      valueUsd: usd(c.value.value),
+      valueToman: c.value.value,
       pct: c.pct,
     })),
-    netWorth: { totalUsd: data.netWorth.usd, totalToman: data.netWorth.toman },
+    netWorth: { totalUsd: usd(data.netWorth.value), totalToman: data.netWorth.value },
     unsubscribeUrl: unsubscribeUrl(unsubscribeToken),
     webViewUrl: `${APP_URL}/overview`,
     logoUrl: LOGO_DATA_URI,
   };
 }
 
-function buildYearlyProps(input: DispatchInput): YearlyReportProps {
+function buildYearlyProps(input: DispatchInput, usd: (v: number) => number): YearlyReportProps {
   const { data, userName, unsubscribeToken } = input;
   const previousLabel = String(Number(data.periodKey) - 1);
 
@@ -73,39 +83,41 @@ function buildYearlyProps(input: DispatchInput): YearlyReportProps {
     periodLabel: data.periodLabel,
     previousLabel,
     totals: {
-      incomeUsd: data.totals.income.usd,
-      incomeToman: data.totals.income.toman,
-      expensesUsd: data.totals.expenses.usd,
-      expensesToman: data.totals.expenses.toman,
-      netUsd: data.totals.net.usd,
-      netToman: data.totals.net.toman,
+      incomeUsd: usd(data.totals.income.value),
+      incomeToman: data.totals.income.value,
+      expensesUsd: usd(data.totals.expenses.value),
+      expensesToman: data.totals.expenses.value,
+      netUsd: usd(data.totals.net.value),
+      netToman: data.totals.net.value,
     },
     deltaPct: data.deltaPct,
     topCategories: data.topCategories.map((c) => ({
       id: c.id,
       name: c.name,
       color: c.color,
-      valueUsd: c.value.usd,
-      valueToman: c.value.toman,
+      valueUsd: usd(c.value.value),
+      valueToman: c.value.value,
       pct: c.pct,
     })),
-    netWorth: { totalUsd: data.netWorth.usd, totalToman: data.netWorth.toman },
+    netWorth: { totalUsd: usd(data.netWorth.value), totalToman: data.netWorth.value },
     months: (data.months ?? []).map((m) => ({
       month: m.month,
-      incomeUsd: m.income.usd,
-      expensesUsd: m.expenses.usd,
+      incomeUsd: usd(m.income.value),
+      expensesUsd: usd(m.expenses.value),
     })),
     bestMonth: data.bestMonth && {
       monthLabel: `${getMonthLabel(data.bestMonth.month).en} ${data.bestMonth.year}`,
-      netUsd: data.bestMonth.net.usd,
-      netToman: data.bestMonth.net.toman,
+      netUsd: usd(data.bestMonth.net.value),
+      netToman: data.bestMonth.net.value,
     },
     worstMonth: data.worstMonth && {
       monthLabel: `${getMonthLabel(data.worstMonth.month).en} ${data.worstMonth.year}`,
-      netUsd: data.worstMonth.net.usd,
-      netToman: data.worstMonth.net.toman,
+      netUsd: usd(data.worstMonth.net.value),
+      netToman: data.worstMonth.net.value,
     },
-    totalSaved: data.totalSaved ?? { usd: 0, toman: 0 },
+    totalSaved: data.totalSaved
+      ? { usd: usd(data.totalSaved.value), toman: data.totalSaved.value }
+      : { usd: 0, toman: 0 },
     savingsRatePct: data.savingsRatePct ?? 0,
     unsubscribeUrl: unsubscribeUrl(unsubscribeToken),
     webViewUrl: `${APP_URL}/overview`,
@@ -120,10 +132,13 @@ function buildYearlyProps(input: DispatchInput): YearlyReportProps {
 export async function dispatchReport(input: DispatchInput): Promise<DispatchResult> {
   const { data, userEmail, unsubscribeToken } = input;
 
+  const latest = await getLatestRates();
+  const usd = makeUsdConverter(latest['USD'] ?? 0);
+
   const element =
     data.type === 'monthly'
-      ? React.createElement(MonthlyReport, buildMonthlyProps(input))
-      : React.createElement(YearlyReport, buildYearlyProps(input));
+      ? React.createElement(MonthlyReport, buildMonthlyProps(input, usd))
+      : React.createElement(YearlyReport, buildYearlyProps(input, usd));
 
   const html = await render(element);
 

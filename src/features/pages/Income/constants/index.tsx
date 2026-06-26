@@ -4,8 +4,9 @@ import { type ColumnDef } from '@tanstack/react-table';
 import type { Income } from '@types';
 
 import ActionButtons from '@components/ActionButtons';
+import Money from '@components/Money';
 
-import { formatNumber, getJalaliMonthName } from '@utils';
+import { getJalaliMonthName } from '@utils';
 
 // ─── Table layout config ──────────────────────────────────────────────────────
 // Centralized so column widths can be tuned in one place. Percentages must sum
@@ -70,18 +71,19 @@ export function buildIncomeColumns(
     },
     {
       id: 'amount',
-      accessorKey: 'amountUsd',
+      accessorKey: 'amount',
       header: 'Amount',
       meta: { widthClass: INCOME_COLUMN_WIDTHS.amount, align: 'right' as const },
       cell: ({ row }) => {
         const income = row.original;
         return (
-          <div className="flex flex-col items-end">
-            <span className="text-success text-sm font-semibold whitespace-nowrap">
-              ${formatNumber(income.amountUsd)} USD
-            </span>
-            <span className="text-text-muted text-xs whitespace-nowrap">{formatNumber(income.amountToman)} Toman</span>
-          </div>
+          <Money
+            amount={income.amount}
+            currency={income.currency}
+            className="items-end"
+            primaryClassName="text-success text-sm font-semibold whitespace-nowrap"
+            secondaryClassName="text-text-muted text-xs whitespace-nowrap"
+          />
         );
       },
     },
