@@ -7,7 +7,6 @@ import { gzipSync } from 'zlib';
 import { pruneOldBackups, uploadBackup } from '@core/database/backup-storage';
 import { db } from '@core/database/client';
 import { generateSqlDump } from '@core/database/dump';
-import { ensureFreshRates } from '@core/rates';
 import { getReportData, previousMonthOf } from '@core/reports/aggregate';
 import type { ReportType } from '@core/reports/aggregate';
 import { dispatchReport } from '@core/reports/dispatch';
@@ -146,21 +145,10 @@ export async function POST(request: NextRequest) {
     backupResult = { ok: false, error: message };
   }
 
-  // ── 2. Rate refresh (runs every day) ─────────────────────────────────────
-  let ratesResult: Record<string, unknown>;
-  try {
-    await ensureFreshRates(process.env.NAVASAN_API_KEY);
-    ratesResult = { ok: true };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error('[cron/rates] failed:', message);
-    ratesResult = { ok: false, error: message };
-  }
-
-  // ── 3. Email reports (runs only on the 1st of each month) ─────────────────
+  // ── 2. Email reports (runs only on the 1st of each month) ─────────────────
   const dispatch = decideDispatch(now);
   if (!dispatch) {
-    return NextResponse.json({ backup: backupResult, rates: ratesResult, reports: { skipped: true } });
+    return NextResponse.json({ backup: backupResult, reports: { skipped: true } });
   }
 
   const { reportType, year, month } = dispatch;
@@ -187,5 +175,5 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ backup: backupResult, rates: ratesResult, reports: summary });
+  return NextResponse.json({ backup: backupResult, reports: summary });
 }
