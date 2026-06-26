@@ -2,9 +2,8 @@ import { createIncomeSchema } from '../income';
 
 describe('createIncomeSchema', () => {
   const validIncome = {
-    amountUsd: 3000,
-    amountToman: 390000000,
-    exchangeRateUsed: 130000,
+    amount: 3000,
+    currency: 'USD',
     month: 6,
     year: 2024,
     incomeType: 'salary' as const,
@@ -34,8 +33,8 @@ describe('createIncomeSchema', () => {
     expect(createIncomeSchema.safeParse({ ...validIncome, month: 13 }).success).toBe(false);
   });
 
-  it('rejects negative amounts', () => {
-    const result = createIncomeSchema.safeParse({ ...validIncome, amountUsd: -100 });
+  it('rejects negative amount', () => {
+    const result = createIncomeSchema.safeParse({ ...validIncome, amount: -100 });
     expect(result.success).toBe(false);
   });
 });

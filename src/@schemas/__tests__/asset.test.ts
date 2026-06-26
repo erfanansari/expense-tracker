@@ -5,9 +5,8 @@ describe('createAssetSchema', () => {
     category: 'crypto' as const,
     name: 'Bitcoin',
     quantity: 0.5,
-    totalValueUsd: 50000,
-    totalValueToman: 6500000000,
-    exchangeRateUsed: 130000,
+    amount: 50000,
+    currency: 'USD',
   };
 
   it('accepts valid asset data', () => {
@@ -19,7 +18,7 @@ describe('createAssetSchema', () => {
     const result = createAssetSchema.safeParse({
       ...validAsset,
       unit: 'BTC',
-      unitValueUsd: 100000,
+      unitValue: 100000,
       notes: 'Cold wallet',
     });
     expect(result.success).toBe(true);

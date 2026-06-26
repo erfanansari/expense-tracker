@@ -10,15 +10,15 @@ export interface ReportPeriod {
   month?: number; // 1..12, required when type='monthly'
 }
 
-export interface CurrencyPair {
-  usd: number;
-  toman: number;
+/** A monetary value in the pivot currency (IRT). */
+export interface MoneyValue {
+  value: number;
 }
 
 export interface PeriodTotals {
-  income: CurrencyPair;
-  expenses: CurrencyPair;
-  net: CurrencyPair;
+  income: MoneyValue;
+  expenses: MoneyValue;
+  net: MoneyValue;
 }
 
 export interface TopCategory {
@@ -26,15 +26,15 @@ export interface TopCategory {
   name: string;
   icon: string;
   color: string;
-  value: CurrencyPair;
+  value: MoneyValue;
   pct: number; // share of total expenses for the period, 0..100
 }
 
 export interface MonthlyBreakdown {
   month: number;
   year: number;
-  income: CurrencyPair;
-  expenses: CurrencyPair;
+  income: MoneyValue;
+  expenses: MoneyValue;
 }
 
 export interface ReportData {
@@ -45,12 +45,12 @@ export interface ReportData {
   previous: PeriodTotals;
   deltaPct: { income: number; expenses: number };
   topCategories: TopCategory[];
-  netWorth: CurrencyPair;
+  netWorth: MoneyValue;
   // Yearly-only enrichment
   months?: MonthlyBreakdown[];
-  bestMonth?: MonthlyBreakdown & { net: CurrencyPair };
-  worstMonth?: MonthlyBreakdown & { net: CurrencyPair };
-  totalSaved?: CurrencyPair;
+  bestMonth?: MonthlyBreakdown & { net: MoneyValue };
+  worstMonth?: MonthlyBreakdown & { net: MoneyValue };
+  totalSaved?: MoneyValue;
   savingsRatePct?: number;
 }
 
@@ -64,7 +64,6 @@ function pad2(n: number): string {
 }
 
 function lastDayOfMonth(year: number, month: number): number {
-  // month is 1-based; Date(year, month, 0) gives the last day of `month`.
   return new Date(year, month, 0).getDate();
 }
 
@@ -89,73 +88,68 @@ function deltaPct(current: number, previous: number): number {
   return ((current - previous) / Math.abs(previous)) * 100;
 }
 
-async function incomeTotalsForMonth(userId: number, year: number, month: number): Promise<CurrencyPair> {
+const val = (v: unknown): number => (typeof v === 'number' ? v : 0);
+
+async function incomeTotalsForMonth(userId: number, year: number, month: number): Promise<MoneyValue> {
   const result = await db.execute({
-    sql: `SELECT COALESCE(SUM(amountUsd), 0) AS usd, COALESCE(SUM(amountToman), 0) AS toman
+    sql: `SELECT COALESCE(SUM(amount * entryRate), 0) AS value
           FROM incomes WHERE userId = ? AND month = ? AND year = ?`,
     args: [userId, month, year],
   });
-  const row = result.rows[0];
-  return { usd: (row?.usd as number) || 0, toman: (row?.toman as number) || 0 };
+  return { value: val(result.rows[0]?.value) };
 }
 
-async function incomeTotalsForYear(userId: number, year: number): Promise<CurrencyPair> {
+async function incomeTotalsForYear(userId: number, year: number): Promise<MoneyValue> {
   const result = await db.execute({
-    sql: `SELECT COALESCE(SUM(amountUsd), 0) AS usd, COALESCE(SUM(amountToman), 0) AS toman
-          FROM incomes WHERE userId = ? AND year = ?`,
+    sql: `SELECT COALESCE(SUM(amount * entryRate), 0) AS value FROM incomes WHERE userId = ? AND year = ?`,
     args: [userId, year],
   });
-  const row = result.rows[0];
-  return { usd: (row?.usd as number) || 0, toman: (row?.toman as number) || 0 };
+  return { value: val(result.rows[0]?.value) };
 }
 
-async function expenseTotalsForRange(userId: number, bounds: DateBounds): Promise<CurrencyPair> {
+async function expenseTotalsForRange(userId: number, bounds: DateBounds): Promise<MoneyValue> {
   const result = await db.execute({
-    sql: `SELECT COALESCE(SUM(price_usd), 0) AS usd, COALESCE(SUM(price_toman), 0) AS toman
+    sql: `SELECT COALESCE(SUM(amount * entryRate), 0) AS value
           FROM expenses WHERE user_id = ? AND date >= ? AND date <= ?`,
     args: [userId, bounds.start, bounds.end],
   });
-  const row = result.rows[0];
-  return { usd: (row?.usd as number) || 0, toman: (row?.toman as number) || 0 };
+  return { value: val(result.rows[0]?.value) };
 }
 
 async function topCategoriesForRange(userId: number, bounds: DateBounds, limit = 5): Promise<TopCategory[]> {
   const result = await db.execute({
     sql: `SELECT c.id, c.name, c.icon, c.color,
-                 COALESCE(SUM(e.price_usd), 0)   AS valueUsd,
-                 COALESCE(SUM(e.price_toman), 0) AS valueToman
+                 COALESCE(SUM(e.amount * e.entryRate), 0) AS value
           FROM expenses e
           JOIN categories c ON c.id = e.category_id
           WHERE e.user_id = ? AND e.date >= ? AND e.date <= ?
           GROUP BY c.id
-          ORDER BY valueUsd DESC
+          ORDER BY value DESC
           LIMIT ?`,
     args: [userId, bounds.start, bounds.end, limit],
   });
 
-  const totalUsd = result.rows.reduce((acc, r) => acc + ((r.valueUsd as number) || 0), 0);
+  const total = result.rows.reduce((acc, r) => acc + val(r.value), 0);
 
   return result.rows.map((row) => {
-    const valueUsd = (row.valueUsd as number) || 0;
+    const value = val(row.value);
     return {
       id: row.id as number,
       name: row.name as string,
       icon: row.icon as string,
       color: row.color as string,
-      value: { usd: valueUsd, toman: (row.valueToman as number) || 0 },
-      pct: totalUsd > 0 ? (valueUsd / totalUsd) * 100 : 0,
+      value: { value },
+      pct: total > 0 ? (value / total) * 100 : 0,
     };
   });
 }
 
-async function netWorthSnapshot(userId: number): Promise<CurrencyPair> {
+async function netWorthSnapshot(userId: number): Promise<MoneyValue> {
   const result = await db.execute({
-    sql: `SELECT COALESCE(SUM(totalValueUsd), 0) AS usd, COALESCE(SUM(totalValueToman), 0) AS toman
-          FROM assets WHERE userId = ?`,
+    sql: `SELECT COALESCE(SUM(amount * entryRate), 0) AS value FROM assets WHERE userId = ?`,
     args: [userId],
   });
-  const row = result.rows[0];
-  return { usd: (row?.usd as number) || 0, toman: (row?.toman as number) || 0 };
+  return { value: val(result.rows[0]?.value) };
 }
 
 async function monthlyBreakdownForYear(userId: number, year: number): Promise<MonthlyBreakdown[]> {
@@ -163,14 +157,13 @@ async function monthlyBreakdownForYear(userId: number, year: number): Promise<Mo
 
   const [incomeRows, expenseRows] = await Promise.all([
     db.execute({
-      sql: `SELECT month, COALESCE(SUM(amountUsd), 0) AS usd, COALESCE(SUM(amountToman), 0) AS toman
+      sql: `SELECT month, COALESCE(SUM(amount * entryRate), 0) AS value
             FROM incomes WHERE userId = ? AND year = ? GROUP BY month`,
       args: [userId, year],
     }),
     db.execute({
       sql: `SELECT CAST(SUBSTR(date, 6, 2) AS INTEGER) AS month,
-                   COALESCE(SUM(price_usd), 0)   AS usd,
-                   COALESCE(SUM(price_toman), 0) AS toman
+                   COALESCE(SUM(amount * entryRate), 0) AS value
             FROM expenses
             WHERE user_id = ? AND date >= ? AND date <= ?
             GROUP BY SUBSTR(date, 6, 2)`,
@@ -178,38 +171,28 @@ async function monthlyBreakdownForYear(userId: number, year: number): Promise<Mo
     }),
   ]);
 
-  const incomeMap = new Map<number, CurrencyPair>();
-  incomeRows.rows.forEach((r) => {
-    incomeMap.set(r.month as number, {
-      usd: (r.usd as number) || 0,
-      toman: (r.toman as number) || 0,
-    });
-  });
+  const incomeMap = new Map<number, MoneyValue>();
+  incomeRows.rows.forEach((r) => incomeMap.set(r.month as number, { value: val(r.value) }));
 
-  const expenseMap = new Map<number, CurrencyPair>();
-  expenseRows.rows.forEach((r) => {
-    expenseMap.set(r.month as number, {
-      usd: (r.usd as number) || 0,
-      toman: (r.toman as number) || 0,
-    });
-  });
+  const expenseMap = new Map<number, MoneyValue>();
+  expenseRows.rows.forEach((r) => expenseMap.set(r.month as number, { value: val(r.value) }));
 
   return Array.from({ length: 12 }, (_, i) => {
     const month = i + 1;
     return {
       month,
       year,
-      income: incomeMap.get(month) ?? { usd: 0, toman: 0 },
-      expenses: expenseMap.get(month) ?? { usd: 0, toman: 0 },
+      income: incomeMap.get(month) ?? { value: 0 },
+      expenses: expenseMap.get(month) ?? { value: 0 },
     };
   });
 }
 
-function buildTotals(income: CurrencyPair, expenses: CurrencyPair): PeriodTotals {
+function buildTotals(income: MoneyValue, expenses: MoneyValue): PeriodTotals {
   return {
     income,
     expenses,
-    net: { usd: income.usd - expenses.usd, toman: income.toman - expenses.toman },
+    net: { value: income.value - expenses.value },
   };
 }
 
@@ -259,8 +242,8 @@ export async function getReportData(userId: number, period: ReportPeriod): Promi
       totals,
       previous,
       deltaPct: {
-        income: deltaPct(income.usd, prevIncome.usd),
-        expenses: deltaPct(expenses.usd, prevExpenses.usd),
+        income: deltaPct(income.value, prevIncome.value),
+        expenses: deltaPct(expenses.value, prevExpenses.value),
       },
       topCategories,
       netWorth,
@@ -286,17 +269,20 @@ export async function getReportData(userId: number, period: ReportPeriod): Promi
 
   const monthsWithNet = months.map((m) => ({
     ...m,
-    net: { usd: m.income.usd - m.expenses.usd, toman: m.income.toman - m.expenses.toman },
+    net: { value: m.income.value - m.expenses.value },
   }));
 
-  // Skip zero-activity months when choosing best/worst — sending "best month: $0"
-  // is meaningless. If no month has activity, both stay undefined.
-  const activeMonths = monthsWithNet.filter((m) => m.income.usd !== 0 || m.expenses.usd !== 0);
-  const bestMonth = activeMonths.length ? activeMonths.reduce((a, b) => (b.net.usd > a.net.usd ? b : a)) : undefined;
-  const worstMonth = activeMonths.length ? activeMonths.reduce((a, b) => (b.net.usd < a.net.usd ? b : a)) : undefined;
+  // Skip zero-activity months when choosing best/worst.
+  const activeMonths = monthsWithNet.filter((m) => m.income.value !== 0 || m.expenses.value !== 0);
+  const bestMonth = activeMonths.length
+    ? activeMonths.reduce((a, b) => (b.net.value > a.net.value ? b : a))
+    : undefined;
+  const worstMonth = activeMonths.length
+    ? activeMonths.reduce((a, b) => (b.net.value < a.net.value ? b : a))
+    : undefined;
 
-  const totalSaved: CurrencyPair = { usd: income.usd - expenses.usd, toman: income.toman - expenses.toman };
-  const savingsRatePct = income.usd > 0 ? (totalSaved.usd / income.usd) * 100 : 0;
+  const totalSaved: MoneyValue = { value: income.value - expenses.value };
+  const savingsRatePct = income.value > 0 ? (totalSaved.value / income.value) * 100 : 0;
 
   return {
     type: 'yearly',
@@ -305,8 +291,8 @@ export async function getReportData(userId: number, period: ReportPeriod): Promi
     totals,
     previous,
     deltaPct: {
-      income: deltaPct(income.usd, prevIncome.usd),
-      expenses: deltaPct(expenses.usd, prevExpenses.usd),
+      income: deltaPct(income.value, prevIncome.value),
+      expenses: deltaPct(expenses.value, prevExpenses.value),
     },
     topCategories,
     netWorth,
@@ -320,7 +306,6 @@ export async function getReportData(userId: number, period: ReportPeriod): Promi
 
 /**
  * For Day-1-of-month cron runs, compute the just-completed reporting period.
- * Given today=Jun 1, 2026 returns {year:2026, month:5}. For Jan 1 → Dec of prev year.
  */
 export function previousMonthOf(date: Date): { year: number; month: number } {
   const m = date.getUTCMonth() + 1; // 1..12

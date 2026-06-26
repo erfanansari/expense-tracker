@@ -1,16 +1,13 @@
 import { apiFetch } from './client';
 
+// All values are in the pivot currency (IRT); the client converts for display.
 export interface SummaryData {
-  current_month_income_usd: number;
-  current_month_income_toman: number;
-  current_month_expenses_usd: number;
-  current_month_expenses_toman: number;
-  total_income_usd: number;
-  total_income_toman: number;
-  total_expenses_usd: number;
-  total_expenses_toman: number;
-  net_worth_usd: number;
-  net_worth_toman: number;
+  current_month_income: number;
+  current_month_expenses: number;
+  total_income: number;
+  total_expenses: number;
+  total_assets: number;
+  net_worth: number;
 }
 
 export const fetchSummary = () => apiFetch<SummaryData>('/api/summary');

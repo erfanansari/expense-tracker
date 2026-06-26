@@ -3,9 +3,12 @@ export type IncomeType = 'salary' | 'freelance' | 'investment' | 'gift' | 'other
 export interface Income {
   id: number;
   userId: number;
-  amountUsd: number;
-  amountToman: number;
-  exchangeRateUsed: number;
+  /** Amount in the entry currency. */
+  amount: number;
+  /** Entry currency code (see src/constants/currencies.ts). */
+  currency: string;
+  /** Rate to the pivot at entry time (frozen snapshot). */
+  entryRate: number;
   month: number;
   year: number;
   incomeType: IncomeType;
@@ -16,9 +19,8 @@ export interface Income {
 }
 
 export interface CreateIncomeInput {
-  amountUsd: number;
-  amountToman: number;
-  exchangeRateUsed: number;
+  amount: number;
+  currency: string;
   month: number;
   year: number;
   incomeType: IncomeType;

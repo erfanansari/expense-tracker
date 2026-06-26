@@ -7,10 +7,14 @@ export interface Asset {
   name: string;
   quantity: number;
   unit: string | null;
-  unitValueUsd: number | null;
-  totalValueUsd: number;
-  totalValueToman: number;
-  exchangeRateUsed: number;
+  /** Per-unit value in the entry currency (nullable). */
+  unitValue: number | null;
+  /** Total value in the entry currency. */
+  amount: number;
+  /** Entry currency code (see src/constants/currencies.ts). */
+  currency: string;
+  /** Rate to the pivot at entry time (frozen snapshot). */
+  entryRate: number;
   notes: string | null;
   lastValuedAt: string;
   createdAt: string;
@@ -22,10 +26,9 @@ export interface CreateAssetInput {
   name: string;
   quantity: number;
   unit?: string;
-  unitValueUsd?: number;
-  totalValueUsd: number;
-  totalValueToman: number;
-  exchangeRateUsed: number;
+  unitValue?: number;
+  amount: number;
+  currency: string;
   notes?: string;
   lastValuedAt?: string;
 }
@@ -36,21 +39,20 @@ export interface AssetValuation {
   id: number;
   assetId: number;
   quantity: number;
-  unitValueUsd: number | null;
-  totalValueUsd: number;
-  totalValueToman: number;
-  exchangeRateUsed: number;
+  unitValue: number | null;
+  amount: number;
+  currency: string;
+  entryRate: number;
   valuedAt: string;
   createdAt: string;
 }
 
 export interface AssetSummary {
-  totalValueUsd: number;
-  totalValueToman: number;
+  /** Total in the pivot currency. */
+  totalValue: number;
   byCategory: {
     category: AssetCategory;
-    valueUsd: number;
-    valueToman: number;
+    value: number;
     percentage: number;
   }[];
 }

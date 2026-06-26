@@ -5,8 +5,7 @@ import { Banknote, Bitcoin, Building2, Gem, Landmark, TrendingUp, Wallet } from 
 import type { Asset, AssetCategory } from '@types';
 
 import ActionButtons from '@components/ActionButtons';
-
-import { formatNumber } from '@utils';
+import Money from '@components/Money';
 
 export const CATEGORY_ICONS: Record<AssetCategory, typeof Wallet> = {
   cash: Banknote,
@@ -71,20 +70,19 @@ export function buildAssetColumns(
     },
     {
       id: 'value',
-      accessorKey: 'totalValueUsd',
+      accessorKey: 'amount',
       header: 'Value',
       meta: { widthClass: ASSETS_COLUMN_WIDTHS.value, align: 'right' as const },
       cell: ({ row }) => {
         const asset = row.original;
         return (
-          <div className="flex flex-col items-end">
-            <span className="text-text-primary text-sm font-semibold whitespace-nowrap">
-              ${formatNumber(asset.totalValueUsd)}
-            </span>
-            <span className="text-text-muted text-xs whitespace-nowrap">
-              {formatNumber(asset.totalValueToman)} Toman
-            </span>
-          </div>
+          <Money
+            amount={asset.amount}
+            currency={asset.currency}
+            className="items-end"
+            primaryClassName="text-text-primary text-sm font-semibold whitespace-nowrap"
+            secondaryClassName="text-text-muted text-xs whitespace-nowrap"
+          />
         );
       },
     },

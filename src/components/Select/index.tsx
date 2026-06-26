@@ -24,6 +24,12 @@ interface SelectProps {
   required?: boolean;
   disabled?: boolean;
   className?: string;
+  /** Custom per-option rendering (react-select). Lets callers show a compact
+   *  value in the control but a richer label in the menu. */
+  formatOptionLabel?: (option: SelectOption, meta: { context: 'menu' | 'value' }) => React.ReactNode;
+  /** Borderless control for embedding inside an input group (e.g. MoneyInput).
+   *  The surrounding container owns the border/focus ring. */
+  bare?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,7 +70,16 @@ const Option = (props: OptionProps<SelectOption, false>) => (
   </components.Option>
 );
 
-const Select = ({ value, onChange, options, placeholder, disabled, className }: SelectProps) => {
+const Select = ({
+  value,
+  onChange,
+  options,
+  placeholder,
+  disabled,
+  className,
+  formatOptionLabel,
+  bare,
+}: SelectProps) => {
   const selectedOption = options.find((o) => o.value === value) ?? null;
 
   return (
@@ -75,6 +90,7 @@ const Select = ({ value, onChange, options, placeholder, disabled, className }: 
       placeholder={placeholder ?? 'Select...'}
       isDisabled={disabled}
       isSearchable={false}
+      formatOptionLabel={formatOptionLabel}
       menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
       menuPosition="fixed"
       menuPlacement="auto"
@@ -83,14 +99,21 @@ const Select = ({ value, onChange, options, placeholder, disabled, className }: 
       components={{ DropdownIndicator, MenuList, Option, IndicatorSeparator: () => null }}
       className={className}
       classNames={{
-        control: ({ isFocused, isDisabled, menuIsOpen }) =>
-          twMerge(
-            'border-border-subtle bg-background flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer transition-all duration-150',
-            'hover:border-border-default hover:bg-background-secondary',
-            (isFocused || menuIsOpen) && 'border-blue hover:border-blue ring-2 ring-blue/15 bg-background',
-            isDisabled &&
-              'bg-background-secondary text-text-muted cursor-not-allowed opacity-60 hover:bg-background-secondary hover:border-border-subtle'
-          ),
+        control: ({ isDisabled, ...state }) =>
+          bare
+            ? twMerge(
+                'flex w-full items-center gap-1 px-3 py-2 text-sm cursor-pointer transition-colors duration-150',
+                'text-text-primary hover:bg-background-secondary rounded-lg',
+                isDisabled && 'text-text-muted cursor-not-allowed opacity-60'
+              )
+            : twMerge(
+                'border-border-subtle bg-background flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer transition-all duration-150',
+                'hover:border-border-default hover:bg-background-secondary',
+                (state.isFocused || state.menuIsOpen) &&
+                  'border-blue hover:border-blue ring-2 ring-blue/15 bg-background',
+                isDisabled &&
+                  'bg-background-secondary text-text-muted cursor-not-allowed opacity-60 hover:bg-background-secondary hover:border-border-subtle'
+              ),
         menu: () =>
           'border-border-subtle bg-background mt-1.5 rounded-xl border p-1 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.18),0_4px_8px_-4px_rgba(0,0,0,0.08)] animate-dropdown-pop overflow-hidden',
         menuList: () => 'flex flex-col gap-0.5 max-h-80 overflow-y-auto',

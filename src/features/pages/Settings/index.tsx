@@ -6,6 +6,7 @@ import { useAuth } from '@hooks/use-auth';
 
 import AppearanceSection from './components/AppearanceSection';
 import CategoryManagement from './components/CategoryManagement';
+import CurrencySection from './components/CurrencySection';
 import DataManagement from './components/DataManagement';
 import HelpSection from './components/HelpSection';
 import LanguageSection from './components/LanguageSection';
@@ -61,6 +62,7 @@ const SettingsPage = () => {
         ) : (
           <div className="grid gap-6">
             <ProfileCard />
+            <CurrencySection />
             <CategoryManagement />
             <TagManagement />
 

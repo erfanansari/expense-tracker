@@ -1,25 +1,29 @@
 import { getMonthLabel } from '@constants/income';
 import { Banknote, DollarSign, TrendingUp } from 'lucide-react';
 
-import { formatNumber } from '@utils';
+import Money from '@components/Money';
+
+import { PIVOT_CURRENCY } from '@/constants/currencies';
 
 import type { IncomeSummaryProps } from '../../@types';
 
 const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
-  // Variables
+  // All aggregates are in the pivot currency (amount * entryRate); Money converts
+  // to the user's primary/secondary currency for display.
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
   const lastMonth = currentMonth === 1 ? 12 : currentMonth - 1;
   const lastMonthYear = currentMonth === 1 ? currentYear - 1 : currentYear;
 
-  const ytdIncome = incomes.filter((inc) => inc.year === currentYear).reduce((sum, inc) => sum + inc.amountUsd, 0);
+  const pivot = (inc: { amount: number; entryRate: number }) => inc.amount * inc.entryRate;
+
+  const ytdIncome = incomes.filter((inc) => inc.year === currentYear).reduce((sum, inc) => sum + pivot(inc), 0);
 
   const lastMonthIncome = incomes
     .filter((inc) => inc.year === lastMonthYear && inc.month === lastMonth)
-    .reduce((sum, inc) => sum + inc.amountUsd, 0);
+    .reduce((sum, inc) => sum + pivot(inc), 0);
 
-  const totalIncomeAllTime = incomes.reduce((sum, inc) => sum + inc.amountUsd, 0);
-  const totalIncomeAllTimeToman = incomes.reduce((sum, inc) => sum + inc.amountToman, 0);
+  const totalIncomeAllTime = incomes.reduce((sum, inc) => sum + pivot(inc), 0);
 
   const distinctMonths = new Set(incomes.map((inc) => `${inc.year}-${inc.month}`)).size;
   const avgMonthlyIncome = distinctMonths > 0 ? totalIncomeAllTime / distinctMonths : 0;
@@ -34,8 +38,12 @@ const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
           </div>
         </div>
         <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Income</p>
-        <p className="text-success text-2xl font-semibold tabular-nums">${formatNumber(totalIncomeAllTime)}</p>
-        <p className="text-text-secondary mt-1.5 text-sm font-medium">{formatNumber(totalIncomeAllTimeToman)} Toman</p>
+        <Money
+          amount={totalIncomeAllTime}
+          currency={PIVOT_CURRENCY}
+          primaryClassName="text-success text-2xl font-semibold tabular-nums"
+          secondaryClassName="text-text-secondary mt-1.5 text-sm font-medium"
+        />
       </div>
 
       {/* YTD Income */}
@@ -46,7 +54,12 @@ const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
           </div>
         </div>
         <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">YTD Income</p>
-        <p className="text-text-primary text-2xl font-semibold tabular-nums">${formatNumber(ytdIncome)}</p>
+        <Money
+          amount={ytdIncome}
+          currency={PIVOT_CURRENCY}
+          primaryClassName="text-text-primary text-2xl font-semibold tabular-nums"
+          secondaryClassName="text-text-muted text-xs"
+        />
         <p className="text-text-secondary mt-1.5 text-sm font-medium">{currentYear}</p>
       </div>
 
@@ -58,7 +71,12 @@ const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
           </div>
         </div>
         <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Last Month</p>
-        <p className="text-text-primary text-2xl font-semibold tabular-nums">${formatNumber(lastMonthIncome)}</p>
+        <Money
+          amount={lastMonthIncome}
+          currency={PIVOT_CURRENCY}
+          primaryClassName="text-text-primary text-2xl font-semibold tabular-nums"
+          secondaryClassName="text-text-muted text-xs"
+        />
         <p className="text-text-secondary mt-1.5 text-sm font-medium">
           {getMonthLabel(lastMonth).en} {lastMonthYear}
         </p>
@@ -72,9 +90,12 @@ const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
           </div>
         </div>
         <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Monthly Average</p>
-        <p className="text-text-primary text-2xl font-semibold tabular-nums">
-          ${formatNumber(Math.round(avgMonthlyIncome))}
-        </p>
+        <Money
+          amount={avgMonthlyIncome}
+          currency={PIVOT_CURRENCY}
+          primaryClassName="text-text-primary text-2xl font-semibold tabular-nums"
+          secondaryClassName="text-text-muted text-xs"
+        />
         <p className="text-text-secondary mt-1.5 text-sm font-medium">
           over {distinctMonths} month{distinctMonths !== 1 ? 's' : ''}
         </p>

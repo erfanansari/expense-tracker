@@ -14,6 +14,8 @@ import {
   YAxis,
 } from 'recharts';
 
+import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
+
 import ChartTooltip from '@components/ChartTooltip';
 import EmptyState from '@components/EmptyState';
 import ErrorState from '@components/ErrorState';
@@ -22,11 +24,14 @@ import Pulse from '@components/Skeleton';
 
 import { type NetWorthRange, useNetWorthHistory } from '@hooks/use-net-worth-history';
 
-import { formatChartTooltipDate, formatNumber } from '@utils';
+import { formatChartTooltipDate } from '@utils';
+
+import { PIVOT_CURRENCY } from '@/constants/currencies';
 
 const RANGES: NetWorthRange[] = ['1M', '3M', '6M', '1Y', 'ALL'];
 
 // ─── Custom tooltip ──────────────────────────────────────────────────────────
+// Net-worth points are in the pivot currency; the tooltip converts for display.
 function NetWorthTooltip({
   active,
   payload,
@@ -34,29 +39,32 @@ function NetWorthTooltip({
   active?: boolean;
   payload?: ReadonlyArray<{
     value: number;
-    payload: { date: string; valueUsd: number; valueToman: number };
+    payload: { date: string; value: number };
   }>;
 }) {
+  const { display } = useCurrency();
   if (!active || !payload?.length) return null;
   const point = payload[0].payload;
+  const { primary, secondary } = display(point.value, PIVOT_CURRENCY);
   return (
     <ChartTooltip
-      primary={`$${point.valueUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-      secondary={`${formatNumber(point.valueToman)} Toman`}
+      primary={primary}
+      secondary={secondary ?? undefined}
       accent={{ text: formatChartTooltipDate(point.date, 'daily'), tone: 'success' }}
     />
   );
 }
 
 // ─── Delta badge ─────────────────────────────────────────────────────────────
-function DeltaBadge({ data }: { data: Array<{ valueUsd: number }> }) {
-  const { deltaUsd, deltaPercent, isPositive } = useMemo(() => {
-    if (data.length < 2) return { deltaUsd: 0, deltaPercent: 0, isPositive: true };
-    const first = data[0].valueUsd;
-    const last = data[data.length - 1].valueUsd;
+function DeltaBadge({ data }: { data: Array<{ value: number }> }) {
+  const { display } = useCurrency();
+  const { deltaPivot, deltaPercent, isPositive } = useMemo(() => {
+    if (data.length < 2) return { deltaPivot: 0, deltaPercent: 0, isPositive: true };
+    const first = data[0].value;
+    const last = data[data.length - 1].value;
     const d = last - first;
     const pct = first !== 0 ? (d / first) * 100 : 0;
-    return { deltaUsd: d, deltaPercent: pct, isPositive: d >= 0 };
+    return { deltaPivot: d, deltaPercent: pct, isPositive: d >= 0 };
   }, [data]);
 
   if (data.length < 2) return null;
@@ -66,8 +74,8 @@ function DeltaBadge({ data }: { data: Array<{ valueUsd: number }> }) {
 
   return (
     <span className={`text-sm font-medium ${color}`}>
-      {sign}${Math.abs(deltaUsd).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (
       {sign}
+      {display(Math.abs(deltaPivot), PIVOT_CURRENCY).primary} ({sign}
       {deltaPercent.toFixed(1)}%)
     </span>
   );
@@ -258,7 +266,7 @@ const NetWorthChart = () => {
               />
               <Area
                 type="monotone"
-                dataKey="valueUsd"
+                dataKey="value"
                 stroke="var(--color-success)"
                 strokeWidth={2}
                 fillOpacity={1}

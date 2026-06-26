@@ -5,8 +5,8 @@ describe('createExpenseSchema', () => {
     date: '2024-01-15',
     categoryId: 1,
     description: 'Lunch',
-    price_toman: 150000,
-    price_usd: 3.5,
+    amount: 150000,
+    currency: 'IRT',
   };
 
   it('accepts valid expense data', () => {
@@ -40,8 +40,13 @@ describe('createExpenseSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects negative prices', () => {
-    const result = createExpenseSchema.safeParse({ ...validExpense, price_toman: -100 });
+  it('rejects negative amount', () => {
+    const result = createExpenseSchema.safeParse({ ...validExpense, amount: -100 });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects unsupported currency', () => {
+    const result = createExpenseSchema.safeParse({ ...validExpense, currency: 'JPY' });
     expect(result.success).toBe(false);
   });
 });

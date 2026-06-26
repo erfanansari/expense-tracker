@@ -2,8 +2,8 @@ import { apiFetch } from './client';
 
 export interface NetWorthHistoryPoint {
   date: string;
-  valueUsd: number;
-  valueToman: number;
+  /** Net worth in the pivot currency (IRT). */
+  value: number;
 }
 
 export interface NetWorthHistoryResponse {

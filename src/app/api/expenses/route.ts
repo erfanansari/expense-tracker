@@ -7,6 +7,7 @@ import { fetchCategoriesForExpenses } from '@core/database/categories';
 import { db } from '@core/database/client';
 import { mapRowToExpense } from '@core/database/mappers';
 import { assignTagsToExpense, fetchTagsForExpenses } from '@core/database/tags';
+import { getEntryRate } from '@core/rates';
 
 // GET /api/expenses - Fetch expenses with pagination support
 // Query parameters:
@@ -123,9 +124,15 @@ export const POST = withAuth(async (user, request) => {
   const category = await verifyOwnership('categories', body.categoryId, user.userId, 'user_id');
   if (category instanceof NextResponse) return category;
 
+  // Snapshot the rate to the pivot at entry time so the value stays historically exact.
+  const entryRate = await getEntryRate(body.currency);
+  if (entryRate === null) {
+    return NextResponse.json({ error: `No exchange rate available for ${body.currency}` }, { status: 422 });
+  }
+
   const expenseResult = await db.execute({
-    sql: 'INSERT INTO expenses (user_id, date, category_id, description, price_toman, price_usd) VALUES (?, ?, ?, ?, ?, ?) RETURNING id',
-    args: [user.userId, body.date, body.categoryId, body.description, body.price_toman, body.price_usd],
+    sql: 'INSERT INTO expenses (user_id, date, category_id, description, amount, currency, entryRate) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id',
+    args: [user.userId, body.date, body.categoryId, body.description, body.amount, body.currency, entryRate],
   });
 
   const expenseId = expenseResult.rows[0].id as number;

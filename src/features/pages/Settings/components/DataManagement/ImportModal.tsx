@@ -10,6 +10,7 @@ import Button from '@components/Button';
 import Modal from '@components/Modal';
 
 import { useToast } from '@/components/Toast/ToastProvider';
+import { isSupportedCurrency, PIVOT_CURRENCY, SUPPORTED_CURRENCY_CODES } from '@/constants/currencies';
 import { queryKeys } from '@/lib/query-keys';
 
 interface ImportModalProps {
@@ -22,10 +23,11 @@ type Step = 'upload' | 'preview' | 'importing';
 type ParsedRow = Record<string, string>;
 
 type ValidatedRow =
-  | { valid: true; date: string; category: string; description: string; price_toman: number; price_usd: number }
+  | { valid: true; date: string; category: string; description: string; amount: number; currency: string }
   | { valid: false; error: string; raw: ParsedRow };
 
-const REQUIRED_COLUMNS = ['date', 'category', 'description', 'price_toman', 'price_usd'];
+// `currency` is optional; defaults to the pivot currency when omitted.
+const REQUIRED_COLUMNS = ['date', 'category', 'description', 'amount'];
 
 function normalizeHeaders(row: ParsedRow): ParsedRow {
   const normalized: ParsedRow = {};
@@ -47,13 +49,13 @@ function validateRow(raw: ParsedRow): ValidatedRow {
   if (!row.description?.trim()) {
     return { valid: false, error: 'Description is required', raw };
   }
-  const toman = parseFloat(row.price_toman);
-  if (isNaN(toman) || toman < 0) {
-    return { valid: false, error: 'price_toman must be a non-negative number', raw };
+  const amount = parseFloat(row.amount);
+  if (isNaN(amount) || amount < 0) {
+    return { valid: false, error: 'amount must be a non-negative number', raw };
   }
-  const usd = parseFloat(row.price_usd);
-  if (isNaN(usd) || usd < 0) {
-    return { valid: false, error: 'price_usd must be a non-negative number', raw };
+  const currency = (row.currency?.trim() || PIVOT_CURRENCY).toUpperCase();
+  if (!isSupportedCurrency(currency)) {
+    return { valid: false, error: `currency must be one of ${SUPPORTED_CURRENCY_CODES.join(', ')}`, raw };
   }
 
   return {
@@ -61,8 +63,8 @@ function validateRow(raw: ParsedRow): ValidatedRow {
     date: row.date.trim(),
     category: row.category.trim(),
     description: row.description.trim(),
-    price_toman: toman,
-    price_usd: usd,
+    amount,
+    currency,
   };
 }
 
@@ -141,8 +143,8 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
             date: row.date,
             category: row.category,
             description: row.description,
-            price_toman: row.price_toman,
-            price_usd: row.price_usd,
+            amount: row.amount,
+            currency: row.currency,
           }),
         });
         successCount++;
@@ -165,8 +167,8 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
             Upload a CSV file with columns: <code className="bg-background-secondary rounded px-1 text-xs">date</code>,{' '}
             <code className="bg-background-secondary rounded px-1 text-xs">category</code>,{' '}
             <code className="bg-background-secondary rounded px-1 text-xs">description</code>,{' '}
-            <code className="bg-background-secondary rounded px-1 text-xs">price_toman</code>,{' '}
-            <code className="bg-background-secondary rounded px-1 text-xs">price_usd</code>
+            <code className="bg-background-secondary rounded px-1 text-xs">amount</code>,{' '}
+            <code className="bg-background-secondary rounded px-1 text-xs">currency</code> (optional)
           </p>
 
           <button
@@ -230,7 +232,7 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
                   <th className="text-text-muted w-[22%] px-3 py-2 text-left text-xs font-medium">Date</th>
                   <th className="text-text-muted w-[20%] px-3 py-2 text-left text-xs font-medium">Category</th>
                   <th className="text-text-muted w-[32%] px-3 py-2 text-left text-xs font-medium">Description</th>
-                  <th className="text-text-muted w-[26%] px-3 py-2 text-right text-xs font-medium">USD / Toman</th>
+                  <th className="text-text-muted w-[26%] px-3 py-2 text-right text-xs font-medium">Amount</th>
                 </tr>
               </thead>
               <tbody>
@@ -241,7 +243,7 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
                       <td className="text-text-secondary truncate px-3 py-2 text-xs">{row.category}</td>
                       <td className="text-text-secondary truncate px-3 py-2 text-xs">{row.description}</td>
                       <td className="text-text-secondary px-3 py-2 text-right text-xs">
-                        ${row.price_usd} / {row.price_toman.toLocaleString()}
+                        {row.amount.toLocaleString()} {row.currency}
                       </td>
                     </tr>
                   ) : (

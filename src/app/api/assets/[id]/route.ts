@@ -5,6 +5,7 @@ import { createAssetSchema } from '@schemas';
 import { parseIdParam, validateBody, verifyOwnership, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
 import { mapRowToAsset, mapRowToAssetValuation } from '@core/database/mappers';
+import { getEntryRate } from '@core/rates';
 
 // GET /api/assets/[id] - Get a single asset with valuation history
 export const GET = withAuth(async (user, _request, { params }) => {
@@ -47,13 +48,12 @@ export const PUT = withAuth(async (user, request, { params }) => {
   const updates: string[] = [];
   const args: (string | number | null)[] = [];
 
-  // Track if valuation changed for snapshot
+  // Track if the valuation changed (amount/currency/quantity/unitValue) for a snapshot.
   let valuationChanged = false;
   const newQuantity = body.quantity ?? (currentAsset.quantity as number);
-  const newUnitValueUsd = body.unitValueUsd ?? (currentAsset.unitValueUsd as number | null);
-  const newTotalValueUsd = body.totalValueUsd ?? (currentAsset.totalValueUsd as number);
-  const newTotalValueToman = body.totalValueToman ?? (currentAsset.totalValueToman as number);
-  const newExchangeRate = body.exchangeRateUsed ?? (currentAsset.exchangeRateUsed as number);
+  const newUnitValue = body.unitValue ?? (currentAsset.unitValue as number | null);
+  const newAmount = body.amount ?? (currentAsset.amount as number);
+  const newCurrency = body.currency ?? (currentAsset.currency as string);
 
   if (body.category !== undefined) {
     updates.push('category = ?');
@@ -76,27 +76,20 @@ export const PUT = withAuth(async (user, request, { params }) => {
     args.push(body.unit || null);
   }
 
-  if (body.unitValueUsd !== undefined) {
-    updates.push('unitValueUsd = ?');
-    args.push(body.unitValueUsd);
-    if (body.unitValueUsd !== currentAsset.unitValueUsd) valuationChanged = true;
+  if (body.unitValue !== undefined) {
+    updates.push('unitValue = ?');
+    args.push(body.unitValue);
+    if (body.unitValue !== currentAsset.unitValue) valuationChanged = true;
   }
 
-  if (body.totalValueUsd !== undefined) {
-    updates.push('totalValueUsd = ?');
-    args.push(body.totalValueUsd);
-    if (body.totalValueUsd !== currentAsset.totalValueUsd) valuationChanged = true;
+  if (body.amount !== undefined) {
+    updates.push('amount = ?');
+    args.push(body.amount);
+    if (body.amount !== currentAsset.amount) valuationChanged = true;
   }
 
-  if (body.totalValueToman !== undefined) {
-    updates.push('totalValueToman = ?');
-    args.push(body.totalValueToman);
-    if (body.totalValueToman !== currentAsset.totalValueToman) valuationChanged = true;
-  }
-
-  if (body.exchangeRateUsed !== undefined) {
-    updates.push('exchangeRateUsed = ?');
-    args.push(body.exchangeRateUsed);
+  if (body.currency !== undefined && body.currency !== currentAsset.currency) {
+    valuationChanged = true;
   }
 
   if (body.notes !== undefined) {
@@ -107,6 +100,18 @@ export const PUT = withAuth(async (user, request, { params }) => {
   if (body.lastValuedAt !== undefined) {
     updates.push('lastValuedAt = ?');
     args.push(body.lastValuedAt);
+  }
+
+  // Re-snapshot the entry rate whenever the valuation changes (rate at this valuation time).
+  let newEntryRate = currentAsset.entryRate as number;
+  if (valuationChanged) {
+    const rate = await getEntryRate(newCurrency);
+    if (rate === null) {
+      return NextResponse.json({ error: `No exchange rate available for ${newCurrency}` }, { status: 422 });
+    }
+    newEntryRate = rate;
+    updates.push('currency = ?', 'entryRate = ?');
+    args.push(newCurrency, newEntryRate);
   }
 
   if (updates.length === 0) {
@@ -131,9 +136,9 @@ export const PUT = withAuth(async (user, request, { params }) => {
   // Create valuation snapshot if values changed
   if (valuationChanged) {
     await db.execute({
-      sql: `INSERT INTO assetValuations (assetId, quantity, unitValueUsd, totalValueUsd, totalValueToman, exchangeRateUsed, valuedAt)
+      sql: `INSERT INTO assetValuations (assetId, quantity, unitValue, amount, currency, entryRate, valuedAt)
             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      args: [id, newQuantity, newUnitValueUsd, newTotalValueUsd, newTotalValueToman, newExchangeRate, valuedAt],
+      args: [id, newQuantity, newUnitValue, newAmount, newCurrency, newEntryRate, valuedAt],
     });
   }
 

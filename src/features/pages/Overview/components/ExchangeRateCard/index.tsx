@@ -1,21 +1,33 @@
-import { DollarSign, Info, Minus, TrendingDown, TrendingUp } from 'lucide-react';
+import { Coins, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
-import Tooltip from '@components/Tooltip';
-
-import { useExchangeRate } from '@hooks/use-exchange-rate';
+import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
 
 import { formatNumber } from '@utils';
 
-const ExchangeRateCard = () => {
-  const { data: rateData, isLoading } = useExchangeRate();
+import { getCurrency, PIVOT_CURRENCY } from '@/constants/currencies';
 
-  if (isLoading || !rateData?.usd) {
+const cardWrapper =
+  'border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6';
+
+const ExchangeRateCard = () => {
+  const { secondaryCurrency, primaryCurrency, series, isLoading } = useCurrency();
+
+  // Show the rate of the most relevant foreign currency against IRT — the
+  // secondary if it's a real foreign currency, otherwise the primary.
+  const displayCode =
+    secondaryCurrency && secondaryCurrency !== PIVOT_CURRENCY
+      ? secondaryCurrency
+      : primaryCurrency !== PIVOT_CURRENCY
+        ? primaryCurrency
+        : null;
+
+  if (isLoading) {
     return (
-      <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm sm:p-6">
+      <div className={cardWrapper}>
         <div className="mb-4 flex items-center justify-between">
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-            <DollarSign className="text-text-secondary h-5 w-5" />
+            <Coins className="text-text-secondary h-5 w-5" />
           </div>
         </div>
         <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Exchange Rate</p>
@@ -27,81 +39,55 @@ const ExchangeRateCard = () => {
     );
   }
 
-  const { value, change } = rateData.usd;
-  const rate = parseInt(value, 10);
-  const isZero = change === 0;
-  const freshness = rateData._meta?.freshness || 'cached';
-  const usage = rateData._meta?.usage;
-
-  const lastUpdate = rateData._meta?.fetchedAt
-    ? new Date(rateData._meta.fetchedAt).toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    : '';
-
-  const freshnessStyles = {
-    fresh: 'bg-success-light text-success border-success/20',
-    cached: 'bg-warning-light text-warning border-warning/20',
-    stale: 'bg-danger-light text-danger border-danger/20',
-  };
-
-  const freshnessLabels = {
-    fresh: 'Live',
-    cached: 'Cached',
-    stale: 'Old',
-  };
-
-  const sourceLabels = {
-    navasan: 'Navasan API',
-    cached: 'Database',
-    fallback: 'Fallback',
-  };
-
-  const tooltipContent = (
-    <div className="space-y-1.5 text-xs whitespace-nowrap">
-      <div className="flex items-center justify-between gap-6">
-        <span className="text-zinc-400">Status</span>
-        <span
-          className={twMerge(
-            'font-medium',
-            freshness === 'fresh' ? 'text-green-400' : freshness === 'cached' ? 'text-yellow-400' : 'text-red-400'
-          )}
-        >
-          {freshnessLabels[freshness]}
-        </span>
-      </div>
-      <div className="flex items-center justify-between gap-6">
-        <span className="text-zinc-400">Source</span>
-        <span className="font-medium text-zinc-200">{sourceLabels[rateData._meta?.source || 'cached']}</span>
-      </div>
-      <div className="flex items-center justify-between gap-6">
-        <span className="text-zinc-400">Updated</span>
-        <span className="font-medium text-zinc-200">{lastUpdate}</span>
-      </div>
-      {usage && (
-        <>
-          <div className="my-1.5 border-t border-zinc-700" />
-          <div className="flex items-center justify-between gap-6">
-            <span className="text-zinc-400">API Remaining</span>
-            <span
-              className={twMerge('font-medium tabular-nums', usage.remaining < 10 ? 'text-red-400' : 'text-zinc-200')}
-            >
-              {usage.remaining}/{usage.limit}
-            </span>
+  // No foreign currency selected (both primary & secondary are IRT, or secondary off).
+  if (!displayCode) {
+    return (
+      <div className={cardWrapper}>
+        <div className="mb-4 flex items-center justify-between">
+          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+            <Coins className="text-text-secondary h-5 w-5" />
           </div>
-        </>
-      )}
-    </div>
-  );
+        </div>
+        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Exchange Rate</p>
+        <p className="text-text-secondary text-sm">Pick a foreign secondary currency in Settings to track its rate.</p>
+      </div>
+    );
+  }
+
+  const def = getCurrency(displayCode);
+  // Ignore any future-dated rows — "current" rate is the most recent on or before today.
+  const today = new Date().toISOString().split('T')[0];
+  const points = (series[displayCode] ?? []).filter((p) => p.rateDate <= today);
+  const latest = points[points.length - 1];
+  const prev = points[points.length - 2];
+
+  if (!latest) {
+    return (
+      <div className={cardWrapper}>
+        <div className="mb-4 flex items-center justify-between">
+          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+            <span className="text-text-secondary text-sm font-semibold">{def.symbol}</span>
+          </div>
+        </div>
+        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">1 {def.code} =</p>
+        <p className="text-text-primary text-2xl font-semibold sm:text-3xl">—</p>
+        <p className="text-text-secondary mt-1.5 text-sm font-medium">{def.label} · rate unavailable</p>
+      </div>
+    );
+  }
+
+  const rate = latest.rate; // IRT per 1 unit of displayCode
+  const change = prev ? rate - prev.rate : 0;
+  const pct = prev && prev.rate ? (change / prev.rate) * 100 : 0;
+  const isZero = change === 0;
+
+  const isFresh = latest.rateDate === today;
 
   return (
-    <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
+    <div className={cardWrapper}>
       <div className="mb-4 flex items-center justify-between">
-        <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
-          <DollarSign className="text-text-secondary h-5 w-5" />
+        <div className="border-border-subtle bg-background-secondary flex h-10 w-10 items-center justify-center rounded-lg border">
+          <span className="text-text-secondary text-sm font-semibold">{def.symbol}</span>
         </div>
         <div
           className={twMerge(
@@ -122,8 +108,8 @@ const ExchangeRateCard = () => {
             <>
               {change > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
               <span>
-                {change > 0 ? '+' : ''}
-                {formatNumber(Math.abs(change))}
+                {change > 0 ? '+' : '−'}
+                {Math.abs(pct).toFixed(1)}%
               </span>
             </>
           )}
@@ -131,24 +117,22 @@ const ExchangeRateCard = () => {
       </div>
 
       <div>
-        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Exchange Rate</p>
+        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">1 {def.code} =</p>
         <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl">
-          {formatNumber(rate)} <span className="text-text-muted text-lg">Toman</span>
+          {formatNumber(rate)} <span className="text-text-muted text-lg">IRT</span>
         </p>
-        <div className="flex items-center justify-between gap-2">
-          {lastUpdate && <span className="text-text-secondary mt-1.5 text-sm font-medium">Updated {lastUpdate}</span>}
-          <div className="flex items-center gap-x-2">
-            <span
-              className={twMerge('rounded border px-1.5 py-0.5 text-[10px] font-medium', freshnessStyles[freshness])}
-            >
-              {freshnessLabels[freshness]}
-            </span>
-            <Tooltip content={tooltipContent} position="left">
-              <span className="text-text-muted hover:text-text-secondary transition-colors">
-                <Info className="h-3.5 w-3.5" />
-              </span>
-            </Tooltip>
-          </div>
+        <div className="mt-1.5 flex items-center justify-between gap-2">
+          <span className="text-text-secondary text-sm font-medium">{def.label}</span>
+          <span
+            className={twMerge(
+              'rounded border px-1.5 py-0.5 text-[10px] font-medium',
+              isFresh
+                ? 'bg-success-light text-success border-success/20'
+                : 'bg-warning-light text-warning border-warning/20'
+            )}
+          >
+            {isFresh ? 'Live' : latest.rateDate}
+          </span>
         </div>
       </div>
     </div>

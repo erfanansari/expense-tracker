@@ -5,6 +5,7 @@ import { createIncomeSchema } from '@schemas';
 import { getSearchParams, validateBody, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
 import { mapRowToIncome } from '@core/database/mappers';
+import { getEntryRate } from '@core/rates';
 
 // GET /api/incomes - Fetch incomes with optional year/month filters
 export const GET = withAuth(async (user, request) => {
@@ -40,14 +41,19 @@ export const POST = withAuth(async (user, request) => {
 
   const body = result.data;
 
+  const entryRate = await getEntryRate(body.currency);
+  if (entryRate === null) {
+    return NextResponse.json({ error: `No exchange rate available for ${body.currency}` }, { status: 422 });
+  }
+
   const dbResult = await db.execute({
-    sql: `INSERT INTO incomes (userId, amountUsd, amountToman, exchangeRateUsed, month, year, incomeType, source, notes)
+    sql: `INSERT INTO incomes (userId, amount, currency, entryRate, month, year, incomeType, source, notes)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
     args: [
       user.userId,
-      body.amountUsd,
-      body.amountToman,
-      body.exchangeRateUsed,
+      body.amount,
+      body.currency,
+      entryRate,
       body.month,
       body.year,
       body.incomeType,

@@ -63,19 +63,17 @@ const AssetsPage = () => {
     onError: (err) => showToast(ensureError(err).message, 'error'),
   });
 
-  // Variables
-  const totalValueUsd = assets.reduce((sum, a) => sum + a.totalValueUsd, 0);
-  const totalValueToman = assets.reduce((sum, a) => sum + a.totalValueToman, 0);
+  // Totals in the pivot currency (amount * entryRate); Money converts for display.
+  const totalValue = assets.reduce((sum, a) => sum + a.amount * a.entryRate, 0);
 
   const assetsByCategory = assets.reduce(
     (acc, asset) => {
       const category = asset.category || 'other';
       if (!acc[category]) {
-        acc[category] = { assets: [], totalUsd: 0, totalToman: 0 };
+        acc[category] = { assets: [], total: 0 };
       }
       acc[category].assets.push(asset);
-      acc[category].totalUsd += asset.totalValueUsd;
-      acc[category].totalToman += asset.totalValueToman;
+      acc[category].total += asset.amount * asset.entryRate;
       return acc;
     },
     {} as Record<string, CategoryData>
@@ -84,8 +82,7 @@ const AssetsPage = () => {
   const chartData: ChartEntry[] = Object.entries(assetsByCategory).map(([category, data]) => ({
     name: getAssetCategoryLabel(category).en,
     nameFa: getAssetCategoryLabel(category).fa,
-    value: data.totalUsd,
-    tomanValue: data.totalToman,
+    value: data.total,
     color: CATEGORY_COLORS[category as AssetCategory] || '#525252',
   }));
 
@@ -109,11 +106,7 @@ const AssetsPage = () => {
         {showingSkeleton ? (
           <AssetsSummarySkeleton />
         ) : (
-          <AssetsSummary
-            totalValueUsd={totalValueUsd}
-            totalValueToman={totalValueToman}
-            assetsByCategory={assetsByCategory}
-          />
+          <AssetsSummary totalValue={totalValue} assetsByCategory={assetsByCategory} />
         )}
 
         <AssetsTable
@@ -130,7 +123,7 @@ const AssetsPage = () => {
         {assets.length > 0 && (
           <>
             <div className="mt-6">
-              <AssetsDistribution chartData={chartData} totalValueUsd={totalValueUsd} />
+              <AssetsDistribution chartData={chartData} totalValue={totalValue} />
             </div>
             <div className="mt-6">
               <NetWorthChart />

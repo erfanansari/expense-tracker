@@ -27,8 +27,12 @@ export const queryKeys = {
   netWorth: {
     history: (from: string, to: string) => ['netWorth', 'history', from, to] as const,
   },
-  exchangeRate: {
-    current: () => ['exchangeRate', 'current'] as const,
+  rates: {
+    all: () => ['rates'] as const,
+    withHistory: () => ['rates', 'history'] as const,
+  },
+  currencyPreferences: {
+    all: () => ['currencyPreferences'] as const,
   },
   user: {
     profile: () => ['user', 'profile'] as const,

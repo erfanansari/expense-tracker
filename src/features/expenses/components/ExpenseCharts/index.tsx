@@ -18,33 +18,38 @@ import {
   YAxis,
 } from 'recharts';
 
+import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
+
 import ChartTooltip from '@components/ChartTooltip';
 
-import { formatChartTooltipDate, formatNumber } from '@utils';
+import { formatChartTooltipDate } from '@utils';
 
 import { type Expense } from '@/@types/expense';
+import { PIVOT_CURRENCY } from '@/constants/currencies';
 
 interface ExpenseChartsProps {
   expenses: Expense[];
   granularity?: 'daily' | 'weekly' | 'monthly';
 }
 
+// Chart values are in the pivot currency; tooltips convert to primary/secondary.
 // Tooltip for pie / bar (category-based)
 const CategoryTooltip = ({
   active,
   payload,
 }: {
   active?: boolean;
-  payload?: ReadonlyArray<{ value: number; payload: { name?: string; usdValue?: number } }>;
+  payload?: ReadonlyArray<{ value: number; payload: { name?: string } }>;
 }) => {
+  const { display } = useCurrency();
   if (!active || !payload?.length) return null;
   const data = payload[0];
-  const usdValue = data.payload.usdValue || 0;
   const accentText = data.payload.name;
+  const { primary, secondary } = display(data.value, PIVOT_CURRENCY);
   return (
     <ChartTooltip
-      primary={`${formatNumber(data.value)} Toman`}
-      secondary={`$${usdValue.toFixed(2)} USD`}
+      primary={primary}
+      secondary={secondary ?? undefined}
       accent={accentText ? { text: accentText, tone: 'blue' } : undefined}
     />
   );
@@ -58,21 +63,19 @@ const AreaTooltip = ({
   granularity,
 }: {
   active?: boolean;
-  payload?: ReadonlyArray<{
-    value?: number | string | ReadonlyArray<number | string>;
-    payload?: { usdValue?: number };
-  }>;
+  payload?: ReadonlyArray<{ value?: number | string | ReadonlyArray<number | string> }>;
   label?: string | number;
   granularity: 'daily' | 'weekly' | 'monthly';
 }) => {
+  const { display } = useCurrency();
   if (!active || !payload?.length) return null;
-  const usdValue = payload[0].payload?.usdValue || 0;
   const rawValue = payload[0].value;
   const numericValue = typeof rawValue === 'number' ? rawValue : Number(rawValue) || 0;
+  const { primary, secondary } = display(numericValue, PIVOT_CURRENCY);
   return (
     <ChartTooltip
-      primary={`${formatNumber(numericValue)} Toman`}
-      secondary={`$${usdValue.toFixed(2)} USD`}
+      primary={primary}
+      secondary={secondary ?? undefined}
       accent={label != null ? { text: formatChartTooltipDate(String(label), granularity), tone: 'blue' } : undefined}
     />
   );
@@ -83,22 +86,21 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
   // segments / bars / legend chips all share a single source of truth.
   const categoryTotals = expenses.reduce(
     (acc, exp) => {
+      const pivot = exp.amount * exp.entryRate;
       const existing = acc.find((item) => item.categoryId === exp.category.id);
       if (existing) {
-        existing.value += exp.price_toman;
-        existing.usdValue += exp.price_usd;
+        existing.value += pivot;
       } else {
         acc.push({
           categoryId: exp.category.id,
           name: exp.category.name,
           color: getCategoryColor(exp.category.color).fill,
-          value: exp.price_toman,
-          usdValue: exp.price_usd,
+          value: pivot,
         });
       }
       return acc;
     },
-    [] as Array<{ categoryId: number; name: string; color: string; value: number; usdValue: number }>
+    [] as Array<{ categoryId: number; name: string; color: string; value: number }>
   );
 
   categoryTotals.sort((a, b) => b.value - a.value);
@@ -114,10 +116,11 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
   const aggregateExpenses = () => {
     if (expenses.length === 0) return [];
 
-    const aggregated = new Map<string, { amount: number; usdValue: number }>();
+    const aggregated = new Map<string, { amount: number }>();
 
     expenses.forEach((exp) => {
       const date = new Date(exp.date);
+      const pivot = exp.amount * exp.entryRate;
       let key: string;
 
       switch (granularity) {
@@ -135,10 +138,9 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
 
       const existing = aggregated.get(key);
       if (existing) {
-        existing.amount += exp.price_toman;
-        existing.usdValue += exp.price_usd;
+        existing.amount += pivot;
       } else {
-        aggregated.set(key, { amount: exp.price_toman, usdValue: exp.price_usd });
+        aggregated.set(key, { amount: pivot });
       }
     });
 
