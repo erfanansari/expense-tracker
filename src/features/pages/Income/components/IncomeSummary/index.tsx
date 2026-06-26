@@ -28,6 +28,19 @@ const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
   const distinctMonths = new Set(incomes.map((inc) => `${inc.year}-${inc.month}`)).size;
   const avgMonthlyIncome = distinctMonths > 0 ? totalIncomeAllTime / distinctMonths : 0;
 
+  // Date span covered by all income — the Total Income card's context line.
+  const sortedByPeriod = [...incomes].sort((a, b) => a.year - b.year || a.month - b.month);
+  const earliest = sortedByPeriod[0];
+  const latest = sortedByPeriod[sortedByPeriod.length - 1];
+
+  let incomeSpanLabel = 'All time';
+  if (earliest) {
+    const sameMonth = earliest.year === latest.year && earliest.month === latest.month;
+    incomeSpanLabel = sameMonth
+      ? `${getMonthLabel(earliest.month).en} ${earliest.year}`
+      : `${getMonthLabel(earliest.month).en.slice(0, 3)} ${earliest.year} – ${getMonthLabel(latest.month).en.slice(0, 3)} ${latest.year}`;
+  }
+
   return (
     <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
       {/* Total Income (All Time) */}
@@ -42,8 +55,9 @@ const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
           amount={totalIncomeAllTime}
           currency={PIVOT_CURRENCY}
           primaryClassName="text-success text-2xl font-semibold tabular-nums"
-          secondaryClassName="text-text-secondary mt-1.5 text-sm font-medium"
+          secondaryClassName="text-text-muted text-xs"
         />
+        <p className="text-text-secondary mt-1.5 text-sm font-medium">{incomeSpanLabel}</p>
       </div>
 
       {/* YTD Income */}
