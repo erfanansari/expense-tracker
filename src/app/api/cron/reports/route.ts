@@ -1,7 +1,13 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
+import { backupConfig } from '@configs/backup.config';
+import { gzipSync } from 'zlib';
+
+import { pruneOldBackups, uploadBackup } from '@core/database/backup-storage';
 import { db } from '@core/database/client';
+import { generateSqlDump } from '@core/database/dump';
+import { ensureFreshRates } from '@core/rates';
 import { getReportData, previousMonthOf } from '@core/reports/aggregate';
 import type { ReportType } from '@core/reports/aggregate';
 import { dispatchReport } from '@core/reports/dispatch';
@@ -77,7 +83,7 @@ async function processUser(
   const data = await getReportData(user.userId, { type: reportType, year, month });
 
   // Don't email an empty report — no income, no expenses for the period.
-  if (data.totals.income.usd === 0 && data.totals.expenses.usd === 0) {
+  if (data.totals.income.value === 0 && data.totals.expenses.value === 0) {
     await db.execute({
       sql: `INSERT OR IGNORE INTO sentEmailReports (userId, reportType, periodKey, status, errorMsg)
             VALUES (?, ?, ?, 'skipped', 'empty-period')`,
@@ -125,9 +131,36 @@ export async function POST(request: NextRequest) {
     if (!Number.isNaN(parsed.getTime())) now = parsed;
   }
 
+  // ── 1. Backup (runs every day) ────────────────────────────────────────────
+  let backupResult: Record<string, unknown>;
+  try {
+    const dump = await generateSqlDump(db);
+    const gzipped = gzipSync(Buffer.from(dump, 'utf-8'));
+    const key = `kharji-${now.toISOString().slice(0, 10)}.sql.gz`;
+    await uploadBackup(key, gzipped);
+    const deleted = await pruneOldBackups(backupConfig.retentionDays);
+    backupResult = { ok: true, uploaded: key, bytes: gzipped.length, deleted };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[cron/backup] failed:', message);
+    backupResult = { ok: false, error: message };
+  }
+
+  // ── 2. Rate refresh (runs every day) ─────────────────────────────────────
+  let ratesResult: Record<string, unknown>;
+  try {
+    await ensureFreshRates(process.env.NAVASAN_API_KEY);
+    ratesResult = { ok: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[cron/rates] failed:', message);
+    ratesResult = { ok: false, error: message };
+  }
+
+  // ── 3. Email reports (runs only on the 1st of each month) ─────────────────
   const dispatch = decideDispatch(now);
   if (!dispatch) {
-    return NextResponse.json({ skipped: true, reason: 'not-a-report-day', date: now.toISOString() });
+    return NextResponse.json({ backup: backupResult, rates: ratesResult, reports: { skipped: true } });
   }
 
   const { reportType, year, month } = dispatch;
@@ -154,5 +187,5 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  return NextResponse.json(summary);
+  return NextResponse.json({ backup: backupResult, rates: ratesResult, reports: summary });
 }
