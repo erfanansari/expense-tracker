@@ -3,20 +3,22 @@ import { backupConfig } from '@configs/backup.config';
 
 const BACKUP_PREFIX = 'backups/';
 
-if (!backupConfig.keyId || !backupConfig.applicationKey || !backupConfig.bucket || !backupConfig.endpoint) {
-  throw new Error('Missing Backblaze B2 environment variables');
+function getS3Client(): S3Client {
+  if (!backupConfig.keyId || !backupConfig.applicationKey || !backupConfig.bucket || !backupConfig.endpoint) {
+    throw new Error('Missing Backblaze B2 environment variables');
+  }
+  return new S3Client({
+    region: backupConfig.region,
+    endpoint: `https://${backupConfig.endpoint}`,
+    credentials: {
+      accessKeyId: backupConfig.keyId,
+      secretAccessKey: backupConfig.applicationKey,
+    },
+  });
 }
 
-const s3 = new S3Client({
-  region: backupConfig.region,
-  endpoint: `https://${backupConfig.endpoint}`,
-  credentials: {
-    accessKeyId: backupConfig.keyId,
-    secretAccessKey: backupConfig.applicationKey,
-  },
-});
-
 export async function uploadBackup(key: string, body: Buffer): Promise<void> {
+  const s3 = getS3Client();
   await s3.send(
     new PutObjectCommand({
       Bucket: backupConfig.bucket,
@@ -28,6 +30,7 @@ export async function uploadBackup(key: string, body: Buffer): Promise<void> {
 }
 
 export async function pruneOldBackups(retentionDays: number): Promise<string[]> {
+  const s3 = getS3Client();
   const cutoff = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
   const deleted: string[] = [];
 
