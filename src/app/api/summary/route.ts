@@ -2,158 +2,71 @@ import { NextResponse } from 'next/server';
 
 import { withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
+import { getCurrencyPreferences } from '@core/database/currency-preferences';
 
-import type { AssetCategory } from '@/@types/asset';
+import { PIVOT_CURRENCY, SUPPORTED_CURRENCY_CODES } from '@/constants/currencies';
 
-// All monetary values in this response are in the pivot currency (IRT). Each
-// record's pivot value is amount * entryRate (its frozen historical value).
-// The client converts to the user's primary/secondary currency for display.
-interface MonthlySummary {
-  month: number;
-  year: number;
-  income: number;
-  expenses: number;
-}
-
-interface CategorySummary {
-  category: AssetCategory;
-  value: number;
-  percentage: number;
+// Totals are converted PER RECORD at each record's own date (historically
+// accurate and stable over time), into the user's primary & secondary currency.
+interface SummaryPair {
+  primary: number;
+  secondary: number | null;
 }
 
 interface SummaryResponse {
-  current_month_income: number;
-  current_month_expenses: number;
-  total_income: number;
-  total_expenses: number;
-  total_assets: number;
-  net_worth: number;
-  income_vs_expenses: MonthlySummary[];
-  assets_by_category: CategorySummary[];
+  primaryCurrency: string;
+  secondaryCurrency: string | null;
+  total_income: SummaryPair;
+  total_expenses: SummaryPair;
+  net_worth: SummaryPair;
 }
 
 const num = (v: unknown): number => (typeof v === 'number' ? v : 0);
 
-// GET /api/summary - Get financial overview for dashboard (all values in pivot/IRT)
+/**
+ * SQL expression summing each row's pivot value (amount*entryRate) converted to
+ * `currency` at the row's own date. For the pivot currency it's just the sum;
+ * otherwise divide by the currency's rate on that date (carry-forward, with a
+ * fallback to the earliest known rate). `currency` is validated against the
+ * supported set before inlining.
+ */
+function sumInCurrency(currency: string, dateExpr: string): string {
+  const pivot = 'amount * entryRate';
+  if (currency === PIVOT_CURRENCY) return `COALESCE(SUM(${pivot}), 0)`;
+  if (!SUPPORTED_CURRENCY_CODES.includes(currency)) return '0';
+  return `COALESCE(SUM( (${pivot}) / NULLIF(COALESCE(
+    (SELECT cr.rate FROM currencyRates cr WHERE cr.currency='${currency}' AND cr.rateDate <= ${dateExpr} ORDER BY cr.rateDate DESC LIMIT 1),
+    (SELECT cr.rate FROM currencyRates cr WHERE cr.currency='${currency}' ORDER BY cr.rateDate ASC LIMIT 1)
+  ), 0) ), 0)`;
+}
+
 export const GET = withAuth(async (user) => {
-  const now = new Date();
-  const currentMonth = now.getMonth() + 1;
-  const currentYear = now.getFullYear();
+  const prefs = await getCurrencyPreferences(user.userId);
+  const primary = prefs.primaryCurrency;
+  const secondary = prefs.secondaryCurrency && prefs.secondaryCurrency !== primary ? prefs.secondaryCurrency : null;
 
-  const currentIncomeResult = await db.execute({
-    sql: `SELECT COALESCE(SUM(amount * entryRate), 0) as total
-          FROM incomes WHERE userId = ? AND month = ? AND year = ?`,
-    args: [user.userId, currentMonth, currentYear],
-  });
-  const currentMonthIncome = num(currentIncomeResult.rows[0]?.total);
-
-  const totalIncomeResult = await db.execute({
-    sql: `SELECT COALESCE(SUM(amount * entryRate), 0) as total FROM incomes WHERE userId = ?`,
-    args: [user.userId],
-  });
-  const totalIncome = num(totalIncomeResult.rows[0]?.total);
-
-  const startOfMonth = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
-  const endOfMonth = new Date(currentYear, currentMonth, 0);
-  const endOfMonthStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(endOfMonth.getDate()).padStart(2, '0')}`;
-
-  const currentExpensesResult = await db.execute({
-    sql: `SELECT COALESCE(SUM(amount * entryRate), 0) as total
-          FROM expenses WHERE user_id = ? AND date >= ? AND date <= ?`,
-    args: [user.userId, startOfMonth, endOfMonthStr],
-  });
-  const currentMonthExpenses = num(currentExpensesResult.rows[0]?.total);
-
-  const totalExpensesResult = await db.execute({
-    sql: `SELECT COALESCE(SUM(amount * entryRate), 0) as total FROM expenses WHERE user_id = ?`,
-    args: [user.userId],
-  });
-  const totalExpenses = num(totalExpensesResult.rows[0]?.total);
-
-  const assetsResult = await db.execute({
-    sql: `SELECT COALESCE(SUM(amount * entryRate), 0) as total FROM assets WHERE userId = ?`,
-    args: [user.userId],
-  });
-  const totalAssets = num(assetsResult.rows[0]?.total);
-
-  // Net worth = total assets (no liabilities tracked yet)
-  const netWorth = totalAssets;
-
-  // Income vs expenses for the last 6 months
-  const months: { month: number; year: number; start: string; end: string }[] = [];
-  for (let i = 5; i >= 0; i--) {
-    const date = new Date(currentYear, currentMonth - 1 - i, 1);
-    const m = date.getMonth() + 1;
-    const y = date.getFullYear();
-    const lastDay = new Date(y, m, 0).getDate();
-    months.push({
-      month: m,
-      year: y,
-      start: `${y}-${String(m).padStart(2, '0')}-01`,
-      end: `${y}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`,
+  // Run one query per table selecting both primary and secondary totals.
+  const pair = async (table: string, userCol: string, dateExpr: string): Promise<SummaryPair> => {
+    const secSelect = secondary ? `, ${sumInCurrency(secondary, dateExpr)} AS s` : '';
+    const res = await db.execute({
+      sql: `SELECT ${sumInCurrency(primary, dateExpr)} AS p ${secSelect} FROM ${table} WHERE ${userCol} = ?`,
+      args: [user.userId],
     });
-  }
-
-  const monthYearConditions = months.map(() => '(month = ? AND year = ?)').join(' OR ');
-  const monthYearArgs = months.flatMap((m) => [m.month, m.year]);
-
-  const incomeByMonthResult = await db.execute({
-    sql: `SELECT month, year, COALESCE(SUM(amount * entryRate), 0) as total
-          FROM incomes WHERE userId = ? AND (${monthYearConditions})
-          GROUP BY month, year`,
-    args: [user.userId, ...monthYearArgs],
-  });
-
-  const oldestStart = months[0].start;
-  const newestEnd = months[months.length - 1].end;
-
-  const expensesByMonthResult = await db.execute({
-    sql: `SELECT
-            CAST(SUBSTR(date, 6, 2) AS INTEGER) as month,
-            CAST(SUBSTR(date, 1, 4) AS INTEGER) as year,
-            COALESCE(SUM(amount * entryRate), 0) as total
-          FROM expenses
-          WHERE user_id = ? AND date >= ? AND date <= ?
-          GROUP BY SUBSTR(date, 1, 7)`,
-    args: [user.userId, oldestStart, newestEnd],
-  });
-
-  const incomeMap = new Map<string, number>();
-  incomeByMonthResult.rows.forEach((row) => incomeMap.set(`${row.year}-${row.month}`, num(row.total)));
-
-  const expenseMap = new Map<string, number>();
-  expensesByMonthResult.rows.forEach((row) => expenseMap.set(`${row.year}-${row.month}`, num(row.total)));
-
-  const incomeVsExpenses: MonthlySummary[] = months.map((m) => ({
-    month: m.month,
-    year: m.year,
-    income: incomeMap.get(`${m.year}-${m.month}`) ?? 0,
-    expenses: expenseMap.get(`${m.year}-${m.month}`) ?? 0,
-  }));
-
-  const categoryResult = await db.execute({
-    sql: `SELECT category, COALESCE(SUM(amount * entryRate), 0) as value
-          FROM assets WHERE userId = ?
-          GROUP BY category ORDER BY value DESC`,
-    args: [user.userId],
-  });
-
-  const assetsByCategory: CategorySummary[] = categoryResult.rows.map((row) => ({
-    category: row.category as AssetCategory,
-    value: num(row.value),
-    percentage: totalAssets > 0 ? (num(row.value) / totalAssets) * 100 : 0,
-  }));
-
-  const response: SummaryResponse = {
-    current_month_income: currentMonthIncome,
-    current_month_expenses: currentMonthExpenses,
-    total_income: totalIncome,
-    total_expenses: totalExpenses,
-    total_assets: totalAssets,
-    net_worth: netWorth,
-    income_vs_expenses: incomeVsExpenses,
-    assets_by_category: assetsByCategory,
+    return { primary: num(res.rows[0]?.p), secondary: secondary ? num(res.rows[0]?.s) : null };
   };
 
+  const [total_income, total_expenses, net_worth] = await Promise.all([
+    pair('incomes', 'userId', `printf('%04d-%02d-01', year, month)`),
+    pair('expenses', 'user_id', `substr(date, 1, 10)`),
+    pair('assets', 'userId', `substr(lastValuedAt, 1, 10)`),
+  ]);
+
+  const response: SummaryResponse = {
+    primaryCurrency: primary,
+    secondaryCurrency: secondary,
+    total_income,
+    total_expenses,
+    net_worth,
+  };
   return NextResponse.json(response);
 }, 'Summary');

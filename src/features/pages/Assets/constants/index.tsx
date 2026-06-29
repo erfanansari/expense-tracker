@@ -79,6 +79,7 @@ export function buildAssetColumns(
           <Money
             amount={asset.amount}
             currency={asset.currency}
+            date={asset.lastValuedAt?.slice(0, 10)}
             className="items-end"
             primaryClassName="text-text-primary text-sm font-semibold whitespace-nowrap"
             secondaryClassName="text-text-muted text-xs whitespace-nowrap"
