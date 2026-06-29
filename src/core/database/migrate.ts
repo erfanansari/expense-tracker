@@ -1,11 +1,43 @@
 /* eslint-disable no-console, @typescript-eslint/no-non-null-assertion */
 import { createClient } from '@libsql/client';
+import type { Client } from '@libsql/client';
 import { config } from 'dotenv';
 import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
+import { gzipSync } from 'zlib';
+
+import { uploadBackup } from './backup-storage';
+import { generateSqlDump } from './dump';
 
 // Load environment variables from .env.local
 config({ path: '.env.local' });
+
+/**
+ * Snapshot the whole DB to B2 BEFORE applying migrations, so a destructive
+ * migration always has a fresh, clearly-named restore point (closes the gap the
+ * once-daily backup leaves). Aborts the migration if the snapshot fails — set
+ * SKIP_PREMIGRATION_BACKUP=1 to bypass intentionally (e.g. local throwaway DBs).
+ */
+async function snapshotBeforeMigrating(client: Client, pending: string[]): Promise<void> {
+  if (process.env.SKIP_PREMIGRATION_BACKUP === '1') {
+    console.warn('⚠️  SKIP_PREMIGRATION_BACKUP=1 — skipping pre-migration snapshot.');
+    return;
+  }
+
+  console.log(`Taking pre-migration snapshot before applying: ${pending.join(', ')}`);
+  try {
+    const dump = await generateSqlDump(client);
+    const gzipped = gzipSync(Buffer.from(dump, 'utf-8'));
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const key = `kharji-premigration-${stamp}.sql.gz`;
+    await uploadBackup(key, gzipped);
+    console.log(`✓ Pre-migration snapshot uploaded: ${key} (${gzipped.length} bytes)`);
+  } catch (error) {
+    console.error('Pre-migration snapshot FAILED — aborting before any migration runs.');
+    console.error('Fix the backup (B2 creds) or re-run with SKIP_PREMIGRATION_BACKUP=1 to bypass.');
+    throw error;
+  }
+}
 
 async function migrate() {
   const client = createClient({
@@ -38,29 +70,30 @@ async function migrate() {
       console.log('No migrations directory found, skipping migrations');
     }
 
-    // Run each migration that hasn't been run yet
-    for (const file of migrationFiles) {
-      // Check if migration has already been run
-      const result = await client.execute({
-        sql: 'SELECT name FROM _migrations WHERE name = ?',
+    // Work out which migrations are pending up front, so we can snapshot once.
+    const executed = await client.execute({ sql: 'SELECT name FROM _migrations' });
+    const executedNames = new Set(executed.rows.map((r) => r.name as string));
+    const pending = migrationFiles.filter((f) => !executedNames.has(f));
+
+    if (pending.length === 0) {
+      console.log('No pending migrations — database is up to date.');
+      return;
+    }
+
+    // Guaranteed restore point before any schema/data change.
+    await snapshotBeforeMigrating(client, pending);
+
+    for (const file of pending) {
+      console.log(`Running migration: ${file}`);
+      const migrationPath = join(migrationsDir, file);
+      const migrationSql = readFileSync(migrationPath, 'utf-8');
+
+      await client.executeMultiple(migrationSql);
+
+      await client.execute({
+        sql: 'INSERT INTO _migrations (name) VALUES (?)',
         args: [file],
       });
-
-      if (result.rows.length === 0) {
-        console.log(`Running migration: ${file}`);
-        const migrationPath = join(migrationsDir, file);
-        const migrationSql = readFileSync(migrationPath, 'utf-8');
-
-        await client.executeMultiple(migrationSql);
-
-        // Record migration as executed
-        await client.execute({
-          sql: 'INSERT INTO _migrations (name) VALUES (?)',
-          args: [file],
-        });
-      } else {
-        console.log(`Skipping already-executed migration: ${file}`);
-      }
     }
 
     console.log('Migration completed successfully!');
