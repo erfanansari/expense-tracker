@@ -117,6 +117,8 @@ async function processUser(
   }
 }
 
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   if (request.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -177,3 +179,6 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ backup: backupResult, reports: summary });
 }
+
+// Vercel Cron Jobs send GET requests — alias POST so both work
+export const GET = POST;
