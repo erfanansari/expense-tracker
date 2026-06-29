@@ -37,7 +37,7 @@ function SpendingTooltip({
   granularity,
 }: {
   active?: boolean;
-  payload?: ReadonlyArray<{ value?: number | string | ReadonlyArray<number | string> }>;
+  payload?: ReadonlyArray<{ value?: number | string | ReadonlyArray<number | string>; payload?: { date?: string } }>;
   label?: string | number;
   granularity: 'daily' | 'weekly' | 'monthly';
 }) {
@@ -45,7 +45,10 @@ function SpendingTooltip({
   if (!active || !payload?.length) return null;
   const rawValue = payload[0].value;
   const numericValue = typeof rawValue === 'number' ? rawValue : Number(rawValue) || 0;
-  const { primary, secondary } = display(numericValue, PIVOT_CURRENCY);
+  // Convert at the bucket's own date (monthly keys are YYYY-MM → use mid-month).
+  const bucketDate = payload[0].payload?.date;
+  const convDate = bucketDate && bucketDate.length === 7 ? `${bucketDate}-15` : bucketDate;
+  const { primary, secondary } = display(numericValue, PIVOT_CURRENCY, convDate);
   return (
     <ChartTooltip
       primary={primary}
