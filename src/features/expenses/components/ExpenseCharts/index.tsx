@@ -19,6 +19,7 @@ import {
 } from 'recharts';
 
 import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
+import type { MoneyItem } from '@features/ExchangeRate/CurrencyProvider';
 
 import ChartTooltip from '@components/ChartTooltip';
 
@@ -32,25 +33,22 @@ interface ExpenseChartsProps {
   granularity?: 'daily' | 'weekly' | 'monthly';
 }
 
-// Chart values are in the pivot currency; tooltips convert to primary/secondary.
-// Tooltip for pie / bar (category-based)
+// Tooltip for pie / bar (category-based). Categories span all dates, so the
+// primary/secondary strings are pre-summed per-record in the component.
 const CategoryTooltip = ({
   active,
   payload,
 }: {
   active?: boolean;
-  payload?: ReadonlyArray<{ value: number; payload: { name?: string } }>;
+  payload?: ReadonlyArray<{ payload: { name?: string; primaryStr?: string; secondaryStr?: string } }>;
 }) => {
-  const { display } = useCurrency();
   if (!active || !payload?.length) return null;
-  const data = payload[0];
-  const accentText = data.payload.name;
-  const { primary, secondary } = display(data.value, PIVOT_CURRENCY);
+  const d = payload[0].payload;
   return (
     <ChartTooltip
-      primary={primary}
-      secondary={secondary ?? undefined}
-      accent={accentText ? { text: accentText, tone: 'blue' } : undefined}
+      primary={d.primaryStr ?? ''}
+      secondary={d.secondaryStr}
+      accent={d.name ? { text: d.name, tone: 'blue' } : undefined}
     />
   );
 };
@@ -71,7 +69,10 @@ const AreaTooltip = ({
   if (!active || !payload?.length) return null;
   const rawValue = payload[0].value;
   const numericValue = typeof rawValue === 'number' ? rawValue : Number(rawValue) || 0;
-  const { primary, secondary } = display(numericValue, PIVOT_CURRENCY);
+  // Convert at the bucket's own date (monthly keys are YYYY-MM → use mid-month).
+  const bucket = label != null ? String(label) : undefined;
+  const convDate = bucket && bucket.length === 7 ? `${bucket}-15` : bucket;
+  const { primary, secondary } = display(numericValue, PIVOT_CURRENCY, convDate);
   return (
     <ChartTooltip
       primary={primary}
@@ -82,28 +83,41 @@ const AreaTooltip = ({
 };
 
 export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseChartsProps) {
-  // Aggregate per category, carrying the category's color through so chart
-  // segments / bars / legend chips all share a single source of truth.
-  const categoryTotals = expenses.reduce(
-    (acc, exp) => {
-      const pivot = exp.amount * exp.entryRate;
-      const existing = acc.find((item) => item.categoryId === exp.category.id);
-      if (existing) {
-        existing.value += pivot;
-      } else {
-        acc.push({
-          categoryId: exp.category.id,
-          name: exp.category.name,
-          color: getCategoryColor(exp.category.color).fill,
-          value: pivot,
-        });
-      }
-      return acc;
-    },
-    [] as Array<{ categoryId: number; name: string; color: string; value: number }>
-  );
+  const { sumTo, format: fmtMoney, primaryCurrency, secondaryCurrency } = useCurrency();
+  const showSecondary = !!secondaryCurrency && secondaryCurrency !== primaryCurrency;
 
-  categoryTotals.sort((a, b) => b.value - a.value);
+  // Aggregate per category. `value` (pivot) drives segment sizing; primary/
+  // secondary strings are summed per-record at each expense's date (accurate).
+  const catMap = new Map<number, { name: string; color: string; value: number; items: MoneyItem[] }>();
+  expenses.forEach((exp) => {
+    const pivot = exp.amount * exp.entryRate;
+    const item: MoneyItem = { amount: exp.amount, currency: exp.currency, date: exp.date };
+    const ex = catMap.get(exp.category.id);
+    if (ex) {
+      ex.value += pivot;
+      ex.items.push(item);
+    } else {
+      catMap.set(exp.category.id, {
+        name: exp.category.name,
+        color: getCategoryColor(exp.category.color).fill,
+        value: pivot,
+        items: [item],
+      });
+    }
+  });
+
+  const categoryTotals = Array.from(catMap.entries())
+    .map(([categoryId, c]) => ({
+      categoryId,
+      name: c.name,
+      color: c.color,
+      value: c.value,
+      primaryStr: fmtMoney(sumTo(c.items, primaryCurrency), primaryCurrency),
+      secondaryStr: showSecondary
+        ? fmtMoney(sumTo(c.items, secondaryCurrency || primaryCurrency), secondaryCurrency || primaryCurrency)
+        : undefined,
+    }))
+    .sort((a, b) => b.value - a.value);
 
   // Helper functions for date formatting
   const getWeekKey = (date: Date): string => format(startOfWeek(date), 'yyyy-MM-dd');

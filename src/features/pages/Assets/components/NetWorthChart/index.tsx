@@ -45,7 +45,8 @@ function NetWorthTooltip({
   const { display } = useCurrency();
   if (!active || !payload?.length) return null;
   const point = payload[0].payload;
-  const { primary, secondary } = display(point.value, PIVOT_CURRENCY);
+  // Convert at the point's own date so the secondary is historically accurate & stable.
+  const { primary, secondary } = display(point.value, PIVOT_CURRENCY, point.date);
   return (
     <ChartTooltip
       primary={primary}
