@@ -6,10 +6,9 @@ import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { gzipSync } from 'zlib';
 
-import { uploadBackup } from './backup-storage';
-import { generateSqlDump } from './dump';
-
-// Load environment variables from .env.local
+// Load environment variables from .env.local BEFORE importing modules that read
+// process.env at load time (backup-storage/backup.config) — hence the dynamic
+// imports inside snapshotBeforeMigrating rather than static imports here.
 config({ path: '.env.local' });
 
 /**
@@ -26,6 +25,9 @@ async function snapshotBeforeMigrating(client: Client, pending: string[]): Promi
 
   console.log(`Taking pre-migration snapshot before applying: ${pending.join(', ')}`);
   try {
+    // Dynamic import so .env.local is loaded before backup.config reads process.env.
+    const { uploadBackup } = await import('./backup-storage');
+    const { generateSqlDump } = await import('./dump');
     const dump = await generateSqlDump(client);
     const gzipped = gzipSync(Buffer.from(dump, 'utf-8'));
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
