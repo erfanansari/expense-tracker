@@ -31,9 +31,11 @@ async function snapshotBeforeMigrating(client: Client, pending: string[]): Promi
     const dump = await generateSqlDump(client);
     const gzipped = gzipSync(Buffer.from(dump, 'utf-8'));
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const key = `kharji-premigration-${stamp}.sql.gz`;
+    // Sub-folder keeps these separate from the daily backups (uploadBackup
+    // prepends "backups/", so this lands in backups/premigration/).
+    const key = `premigration/kharji-${stamp}.sql.gz`;
     await uploadBackup(key, gzipped);
-    console.log(`✓ Pre-migration snapshot uploaded: ${key} (${gzipped.length} bytes)`);
+    console.log(`✓ Pre-migration snapshot uploaded: backups/${key} (${gzipped.length} bytes)`);
   } catch (error) {
     console.error('Pre-migration snapshot FAILED — aborting before any migration runs.');
     console.error('Fix the backup (B2 creds) or re-run with SKIP_PREMIGRATION_BACKUP=1 to bypass.');
