@@ -1,19 +1,45 @@
 import { ASSET_CATEGORY_COLORS, getAssetCategoryLabel } from '@constants/assets';
 import { TrendingUp, Wallet } from 'lucide-react';
 
-import type { AssetCategory } from '@types';
+import type { Asset, AssetCategory } from '@types';
 
-import Money from '@components/Money';
-
-import { PIVOT_CURRENCY } from '@/constants/currencies';
+import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
+import type { MoneyItem } from '@features/ExchangeRate/CurrencyProvider';
 
 import type { AssetsSummaryProps } from '../../@types';
 import { CATEGORY_ICONS } from '../../constants';
 
 const CATEGORY_COLORS = ASSET_CATEGORY_COLORS as Record<AssetCategory, string>;
 
-const AssetsSummary = ({ totalValue, assetsByCategory }: AssetsSummaryProps) => {
-  const totalAssetCount = Object.values(assetsByCategory).reduce((sum, data) => sum + data.assets.length, 0);
+// Each asset converted at its OWN valuation date — historically accurate & stable.
+const toItem = (a: Asset): MoneyItem => ({
+  amount: a.amount,
+  currency: a.currency,
+  date: a.lastValuedAt?.slice(0, 10),
+});
+
+const AssetsSummary = ({ assetsByCategory }: AssetsSummaryProps) => {
+  const { primaryCurrency, secondaryCurrency, sumTo, format } = useCurrency();
+  const showSecondary = !!secondaryCurrency && secondaryCurrency !== primaryCurrency;
+
+  const allAssets = Object.values(assetsByCategory).flatMap((d) => d.assets);
+  const totalAssetCount = allAssets.length;
+
+  const pair = (assets: Asset[]) => {
+    const items = assets.map(toItem);
+    return {
+      p: sumTo(items, primaryCurrency),
+      s: showSecondary ? sumTo(items, secondaryCurrency || primaryCurrency) : 0,
+    };
+  };
+  const net = pair(allAssets);
+
+  const renderPair = (p: number, s: number) => (
+    <>
+      <p className="text-text-primary text-2xl font-semibold tabular-nums">{format(p, primaryCurrency)}</p>
+      {showSecondary && secondaryCurrency && <p className="text-text-muted text-xs">{format(s, secondaryCurrency)}</p>}
+    </>
+  );
 
   return (
     <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
@@ -25,12 +51,7 @@ const AssetsSummary = ({ totalValue, assetsByCategory }: AssetsSummaryProps) => 
           </div>
         </div>
         <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Net Worth</p>
-        <Money
-          amount={totalValue}
-          currency={PIVOT_CURRENCY}
-          primaryClassName="text-text-primary text-2xl font-semibold tabular-nums"
-          secondaryClassName="text-text-muted text-xs"
-        />
+        {renderPair(net.p, net.s)}
         <p className="text-text-secondary mt-1.5 text-sm font-medium">
           {totalAssetCount} asset{totalAssetCount !== 1 ? 's' : ''}
         </p>
@@ -43,6 +64,7 @@ const AssetsSummary = ({ totalValue, assetsByCategory }: AssetsSummaryProps) => 
           const Icon = CATEGORY_ICONS[category as AssetCategory] || Wallet;
           const labels = getAssetCategoryLabel(category);
           const color = CATEGORY_COLORS[category as AssetCategory] || '#525252';
+          const cat = pair(data.assets);
 
           return (
             <div
@@ -55,12 +77,7 @@ const AssetsSummary = ({ totalValue, assetsByCategory }: AssetsSummaryProps) => 
                 </div>
               </div>
               <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{labels.en}</p>
-              <Money
-                amount={data.total}
-                currency={PIVOT_CURRENCY}
-                primaryClassName="text-text-primary text-2xl font-semibold tabular-nums"
-                secondaryClassName="text-text-muted text-xs"
-              />
+              {renderPair(cat.p, cat.s)}
               <p className="text-text-secondary mt-1.5 text-sm font-medium">
                 {data.assets.length} asset{data.assets.length !== 1 ? 's' : ''}
               </p>
