@@ -18,29 +18,38 @@ interface StatCardProps {
   primaryCurrency: string;
   secondaryCurrency: string | null;
   format: (value: number, currency: string, opts?: { compact?: boolean }) => string;
+  formatFull: (value: number, currency: string) => string;
 }
 
-const StatCard: FC<StatCardProps> = ({ label, icon, pair, primaryCurrency, secondaryCurrency, format }) => (
-  <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
-    <div className="mb-4 flex items-center justify-between">
-      <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">{icon}</div>
+const StatCard: FC<StatCardProps> = ({ label, icon, pair, primaryCurrency, secondaryCurrency, format, formatFull }) => {
+  const p = pair?.primary ?? 0;
+  const s = pair?.secondary ?? 0;
+  return (
+    <div className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">{icon}</div>
+      </div>
+      <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{label}</p>
+      <p className={primaryClass} title={formatFull(p, primaryCurrency)}>
+        {format(p, primaryCurrency, { compact: true })}
+      </p>
+      {secondaryCurrency && (
+        <p className={secondaryClass} title={formatFull(s, secondaryCurrency)}>
+          {format(s, secondaryCurrency, { compact: true })}
+        </p>
+      )}
     </div>
-    <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{label}</p>
-    <p className={primaryClass}>{format(pair?.primary ?? 0, primaryCurrency, { compact: true })}</p>
-    {secondaryCurrency && (
-      <p className={secondaryClass}>{format(pair?.secondary ?? 0, secondaryCurrency, { compact: true })}</p>
-    )}
-  </div>
-);
+  );
+};
 
 const OverviewStats = ({ summary }: OverviewStatsProps) => {
-  const { format, primaryCurrency: ctxPrimary, secondaryCurrency: ctxSecondary } = useCurrency();
+  const { format, formatFull, primaryCurrency: ctxPrimary, secondaryCurrency: ctxSecondary } = useCurrency();
 
   // Totals arrive already converted (per-record, historical). Fall back to the
   // context currencies while the summary is still loading.
   const primaryCurrency = summary?.primaryCurrency ?? ctxPrimary;
   const secondaryCurrency = summary?.secondaryCurrency ?? ctxSecondary;
-  const shared = { primaryCurrency, secondaryCurrency, format };
+  const shared = { primaryCurrency, secondaryCurrency, format, formatFull };
 
   return (
     <>

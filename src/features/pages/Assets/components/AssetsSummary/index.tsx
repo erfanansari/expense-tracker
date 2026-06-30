@@ -19,7 +19,7 @@ const toItem = (a: Asset): MoneyItem => ({
 });
 
 const AssetsSummary = ({ assetsByCategory }: AssetsSummaryProps) => {
-  const { primaryCurrency, secondaryCurrency, sumTo, format } = useCurrency();
+  const { primaryCurrency, secondaryCurrency, sumTo, format, formatFull } = useCurrency();
   const showSecondary = !!secondaryCurrency && secondaryCurrency !== primaryCurrency;
 
   const allAssets = Object.values(assetsByCategory).flatMap((d) => d.assets);
@@ -36,11 +36,13 @@ const AssetsSummary = ({ assetsByCategory }: AssetsSummaryProps) => {
 
   const renderPair = (p: number, s: number) => (
     <>
-      <p className="text-text-primary text-2xl font-semibold tabular-nums">
+      <p className="text-text-primary text-2xl font-semibold tabular-nums" title={formatFull(p, primaryCurrency)}>
         {format(p, primaryCurrency, { compact: true })}
       </p>
       {showSecondary && secondaryCurrency && (
-        <p className="text-text-muted text-xs">{format(s, secondaryCurrency, { compact: true })}</p>
+        <p className="text-text-muted text-xs" title={formatFull(s, secondaryCurrency)}>
+          {format(s, secondaryCurrency, { compact: true })}
+        </p>
       )}
     </>
   );
