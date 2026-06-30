@@ -5,14 +5,18 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PIVOT_CURRENCY } from '@/constants/currencies';
 import { queryKeys } from '@/lib/query-keys';
 
+export type NumberFormat = 'auto' | 'compact' | 'full';
+
 export interface CurrencyPreferencesPayload {
   primaryCurrency: string;
   secondaryCurrency: string | null;
+  numberFormat: NumberFormat;
 }
 
 const DEFAULTS: CurrencyPreferencesPayload = {
   primaryCurrency: PIVOT_CURRENCY,
   secondaryCurrency: 'USD',
+  numberFormat: 'auto',
 };
 
 async function fetchCurrencyPreferences(): Promise<CurrencyPreferencesPayload> {

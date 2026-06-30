@@ -14,8 +14,9 @@ const updateSchema = z
     primaryCurrency: currencyCode.optional(),
     // null = disable secondary display.
     secondaryCurrency: currencyCode.nullable().optional(),
+    numberFormat: z.enum(['auto', 'compact', 'full']).optional(),
   })
-  .refine((v) => v.primaryCurrency !== undefined || v.secondaryCurrency !== undefined, {
+  .refine((v) => v.primaryCurrency !== undefined || v.secondaryCurrency !== undefined || v.numberFormat !== undefined, {
     message: 'Provide at least one field to update.',
   });
 
@@ -39,6 +40,7 @@ export const PUT = withAuth(async (user, request) => {
   const prefs = await updateCurrencyPreferences(user.userId, {
     primaryCurrency: nextPrimary,
     secondaryCurrency: nextSecondary,
+    ...(parsed.data.numberFormat !== undefined ? { numberFormat: parsed.data.numberFormat } : {}),
   });
   return NextResponse.json(prefs);
 }, 'CurrencyPUT');

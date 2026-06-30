@@ -55,7 +55,7 @@ const AssetsDistribution = ({ chartData, totalValue }: AssetsDistributionProps) 
               <div className="min-w-0">
                 <p className="text-text-secondary truncate text-sm">{entry.name}</p>
                 <p className="text-text-muted text-xs tabular-nums">
-                  {pct.toFixed(1)}% · {display(entry.value, PIVOT_CURRENCY).primary}
+                  {pct.toFixed(1)}% · {display(entry.value, PIVOT_CURRENCY, undefined, { compact: true }).primary}
                 </p>
               </div>
             </div>

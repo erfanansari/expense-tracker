@@ -48,7 +48,7 @@ function SpendingTooltip({
   // Convert at the bucket's own date (monthly keys are YYYY-MM → use mid-month).
   const bucketDate = payload[0].payload?.date;
   const convDate = bucketDate && bucketDate.length === 7 ? `${bucketDate}-15` : bucketDate;
-  const { primary, secondary } = display(numericValue, PIVOT_CURRENCY, convDate);
+  const { primary, secondary } = display(numericValue, PIVOT_CURRENCY, convDate, { compact: true });
   return (
     <ChartTooltip
       primary={primary}

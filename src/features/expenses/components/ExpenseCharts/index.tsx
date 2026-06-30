@@ -72,7 +72,7 @@ const AreaTooltip = ({
   // Convert at the bucket's own date (monthly keys are YYYY-MM → use mid-month).
   const bucket = label != null ? String(label) : undefined;
   const convDate = bucket && bucket.length === 7 ? `${bucket}-15` : bucket;
-  const { primary, secondary } = display(numericValue, PIVOT_CURRENCY, convDate);
+  const { primary, secondary } = display(numericValue, PIVOT_CURRENCY, convDate, { compact: true });
   return (
     <ChartTooltip
       primary={primary}
@@ -112,9 +112,11 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
       name: c.name,
       color: c.color,
       value: c.value,
-      primaryStr: fmtMoney(sumTo(c.items, primaryCurrency), primaryCurrency),
+      primaryStr: fmtMoney(sumTo(c.items, primaryCurrency), primaryCurrency, { compact: true }),
       secondaryStr: showSecondary
-        ? fmtMoney(sumTo(c.items, secondaryCurrency || primaryCurrency), secondaryCurrency || primaryCurrency)
+        ? fmtMoney(sumTo(c.items, secondaryCurrency || primaryCurrency), secondaryCurrency || primaryCurrency, {
+            compact: true,
+          })
         : undefined,
     }))
     .sort((a, b) => b.value - a.value);

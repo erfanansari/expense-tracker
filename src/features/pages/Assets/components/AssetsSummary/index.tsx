@@ -36,8 +36,12 @@ const AssetsSummary = ({ assetsByCategory }: AssetsSummaryProps) => {
 
   const renderPair = (p: number, s: number) => (
     <>
-      <p className="text-text-primary text-2xl font-semibold tabular-nums">{format(p, primaryCurrency)}</p>
-      {showSecondary && secondaryCurrency && <p className="text-text-muted text-xs">{format(s, secondaryCurrency)}</p>}
+      <p className="text-text-primary text-2xl font-semibold tabular-nums">
+        {format(p, primaryCurrency, { compact: true })}
+      </p>
+      {showSecondary && secondaryCurrency && (
+        <p className="text-text-muted text-xs">{format(s, secondaryCurrency, { compact: true })}</p>
+      )}
     </>
   );
 

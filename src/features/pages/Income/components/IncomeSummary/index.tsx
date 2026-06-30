@@ -53,8 +53,10 @@ const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
 
   const renderPair = (p: number, s: number, primaryClass: string) => (
     <>
-      <p className={primaryClass}>{format(p, primaryCurrency)}</p>
-      {showSecondary && secondaryCurrency && <p className="text-text-muted text-xs">{format(s, secondaryCurrency)}</p>}
+      <p className={primaryClass}>{format(p, primaryCurrency, { compact: true })}</p>
+      {showSecondary && secondaryCurrency && (
+        <p className="text-text-muted text-xs">{format(s, secondaryCurrency, { compact: true })}</p>
+      )}
     </>
   );
 

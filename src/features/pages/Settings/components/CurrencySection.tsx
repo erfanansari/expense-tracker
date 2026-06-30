@@ -5,12 +5,19 @@ import { Coins } from 'lucide-react';
 import Select from '@components/Select';
 
 import { useCurrencyPreferences } from '@hooks/use-currency-preferences';
+import type { NumberFormat } from '@hooks/use-currency-preferences';
 
 import { CURRENCIES } from '@/constants/currencies';
 
 const SECONDARY_DISABLED = 'none';
 
 const CURRENCY_OPTIONS = CURRENCIES.map((c) => ({ value: c.code, label: `${c.code} (${c.label})` }));
+
+const NUMBER_FORMAT_OPTIONS = [
+  { value: 'auto', label: 'Auto (recommended)' },
+  { value: 'compact', label: 'Compact (10.69B)' },
+  { value: 'full', label: 'Full (10,694,654,000)' },
+];
 
 const CurrencySection = () => {
   const { prefs, isLoading, mutate, isMutating } = useCurrencyPreferences();
@@ -30,6 +37,10 @@ const CurrencySection = () => {
 
   const handleSecondaryChange = (value: string) => {
     mutate({ secondaryCurrency: value === SECONDARY_DISABLED ? null : value });
+  };
+
+  const handleNumberFormatChange = (value: string) => {
+    mutate({ numberFormat: value as NumberFormat });
   };
 
   return (
@@ -70,6 +81,19 @@ const CurrencySection = () => {
             />
             <p className="text-text-muted mt-1.5 text-xs">
               A muted caption beneath the primary. Choose “Disabled” to hide it.
+            </p>
+          </div>
+
+          <div>
+            <label className="text-text-secondary mb-1.5 block text-sm font-medium">Number format</label>
+            <Select
+              value={prefs.numberFormat}
+              onChange={handleNumberFormatChange}
+              options={NUMBER_FORMAT_OPTIONS}
+              disabled={isLoading || isMutating}
+            />
+            <p className="text-text-muted mt-1.5 text-xs">
+              Auto abbreviates big numbers on cards & charts; tables stay full. Hover any value for the exact amount.
             </p>
           </div>
         </div>

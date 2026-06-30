@@ -5,10 +5,17 @@ import type { FC, PropsWithChildren } from 'react';
 
 import { useAuth } from '@hooks/use-auth';
 import { useCurrencyPreferences } from '@hooks/use-currency-preferences';
+import type { NumberFormat } from '@hooks/use-currency-preferences';
 import { useRates } from '@hooks/use-rates';
 
 import { convert, formatMoney } from './utils/currency';
 import type { RatesSeries } from './utils/currency';
+
+/** Options for money formatting/conversion helpers. */
+interface FormatOpts {
+  /** Request compact (10.69B) — only honored when numberFormat is 'auto'. */
+  compact?: boolean;
+}
 
 export interface MoneyDisplay {
   primary: string;
@@ -26,14 +33,17 @@ export interface MoneyItem {
 interface CurrencyContextValue {
   primaryCurrency: string;
   secondaryCurrency: string | null;
+  numberFormat: NumberFormat;
   series: RatesSeries;
   isLoading: boolean;
   /** Convert a stored amount/currency into primary + optional secondary strings. */
-  display: (amount: number, currency: string, date?: string) => MoneyDisplay;
+  display: (amount: number, currency: string, date?: string, opts?: FormatOpts) => MoneyDisplay;
   /** Convert one amount between currencies at a given date (null if no rate). */
   convert: (amount: number, from: string, to: string, date?: string) => number | null;
-  /** Format a numeric value in a currency (symbol + locale). */
-  format: (value: number, currency: string) => string;
+  /** Format a numeric value in a currency, honoring the user's numberFormat. */
+  format: (value: number, currency: string, opts?: FormatOpts) => string;
+  /** Always-full formatting (ignores numberFormat) — for hover/exact display. */
+  formatFull: (value: number, currency: string) => string;
   /**
    * Sum a list of money items into a target currency, converting EACH item at
    * its own date (historically accurate; stable over time). Unconvertible items
@@ -42,7 +52,7 @@ interface CurrencyContextValue {
    */
   sumTo: (items: MoneyItem[], to: string) => number;
   /** Sum items into primary + optional secondary, formatted for display. */
-  sumDisplay: (items: MoneyItem[]) => MoneyDisplay;
+  sumDisplay: (items: MoneyItem[], opts?: FormatOpts) => MoneyDisplay;
 }
 
 const CurrencyContext = createContext<CurrencyContextValue | null>(null);
@@ -60,24 +70,36 @@ export const CurrencyProvider: FC<PropsWithChildren> = ({ children }) => {
     const series = ratesData?.series ?? {};
     const primaryCurrency = prefs.primaryCurrency;
     const secondaryCurrency = prefs.secondaryCurrency;
+    const numberFormat = prefs.numberFormat;
 
     // For undated values (aggregates/current balances) convert at today's rate —
     // carry-forward ignores any future-dated rows.
     const todayStr = new Date().toISOString().split('T')[0];
 
+    // 'compact'/'full' apply everywhere; 'auto' compacts only where a caller asks
+    // (cards & charts) and stays full elsewhere (tables, lists).
+    const isCompact = (opts?: FormatOpts): boolean => {
+      if (numberFormat === 'compact') return true;
+      if (numberFormat === 'full') return false;
+      return opts?.compact ?? false; // 'auto'
+    };
+
     const boundConvert = (amount: number, from: string, to: string, date?: string): number | null =>
       convert(amount, from, to, series, date ?? todayStr);
 
-    const display = (amount: number, currency: string, date?: string): MoneyDisplay => {
+    const fmt = (value: number, currency: string, opts?: FormatOpts): string =>
+      formatMoney(value, currency, { compact: isCompact(opts) });
+
+    const display = (amount: number, currency: string, date?: string, opts?: FormatOpts): MoneyDisplay => {
       const primaryValue = boundConvert(amount, currency, primaryCurrency, date);
-      const primary = primaryValue === null ? '—' : formatMoney(primaryValue, primaryCurrency);
+      const primary = primaryValue === null ? '—' : fmt(primaryValue, primaryCurrency, opts);
 
       // Secondary only renders when set AND different from primary.
       if (!secondaryCurrency || secondaryCurrency === primaryCurrency) {
         return { primary, secondary: null };
       }
       const secondaryValue = boundConvert(amount, currency, secondaryCurrency, date);
-      const secondary = secondaryValue === null ? '—' : formatMoney(secondaryValue, secondaryCurrency);
+      const secondary = secondaryValue === null ? '—' : fmt(secondaryValue, secondaryCurrency, opts);
       return { primary, secondary };
     };
 
@@ -91,24 +113,33 @@ export const CurrencyProvider: FC<PropsWithChildren> = ({ children }) => {
       return total;
     };
 
-    const sumDisplay = (items: MoneyItem[]): MoneyDisplay => {
-      const primary = formatMoney(sumTo(items, primaryCurrency), primaryCurrency);
+    const sumDisplay = (items: MoneyItem[], opts?: FormatOpts): MoneyDisplay => {
+      const primary = fmt(sumTo(items, primaryCurrency), primaryCurrency, opts);
       if (!secondaryCurrency || secondaryCurrency === primaryCurrency) return { primary, secondary: null };
-      return { primary, secondary: formatMoney(sumTo(items, secondaryCurrency), secondaryCurrency) };
+      return { primary, secondary: fmt(sumTo(items, secondaryCurrency), secondaryCurrency, opts) };
     };
 
     return {
       primaryCurrency,
       secondaryCurrency,
+      numberFormat,
       series,
       isLoading: prefsLoading || ratesLoading,
       display,
       convert: boundConvert,
-      format: formatMoney,
+      format: fmt,
+      formatFull: (value: number, currency: string) => formatMoney(value, currency),
       sumTo,
       sumDisplay,
     };
-  }, [prefs.primaryCurrency, prefs.secondaryCurrency, ratesData?.series, prefsLoading, ratesLoading]);
+  }, [
+    prefs.primaryCurrency,
+    prefs.secondaryCurrency,
+    prefs.numberFormat,
+    ratesData?.series,
+    prefsLoading,
+    ratesLoading,
+  ]);
 
   return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;
 };

@@ -44,11 +44,11 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
         <div>
           <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Expenses</p>
           <p className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl">
-            {format(totalPrimary, primaryCurrency)}
+            {format(totalPrimary, primaryCurrency, { compact: true })}
           </p>
           {showSecondary && (
             <p className="text-text-secondary mt-1.5 text-sm font-medium">
-              {format(totalSecondary, secondaryCurrency)}
+              {format(totalSecondary, secondaryCurrency, { compact: true })}
             </p>
           )}
         </div>
@@ -80,11 +80,11 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
         <div>
           <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Daily Average</p>
           <p className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl">
-            {format(totalPrimary / div, primaryCurrency)}
+            {format(totalPrimary / div, primaryCurrency, { compact: true })}
           </p>
           {showSecondary && (
             <p className="text-text-secondary mt-1.5 text-sm font-medium">
-              {format(totalSecondary / div, secondaryCurrency)}
+              {format(totalSecondary / div, secondaryCurrency, { compact: true })}
             </p>
           )}
         </div>

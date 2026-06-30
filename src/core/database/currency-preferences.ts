@@ -6,30 +6,35 @@ import { db } from './client';
 
 type Executor = Pick<Client, 'execute'>;
 
+export type NumberFormat = 'auto' | 'compact' | 'full';
+
 export interface CurrencyPreferences {
   primaryCurrency: string;
   /** null = secondary display disabled. */
   secondaryCurrency: string | null;
+  /** auto = compact on cards/charts, full in tables; compact/full = everywhere. */
+  numberFormat: NumberFormat;
 }
 
 const DEFAULTS: CurrencyPreferences = {
   primaryCurrency: PIVOT_CURRENCY, // IRT
   secondaryCurrency: 'USD',
+  numberFormat: 'auto',
 };
 
 /** Insert default currency preferences for a new user (idempotent). */
 export async function createDefaultCurrencyPreferences(userId: number, executor: Executor = db): Promise<void> {
   await executor.execute({
-    sql: `INSERT OR IGNORE INTO userCurrencyPreferences (userId, primaryCurrency, secondaryCurrency)
-          VALUES (?, ?, ?)`,
-    args: [userId, DEFAULTS.primaryCurrency, DEFAULTS.secondaryCurrency],
+    sql: `INSERT OR IGNORE INTO userCurrencyPreferences (userId, primaryCurrency, secondaryCurrency, numberFormat)
+          VALUES (?, ?, ?, ?)`,
+    args: [userId, DEFAULTS.primaryCurrency, DEFAULTS.secondaryCurrency, DEFAULTS.numberFormat],
   });
 }
 
 /** Fetch a user's currency preferences, lazy-creating the row if missing. */
 export async function getCurrencyPreferences(userId: number): Promise<CurrencyPreferences> {
   const existing = await db.execute({
-    sql: `SELECT primaryCurrency, secondaryCurrency FROM userCurrencyPreferences WHERE userId = ?`,
+    sql: `SELECT primaryCurrency, secondaryCurrency, numberFormat FROM userCurrencyPreferences WHERE userId = ?`,
     args: [userId],
   });
 
@@ -42,6 +47,7 @@ export async function getCurrencyPreferences(userId: number): Promise<CurrencyPr
   return {
     primaryCurrency: row.primaryCurrency as string,
     secondaryCurrency: (row.secondaryCurrency as string | null) ?? null,
+    numberFormat: ((row.numberFormat as string | null) ?? DEFAULTS.numberFormat) as NumberFormat,
   };
 }
 
@@ -59,6 +65,10 @@ export async function updateCurrencyPreferences(
   if (patch.secondaryCurrency !== undefined) {
     fields.push('secondaryCurrency = ?');
     args.push(patch.secondaryCurrency);
+  }
+  if (typeof patch.numberFormat === 'string') {
+    fields.push('numberFormat = ?');
+    args.push(patch.numberFormat);
   }
 
   if (fields.length > 0) {
