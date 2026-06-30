@@ -16,7 +16,7 @@ const toItem = (inc: Income): MoneyItem => ({
 });
 
 const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
-  const { primaryCurrency, secondaryCurrency, sumTo, format } = useCurrency();
+  const { primaryCurrency, secondaryCurrency, sumTo, format, formatFull } = useCurrency();
   const showSecondary = !!secondaryCurrency && secondaryCurrency !== primaryCurrency;
 
   const currentYear = new Date().getFullYear();
@@ -53,9 +53,13 @@ const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
 
   const renderPair = (p: number, s: number, primaryClass: string) => (
     <>
-      <p className={primaryClass}>{format(p, primaryCurrency, { compact: true })}</p>
+      <p className={primaryClass} title={formatFull(p, primaryCurrency)}>
+        {format(p, primaryCurrency, { compact: true })}
+      </p>
       {showSecondary && secondaryCurrency && (
-        <p className="text-text-muted text-xs">{format(s, secondaryCurrency, { compact: true })}</p>
+        <p className="text-text-muted text-xs" title={formatFull(s, secondaryCurrency)}>
+          {format(s, secondaryCurrency, { compact: true })}
+        </p>
       )}
     </>
   );

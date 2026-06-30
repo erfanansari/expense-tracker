@@ -11,7 +11,7 @@ interface ExpenseStatsProps {
 }
 
 const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
-  const { primaryCurrency, secondaryCurrency, sumTo, format } = useCurrency();
+  const { primaryCurrency, secondaryCurrency, sumTo, format, formatFull } = useCurrency();
 
   // Sum each expense converted at ITS OWN date — historically accurate & stable.
   const items = expenses.map((e) => ({ amount: e.amount, currency: e.currency, date: e.date }));
@@ -43,11 +43,17 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
 
         <div>
           <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Expenses</p>
-          <p className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl">
+          <p
+            className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl"
+            title={formatFull(totalPrimary, primaryCurrency)}
+          >
             {format(totalPrimary, primaryCurrency, { compact: true })}
           </p>
           {showSecondary && (
-            <p className="text-text-secondary mt-1.5 text-sm font-medium">
+            <p
+              className="text-text-secondary mt-1.5 text-sm font-medium"
+              title={formatFull(totalSecondary, secondaryCurrency)}
+            >
               {format(totalSecondary, secondaryCurrency, { compact: true })}
             </p>
           )}
@@ -79,11 +85,17 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
 
         <div>
           <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Daily Average</p>
-          <p className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl">
+          <p
+            className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl"
+            title={formatFull(totalPrimary / div, primaryCurrency)}
+          >
             {format(totalPrimary / div, primaryCurrency, { compact: true })}
           </p>
           {showSecondary && (
-            <p className="text-text-secondary mt-1.5 text-sm font-medium">
+            <p
+              className="text-text-secondary mt-1.5 text-sm font-medium"
+              title={formatFull(totalSecondary / div, secondaryCurrency)}
+            >
               {format(totalSecondary / div, secondaryCurrency, { compact: true })}
             </p>
           )}
