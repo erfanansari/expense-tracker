@@ -46,7 +46,7 @@ function NetWorthTooltip({
   if (!active || !payload?.length) return null;
   const point = payload[0].payload;
   // Convert at the point's own date so the secondary is historically accurate & stable.
-  const { primary, secondary } = display(point.value, PIVOT_CURRENCY, point.date);
+  const { primary, secondary } = display(point.value, PIVOT_CURRENCY, point.date, { compact: true });
   return (
     <ChartTooltip
       primary={primary}
@@ -76,7 +76,7 @@ function DeltaBadge({ data }: { data: Array<{ value: number }> }) {
   return (
     <span className={`text-sm font-medium ${color}`}>
       {sign}
-      {display(Math.abs(deltaPivot), PIVOT_CURRENCY).primary} ({sign}
+      {display(Math.abs(deltaPivot), PIVOT_CURRENCY, undefined, { compact: true }).primary} ({sign}
       {deltaPercent.toFixed(1)}%)
     </span>
   );

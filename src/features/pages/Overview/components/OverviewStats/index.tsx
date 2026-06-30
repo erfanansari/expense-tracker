@@ -17,7 +17,7 @@ interface StatCardProps {
   pair?: SummaryPair;
   primaryCurrency: string;
   secondaryCurrency: string | null;
-  format: (value: number, currency: string) => string;
+  format: (value: number, currency: string, opts?: { compact?: boolean }) => string;
 }
 
 const StatCard: FC<StatCardProps> = ({ label, icon, pair, primaryCurrency, secondaryCurrency, format }) => (
@@ -26,8 +26,10 @@ const StatCard: FC<StatCardProps> = ({ label, icon, pair, primaryCurrency, secon
       <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">{icon}</div>
     </div>
     <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{label}</p>
-    <p className={primaryClass}>{format(pair?.primary ?? 0, primaryCurrency)}</p>
-    {secondaryCurrency && <p className={secondaryClass}>{format(pair?.secondary ?? 0, secondaryCurrency)}</p>}
+    <p className={primaryClass}>{format(pair?.primary ?? 0, primaryCurrency, { compact: true })}</p>
+    {secondaryCurrency && (
+      <p className={secondaryClass}>{format(pair?.secondary ?? 0, secondaryCurrency, { compact: true })}</p>
+    )}
   </div>
 );
 

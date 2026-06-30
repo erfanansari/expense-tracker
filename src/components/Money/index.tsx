@@ -36,12 +36,21 @@ const Money: FC<MoneyProps> = ({
   secondaryClassName = 'text-text-muted text-xs',
   inline = false,
 }) => {
-  const { display } = useCurrency();
+  const { display, convert, formatFull, primaryCurrency, secondaryCurrency } = useCurrency();
   const { primary, secondary } = display(amount, currency, date);
+
+  // Always expose the exact full value on hover, even when shown compact.
+  const pNum = convert(amount, currency, primaryCurrency, date);
+  const parts = pNum === null ? [] : [formatFull(pNum, primaryCurrency)];
+  if (secondary && secondaryCurrency && secondaryCurrency !== primaryCurrency) {
+    const sNum = convert(amount, currency, secondaryCurrency, date);
+    if (sNum !== null) parts.push(formatFull(sNum, secondaryCurrency));
+  }
+  const title = parts.join(' · ') || undefined;
 
   if (inline) {
     return (
-      <span className={className}>
+      <span className={className} title={title}>
         <span className={primaryClassName}>{primary}</span>
         {secondary && <span className={`ml-1.5 ${secondaryClassName}`}>{secondary}</span>}
       </span>
@@ -49,7 +58,7 @@ const Money: FC<MoneyProps> = ({
   }
 
   return (
-    <span className={`flex flex-col ${className}`}>
+    <span className={`flex flex-col ${className}`} title={title}>
       <span className={primaryClassName}>{primary}</span>
       {secondary && <span className={secondaryClassName}>{secondary}</span>}
     </span>

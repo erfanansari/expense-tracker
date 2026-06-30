@@ -63,13 +63,23 @@ export function seriesFromLatest(latest: LatestRates, rateDate = ''): RatesSerie
   return series;
 }
 
-/** Format an amount in a currency: localized number + symbol in the right place. */
-export function formatMoney(amount: number, currencyCode: string): string {
+/**
+ * Format an amount in a currency: localized number + symbol in the right place.
+ * `compact` abbreviates large values (10.69B, $61.33K) for space-tight spots
+ * like dashboard cards and charts; default is full precision with separators.
+ */
+export function formatMoney(amount: number, currencyCode: string, opts?: { compact?: boolean }): string {
   const def = getCurrency(currencyCode);
-  const number = new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: def.decimals,
-  }).format(amount);
+  const number = opts?.compact
+    ? new Intl.NumberFormat('en-US', {
+        notation: 'compact',
+        compactDisplay: 'short',
+        maximumFractionDigits: 2,
+      }).format(amount)
+    : new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: def.decimals,
+      }).format(amount);
 
   return def.symbolPosition === 'prefix' ? `${def.symbol}${number}` : `${number} ${def.symbol}`;
 }
