@@ -3,7 +3,6 @@
 import { useState } from 'react';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
@@ -17,7 +16,6 @@ import { queryKeys } from '@/lib/query-keys';
 
 const Login = () => {
   // Customs
-  const router = useRouter();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
@@ -31,9 +29,10 @@ const Login = () => {
   const loginMutation = useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) => login(email, password),
     onSuccess: (user) => {
+      // Setting the `me` query data is enough — GuestGuard sees the user and
+      // redirects (honoring ?rp=). Pushing /overview here too would race it.
       queryClient.setQueryData(queryKeys.auth.me(), user);
       showToast(`Welcome back${user.name ? `, ${user.name}` : ''}!`, 'success');
-      router.push('/overview');
     },
     onError: (err: Error) => {
       setError(err.message || 'Login failed');

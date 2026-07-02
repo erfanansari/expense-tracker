@@ -3,7 +3,6 @@
 import { useState } from 'react';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
@@ -23,7 +22,6 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [error, setError] = useState('');
-  const router = useRouter();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
@@ -41,9 +39,10 @@ const Signup = () => {
       passwordConfirm: string;
     }) => signup(name, email, password, passwordConfirm),
     onSuccess: (user) => {
+      // Setting the `me` query data is enough — GuestGuard sees the user and
+      // redirects (honoring ?rp=). Pushing /overview here too would race it.
       queryClient.setQueryData(queryKeys.auth.me(), user);
       showToast('Account created. Welcome to Kharji!', 'success');
-      router.push('/overview');
     },
     onError: (err: Error) => {
       setError(err.message || 'Signup failed');

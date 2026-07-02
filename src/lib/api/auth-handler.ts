@@ -11,20 +11,17 @@ export function triggerUnauthorized() {
 }
 
 /**
- * One-shot suppression flag for the AuthGuard / UnauthorizedListener toast.
- * Set by intentional flows (manual logout) so the guard doesn't also yell
- * "you've been signed out" on top of the action's own success toast.
+ * Global one-shot latch for signout transitions. Several paths can detect a
+ * dead session at the same time (manual logout, a 401 from any API call, the
+ * `me` query resolving to null) — whichever calls beginSignout() first owns
+ * the toast and the redirect, and everyone else stands down. The latch never
+ * needs resetting: every signout path ends in a hard navigation, which
+ * reloads the JS and clears module state.
  */
-let suppressNext = false;
+let signoutInProgress = false;
 
-export function suppressNextSignoutToast() {
-  suppressNext = true;
-}
-
-export function consumeSignoutToastSuppression(): boolean {
-  if (suppressNext) {
-    suppressNext = false;
-    return true;
-  }
-  return false;
+export function beginSignout(): boolean {
+  if (signoutInProgress) return false;
+  signoutInProgress = true;
+  return true;
 }
