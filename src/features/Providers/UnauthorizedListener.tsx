@@ -4,20 +4,15 @@ import { useEffect, useRef } from 'react';
 
 import { usePathname } from 'next/navigation';
 
-import { useQueryClient } from '@tanstack/react-query';
-
 import { useToast } from '@components/Toast/ToastProvider';
 
-import { setUnauthorizedHandler } from '@/lib/api/auth-handler';
-import { queryKeys } from '@/lib/query-keys';
+import { beginSignout, setUnauthorizedHandler } from '@/lib/api/auth-handler';
 
 const UnauthorizedListener = () => {
   const pathname = usePathname();
   const { showToast } = useToast();
-  const queryClient = useQueryClient();
 
   const pathRef = useRef(pathname);
-  const firedRef = useRef(false);
 
   useEffect(() => {
     pathRef.current = pathname;
@@ -25,11 +20,11 @@ const UnauthorizedListener = () => {
 
   useEffect(() => {
     setUnauthorizedHandler(async () => {
-      if (firedRef.current) return;
-      firedRef.current = true;
+      if (!beginSignout()) return;
 
-      queryClient.setQueryData(queryKeys.auth.me(), null);
-      queryClient.clear();
+      // Deliberately leave the query cache alone: the stale page staying
+      // visible under the toast beats blanking to white, and the hard
+      // navigation below wipes all in-memory state anyway.
 
       // Clear the (now-invalid) cookie BEFORE navigating so the proxy doesn't
       // bounce /login back to /overview. Await it so the browser actually
@@ -47,7 +42,7 @@ const UnauthorizedListener = () => {
       // and clears any client-router state from the (now-invalid) session.
       window.location.href = '/login';
     });
-  }, [queryClient, showToast]);
+  }, [showToast]);
 
   return null;
 };

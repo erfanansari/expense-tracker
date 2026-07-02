@@ -8,7 +8,7 @@ import { useToast } from '@components/Toast/ToastProvider';
 
 import { fetchMe, logout as logoutApi } from '@/lib/api/auth';
 import type { AuthUser } from '@/lib/api/auth';
-import { suppressNextSignoutToast } from '@/lib/api/auth-handler';
+import { beginSignout } from '@/lib/api/auth-handler';
 import { queryKeys } from '@/lib/query-keys';
 
 export function useAuth() {
@@ -30,21 +30,23 @@ export function useAuth() {
 
   // Callbacks
   const logout = useCallback(async () => {
+    // Own the signout so AuthGuard / the 401 listener don't stack a second
+    // toast or redirect on top of this one.
+    beginSignout();
     try {
       await logoutApi();
-      // Intentional signout — don't let AuthGuard fire its "signed out" toast
-      // on top of our success toast.
-      suppressNextSignoutToast();
-      queryClient.clear();
-      showToast('Signed out. See you next time!', 'info');
-      // Hard navigation rather than router.push: guarantees a fresh request
-      // so the proxy re-evaluates the (now-deleted) cookie server-side and
-      // there's no client-side router state left to confuse the next page.
-      window.location.href = '/login';
     } catch {
-      // ignore logout errors
+      // Even if the request fails, still redirect — /login is the safest
+      // state either way, and the proxy will bounce us back if the cookie
+      // somehow survived.
     }
-  }, [queryClient, showToast]);
+    showToast('Signed out. See you next time!', 'info');
+    // Hard navigation rather than router.push: guarantees a fresh request so
+    // the proxy re-evaluates the (now-deleted) cookie server-side, and the
+    // full page load wipes all in-memory state (including the query cache) —
+    // no need to clear it here, which would only flash a refetch loader.
+    window.location.href = '/login';
+  }, [showToast]);
 
   const updateUser = useCallback(
     (updates: Partial<AuthUser>) => {

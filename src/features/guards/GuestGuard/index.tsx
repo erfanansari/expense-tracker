@@ -13,6 +13,8 @@ const GuestGuard: FC<PropsWithChildren> = ({ children }) => {
   const { user, loading } = useAuth();
   const router = useRouter();
 
+  // Single owner of the post-auth redirect: login/signup just set the `me`
+  // query data and this effect navigates, honoring the ?rp= return path.
   useEffect(() => {
     if (loading || !user) return;
     const rp = new URLSearchParams(window.location.search).get('rp');
@@ -21,7 +23,9 @@ const GuestGuard: FC<PropsWithChildren> = ({ children }) => {
 
   if (loading) return <FullPageLoader />;
 
-  if (user) return null;
+  // Authenticated: keep the loader up while the redirect above runs —
+  // returning null flashes a bare white page between login and /overview.
+  if (user) return <FullPageLoader />;
 
   return <>{children}</>;
 };
