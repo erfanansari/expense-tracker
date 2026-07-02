@@ -45,7 +45,6 @@ export interface ReportData {
   previous: PeriodTotals;
   deltaPct: { income: number; expenses: number };
   topCategories: TopCategory[];
-  netWorth: MoneyValue;
   // Yearly-only enrichment
   months?: MonthlyBreakdown[];
   bestMonth?: MonthlyBreakdown & { net: MoneyValue };
@@ -144,14 +143,6 @@ async function topCategoriesForRange(userId: number, bounds: DateBounds, limit =
   });
 }
 
-async function netWorthSnapshot(userId: number): Promise<MoneyValue> {
-  const result = await db.execute({
-    sql: `SELECT COALESCE(SUM(amount * entryRate), 0) AS value FROM assets WHERE userId = ?`,
-    args: [userId],
-  });
-  return { value: val(result.rows[0]?.value) };
-}
-
 async function monthlyBreakdownForYear(userId: number, year: number): Promise<MonthlyBreakdown[]> {
   const bounds = yearBounds(year);
 
@@ -223,13 +214,12 @@ export async function getReportData(userId: number, period: ReportPeriod): Promi
     const prev = previousMonth(period.year, month);
     const prevBounds = monthBounds(prev.year, prev.month);
 
-    const [income, expenses, prevIncome, prevExpenses, topCategories, netWorth] = await Promise.all([
+    const [income, expenses, prevIncome, prevExpenses, topCategories] = await Promise.all([
       incomeTotalsForMonth(userId, period.year, month),
       expenseTotalsForRange(userId, bounds),
       incomeTotalsForMonth(userId, prev.year, prev.month),
       expenseTotalsForRange(userId, prevBounds),
       topCategoriesForRange(userId, bounds),
-      netWorthSnapshot(userId),
     ]);
 
     const totals = buildTotals(income, expenses);
@@ -246,7 +236,6 @@ export async function getReportData(userId: number, period: ReportPeriod): Promi
         expenses: deltaPct(expenses.value, prevExpenses.value),
       },
       topCategories,
-      netWorth,
     };
   }
 
@@ -254,13 +243,12 @@ export async function getReportData(userId: number, period: ReportPeriod): Promi
   const bounds = yearBounds(period.year);
   const prevBounds = yearBounds(period.year - 1);
 
-  const [income, expenses, prevIncome, prevExpenses, topCategories, netWorth, months] = await Promise.all([
+  const [income, expenses, prevIncome, prevExpenses, topCategories, months] = await Promise.all([
     incomeTotalsForYear(userId, period.year),
     expenseTotalsForRange(userId, bounds),
     incomeTotalsForYear(userId, period.year - 1),
     expenseTotalsForRange(userId, prevBounds),
     topCategoriesForRange(userId, bounds),
-    netWorthSnapshot(userId),
     monthlyBreakdownForYear(userId, period.year),
   ]);
 
@@ -295,7 +283,6 @@ export async function getReportData(userId: number, period: ReportPeriod): Promi
       expenses: deltaPct(expenses.value, prevExpenses.value),
     },
     topCategories,
-    netWorth,
     months,
     bestMonth,
     worstMonth,
