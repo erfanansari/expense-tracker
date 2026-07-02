@@ -2,24 +2,55 @@ import React from 'react';
 
 import { render } from '@react-email/render';
 
-import { APP_URL, FROM_ADDRESS, LOGO_DATA_URI, REPLY_TO, resend, unsubscribeUrl } from '@core/email/client';
+import { getCurrencyPreferences } from '@core/database/currency-preferences';
+import type { CurrencyPreferences } from '@core/database/currency-preferences';
+import { APP_URL, FROM_ADDRESS, LOGO_URL, REPLY_TO, resend, unsubscribeUrl } from '@core/email/client';
 import { getLatestRates } from '@core/rates';
 
+import { convert, seriesFromLatest } from '@features/ExchangeRate/utils/currency';
+import type { RatesSeries } from '@features/ExchangeRate/utils/currency';
+
+import { PIVOT_CURRENCY } from '@/constants/currencies';
 import { getMonthLabel } from '@/constants/income';
 import MonthlyReport from '@/emails/MonthlyReport';
 import type { MonthlyReportProps } from '@/emails/MonthlyReport';
+import type { EmailCurrencyContext, EmailMoney } from '@/emails/types';
 import YearlyReport from '@/emails/YearlyReport';
 import type { YearlyReportProps } from '@/emails/YearlyReport';
 
 import type { ReportData } from './aggregate';
 
+interface EmailCurrencySetup {
+  ctx: EmailCurrencyContext;
+  /** Convert a pivot (Toman) aggregate into the user's display currencies. */
+  money: (pivotValue: number) => EmailMoney;
+  /** Pivot → primary currency number (for chart-scaling values). */
+  toPrimary: (pivotValue: number) => number;
+}
+
 /**
- * Report aggregates are in the pivot currency (Toman). Emails still show a
- * Toman + USD pair, so we convert pivot→USD with the latest USD rate at send
- * time. `usd(v)` returns 0 when no USD rate is available.
+ * Report aggregates are in the pivot currency (Toman). Emails show them in the
+ * user's primary currency with their secondary as a muted caption, converted
+ * with the latest rates at send time. If the primary rate is somehow missing,
+ * fall back to displaying pivot amounts (never silently wrong numbers).
  */
-function makeUsdConverter(usdRate: number) {
-  return (pivotValue: number): number => (usdRate > 0 ? Math.round((pivotValue / usdRate) * 100) / 100 : 0);
+function makeEmailCurrencySetup(prefs: CurrencyPreferences, series: RatesSeries): EmailCurrencySetup {
+  const primaryAvailable = convert(1, PIVOT_CURRENCY, prefs.primaryCurrency, series) !== null;
+  const primaryCurrency = primaryAvailable ? prefs.primaryCurrency : PIVOT_CURRENCY;
+  const secondaryCurrency =
+    prefs.secondaryCurrency && prefs.secondaryCurrency !== primaryCurrency ? prefs.secondaryCurrency : null;
+
+  const toPrimary = (v: number): number => convert(v, PIVOT_CURRENCY, primaryCurrency, series) ?? v;
+  const money = (v: number): EmailMoney => ({
+    primary: toPrimary(v),
+    secondary: secondaryCurrency ? convert(v, PIVOT_CURRENCY, secondaryCurrency, series) : null,
+  });
+
+  return {
+    ctx: { primaryCurrency, secondaryCurrency, numberFormat: prefs.numberFormat },
+    money,
+    toPrimary,
+  };
 }
 
 interface DispatchInput {
@@ -38,8 +69,9 @@ interface DispatchResult {
   resendId: string;
 }
 
-function buildMonthlyProps(input: DispatchInput, usd: (v: number) => number): MonthlyReportProps {
+function buildMonthlyProps(input: DispatchInput, currency: EmailCurrencySetup): MonthlyReportProps {
   const { data, userName, unsubscribeToken } = input;
+  const { ctx, money } = currency;
   const [yearStr, monthStr] = data.periodKey.split('-');
   const month = Number(monthStr);
   const prevMonth = month === 1 ? 12 : month - 1;
@@ -47,81 +79,70 @@ function buildMonthlyProps(input: DispatchInput, usd: (v: number) => number): Mo
   const previousLabel = `${getMonthLabel(prevMonth).en.slice(0, 3)} ${prevYear}`;
 
   return {
+    ...ctx,
     userName,
     periodLabel: data.periodLabel,
     previousLabel,
     totals: {
-      incomeUsd: usd(data.totals.income.value),
-      incomeToman: data.totals.income.value,
-      expensesUsd: usd(data.totals.expenses.value),
-      expensesToman: data.totals.expenses.value,
-      netUsd: usd(data.totals.net.value),
-      netToman: data.totals.net.value,
+      income: money(data.totals.income.value),
+      expenses: money(data.totals.expenses.value),
+      net: money(data.totals.net.value),
     },
     deltaPct: data.deltaPct,
     topCategories: data.topCategories.map((c) => ({
       id: c.id,
       name: c.name,
       color: c.color,
-      valueUsd: usd(c.value.value),
-      valueToman: c.value.value,
+      value: money(c.value.value),
       pct: c.pct,
     })),
-    netWorth: { totalUsd: usd(data.netWorth.value), totalToman: data.netWorth.value },
     unsubscribeUrl: unsubscribeUrl(unsubscribeToken),
     webViewUrl: `${APP_URL}/overview`,
-    logoUrl: LOGO_DATA_URI,
+    logoUrl: LOGO_URL,
   };
 }
 
-function buildYearlyProps(input: DispatchInput, usd: (v: number) => number): YearlyReportProps {
+function buildYearlyProps(input: DispatchInput, currency: EmailCurrencySetup): YearlyReportProps {
   const { data, userName, unsubscribeToken } = input;
+  const { ctx, money, toPrimary } = currency;
   const previousLabel = String(Number(data.periodKey) - 1);
 
   return {
+    ...ctx,
     userName,
     periodLabel: data.periodLabel,
     previousLabel,
     totals: {
-      incomeUsd: usd(data.totals.income.value),
-      incomeToman: data.totals.income.value,
-      expensesUsd: usd(data.totals.expenses.value),
-      expensesToman: data.totals.expenses.value,
-      netUsd: usd(data.totals.net.value),
-      netToman: data.totals.net.value,
+      income: money(data.totals.income.value),
+      expenses: money(data.totals.expenses.value),
+      net: money(data.totals.net.value),
     },
     deltaPct: data.deltaPct,
     topCategories: data.topCategories.map((c) => ({
       id: c.id,
       name: c.name,
       color: c.color,
-      valueUsd: usd(c.value.value),
-      valueToman: c.value.value,
+      value: money(c.value.value),
       pct: c.pct,
     })),
-    netWorth: { totalUsd: usd(data.netWorth.value), totalToman: data.netWorth.value },
     months: (data.months ?? []).map((m) => ({
       month: m.month,
-      incomeUsd: usd(m.income.value),
-      expensesUsd: usd(m.expenses.value),
+      income: toPrimary(m.income.value),
+      expenses: toPrimary(m.expenses.value),
     })),
     bestMonth: data.bestMonth && {
       monthLabel: `${getMonthLabel(data.bestMonth.month).en} ${data.bestMonth.year}`,
-      netUsd: usd(data.bestMonth.net.value),
-      netToman: data.bestMonth.net.value,
+      net: money(data.bestMonth.net.value),
     },
     worstMonth: data.worstMonth && {
       monthLabel: `${getMonthLabel(data.worstMonth.month).en} ${data.worstMonth.year}`,
-      netUsd: usd(data.worstMonth.net.value),
-      netToman: data.worstMonth.net.value,
+      net: money(data.worstMonth.net.value),
     },
-    totalSaved: data.totalSaved
-      ? { usd: usd(data.totalSaved.value), toman: data.totalSaved.value }
-      : { usd: 0, toman: 0 },
+    totalSaved: data.totalSaved ? money(data.totalSaved.value) : { primary: 0, secondary: null },
     savingsRatePct: data.savingsRatePct ?? 0,
     unsubscribeUrl: unsubscribeUrl(unsubscribeToken),
     webViewUrl: `${APP_URL}/overview`,
-    logoUrl: LOGO_DATA_URI,
+    logoUrl: LOGO_URL,
   };
 }
 
@@ -132,13 +153,13 @@ function buildYearlyProps(input: DispatchInput, usd: (v: number) => number): Yea
 export async function dispatchReport(input: DispatchInput): Promise<DispatchResult> {
   const { data, userEmail, unsubscribeToken } = input;
 
-  const latest = await getLatestRates();
-  const usd = makeUsdConverter(latest['USD'] ?? 0);
+  const [prefs, latest] = await Promise.all([getCurrencyPreferences(input.userId), getLatestRates()]);
+  const currency = makeEmailCurrencySetup(prefs, seriesFromLatest(latest));
 
   const element =
     data.type === 'monthly'
-      ? React.createElement(MonthlyReport, buildMonthlyProps(input, usd))
-      : React.createElement(YearlyReport, buildYearlyProps(input, usd));
+      ? React.createElement(MonthlyReport, buildMonthlyProps(input, currency))
+      : React.createElement(YearlyReport, buildYearlyProps(input, currency));
 
   const html = await render(element);
 

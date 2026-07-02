@@ -2,8 +2,6 @@ import * as React from 'react';
 
 import { Body, Button, Container, Head, Heading, Hr, Html, Preview, Section, Text } from '@react-email/components';
 
-import { LOGO_DATA_URI } from '@/core/email/client';
-
 export interface WelcomeEmailProps {
   userName: string | null;
   dashboardUrl: string;
@@ -16,7 +14,7 @@ const FEATURES = [
   {
     color: '#10b981',
     title: 'Expenses',
-    description: 'Log daily spending with categories, tags, and dual USD/Toman amounts.',
+    description: 'Log daily spending with categories, tags, and multi-currency amounts.',
   },
   {
     color: '#0070f3',
@@ -98,8 +96,8 @@ const WelcomeEmail = ({ userName, dashboardUrl, logoUrl }: WelcomeEmailProps) =>
             <Text
               style={{ margin: '0 0 32px', fontSize: '15px', lineHeight: '1.6', color: '#525252', fontFamily: FONT }}
             >
-              Kharji helps you track your finances in both USD and Toman — expenses, income, assets, and net worth, all
-              in one place.
+              Kharji helps you track your finances across multiple currencies — expenses, income, assets, and net worth,
+              all in one place.
             </Text>
 
             {/* CTA button — table wrapper keeps it left-aligned and auto-width */}
@@ -186,7 +184,7 @@ const WelcomeEmail = ({ userName, dashboardUrl, logoUrl }: WelcomeEmailProps) =>
 WelcomeEmail.PreviewProps = {
   userName: 'Erfan Ansari',
   dashboardUrl: 'https://kharji.app/overview',
-  logoUrl: LOGO_DATA_URI,
+  logoUrl: 'https://kharji.app/icons/icon-192.png',
 } satisfies WelcomeEmailProps;
 
 export default WelcomeEmail;

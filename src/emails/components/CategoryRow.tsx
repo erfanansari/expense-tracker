@@ -2,12 +2,17 @@ import * as React from 'react';
 
 import { Text } from '@react-email/components';
 
+import { formatMoney } from '@features/ExchangeRate/utils/currency';
+
+import type { EmailCurrencyContext, EmailMoney } from '../types';
+import { isCompact } from '../types';
+
 interface CategoryRowProps {
   rank: number;
   name: string;
   color: string; // 'blue' | 'amber' | etc. (tailwind palette name)
-  valueUsd: number;
-  valueToman: number;
+  value: EmailMoney;
+  currency: EmailCurrencyContext;
   pct: number; // 0..100
 }
 
@@ -34,13 +39,11 @@ const COLOR_HEX: Record<string, string> = {
   fuchsia: '#d946ef',
 };
 
-function fmt(n: number): string {
-  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n);
-}
-
-export const CategoryRow = ({ rank, name, color, valueUsd, valueToman, pct }: CategoryRowProps) => {
+export const CategoryRow = ({ rank, name, color, value, currency, pct }: CategoryRowProps) => {
   const swatch = COLOR_HEX[color] ?? '#6b7280';
   const widthPct = Math.max(2, Math.round(pct));
+  // Rows are dense lists: 'auto' keeps them full-precision (compact is cards-only).
+  const compact = isCompact(currency.numberFormat, false);
 
   return (
     <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" style={{ marginBottom: '14px' }}>
@@ -55,7 +58,9 @@ export const CategoryRow = ({ rank, name, color, valueUsd, valueToman, pct }: Ca
                 <Text className="m-0 text-[14px] font-medium text-[#171717]">{name}</Text>
               </td>
               <td style={{ textAlign: 'right', whiteSpace: 'nowrap', paddingLeft: '12px' }}>
-                <Text className="m-0 text-[14px] font-semibold text-[#171717]">${fmt(valueUsd)}</Text>
+                <Text className="m-0 text-[14px] font-semibold text-[#171717]">
+                  {formatMoney(value.primary, currency.primaryCurrency, { compact })}
+                </Text>
               </td>
             </tr>
             <tr>
@@ -82,7 +87,11 @@ export const CategoryRow = ({ rank, name, color, valueUsd, valueToman, pct }: Ca
             </tr>
             <tr>
               <td style={{ paddingTop: '4px' }}>
-                <Text className="m-0 text-[12px] text-[#a3a3a3]">{fmt(valueToman)} T</Text>
+                {value.secondary !== null && currency.secondaryCurrency && (
+                  <Text className="m-0 text-[12px] text-[#a3a3a3]">
+                    {formatMoney(value.secondary, currency.secondaryCurrency, { compact })}
+                  </Text>
+                )}
               </td>
               <td style={{ textAlign: 'right', paddingTop: '4px' }}>
                 <Text className="m-0 text-[12px] text-[#a3a3a3]">{pct.toFixed(1)}%</Text>

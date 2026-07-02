@@ -2,10 +2,15 @@ import * as React from 'react';
 
 import { Section, Text } from '@react-email/components';
 
+import { formatMoney } from '@features/ExchangeRate/utils/currency';
+
+import type { EmailCurrencyContext, EmailMoney } from '../types';
+import { isCompact } from '../types';
+
 interface StatCardProps {
   label: string;
-  usd: number;
-  toman: number;
+  value: EmailMoney;
+  currency: EmailCurrencyContext;
   tone?: 'neutral' | 'positive' | 'negative';
   delta?: { pct: number; label: string }; // e.g. { pct: -12.4, label: 'vs Apr 2026' }
   // Whether a positive delta is good or bad. Income up = good, expenses up = bad.
@@ -18,13 +23,10 @@ const TONE_COLOR: Record<NonNullable<StatCardProps['tone']>, string> = {
   negative: '#ea001d',
 };
 
-function fmt(n: number): string {
-  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n);
-}
-
-function fmtUsd(n: number): string {
+/** Format with an explicit leading minus so the sign never lands mid-string (e.g. -1,234 IRT). */
+export function formatSigned(n: number, currencyCode: string, compact: boolean): string {
   const sign = n < 0 ? '-' : '';
-  return `${sign}$${fmt(Math.abs(n))}`;
+  return `${sign}${formatMoney(Math.abs(n), currencyCode, { compact })}`;
 }
 
 function fmtDelta(pct: number, direction: 'up-is-good' | 'up-is-bad'): { value: string; color: string } {
@@ -37,14 +39,15 @@ function fmtDelta(pct: number, direction: 'up-is-good' | 'up-is-bad'): { value: 
 
 export const StatCard = ({
   label,
-  usd,
-  toman,
+  value,
+  currency,
   tone = 'neutral',
   delta,
   deltaDirection = 'up-is-bad',
 }: StatCardProps) => {
   const valueColor = TONE_COLOR[tone];
   const deltaDisplay = delta ? fmtDelta(delta.pct, deltaDirection) : null;
+  const compact = isCompact(currency.numberFormat, true);
   return (
     <Section
       style={{
@@ -65,9 +68,13 @@ export const StatCard = ({
           color: valueColor,
         }}
       >
-        {fmtUsd(usd)}
+        {formatSigned(value.primary, currency.primaryCurrency, compact)}
       </Text>
-      <Text className="m-0 mt-1 text-[13px] text-[#6b7280]">{fmt(toman)} T</Text>
+      {value.secondary !== null && currency.secondaryCurrency && (
+        <Text className="m-0 mt-1 text-[13px] text-[#6b7280]">
+          {formatSigned(value.secondary, currency.secondaryCurrency, compact)}
+        </Text>
+      )}
       {delta && deltaDisplay && (
         <Text className="m-0 mt-3 text-[12px]" style={{ color: deltaDisplay.color }}>
           <span style={{ fontWeight: 600 }}>{deltaDisplay.value}</span>

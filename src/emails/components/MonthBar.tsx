@@ -4,9 +4,10 @@ import { Text } from '@react-email/components';
 
 interface MonthBarProps {
   month: string; // 'Jan'
-  incomeUsd: number;
-  expensesUsd: number;
-  maxUsd: number; // largest value in the entire 12-month series, for scaling
+  // Amounts in the user's primary currency — only used relatively, for bar heights.
+  income: number;
+  expenses: number;
+  max: number; // largest value in the entire 12-month series, for scaling
 }
 
 const BAR_HEIGHT = 56; // px, the chart cell height
@@ -16,9 +17,9 @@ function pct(value: number, max: number): number {
   return Math.max(0, Math.min(100, (value / max) * 100));
 }
 
-export const MonthBar = ({ month, incomeUsd, expensesUsd, maxUsd }: MonthBarProps) => {
-  const incomeHeight = (pct(incomeUsd, maxUsd) / 100) * BAR_HEIGHT;
-  const expenseHeight = (pct(expensesUsd, maxUsd) / 100) * BAR_HEIGHT;
+export const MonthBar = ({ month, income, expenses, max }: MonthBarProps) => {
+  const incomeHeight = (pct(income, max) / 100) * BAR_HEIGHT;
+  const expenseHeight = (pct(expenses, max) / 100) * BAR_HEIGHT;
 
   return (
     <td style={{ verticalAlign: 'bottom', textAlign: 'center', padding: '0 2px' }}>
