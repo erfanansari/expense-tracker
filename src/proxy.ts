@@ -10,7 +10,8 @@ export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const hasToken = Boolean(request.cookies.get(authConfig.cookie.name)?.value);
 
-  if (AUTH_PAGES.has(pathname) && hasToken) {
+  // Authenticated users skip the landing and auth pages entirely
+  if ((pathname === '/' || AUTH_PAGES.has(pathname)) && hasToken) {
     return NextResponse.redirect(new URL('/overview', request.url));
   }
 

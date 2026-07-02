@@ -4,8 +4,7 @@ import Landing from '@features/pages/Landing';
 
 export const metadata: Metadata = {
   title: 'Kharji - Personal Finance Tracker',
-  description:
-    'Track expenses, manage income, and grow your wealth with Kharji personal finance tracker. Free and open source.',
+  description: 'Track expenses, manage income, and grow your wealth with Kharji personal finance tracker.',
 };
 
 const LandingPage = () => (
