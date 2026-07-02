@@ -23,7 +23,7 @@ import type { MoneyItem } from '@features/ExchangeRate/CurrencyProvider';
 
 import ChartTooltip from '@components/ChartTooltip';
 
-import { formatChartTooltipDate } from '@utils';
+import { formatAxisNumber, formatChartTooltipDate } from '@utils';
 
 import { type Expense } from '@/@types/expense';
 import { PIVOT_CURRENCY } from '@/constants/currencies';
@@ -230,7 +230,7 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
             <BarChart data={categoryTotals} layout="vertical" margin={{ left: 0, right: 20 }}>
               <XAxis
                 type="number"
-                tickFormatter={(value: number) => `${Math.round(value / 1_000_000)}M`}
+                tickFormatter={formatAxisNumber}
                 stroke="var(--color-border-subtle)"
                 tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
                 axisLine={{ stroke: 'var(--color-border-subtle)' }}
@@ -298,7 +298,7 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
                 tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
                 axisLine={{ stroke: 'var(--color-border-subtle)' }}
                 tickLine={{ stroke: 'var(--color-border-subtle)' }}
-                tickFormatter={(value: number) => `${Math.round(value / 1_000_000)}M`}
+                tickFormatter={formatAxisNumber}
               />
               <Tooltip
                 content={(props) => <AreaTooltip {...props} granularity={granularity} />}

@@ -19,16 +19,22 @@ import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
 import ChartTooltip from '@components/ChartTooltip';
 import EmptyState from '@components/EmptyState';
 import ErrorState from '@components/ErrorState';
-import SegmentedSelector from '@components/SegmentedSelector';
+import Select from '@components/Select';
 import Pulse from '@components/Skeleton';
 
 import { type NetWorthRange, useNetWorthHistory } from '@hooks/use-net-worth-history';
 
-import { formatChartTooltipDate } from '@utils';
+import { formatAxisNumber, formatChartTooltipDate } from '@utils';
 
 import { PIVOT_CURRENCY } from '@/constants/currencies';
 
-const RANGES: NetWorthRange[] = ['1M', '3M', '6M', '1Y', 'ALL'];
+const RANGE_OPTIONS: { value: NetWorthRange; label: string }[] = [
+  { value: '1M', label: '1 Month' },
+  { value: '3M', label: '3 Months' },
+  { value: '6M', label: '6 Months' },
+  { value: '1Y', label: '1 Year' },
+  { value: 'ALL', label: 'All Time' },
+];
 
 // ─── Custom tooltip ──────────────────────────────────────────────────────────
 // Net-worth points are in the pivot currency; the tooltip converts for display.
@@ -57,27 +63,25 @@ function NetWorthTooltip({
 }
 
 // ─── Delta badge ─────────────────────────────────────────────────────────────
+// Shows only the absolute change over the range. A percentage would conflate
+// asset contributions with performance — snapshots can't tell them apart.
 function DeltaBadge({ data }: { data: Array<{ value: number }> }) {
   const { display } = useCurrency();
-  const { deltaPivot, deltaPercent, isPositive } = useMemo(() => {
-    if (data.length < 2) return { deltaPivot: 0, deltaPercent: 0, isPositive: true };
-    const first = data[0].value;
-    const last = data[data.length - 1].value;
-    const d = last - first;
-    const pct = first !== 0 ? (d / first) * 100 : 0;
-    return { deltaPivot: d, deltaPercent: pct, isPositive: d >= 0 };
+  const { deltaPivot, isPositive } = useMemo(() => {
+    if (data.length < 2) return { deltaPivot: 0, isPositive: true };
+    const d = data[data.length - 1].value - data[0].value;
+    return { deltaPivot: d, isPositive: d >= 0 };
   }, [data]);
 
   if (data.length < 2) return null;
 
-  const sign = isPositive ? '+' : '';
+  const sign = isPositive ? '+' : '-';
   const color = isPositive ? 'text-success' : 'text-danger';
 
   return (
     <span className={`text-sm font-medium ${color}`}>
       {sign}
-      {display(Math.abs(deltaPivot), PIVOT_CURRENCY, undefined, { compact: true }).primary} ({sign}
-      {deltaPercent.toFixed(1)}%)
+      {display(Math.abs(deltaPivot), PIVOT_CURRENCY, undefined, { compact: true }).primary}
     </span>
   );
 }
@@ -164,12 +168,7 @@ const NetWorthChart = () => {
         </div>
         <h2 className="text-text-primary text-lg font-semibold">Net Worth</h2>
       </div>
-      <SegmentedSelector<NetWorthRange>
-        value={range}
-        onChange={setRange}
-        options={RANGES.map((r) => ({ value: r, label: r === 'ALL' ? 'All' : r }))}
-        ariaLabel="Net worth range"
-      />
+      <Select value={range} onChange={(val) => setRange(val as NetWorthRange)} options={RANGE_OPTIONS} />
     </div>
   );
 
@@ -182,7 +181,7 @@ const NetWorthChart = () => {
             <Pulse className="h-10 w-10 shrink-0 rounded-lg" />
             <Pulse className="h-5 w-28" />
           </div>
-          <Pulse className="h-8 w-40 self-start rounded-lg sm:self-auto" />
+          <Pulse className="h-9 w-32 self-start rounded-lg sm:self-auto" />
         </div>
         <Pulse className="h-[280px] w-full rounded-lg" />
       </div>
@@ -257,9 +256,7 @@ const NetWorthChart = () => {
                 tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
                 axisLine={{ stroke: 'var(--color-border-subtle)' }}
                 tickLine={{ stroke: 'var(--color-border-subtle)' }}
-                tickFormatter={(v: number) =>
-                  v >= 1_000_000 ? `${(v / 1_000_000).toFixed(0)}M` : v >= 1_000 ? `${(v / 1_000).toFixed(0)}K` : `${v}`
-                }
+                tickFormatter={formatAxisNumber}
               />
               <RechartsTooltip
                 content={<NetWorthTooltip />}

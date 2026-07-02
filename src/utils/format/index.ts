@@ -3,6 +3,17 @@ export function formatNumber(num: number): string {
   return new Intl.NumberFormat().format(Math.round(num));
 }
 
+const AXIS_FORMATTER = new Intl.NumberFormat('en-US', {
+  notation: 'compact',
+  compactDisplay: 'short',
+  maximumFractionDigits: 1,
+});
+
+// Compact tick labels for chart axes: 14B, 1.5M, 900K, 42.
+export function formatAxisNumber(value: number): string {
+  return AXIS_FORMATTER.format(value);
+}
+
 const SHORTHAND_MULTIPLIERS: Record<string, number> = {
   k: 1_000,
   m: 1_000_000,

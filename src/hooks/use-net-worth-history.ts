@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import { fetchNetWorthHistory } from '@/lib/api/net-worth';
 import { queryKeys } from '@/lib/query-keys';
@@ -26,5 +26,8 @@ export function useNetWorthHistory(range: NetWorthRange) {
     queryKey: queryKeys.netWorth.history(from, to),
     queryFn: () => fetchNetWorthHistory(from, to),
     select: (res) => res.data,
+    // Keep the previous range's data visible while the new range loads —
+    // otherwise every range switch flashes the full card skeleton.
+    placeholderData: keepPreviousData,
   });
 }
