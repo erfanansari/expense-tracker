@@ -22,7 +22,7 @@ import DateRangeSelector, {
 import ChartTooltip from '@components/ChartTooltip';
 import EmptyState from '@components/EmptyState';
 
-import { formatChartTooltipDate } from '@utils';
+import { formatAxisNumber, formatChartTooltipDate } from '@utils';
 
 import { PIVOT_CURRENCY } from '@/constants/currencies';
 
@@ -166,9 +166,7 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
                 tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
                 axisLine={{ stroke: 'var(--color-border-subtle)' }}
                 tickLine={{ stroke: 'var(--color-border-subtle)' }}
-                tickFormatter={(v: number) =>
-                  v >= 1_000_000 ? `${(v / 1_000_000).toFixed(0)}M` : v >= 1_000 ? `${(v / 1_000).toFixed(0)}K` : `${v}`
-                }
+                tickFormatter={formatAxisNumber}
               />
               <RechartsTooltip
                 content={(props) => <SpendingTooltip {...props} granularity={granularity} />}

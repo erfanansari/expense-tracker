@@ -1,4 +1,4 @@
-import { formatNumber } from '../index';
+import { formatAxisNumber, formatNumber } from '../index';
 
 describe('formatNumber', () => {
   it('formats integers with commas', () => {
@@ -17,5 +17,26 @@ describe('formatNumber', () => {
 
   it('handles negative numbers', () => {
     expect(formatNumber(-1500)).toBe('-1,500');
+  });
+});
+
+describe('formatAxisNumber', () => {
+  it('rolls millions over to billions', () => {
+    expect(formatAxisNumber(14_000_000_000)).toBe('14B');
+    expect(formatAxisNumber(12_000_000_000)).toBe('12B');
+  });
+
+  it('formats thousands and millions', () => {
+    expect(formatAxisNumber(900_000)).toBe('900K');
+    expect(formatAxisNumber(1_500_000)).toBe('1.5M');
+  });
+
+  it('formats trillions', () => {
+    expect(formatAxisNumber(2_300_000_000_000)).toBe('2.3T');
+  });
+
+  it('leaves small numbers as-is', () => {
+    expect(formatAxisNumber(42)).toBe('42');
+    expect(formatAxisNumber(0)).toBe('0');
   });
 });
