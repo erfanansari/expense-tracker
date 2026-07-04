@@ -5,7 +5,10 @@ import { useLayoutEffect } from 'react';
  *
  * When `overflow: hidden` is applied to `<body>`, the vertical scrollbar is removed
  * and the viewport widens — shifting fixed/centered content (modals, navbars, etc.).
- * Compensate by adding right-padding equal to the previous scrollbar width.
+ * Compensate by adding right-padding equal to the width the viewport actually gained.
+ * Measuring the delta (rather than assuming the pre-lock scrollbar width) stays
+ * correct when something else (e.g. vaul/radix's own scroll lock) already removed
+ * the scrollbar, and on overlay-scrollbar systems where nothing changes.
  */
 export function useLockBodyScroll(locked: boolean) {
   useLayoutEffect(() => {
@@ -16,11 +19,14 @@ export function useLockBodyScroll(locked: boolean) {
     const previousPaddingRight = body.style.paddingRight;
 
     // Width must be measured BEFORE we apply overflow:hidden (which removes the scrollbar).
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    const widthBefore = document.documentElement.clientWidth;
 
     body.style.overflow = 'hidden';
-    if (scrollbarWidth > 0) {
-      body.style.paddingRight = `${scrollbarWidth}px`;
+
+    // How much the viewport actually widened once the scrollbar was removed.
+    const widthGained = document.documentElement.clientWidth - widthBefore;
+    if (widthGained > 0) {
+      body.style.paddingRight = `${widthGained}px`;
     }
 
     return () => {

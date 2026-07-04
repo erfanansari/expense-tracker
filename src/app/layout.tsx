@@ -7,6 +7,8 @@ import { twMerge } from 'tailwind-merge';
 
 import Providers from '@features/Providers';
 
+import UpdatePrompt from '@components/UpdatePrompt';
+
 import '@/styles/globals.css';
 
 import AppleSplashScreens from './AppleSplashScreens';
@@ -95,6 +97,7 @@ export default function RootLayout({
         <SerwistProvider swUrl="/sw.js" disable={process.env.NODE_ENV === 'development'}>
           <Providers>
             {children}
+            <UpdatePrompt />
             <Analytics />
           </Providers>
         </SerwistProvider>
