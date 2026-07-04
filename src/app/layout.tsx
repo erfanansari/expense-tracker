@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Vazirmatn } from 'next/font/google';
 
 import { SerwistProvider } from '@serwist/next/react';
@@ -68,11 +68,15 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport = {
+export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
   viewportFit: 'cover',
+  // Android/Chrome: shrink the layout viewport when the keyboard opens so
+  // dvh-sized drawers resize natively. iOS ignores this hint (handled by
+  // useKeyboardInset instead).
+  interactiveWidget: 'resizes-content',
   themeColor: '#ffffff',
 };
 

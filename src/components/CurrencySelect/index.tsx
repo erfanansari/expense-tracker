@@ -26,6 +26,7 @@ const CurrencySelect: FC<CurrencySelectProps> = ({ value, onChange, disabled, cl
     options={OPTIONS}
     disabled={disabled}
     bare={bare}
+    menuAlign="right"
     className={className}
     formatOptionLabel={(option, { context }) => (context === 'value' ? option.value : option.label)}
   />
