@@ -1,5 +1,7 @@
 'use client';
 
+import { useMemo } from 'react';
+
 import { Check, ChevronDown } from 'lucide-react';
 import ReactSelect, { components } from 'react-select';
 import type {
@@ -30,14 +32,11 @@ interface SelectProps {
   /** Borderless control for embedding inside an input group (e.g. MoneyInput).
    *  The surrounding container owns the border/focus ring. */
   bare?: boolean;
+  /** Horizontal edge of the control the portalled menu aligns to. Use 'right'
+   *  when the control sits near the right viewport edge (e.g. CurrencySelect
+   *  inside MoneyInput) so a wide menu grows leftward instead of off-screen. */
+  menuAlign?: 'left' | 'right';
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const selectStyles: StylesConfig<any, any, any> = {
-  menuPortal: (base: CSSObjectWithLabel) => ({ ...base, zIndex: 9999, pointerEvents: 'auto' }),
-  // Allow the menu to grow wider than the control so long labels never wrap.
-  menu: (base: CSSObjectWithLabel) => ({ ...base, width: 'max-content', minWidth: '100%' }),
-};
 
 const MenuList = (props: MenuListProps<SelectOption, false>) => (
   <components.MenuList
@@ -79,8 +78,25 @@ const Select = ({
   className,
   formatOptionLabel,
   bare,
+  menuAlign,
 }: SelectProps) => {
   const selectedOption = options.find((o) => o.value === value) ?? null;
+
+  const selectStyles = useMemo<StylesConfig<SelectOption, false>>(
+    () => ({
+      menuPortal: (base: CSSObjectWithLabel) => ({ ...base, zIndex: 9999, pointerEvents: 'auto' }),
+      // Allow the menu to grow wider than the control so long labels never
+      // wrap, but never wider than the viewport.
+      menu: (base: CSSObjectWithLabel) => ({
+        ...base,
+        width: 'max-content',
+        minWidth: '100%',
+        maxWidth: 'calc(100vw - 16px)',
+        ...(menuAlign === 'right' ? { right: 0, left: 'auto' } : {}),
+      }),
+    }),
+    [menuAlign]
+  );
 
   return (
     <ReactSelect<SelectOption, false>

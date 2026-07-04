@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "rm -f public/sw.js public/sw.js.map && next dev",
     "build": "next build && serwist build serwist.config.mjs",
     "start": "next start",
     "preview": "pnpm build && pnpm start",

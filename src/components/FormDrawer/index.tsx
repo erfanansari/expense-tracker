@@ -5,6 +5,9 @@ import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react';
 import { Drawer } from 'vaul';
 
+import { useKeyboardInset } from '@hooks/use-keyboard-inset';
+import { useLockBodyScroll } from '@hooks/use-lock-body-scroll';
+
 interface FormDrawerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -20,6 +23,11 @@ const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerPro
 
   // States
   const [isMobile, setIsMobile] = useState(false);
+
+  // Keep the mobile sheet pinned above the iOS keyboard (iOS pans the visual
+  // viewport instead of resizing, exposing the page below the drawer).
+  const keyboardInset = useKeyboardInset(isOpen && isMobile);
+  useLockBodyScroll(isOpen);
 
   // Effects
   useEffect(() => {
@@ -73,6 +81,15 @@ const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerPro
         <Drawer.Overlay className="fixed inset-0 z-50 bg-black/20 backdrop-blur-[2px]" />
         <Drawer.Content
           aria-describedby={undefined}
+          style={
+            isMobile && keyboardInset > 0
+              ? {
+                  bottom: keyboardInset,
+                  height: `min(85dvh, calc(100dvh - ${keyboardInset + 12}px))`,
+                  maxHeight: `calc(100dvh - ${keyboardInset + 12}px)`,
+                }
+              : undefined
+          }
           className={
             isMobile
               ? 'bg-background fixed right-0 bottom-0 left-0 z-50 flex h-[85dvh] max-h-[85dvh] flex-col rounded-t-2xl shadow-2xl outline-none'
