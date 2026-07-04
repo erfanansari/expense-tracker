@@ -20,14 +20,25 @@ interface FormDrawerProps {
 const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerProps) => {
   // References
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // States
   const [isMobile, setIsMobile] = useState(false);
 
-  // Keep the mobile sheet pinned above the iOS keyboard (iOS pans the visual
-  // viewport instead of resizing, exposing the page below the drawer).
+  // iOS keyboard handling: the drawer stays pinned to the viewport bottom (moving
+  // it with `bottom:` fights Safari's visual-viewport pan and exposes the page
+  // behind it). Instead, pad the internal scroll area by the keyboard height so
+  // every field can scroll above the keyboard, and reveal the focused one.
   const keyboardInset = useKeyboardInset(isOpen && isMobile);
   useLockBodyScroll(isOpen);
+
+  useEffect(() => {
+    if (keyboardInset === 0) return;
+    const focused = document.activeElement;
+    if (focused instanceof HTMLElement && scrollAreaRef.current?.contains(focused)) {
+      focused.scrollIntoView({ block: 'center' });
+    }
+  }, [keyboardInset]);
 
   // Effects
   useEffect(() => {
@@ -76,20 +87,12 @@ const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerPro
       dismissible
       shouldScaleBackground={false}
       repositionInputs={false}
+      noBodyStyles={!isMobile}
     >
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 z-50 bg-black/20 backdrop-blur-[2px]" />
         <Drawer.Content
           aria-describedby={undefined}
-          style={
-            isMobile && keyboardInset > 0
-              ? {
-                  bottom: keyboardInset,
-                  height: `min(85dvh, calc(100dvh - ${keyboardInset + 12}px))`,
-                  maxHeight: `calc(100dvh - ${keyboardInset + 12}px)`,
-                }
-              : undefined
-          }
           className={
             isMobile
               ? 'bg-background fixed right-0 bottom-0 left-0 z-50 flex h-[85dvh] max-h-[85dvh] flex-col rounded-t-2xl shadow-2xl outline-none'
@@ -132,7 +135,11 @@ const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerPro
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-x-clip overflow-y-auto overscroll-contain px-5 py-5 md:px-8 md:py-8">
+          <div
+            ref={scrollAreaRef}
+            className="flex-1 overflow-x-clip overflow-y-auto overscroll-contain px-5 py-5 md:px-8 md:py-8"
+            style={isMobile && keyboardInset > 0 ? { paddingBottom: keyboardInset } : undefined}
+          >
             {children}
           </div>
 
