@@ -135,6 +135,11 @@ const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerPro
           <div className="flex-1 overflow-x-clip overflow-y-auto overscroll-contain px-5 py-5 md:px-8 md:py-8">
             {children}
           </div>
+
+          {/* Solid extender below the sheet: when the iOS keyboard lifts the
+              drawer, any sliver between its bottom edge and the keyboard shows
+              this instead of the page behind the overlay. */}
+          {isMobile && <div aria-hidden="true" className="bg-background absolute inset-x-0 top-full h-screen" />}
         </Drawer.Content>
       </Drawer.Portal>
     </Drawer.Root>
