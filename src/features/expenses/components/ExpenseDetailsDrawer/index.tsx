@@ -5,13 +5,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowLeftRight, Calendar, Coins, Tag as TagIcon, X } from 'lucide-react';
 import { Drawer } from 'vaul';
 
+import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
+import { formatMoney } from '@features/ExchangeRate/utils/currency';
+
 import CategoryBadge from '@components/CategoryBadge';
 import Money from '@components/Money';
 
-import { formatNumber, formatToFarsiDate } from '@utils';
+import { formatToFarsiDate } from '@utils';
 
 import { type Expense } from '@/@types/expense';
-import { PIVOT_CURRENCY } from '@/constants/currencies';
 
 interface ExpenseDetailsDrawerProps {
   expense: Expense | null;
@@ -49,7 +51,42 @@ const formatCreatedAt = (iso: string) =>
     minute: '2-digit',
   });
 
+type ConvertFn = (amount: number, from: string, to: string, date?: string) => number | null;
+
+/**
+ * The exchange rate to surface for an expense: the rate between the two
+ * currencies the drawer displays (primary vs. secondary), or — when no distinct
+ * secondary — between the entry currency and the primary. Computed at the
+ * expense's own date so it matches the secondary amount shown in the hero.
+ * "Auto direction": the stronger unit is the base, so the rate always reads ≥ 1.
+ * Returns null when everything is one currency (no meaningful rate).
+ */
+function expenseRate(
+  expense: Expense,
+  primaryCurrency: string,
+  secondaryCurrency: string | null,
+  convert: ConvertFn
+): { base: string; quote: string; rate: number } | null {
+  const other = secondaryCurrency && secondaryCurrency !== primaryCurrency ? secondaryCurrency : null;
+  const counterpart = other ?? (expense.currency !== primaryCurrency ? expense.currency : null);
+  if (!counterpart || counterpart === primaryCurrency) return null;
+
+  const rate = convert(1, primaryCurrency, counterpart, expense.date);
+  if (rate === null) return null;
+
+  // Flip so the base is the stronger unit (rate ≥ 1) for readability.
+  if (rate < 1) {
+    const inv = convert(1, counterpart, primaryCurrency, expense.date);
+    if (inv === null) return null;
+    return { base: counterpart, quote: primaryCurrency, rate: inv };
+  }
+  return { base: primaryCurrency, quote: counterpart, rate };
+}
+
 const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawerProps) => {
+  // Currency context (for the exchange-rate cell)
+  const { primaryCurrency, secondaryCurrency, convert } = useCurrency();
+
   // References
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
@@ -95,6 +132,7 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
 
   // Variables
   const farsiDate = expense ? formatToFarsiDate(expense.date) : '';
+  const rateInfo = expense ? expenseRate(expense, primaryCurrency, secondaryCurrency, convert) : null;
 
   return (
     <Drawer.Root
@@ -207,11 +245,11 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
                     label="Entered in"
                     primary={expense.currency}
                   />
-                  {expense.currency !== PIVOT_CURRENCY && (
+                  {rateInfo && (
                     <MetaCell
                       icon={<Coins className="text-text-muted h-3 w-3" />}
                       label="Exchange rate"
-                      primary={`1 ${expense.currency} = ${formatNumber(expense.entryRate)} ${PIVOT_CURRENCY}`}
+                      primary={`1 ${rateInfo.base} = ${formatMoney(rateInfo.rate, rateInfo.quote)}`}
                     />
                   )}
                 </section>
