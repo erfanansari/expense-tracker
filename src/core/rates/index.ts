@@ -142,27 +142,50 @@ async function rateCurrenciesPresentOn(date: string): Promise<number> {
   return (res.rows[0]?.n as number) ?? 0;
 }
 
-/** Date (YYYY-MM-DD) of the last on-demand refresh attempt, or null. */
-async function getLastRatesAttemptDate(): Promise<string | null> {
+/** Date (YYYY-MM-DD) of the last attempt for the given marker, or null. */
+async function getLastAttemptDate(marker: string): Promise<string | null> {
   const res = await db.execute({
-    sql: `SELECT date(checked_at) as d FROM api_usage WHERE api_name = 'navasan_rates' ORDER BY checked_at DESC LIMIT 1`,
+    sql: `SELECT date(checked_at) as d FROM api_usage WHERE api_name = ? ORDER BY checked_at DESC LIMIT 1`,
+    args: [marker],
   });
   return (res.rows[0]?.d as string | null) ?? null;
 }
 
-async function markRatesAttempt(): Promise<void> {
+async function markAttempt(marker: string): Promise<void> {
   await db.execute({
     sql: `INSERT INTO api_usage (api_name, monthly_usage, daily_usage, monthly_limit, checked_at)
-          VALUES ('navasan_rates', 0, 0, ?, ?)`,
-    args: [MONTHLY_LIMIT, new Date().toISOString()],
+          VALUES (?, 0, 0, ?, ?)`,
+    args: [marker, MONTHLY_LIMIT, new Date().toISOString()],
   });
 }
 
 /**
+ * True when a supported rate currency has never been recorded at all (any date).
+ * A brand-new, never-seeded currency is the signal that a currency was just
+ * added to the registry and needs its first fetch — even if a normal refresh
+ * already ran today.
+ */
+async function hasUnseededRateCurrency(): Promise<boolean> {
+  const codes = RATE_CURRENCIES.map((c) => c.code);
+  const placeholders = codes.map(() => '?').join(',');
+  const res = await db.execute({
+    sql: `SELECT COUNT(DISTINCT currency) as n FROM currencyRates WHERE currency IN (${placeholders})`,
+    args: codes,
+  });
+  return ((res.rows[0]?.n as number) ?? 0) < codes.length;
+}
+
+/**
  * Ensure today's rates are present for every supported currency, fetching from
- * Navasan if any are missing. Attempts at most once per day (guarded by a
- * marker) so a currency Navasan doesn't return won't cause repeated calls —
- * keeping us well within budget. Safe to call on a hot read path.
+ * Navasan if any are missing. The normal fetch runs at most once per day
+ * (guarded by a marker) so a currency Navasan doesn't return won't cause
+ * repeated calls — keeping us well within budget. Safe to call on a hot read path.
+ *
+ * When a currency was just added to the registry (never seeded), a one-time
+ * seed fetch runs even if the normal fetch already happened today, so newly
+ * supported currencies work immediately instead of only after the next day's
+ * cron. The seed is itself gated to once per day, so a currency Navasan never
+ * returns can add at most one extra call per day (not a burst).
  */
 export async function ensureFreshRates(apiKey: string | undefined): Promise<void> {
   if (!apiKey) return;
@@ -171,11 +194,19 @@ export async function ensureFreshRates(apiKey: string | undefined): Promise<void
   // All rate currencies already have today's row → nothing to do.
   if ((await rateCurrenciesPresentOn(today)) >= RATE_CURRENCIES.length) return;
 
-  // Already attempted a multi-currency fetch today → accept what we have.
-  if ((await getLastRatesAttemptDate()) === today) return;
+  // Normal path: one multi-currency fetch per day.
+  if ((await getLastAttemptDate('navasan_rates')) !== today) {
+    await markAttempt('navasan_rates');
+    await refreshRates(apiKey);
+    return;
+  }
 
-  await markRatesAttempt();
-  await refreshRates(apiKey);
+  // Already fetched today, but a newly added currency has never been seeded →
+  // do a single extra seed fetch (also gated to once per day).
+  if ((await hasUnseededRateCurrency()) && (await getLastAttemptDate('navasan_seed')) !== today) {
+    await markAttempt('navasan_seed');
+    await refreshRates(apiKey);
+  }
 }
 
 /**
