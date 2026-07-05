@@ -2,15 +2,16 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { ArrowLeftRight, Calendar, Tag as TagIcon, X } from 'lucide-react';
+import { ArrowLeftRight, Calendar, Coins, Tag as TagIcon, X } from 'lucide-react';
 import { Drawer } from 'vaul';
 
 import CategoryBadge from '@components/CategoryBadge';
 import Money from '@components/Money';
 
-import { formatToFarsiDate } from '@utils';
+import { formatNumber, formatToFarsiDate } from '@utils';
 
 import { type Expense } from '@/@types/expense';
+import { PIVOT_CURRENCY } from '@/constants/currencies';
 
 interface ExpenseDetailsDrawerProps {
   expense: Expense | null;
@@ -206,6 +207,13 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
                     label="Entered in"
                     primary={expense.currency}
                   />
+                  {expense.currency !== PIVOT_CURRENCY && (
+                    <MetaCell
+                      icon={<Coins className="text-text-muted h-3 w-3" />}
+                      label="Exchange rate"
+                      primary={`1 ${expense.currency} = ${formatNumber(expense.entryRate)} ${PIVOT_CURRENCY}`}
+                    />
+                  )}
                 </section>
 
                 {/* ─── Footer metadata ─────────────────────────────────── */}
