@@ -24,11 +24,12 @@ const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerPro
   // States
   const [isMobile, setIsMobile] = useState(false);
 
-  // iOS keyboard handling: the drawer stays pinned to the viewport bottom (moving
-  // it with `bottom:` fights Safari's visual-viewport pan and exposes the page
-  // behind it). Instead, pad the internal scroll area by the keyboard height so
-  // every field can scroll above the keyboard, and reveal the focused one.
-  const keyboardInset = useKeyboardInset(isOpen && isMobile);
+  // iOS keyboard handling: while the keyboard is open the sheet is repositioned
+  // onto the *visual* viewport (top/height track every pan and resize), so its
+  // bottom edge always coincides with the keyboard top. Anchoring to the layout
+  // viewport instead leaves a strip below it visible whenever Safari pans —
+  // a region no fixed element can paint into (see useKeyboardInset).
+  const keyboard = useKeyboardInset(isOpen && isMobile);
   // Page scroll locking is owned by Radix Dialog (inside vaul): it applies
   // overflow:hidden + scrollbar-gap compensation on open and removes both
   // atomically when the exit animation finishes. Adding our own lock here
@@ -36,12 +37,12 @@ const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerPro
   // uncompensated — the page visibly shifts when Radix finally unlocks.
 
   useEffect(() => {
-    if (keyboardInset === 0) return;
+    if (keyboard.inset === 0) return;
     const focused = document.activeElement;
     if (focused instanceof HTMLElement && scrollAreaRef.current?.contains(focused)) {
       focused.scrollIntoView({ block: 'center' });
     }
-  }, [keyboardInset]);
+  }, [keyboard.inset]);
 
   // Effects
   useEffect(() => {
@@ -96,6 +97,11 @@ const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerPro
         <Drawer.Overlay className="fixed inset-0 z-50 bg-black/20 backdrop-blur-[2px]" />
         <Drawer.Content
           aria-describedby={undefined}
+          style={
+            isMobile && keyboard.inset > 0
+              ? { top: keyboard.offsetTop, bottom: 'auto', height: keyboard.height, maxHeight: keyboard.height }
+              : undefined
+          }
           className={
             isMobile
               ? 'bg-background fixed right-0 bottom-0 left-0 z-50 flex h-[85dvh] max-h-[85dvh] flex-col rounded-t-2xl shadow-2xl outline-none'
@@ -141,14 +147,13 @@ const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerPro
           <div
             ref={scrollAreaRef}
             className="flex-1 overflow-x-clip overflow-y-auto overscroll-contain px-5 py-5 md:px-8 md:py-8"
-            style={isMobile && keyboardInset > 0 ? { paddingBottom: keyboardInset } : undefined}
           >
             {children}
           </div>
 
-          {/* Solid extender below the sheet: when the iOS keyboard lifts the
-              drawer, any sliver between its bottom edge and the keyboard shows
-              this instead of the page behind the overlay. */}
+          {/* Solid extender below the sheet: covers transient slivers between
+              the sheet's bottom edge and the keyboard while keyboard geometry
+              updates lag a frame behind Safari's pan animation. */}
           {isMobile && <div aria-hidden="true" className="bg-background absolute inset-x-0 top-full h-screen" />}
         </Drawer.Content>
       </Drawer.Portal>

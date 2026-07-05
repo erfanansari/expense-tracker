@@ -4,7 +4,7 @@ import { twMerge } from 'tailwind-merge';
 import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
 import { formatMoney, rateOn } from '@features/ExchangeRate/utils/currency';
 
-import { getCurrency, PIVOT_CURRENCY } from '@/constants/currencies';
+import { getCurrency } from '@/constants/currencies';
 
 const cardWrapper =
   'border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6';
@@ -12,35 +12,7 @@ const cardWrapper =
 const ExchangeRateCard = () => {
   const { secondaryCurrency, primaryCurrency, series, isLoading } = useCurrency();
 
-  // The card shows the rate between the two currencies the user actually uses,
-  // derived through the IRT pivot. "Auto direction": the stronger unit (more IRT
-  // per unit) is the base, so the number always reads ≥ 1 and naturally
-  // (e.g. "1 USD = 38.6 TRY", and the default "1 USD = 176,200 IRT").
   const today = new Date().toISOString().split('T')[0];
-  const secondary = secondaryCurrency && secondaryCurrency !== primaryCurrency ? secondaryCurrency : null;
-
-  // Determine the pair. With no distinct secondary, pair a foreign primary
-  // against IRT; if the sole currency is IRT there's nothing to show.
-  let base: string | null = null;
-  let quote: string | null = null;
-  if (!secondary) {
-    if (primaryCurrency !== PIVOT_CURRENCY) {
-      base = primaryCurrency;
-      quote = PIVOT_CURRENCY;
-    }
-  } else {
-    // Larger current pivot rate → base. PIVOT_CURRENCY has an implicit rate of 1,
-    // so a foreign currency always wins as base against IRT.
-    const rPrimary = rateOn(series, primaryCurrency, today) ?? 0;
-    const rSecondary = rateOn(series, secondary, today) ?? 0;
-    if (rSecondary > rPrimary) {
-      base = secondary;
-      quote = primaryCurrency;
-    } else {
-      base = primaryCurrency;
-      quote = secondary;
-    }
-  }
 
   if (isLoading) {
     return (
@@ -59,8 +31,10 @@ const ExchangeRateCard = () => {
     );
   }
 
-  // No foreign currency selected (both primary & secondary are IRT, or secondary off).
-  if (base === null || quote === null) {
+  // An exchange rate needs two distinct currencies. Without a secondary we don't
+  // invent one — the app never assumes IRT for users who didn't choose it.
+  const secondary = secondaryCurrency && secondaryCurrency !== primaryCurrency ? secondaryCurrency : null;
+  if (!secondary) {
     return (
       <div className={cardWrapper}>
         <div className="mb-4 flex items-center justify-between">
@@ -69,10 +43,19 @@ const ExchangeRateCard = () => {
           </div>
         </div>
         <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Exchange Rate</p>
-        <p className="text-text-secondary text-sm">Pick a foreign secondary currency in Settings to track its rate.</p>
+        <p className="text-text-secondary text-sm">Add a secondary currency in Settings to see an exchange rate.</p>
       </div>
     );
   }
+
+  // Show the rate between the user's two currencies, derived through the IRT
+  // pivot. "Auto direction": the stronger unit (more IRT per unit) is the base,
+  // so the number always reads ≥ 1 and naturally (e.g. "1 USD = 38.6 TRY", and
+  // the diaspora default "1 USD = 176,200 IRT").
+  const rPrimary = rateOn(series, primaryCurrency, today) ?? 0;
+  const rSecondary = rateOn(series, secondary, today) ?? 0;
+  const base = rSecondary > rPrimary ? secondary : primaryCurrency;
+  const quote = rSecondary > rPrimary ? primaryCurrency : secondary;
 
   const def = getCurrency(base);
   const quoteDef = getCurrency(quote);
