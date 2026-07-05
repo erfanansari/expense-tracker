@@ -6,7 +6,6 @@ import { X } from 'lucide-react';
 import { Drawer } from 'vaul';
 
 import { useKeyboardInset } from '@hooks/use-keyboard-inset';
-import { useLockBodyScroll } from '@hooks/use-lock-body-scroll';
 
 interface FormDrawerProps {
   isOpen: boolean;
@@ -30,7 +29,11 @@ const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerPro
   // behind it). Instead, pad the internal scroll area by the keyboard height so
   // every field can scroll above the keyboard, and reveal the focused one.
   const keyboardInset = useKeyboardInset(isOpen && isMobile);
-  useLockBodyScroll(isOpen);
+  // Page scroll locking is owned by Radix Dialog (inside vaul): it applies
+  // overflow:hidden + scrollbar-gap compensation on open and removes both
+  // atomically when the exit animation finishes. Adding our own lock here
+  // creates a second owner whose earlier cleanup leaves the 500ms exit window
+  // uncompensated — the page visibly shifts when Radix finally unlocks.
 
   useEffect(() => {
     if (keyboardInset === 0) return;

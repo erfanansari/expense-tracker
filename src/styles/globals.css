@@ -255,11 +255,6 @@ html {
 }
 
 body {
-  /* Reserve scrollbar space permanently so locking body scroll (modal/drawer open)
-     never changes the viewport width — no shift, no JS timing race. Lives on body
-     (not html) because the browser propagates overflow/scrollbar-gutter as a pair
-     from whichever element's overflow is toggled — here, body's. */
-  scrollbar-gutter: stable;
   background: var(--color-background);
   color: var(--color-text-primary);
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
