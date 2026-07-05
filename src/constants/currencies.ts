@@ -75,6 +75,42 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     decimals: 2,
     navasanItem: 'try',
   },
+  {
+    code: 'CAD',
+    label: 'Canadian Dollar',
+    labelFa: 'دلار کانادا',
+    symbol: 'C$',
+    symbolPosition: 'prefix',
+    decimals: 2,
+    navasanItem: 'cad',
+  },
+  {
+    code: 'AUD',
+    label: 'Australian Dollar',
+    labelFa: 'دلار استرالیا',
+    symbol: 'A$',
+    symbolPosition: 'prefix',
+    decimals: 2,
+    navasanItem: 'aud',
+  },
+  {
+    code: 'SEK',
+    label: 'Swedish Krona',
+    labelFa: 'کرون سوئد',
+    symbol: 'kr',
+    symbolPosition: 'suffix',
+    decimals: 2,
+    navasanItem: 'sek',
+  },
+  {
+    code: 'CHF',
+    label: 'Swiss Franc',
+    labelFa: 'فرانک سوئیس',
+    symbol: 'CHF',
+    symbolPosition: 'prefix',
+    decimals: 2,
+    navasanItem: 'chf',
+  },
 ] as const;
 
 /**
