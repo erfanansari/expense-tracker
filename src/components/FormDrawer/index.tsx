@@ -5,6 +5,7 @@ import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react';
 import { Drawer } from 'vaul';
 
+import { useIOSKeyboardFocusGuard } from '@hooks/use-ios-keyboard-focus-guard';
 import { useKeyboardInset } from '@hooks/use-keyboard-inset';
 
 interface FormDrawerProps {
@@ -30,6 +31,11 @@ const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerPro
   // viewport instead leaves a strip below it visible whenever Safari pans —
   // a region no fixed element can paint into (see useKeyboardInset).
   const keyboard = useKeyboardInset(isOpen && isMobile);
+  // Root-cause guard: stop Safari from panning the page when an input gains
+  // focus (the pan drags every fixed element off-screen and exposes the page
+  // behind the sheet — the viewport tracking above can't see that pan because
+  // it arrives as a window scroll, not a visualViewport offset).
+  useIOSKeyboardFocusGuard(isOpen && isMobile, scrollAreaRef);
   // Page scroll locking is owned by Radix Dialog (inside vaul): it applies
   // overflow:hidden + scrollbar-gap compensation on open and removes both
   // atomically when the exit animation finishes. Adding our own lock here
