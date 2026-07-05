@@ -39,7 +39,7 @@ const UpdatePrompt = () => {
     <div
       role="status"
       aria-live="polite"
-      className="fixed left-1/2 z-[9999] w-[calc(100vw-2rem)] max-w-sm -translate-x-1/2"
+      className="pointer-events-auto fixed left-1/2 z-[9999] w-[calc(100vw-2rem)] max-w-sm -translate-x-1/2"
       style={{ bottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}
     >
       <div className="animate-slide-up border-border-subtle bg-background flex items-center gap-3 rounded-2xl border py-3 pr-2 pl-3 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.18),0_4px_8px_-4px_rgba(0,0,0,0.08)]">
@@ -56,13 +56,13 @@ const UpdatePrompt = () => {
 
         <div className="min-w-0 flex-1">
           <p className="text-text-primary text-sm font-semibold">Update ready</p>
-          <p className="text-text-muted truncate text-xs">A new version of Kharji is available</p>
+          <p className="text-text-secondary text-xs">A new version of Kharji is available</p>
         </div>
 
         <button
           onClick={reload}
           disabled={isReloading}
-          className="bg-button-primary-bg text-button-primary-text hover:bg-button-primary-bg-hover flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors duration-200 disabled:opacity-70"
+          className="bg-button-primary-bg text-button-primary-text hover:bg-button-primary-bg-hover flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors duration-200 disabled:cursor-default disabled:opacity-70"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${isReloading ? 'animate-spin' : ''}`} aria-hidden="true" />
           Reload
@@ -70,7 +70,7 @@ const UpdatePrompt = () => {
 
         <button
           onClick={() => setIsVisible(false)}
-          className="text-action-default hover:bg-action-cancel-bg-hover hover:text-action-cancel-text-hover shrink-0 rounded-lg p-2 transition-all duration-200"
+          className="text-action-default hover:bg-action-cancel-bg-hover hover:text-action-cancel-text-hover shrink-0 cursor-pointer rounded-lg p-2 transition-all duration-200"
           title="Dismiss"
           aria-label="Dismiss update notification"
         >
