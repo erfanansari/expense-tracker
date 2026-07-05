@@ -2,8 +2,7 @@ import { Coins, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
 import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
-
-import { formatNumber } from '@utils';
+import { formatMoney, rateOn } from '@features/ExchangeRate/utils/currency';
 
 import { getCurrency, PIVOT_CURRENCY } from '@/constants/currencies';
 
@@ -13,14 +12,35 @@ const cardWrapper =
 const ExchangeRateCard = () => {
   const { secondaryCurrency, primaryCurrency, series, isLoading } = useCurrency();
 
-  // Show the rate of the most relevant foreign currency against IRT — the
-  // secondary if it's a real foreign currency, otherwise the primary.
-  const displayCode =
-    secondaryCurrency && secondaryCurrency !== PIVOT_CURRENCY
-      ? secondaryCurrency
-      : primaryCurrency !== PIVOT_CURRENCY
-        ? primaryCurrency
-        : null;
+  // The card shows the rate between the two currencies the user actually uses,
+  // derived through the IRT pivot. "Auto direction": the stronger unit (more IRT
+  // per unit) is the base, so the number always reads ≥ 1 and naturally
+  // (e.g. "1 USD = 38.6 TRY", and the default "1 USD = 176,200 IRT").
+  const today = new Date().toISOString().split('T')[0];
+  const secondary = secondaryCurrency && secondaryCurrency !== primaryCurrency ? secondaryCurrency : null;
+
+  // Determine the pair. With no distinct secondary, pair a foreign primary
+  // against IRT; if the sole currency is IRT there's nothing to show.
+  let base: string | null = null;
+  let quote: string | null = null;
+  if (!secondary) {
+    if (primaryCurrency !== PIVOT_CURRENCY) {
+      base = primaryCurrency;
+      quote = PIVOT_CURRENCY;
+    }
+  } else {
+    // Larger current pivot rate → base. PIVOT_CURRENCY has an implicit rate of 1,
+    // so a foreign currency always wins as base against IRT.
+    const rPrimary = rateOn(series, primaryCurrency, today) ?? 0;
+    const rSecondary = rateOn(series, secondary, today) ?? 0;
+    if (rSecondary > rPrimary) {
+      base = secondary;
+      quote = primaryCurrency;
+    } else {
+      base = primaryCurrency;
+      quote = secondary;
+    }
+  }
 
   if (isLoading) {
     return (
@@ -40,7 +60,7 @@ const ExchangeRateCard = () => {
   }
 
   // No foreign currency selected (both primary & secondary are IRT, or secondary off).
-  if (!displayCode) {
+  if (base === null || quote === null) {
     return (
       <div className={cardWrapper}>
         <div className="mb-4 flex items-center justify-between">
@@ -54,14 +74,29 @@ const ExchangeRateCard = () => {
     );
   }
 
-  const def = getCurrency(displayCode);
-  // Ignore any future-dated rows — "current" rate is the most recent on or before today.
-  const today = new Date().toISOString().split('T')[0];
-  const points = (series[displayCode] ?? []).filter((p) => p.rateDate <= today);
-  const latest = points[points.length - 1];
-  const prev = points[points.length - 2];
+  const def = getCurrency(base);
+  const quoteDef = getCurrency(quote);
 
-  if (!latest) {
+  // Cross-rate = IRT-per-base ÷ IRT-per-quote, carried forward at each date.
+  // Trend uses the union of both currencies' rate dates (on/before today); when
+  // the quote is IRT that union is just the base series, matching prior behavior.
+  const crossOn = (date: string): number | null => {
+    const rb = rateOn(series, base, date);
+    const rq = rateOn(series, quote, date);
+    if (rb === null || rq === null || rq === 0) return null;
+    return rb / rq;
+  };
+
+  const unionDates = Array.from(
+    new Set([...(series[base] ?? []), ...(series[quote] ?? [])].map((p) => p.rateDate).filter((d) => d <= today))
+  ).sort();
+
+  const latestDate = unionDates[unionDates.length - 1];
+  const prevDate = unionDates[unionDates.length - 2];
+  const rate = latestDate ? crossOn(latestDate) : null;
+  const prevRate = prevDate ? crossOn(prevDate) : null;
+
+  if (rate === null) {
     return (
       <div className={cardWrapper}>
         <div className="mb-4 flex items-center justify-between">
@@ -76,12 +111,11 @@ const ExchangeRateCard = () => {
     );
   }
 
-  const rate = latest.rate; // IRT per 1 unit of displayCode
-  const change = prev ? rate - prev.rate : 0;
-  const pct = prev && prev.rate ? (change / prev.rate) * 100 : 0;
+  const change = prevRate !== null ? rate - prevRate : 0;
+  const pct = prevRate ? (change / prevRate) * 100 : 0;
   const isZero = change === 0;
 
-  const isFresh = latest.rateDate === today;
+  const isFresh = latestDate === today;
 
   return (
     <div className={cardWrapper}>
@@ -119,7 +153,7 @@ const ExchangeRateCard = () => {
       <div>
         <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">1 {def.code} =</p>
         <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl">
-          {formatNumber(rate)} <span className="text-text-muted text-lg">IRT</span>
+          {formatMoney(rate, quoteDef.code)}
         </p>
         <div className="mt-1.5 flex items-center justify-between gap-2">
           <span className="text-text-secondary text-sm font-medium">{def.label}</span>
@@ -131,7 +165,7 @@ const ExchangeRateCard = () => {
                 : 'bg-warning-light text-warning border-warning/20'
             )}
           >
-            {isFresh ? 'Live' : latest.rateDate}
+            {isFresh ? 'Live' : latestDate}
           </span>
         </div>
       </div>
