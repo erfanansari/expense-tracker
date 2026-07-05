@@ -1,33 +1,46 @@
 import { useEffect, useState } from 'react';
 
 /**
- * Height (px) of the on-screen keyboard overlapping the layout viewport.
+ * Visual-viewport geometry while the on-screen keyboard is open.
  *
  * iOS Safari does not resize the layout viewport when the keyboard opens; it
- * pans the visual viewport instead, which drags `position: fixed` elements out
- * of view and reveals the page behind a bottom drawer. We measure the overlap
- * via `visualViewport` so callers can pin themselves above the keyboard, and
- * undo the pan by scrolling the window back to the top.
+ * shrinks and *pans* the visual viewport instead. `position: fixed` elements
+ * stay glued to the layout viewport, so once Safari pans to reveal the focused
+ * input, the visible area extends past the layout viewport's bottom edge —
+ * a region no fixed element (drawer, overlay, extender) can paint into. The
+ * only reliable way to keep a bottom sheet flush with the keyboard is to
+ * reposition it onto the visual viewport itself, tracking pan/resize events.
  *
- * Returns 0 when the keyboard is closed; overlaps under 60px are ignored to
- * filter browser-toolbar show/hide jitter (same heuristic vaul uses).
+ * `inset` is the keyboard height (0 = closed); `offsetTop`/`height` describe
+ * the visible rectangle in layout-viewport coordinates. Keyboards under 60px
+ * are ignored to filter browser-toolbar show/hide jitter (vaul's heuristic).
  */
-export function useKeyboardInset(enabled: boolean) {
-  const [inset, setInset] = useState(0);
+export interface KeyboardViewport {
+  inset: number;
+  offsetTop: number;
+  height: number;
+}
+
+const KEYBOARD_CLOSED: KeyboardViewport = { inset: 0, offsetTop: 0, height: 0 };
+
+export function useKeyboardInset(enabled: boolean): KeyboardViewport {
+  const [viewport, setViewport] = useState<KeyboardViewport>(KEYBOARD_CLOSED);
 
   useEffect(() => {
     if (!enabled) return;
     const visualViewport = window.visualViewport;
     if (!visualViewport) return;
 
-    let frame = 0;
     const update = () => {
-      const overlap = Math.max(0, window.innerHeight - visualViewport.height - visualViewport.offsetTop);
-      const next = overlap < 60 ? 0 : Math.round(overlap);
-      setInset(next);
-      if (next > 0 && (visualViewport.offsetTop > 0 || window.scrollY > 0)) {
-        cancelAnimationFrame(frame);
-        frame = requestAnimationFrame(() => window.scrollTo(0, 0));
+      const keyboardHeight = Math.max(0, window.innerHeight - visualViewport.height);
+      if (keyboardHeight < 60) {
+        setViewport(KEYBOARD_CLOSED);
+      } else {
+        setViewport({
+          inset: Math.round(keyboardHeight),
+          offsetTop: Math.round(visualViewport.offsetTop),
+          height: Math.round(visualViewport.height),
+        });
       }
     };
 
@@ -35,12 +48,11 @@ export function useKeyboardInset(enabled: boolean) {
     visualViewport.addEventListener('resize', update);
     visualViewport.addEventListener('scroll', update);
     return () => {
-      cancelAnimationFrame(frame);
       visualViewport.removeEventListener('resize', update);
       visualViewport.removeEventListener('scroll', update);
-      setInset(0);
+      setViewport(KEYBOARD_CLOSED);
     };
   }, [enabled]);
 
-  return inset;
+  return viewport;
 }
