@@ -62,7 +62,13 @@ export function useCurrencyPreferences(enabled = true) {
     onError: (_err, _patch, context) => {
       if (context?.previous) queryClient.setQueryData(queryKey, context.previous);
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+    onSettled: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey }),
+        // /api/summary computes totals in the user's currency server-side, so its
+        // cache is stale after a currency change — refetch it in the new currency.
+        queryClient.invalidateQueries({ queryKey: queryKeys.summary.all() }),
+      ]),
   });
 
   return {
