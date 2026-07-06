@@ -49,13 +49,13 @@ The entire codebase is public so you can read every line of code that touches yo
 
 ## Screenshots
 
-|                      Expenses                       |                   Reports                   |
-| :-------------------------------------------------: | :-----------------------------------------: |
-|    ![Expenses](.github/screenshots/expenses.png)    | ![Reports](.github/screenshots/reports.png) |
-|                     **Assets**                      |                 **Income**                  |
-|      ![Assets](.github/screenshots/assets.png)      |  ![Income](.github/screenshots/income.png)  |
-|                    **Dark Mode**                    |              **Landing Page**               |
-| ![Dark Mode](.github/screenshots/overview-dark.png) | ![Landing](.github/screenshots/landing.png) |
+|                       Expenses                        |                   Reports                   |
+| :---------------------------------------------------: | :-----------------------------------------: |
+|     ![Expenses](.github/screenshots/expenses.png)     | ![Reports](.github/screenshots/reports.png) |
+|                      **Assets**                       |                 **Income**                  |
+|       ![Assets](.github/screenshots/assets.png)       |  ![Income](.github/screenshots/income.png)  |
+|                    **Light Mode**                     |              **Landing Page**               |
+| ![Light Mode](.github/screenshots/overview-light.png) | ![Landing](.github/screenshots/landing.png) |
 
 ## Tech Stack
 
