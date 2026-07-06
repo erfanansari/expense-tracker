@@ -52,7 +52,7 @@ function ResetPasswordContent() {
     return (
       <>
         <h1 className="text-text-primary mb-4 text-center text-2xl font-semibold">Invalid reset link</h1>
-        <p className="mb-6 text-center text-[var(--foreground-secondary)]">
+        <p className="text-text-secondary mb-6 text-center">
           This password reset link is invalid or has expired. Please request a new one.
         </p>
         <Link href="/forgot-password">
@@ -65,23 +65,19 @@ function ResetPasswordContent() {
   return (
     <>
       <h1 className="text-text-primary mb-2 text-center text-2xl font-semibold">Reset your password</h1>
-      <p className="mb-6 text-center text-[var(--foreground-secondary)]">Create a new password below</p>
+      <p className="text-text-secondary mb-6 text-center">Create a new password below</p>
 
       {error && (
-        <div className="mb-4 rounded-lg border border-[var(--accent-error)] bg-[var(--accent-error-muted)] p-4 text-sm text-[var(--accent-error)]">
-          {error}
-        </div>
+        <div className="border-danger bg-danger-light text-danger mb-4 rounded-lg border p-4 text-sm">{error}</div>
       )}
 
       {message && (
-        <div className="mb-4 rounded-lg border border-[var(--accent-success)] bg-[var(--accent-success-muted)] p-4 text-sm text-[var(--accent-success)]">
-          {message}
-        </div>
+        <div className="border-success bg-success-light text-success mb-4 rounded-lg border p-4 text-sm">{message}</div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="password" className="mb-2 block text-sm font-medium text-[var(--foreground)]">
+          <label htmlFor="password" className="text-text-primary mb-2 block text-sm font-medium">
             New password
           </label>
           <input
@@ -91,16 +87,14 @@ function ResetPasswordContent() {
             onChange={(e) => setPassword(e.target.value)}
             required
             placeholder="Create a new password"
-            className="bg-background w-full rounded-lg border border-[var(--border-default)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
+            className="bg-background border-border-subtle text-text-primary placeholder:text-text-muted focus:border-primary w-full rounded-lg border px-4 py-3 focus:outline-none"
             disabled={loading}
           />
-          <p className="mt-2 text-xs text-[var(--foreground-muted)]">
-            At least 8 characters, 1 uppercase, 1 lowercase, 1 number
-          </p>
+          <p className="text-text-muted mt-2 text-xs">At least 8 characters, 1 uppercase, 1 lowercase, 1 number</p>
         </div>
 
         <div>
-          <label htmlFor="passwordConfirm" className="mb-2 block text-sm font-medium text-[var(--foreground)]">
+          <label htmlFor="passwordConfirm" className="text-text-primary mb-2 block text-sm font-medium">
             Confirm password
           </label>
           <input
@@ -110,7 +104,7 @@ function ResetPasswordContent() {
             onChange={(e) => setPasswordConfirm(e.target.value)}
             required
             placeholder="Confirm your new password"
-            className="bg-background w-full rounded-lg border border-[var(--border-default)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:border-[var(--accent-blue)] focus:outline-none"
+            className="bg-background border-border-subtle text-text-primary placeholder:text-text-muted focus:border-primary w-full rounded-lg border px-4 py-3 focus:outline-none"
             disabled={loading}
           />
         </div>
@@ -121,8 +115,8 @@ function ResetPasswordContent() {
       </form>
 
       <div className="mt-6 text-center text-sm">
-        <p className="text-[var(--foreground-secondary)]">
-          <Link href="/login" className="font-medium text-[var(--accent-blue)] hover:text-[var(--accent-blue-hover)]">
+        <p className="text-text-secondary">
+          <Link href="/login" className="text-blue hover:text-blue-hover font-medium">
             Back to login
           </Link>
         </p>

@@ -46,7 +46,7 @@ const UpdatePrompt = () => {
         {/* Brand mark with a "fresh" pulse dot */}
         <div className="relative shrink-0">
           <div className="bg-primary flex h-9 w-9 items-center justify-center rounded-xl">
-            <Zap className="h-4 w-4 text-white" aria-hidden="true" />
+            <Zap className="text-primary-foreground h-4 w-4" aria-hidden="true" />
           </div>
           <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5" aria-hidden="true">
             <span className="bg-success absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />

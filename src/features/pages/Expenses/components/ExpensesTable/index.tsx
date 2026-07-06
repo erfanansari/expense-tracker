@@ -292,7 +292,7 @@ const ExpensesTable = ({
                 }}
                 placeholder="From"
                 isClearable
-                wrapperClassName="flex-1 min-w-[80px] [&_input]:border-0 [&_input]:bg-transparent [&_input]:px-1 [&_input]:py-0 [&_input]:shadow-none [&_input]:rounded-none"
+                wrapperClassName="flex-1 min-w-[80px] [&_input]:border-0 [&_input]:!bg-transparent [&_input]:px-1 [&_input]:py-0 [&_input]:shadow-none [&_input]:rounded-none"
               />
               <span className="text-text-muted shrink-0 text-xs">→</span>
               <DatePicker
@@ -301,7 +301,7 @@ const ExpensesTable = ({
                 onChange={(date) => onFiltersChange((f) => ({ ...f, dateTo: date || undefined }))}
                 placeholder="To"
                 isClearable
-                wrapperClassName="flex-1 min-w-[80px] [&_input]:border-0 [&_input]:bg-transparent [&_input]:px-1 [&_input]:py-0 [&_input]:shadow-none [&_input]:rounded-none"
+                wrapperClassName="flex-1 min-w-[80px] [&_input]:border-0 [&_input]:!bg-transparent [&_input]:px-1 [&_input]:py-0 [&_input]:shadow-none [&_input]:rounded-none"
               />
             </div>
 

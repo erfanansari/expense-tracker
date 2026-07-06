@@ -1,5 +1,7 @@
 'use client';
 
+import { ThemeProvider } from 'next-themes';
+
 import { GlobalDrawerProvider } from '@features/drawers/GlobalDrawerProvider';
 import { CurrencyProvider } from '@features/ExchangeRate/CurrencyProvider';
 
@@ -16,16 +18,18 @@ interface ProvidersProps {
 // CurrencyProvider wraps GlobalDrawerProvider so money components rendered inside
 // global drawers (e.g. the expense/income/asset forms) have currency context too.
 const Providers = ({ children }: ProvidersProps) => (
-  <QueryProvider>
-    <ToastProvider>
-      <UnauthorizedListener />
-      <CurrencyProvider>
-        <GlobalDrawerProvider>
-          <CommandPaletteProvider>{children}</CommandPaletteProvider>
-        </GlobalDrawerProvider>
-      </CurrencyProvider>
-    </ToastProvider>
-  </QueryProvider>
+  <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    <QueryProvider>
+      <ToastProvider>
+        <UnauthorizedListener />
+        <CurrencyProvider>
+          <GlobalDrawerProvider>
+            <CommandPaletteProvider>{children}</CommandPaletteProvider>
+          </GlobalDrawerProvider>
+        </CurrencyProvider>
+      </ToastProvider>
+    </QueryProvider>
+  </ThemeProvider>
 );
 
 export default Providers;
