@@ -421,10 +421,15 @@ body {
    classes (bg-background, bg-transparent, bg-input-bg, text-*) always override it.
    In light mode input-bg == background so this changed nothing; in dark mode it
    lets inputs blend with their container instead of being forced to a lighter
-   fill (fixes nested/mismatched input boxes in forms, money field, filters). */
-:where(input[type='text'], input[type='number'], input[type='email'], input[type='password'], textarea) {
-  background-color: var(--color-input-bg);
-  color: var(--color-input-text);
+   fill (fixes nested/mismatched input boxes in forms, money field, filters).
+   Must live in @layer base: this file is unlayered CSS, which otherwise beats
+   Tailwind's layered utility classes regardless of specificity, defeating the
+   :where() zero-specificity trick entirely. */
+@layer base {
+  :where(input[type='text'], input[type='number'], input[type='email'], input[type='password'], textarea) {
+    background-color: var(--color-input-bg);
+    color: var(--color-input-text);
+  }
 }
 
 input[type='text'],
