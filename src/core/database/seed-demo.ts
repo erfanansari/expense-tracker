@@ -2,13 +2,11 @@
 import type { InStatement } from '@libsql/client';
 import { createClient } from '@libsql/client';
 import { config } from 'dotenv';
+import { pathToFileURL } from 'url';
 
 import { DEMO_EMAIL, DEMO_PASSWORD } from '@constants';
 
 import { hashPassword } from '@core/auth/password';
-
-// Load environment variables from .env.local
-config({ path: '.env.local' });
 
 const DEMO_NAME = 'Demo User';
 
@@ -24,7 +22,7 @@ function mulberry32(seed: number) {
   };
 }
 
-const rand = mulberry32(42);
+let rand = mulberry32(42);
 
 function randInt(min: number, max: number): number {
   return Math.floor(rand() * (max - min + 1)) + min;
@@ -43,70 +41,67 @@ function pickN<T>(arr: T[], n: number): T[] {
   return shuffled.slice(0, n);
 }
 
-// ─── Historical exchange rate lookup ────────────────────────────────────────
-const EXCHANGE_RATE_TABLE: Record<number, number> = {
-  2021: 25000,
-  2022: 30000,
-  2023: 42000,
-  2024: 55000,
-  2025: 65000,
-  2026: 70000,
-};
+function pad2(n: number): string {
+  return String(n).padStart(2, '0');
+}
+
+// ─── Rolling date window ────────────────────────────────────────────────────
+// The demo always shows the last WINDOW_YEARS of activity ending with the
+// current month, so re-running this seed keeps the data perpetually "recent".
+const WINDOW_YEARS = 5;
+const NOW = new Date();
+const END_YEAR = NOW.getFullYear();
+const END_MONTH = NOW.getMonth() + 1; // 1-based
+const START_YEAR = END_YEAR - WINDOW_YEARS;
+const START_MONTH = END_MONTH;
+
+/** All { year, month } periods from the window start through the current month. */
+function buildPeriods(): { year: number; month: number }[] {
+  const periods: { year: number; month: number }[] = [];
+  let y = START_YEAR;
+  let m = START_MONTH;
+  while (y < END_YEAR || (y === END_YEAR && m <= END_MONTH)) {
+    periods.push({ year: y, month: m });
+    m++;
+    if (m > 12) {
+      m = 1;
+      y++;
+    }
+  }
+  return periods;
+}
+
+const PERIODS = buildPeriods();
+const isCurrentMonth = (year: number, month: number) => year === END_YEAR && month === END_MONTH;
+
+/** Clamp a day so records in the current month never land in the future. */
+function clampDay(year: number, month: number, day: number): number {
+  return isCurrentMonth(year, month) ? Math.min(day, NOW.getDate()) : day;
+}
+
+// ─── Historical exchange rate (USD→IRT), relative to the window start ────────
+const START_RATE = 25000; // ~Toman per USD at window start
+const ANNUAL_RATE_GROWTH = 1.23; // compounding devaluation (~25k → ~70k over 5y)
 
 function getExchangeRate(year: number, month: number): number {
-  const baseYear = Math.min(Math.max(year, 2021), 2026);
-  const nextYear = Math.min(baseYear + 1, 2026);
-  const baseRate = EXCHANGE_RATE_TABLE[baseYear] ?? 70000;
-  const nextRate = EXCHANGE_RATE_TABLE[nextYear] ?? 70000;
-
-  // Interpolate within the year
-  const fraction = (month - 1) / 12;
-  const interpolated = baseRate + (nextRate - baseRate) * fraction;
-
-  // Add some noise (±5%)
-  const noise = 1 + (rand() - 0.5) * 0.1;
-  return Math.round(interpolated * noise);
+  const yearsFromStart = year - START_YEAR + (month - 1) / 12;
+  const base = START_RATE * Math.pow(ANNUAL_RATE_GROWTH, yearsFromStart);
+  const noise = 1 + (rand() - 0.5) * 0.1; // ±5%
+  return Math.round(base * noise);
 }
 
 // ─── Tags ───────────────────────────────────────────────────────────────────
-const TAG_NAMES = [
-  'essential',
-  'recurring',
-  'luxury',
-  'work-related',
-  'health',
-  'family',
-  'personal',
-  'planned',
-  'impulse',
-  'online',
-  'cash',
-  'seasonal',
-  'subscription',
-  'one-time',
-  'gift',
-  'urgent',
-  'social',
-  'self-care',
-];
+// A small, everyday set — enough to make filtering meaningful without clutter.
+const TAG_NAMES = ['essential', 'recurring', 'planned', 'impulse', 'social', 'fun', 'cash', 'online'];
 
-// Category to tag affinity mapping
+// Category to tag affinity mapping (keys must match EXPENSE_CATEGORIES names).
 const CATEGORY_TAG_AFFINITY: Record<string, string[]> = {
-  Groceries: ['essential', 'recurring', 'cash', 'planned', 'family'],
-  'Dining Out': ['social', 'luxury', 'impulse', 'personal', 'cash'],
-  Transportation: ['essential', 'recurring', 'work-related', 'personal'],
+  Groceries: ['essential', 'recurring', 'planned', 'cash'],
+  'Coffee & Dining': ['social', 'fun', 'impulse', 'cash'],
+  Transport: ['essential', 'recurring', 'cash'],
   Rent: ['essential', 'recurring', 'planned'],
-  Utilities: ['essential', 'recurring', 'planned'],
-  Subscriptions: ['recurring', 'subscription', 'online', 'personal'],
-  Travel: ['luxury', 'planned', 'seasonal', 'personal', 'family'],
-  Electronics: ['luxury', 'one-time', 'online', 'planned', 'impulse'],
-  Healthcare: ['essential', 'health', 'urgent', 'self-care'],
-  Clothing: ['personal', 'seasonal', 'impulse', 'luxury', 'online'],
-  Education: ['personal', 'planned', 'work-related', 'one-time'],
-  'Gifts Given': ['gift', 'family', 'social', 'seasonal'],
-  Home: ['essential', 'planned', 'one-time', 'family'],
-  'Personal Care': ['self-care', 'recurring', 'personal', 'health'],
-  Entertainment: ['social', 'luxury', 'impulse', 'personal', 'online'],
+  Utilities: ['essential', 'recurring', 'planned', 'online'],
+  Entertainment: ['social', 'fun', 'impulse', 'online'],
 };
 
 // ─── Expense categories with frequency and price ranges ─────────────────────
@@ -121,54 +116,53 @@ interface ExpenseCategory {
   descriptions: string[];
 }
 
+// Six everyday categories for a modest renter — legible, not overwhelming.
+// USD amounts are intentionally down-to-earth (rent ~$450, groceries ~$10-55).
 const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   {
     name: 'Groceries',
     icon: 'ShoppingCart',
     color: 'green',
-    minPerMonth: 6,
-    maxPerMonth: 10,
-    minUsd: 15,
-    maxUsd: 120,
+    minPerMonth: 4,
+    maxPerMonth: 7,
+    minUsd: 8,
+    maxUsd: 55,
     descriptions: [
       'Weekly groceries',
       'Fresh produce',
-      'Dairy and eggs',
-      'Meat and fish',
-      'Pantry essentials',
-      'Snacks and beverages',
-      'Organic food',
-      'Frozen meals',
+      'Bread and dairy',
+      'Fruit and vegetables',
+      'Pantry basics',
+      'Snacks and tea',
     ],
   },
   {
-    name: 'Dining Out',
-    icon: 'Utensils',
+    name: 'Coffee & Dining',
+    icon: 'Coffee',
     color: 'orange',
-    minPerMonth: 3,
-    maxPerMonth: 7,
-    minUsd: 8,
-    maxUsd: 85,
+    minPerMonth: 4,
+    maxPerMonth: 8,
+    minUsd: 3,
+    maxUsd: 30,
     descriptions: [
-      'Lunch with coworkers',
-      'Dinner date',
       'Coffee shop',
+      'Lunch out',
+      'Dinner with friends',
+      'Kebab',
+      'Cafe with a friend',
+      'Bakery',
       'Fast food',
-      'Pizza delivery',
-      'Sushi restaurant',
-      'Brunch',
-      'Thai takeout',
     ],
   },
   {
-    name: 'Transportation',
+    name: 'Transport',
     icon: 'Car',
     color: 'sky',
     minPerMonth: 3,
     maxPerMonth: 6,
-    minUsd: 5,
-    maxUsd: 60,
-    descriptions: ['Gas fill-up', 'Uber ride', 'Metro card', 'Parking fee', 'Car wash', 'Bus fare', 'Toll fee'],
+    minUsd: 2,
+    maxUsd: 25,
+    descriptions: ['Gas fill-up', 'Snapp ride', 'Metro credit', 'Taxi', 'Parking', 'Bus fare'],
   },
   {
     name: 'Rent',
@@ -176,8 +170,8 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
     color: 'blue',
     minPerMonth: 1,
     maxPerMonth: 1,
-    minUsd: 1200,
-    maxUsd: 1500,
+    minUsd: 400,
+    maxUsd: 500,
     descriptions: ['Monthly rent'],
   },
   {
@@ -186,121 +180,9 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
     color: 'amber',
     minPerMonth: 1,
     maxPerMonth: 1,
-    minUsd: 80,
-    maxUsd: 200,
-    descriptions: ['Electricity bill', 'Water bill', 'Gas bill', 'Internet bill'],
-  },
-  {
-    name: 'Subscriptions',
-    icon: 'CreditCard',
-    color: 'indigo',
-    minPerMonth: 1,
-    maxPerMonth: 1,
-    minUsd: 10,
-    maxUsd: 50,
-    descriptions: ['Netflix', 'Spotify', 'Cloud storage', 'Gym membership', 'News subscription', 'Software license'],
-  },
-  {
-    name: 'Travel',
-    icon: 'Plane',
-    color: 'cyan',
-    minPerMonth: 0,
-    maxPerMonth: 0,
-    minUsd: 200,
-    maxUsd: 2500,
-    descriptions: [
-      'Flight tickets',
-      'Hotel booking',
-      'Airbnb stay',
-      'Car rental',
-      'Travel insurance',
-      'Vacation activities',
-    ],
-  },
-  {
-    name: 'Electronics',
-    icon: 'Laptop',
-    color: 'slate',
-    minPerMonth: 0,
-    maxPerMonth: 0,
-    minUsd: 30,
-    maxUsd: 800,
-    descriptions: [
-      'Phone accessory',
-      'USB cable',
-      'Headphones',
-      'Keyboard',
-      'Monitor',
-      'Laptop charger',
-      'Smart watch',
-    ],
-  },
-  {
-    name: 'Healthcare',
-    icon: 'Heart',
-    color: 'rose',
-    minPerMonth: 0,
-    maxPerMonth: 0,
     minUsd: 20,
-    maxUsd: 300,
-    descriptions: ['Doctor visit', 'Pharmacy', 'Dental checkup', 'Eye exam', 'Vitamins', 'Lab tests'],
-  },
-  {
-    name: 'Clothing',
-    icon: 'Shirt',
-    color: 'violet',
-    minPerMonth: 0,
-    maxPerMonth: 0,
-    minUsd: 25,
-    maxUsd: 250,
-    descriptions: ['Shoes', 'Winter jacket', 'T-shirts', 'Jeans', 'Work clothes', 'Accessories'],
-  },
-  {
-    name: 'Education',
-    icon: 'GraduationCap',
-    color: 'teal',
-    minPerMonth: 0,
-    maxPerMonth: 0,
-    minUsd: 15,
-    maxUsd: 500,
-    descriptions: ['Online course', 'Books', 'Workshop', 'Certification', 'Udemy course'],
-  },
-  {
-    name: 'Gifts Given',
-    icon: 'Gift',
-    color: 'pink',
-    minPerMonth: 0,
-    maxPerMonth: 0,
-    minUsd: 20,
-    maxUsd: 200,
-    descriptions: ['Birthday gift', 'Wedding gift', 'Holiday present', 'Baby shower gift', 'Thank you gift'],
-  },
-  {
-    name: 'Home',
-    icon: 'Home',
-    color: 'emerald',
-    minPerMonth: 0,
-    maxPerMonth: 0,
-    minUsd: 15,
-    maxUsd: 400,
-    descriptions: [
-      'Cleaning supplies',
-      'Kitchen gadget',
-      'Furniture piece',
-      'Light bulbs',
-      'Home repair',
-      'Decor item',
-    ],
-  },
-  {
-    name: 'Personal Care',
-    icon: 'Sparkles',
-    color: 'lime',
-    minPerMonth: 1,
-    maxPerMonth: 2,
-    minUsd: 10,
-    maxUsd: 80,
-    descriptions: ['Haircut', 'Skincare products', 'Shampoo and soap', 'Dental care', 'Cologne'],
+    maxUsd: 70,
+    descriptions: ['Electricity bill', 'Water bill', 'Gas bill', 'Internet bill', 'Phone bill'],
   },
   {
     name: 'Entertainment',
@@ -308,9 +190,9 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
     color: 'red',
     minPerMonth: 1,
     maxPerMonth: 3,
-    minUsd: 10,
-    maxUsd: 100,
-    descriptions: ['Movie tickets', 'Concert', 'Video game', 'Board game', 'Bowling night', 'Streaming rental'],
+    minUsd: 5,
+    maxUsd: 40,
+    descriptions: ['Movie night', 'Streaming subscription', 'Video game', 'Concert', 'Book', 'Day trip'],
   },
 ];
 
@@ -324,94 +206,57 @@ interface AssetDef {
   growth: number; // annual multiplier (1.05 = 5% growth)
 }
 
+// A modest renter's portfolio (~$22k net worth today), loosely echoing a
+// real Persian-market mix: some cash, a savings account, a bit of gold and a
+// gold coin, a little Bitcoin, and an everyday car. No property, no stock desk.
 const ASSET_DEFS: AssetDef[] = [
   {
     category: 'cash',
-    name: 'Emergency Fund',
-    quantity: 1,
-    unit: null,
-    baseUnitValueUsd: 5000,
-    growth: 1.02,
+    name: 'US Dollar (cash)',
+    quantity: 2800,
+    unit: 'USD',
+    baseUnitValueUsd: 1,
+    growth: 1.0,
   },
   {
-    category: 'cash',
-    name: 'Petty Cash',
+    category: 'bank',
+    name: 'Savings Account',
     quantity: 1,
     unit: null,
-    baseUnitValueUsd: 300,
-    growth: 1.0,
+    baseUnitValueUsd: 3000,
+    growth: 1.03,
+  },
+  {
+    category: 'commodity',
+    name: 'Gold',
+    quantity: 15,
+    unit: 'grams',
+    baseUnitValueUsd: 50,
+    growth: 1.08,
+  },
+  {
+    category: 'commodity',
+    name: 'Emami Gold Coin',
+    quantity: 2,
+    unit: 'coins',
+    baseUnitValueUsd: 500,
+    growth: 1.08,
   },
   {
     category: 'crypto',
     name: 'Bitcoin',
-    quantity: 0.15,
+    quantity: 0.04,
     unit: 'BTC',
     baseUnitValueUsd: 30000,
     growth: 1.4,
   },
   {
-    category: 'crypto',
-    name: 'Ethereum',
-    quantity: 2.5,
-    unit: 'ETH',
-    baseUnitValueUsd: 2000,
-    growth: 1.35,
-  },
-  {
-    category: 'commodity',
-    name: 'Gold',
-    quantity: 10,
-    unit: 'grams',
-    baseUnitValueUsd: 58,
-    growth: 1.08,
-  },
-  {
     category: 'vehicle',
-    name: '2020 Toyota Camry',
-    quantity: 1,
-    unit: null,
-    baseUnitValueUsd: 25000,
-    growth: 0.88,
-  },
-  {
-    category: 'property',
-    name: 'Apartment',
-    quantity: 1,
-    unit: null,
-    baseUnitValueUsd: 180000,
-    growth: 1.06,
-  },
-  {
-    category: 'bank',
-    name: 'Checking Account',
-    quantity: 1,
-    unit: null,
-    baseUnitValueUsd: 3500,
-    growth: 1.01,
-  },
-  {
-    category: 'bank',
-    name: 'High-Yield Savings',
-    quantity: 1,
-    unit: null,
-    baseUnitValueUsd: 15000,
-    growth: 1.05,
-  },
-  {
-    category: 'investment',
-    name: 'Stock Portfolio',
+    name: 'Peugeot 207',
     quantity: 1,
     unit: null,
     baseUnitValueUsd: 12000,
-    growth: 1.12,
-  },
-  {
-    category: 'investment',
-    name: 'Index Fund',
-    quantity: 1,
-    unit: null,
-    baseUnitValueUsd: 8000,
-    growth: 1.1,
+    growth: 0.9,
   },
 ];
 
@@ -424,7 +269,11 @@ async function executeBatch(client: ReturnType<typeof createClient>, statements:
 }
 
 // ─── Main seed function ─────────────────────────────────────────────────────
-async function seedDemo() {
+export async function seedDemo() {
+  // Reset the deterministic PRNG so repeated invocations (e.g. a warm serverless
+  // lambda hit by the cron more than once) always produce the same dataset.
+  rand = mulberry32(42);
+
   const client = createClient({
     url: process.env.TURSO_DATABASE_URL!,
     authToken: process.env.TURSO_AUTH_TOKEN!,
@@ -520,63 +369,60 @@ async function seedDemo() {
     }
     console.log(`  Created ${TAG_NAMES.length} tags`);
 
-    // 4. Insert expenses (Jan 2021 - Jan 2026 = 61 months)
+    // 4. Insert expenses across the rolling window (WINDOW_YEARS + 1 months)
     console.log('Inserting expenses...');
     const expenseStatements: InStatement[] = [];
     const expenseTagPairs: { expenseIndex: number; tagId: number }[] = [];
     let expenseCount = 0;
 
-    for (let year = 2021; year <= 2026; year++) {
-      const maxMonth = year === 2026 ? 1 : 12;
-      for (let month = 1; month <= maxMonth; month++) {
-        for (const cat of EXPENSE_CATEGORIES) {
-          // Determine how many expenses for this category this month
-          let count: number;
-          if (cat.minPerMonth === cat.maxPerMonth) {
-            count = cat.minPerMonth;
-          } else if (cat.minPerMonth === 0) {
-            // Occasional: ~20-30% chance per month
-            count = rand() < 0.25 ? randInt(1, 2) : 0;
-          } else {
-            count = randInt(cat.minPerMonth, cat.maxPerMonth);
-          }
+    for (const { year, month } of PERIODS) {
+      for (const cat of EXPENSE_CATEGORIES) {
+        // Determine how many expenses for this category this month
+        let count: number;
+        if (cat.minPerMonth === cat.maxPerMonth) {
+          count = cat.minPerMonth;
+        } else if (cat.minPerMonth === 0) {
+          // Occasional: ~20-30% chance per month
+          count = rand() < 0.25 ? randInt(1, 2) : 0;
+        } else {
+          count = randInt(cat.minPerMonth, cat.maxPerMonth);
+        }
 
-          for (let i = 0; i < count; i++) {
-            const day = randInt(1, 28); // Avoid month-end edge cases
-            const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const amountUsd = randFloat(cat.minUsd, cat.maxUsd);
-            const rate = getExchangeRate(year, month);
-            const description = pick(cat.descriptions);
+        for (let i = 0; i < count; i++) {
+          const day = clampDay(year, month, randInt(1, 28)); // Avoid month-end/future edge cases
+          const date = `${year}-${pad2(month)}-${pad2(day)}`;
+          const amountUsd = randFloat(cat.minUsd, cat.maxUsd);
+          const rate = getExchangeRate(year, month);
+          const description = pick(cat.descriptions);
 
-            // Demo records are entered in USD with the period's rate as entryRate
-            // (entryRate = Toman per 1 USD), so the pivot value equals amountUsd * rate.
-            expenseStatements.push({
-              sql: `INSERT INTO expenses (user_id, description, amount, currency, entryRate, category_id, date, created_at)
+          // Demo records are entered in USD with the period's rate as entryRate
+          // (entryRate = Toman per 1 USD), so the pivot value equals amountUsd * rate.
+          expenseStatements.push({
+            sql: `INSERT INTO expenses (user_id, description, amount, currency, entryRate, category_id, date, created_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-              args: [
-                userId,
-                description,
-                amountUsd,
-                'USD',
-                rate,
-                categoryMap[cat.name],
-                date,
-                `${date}T${String(randInt(8, 22)).padStart(2, '0')}:${String(randInt(0, 59)).padStart(2, '0')}:00`,
-              ],
-            });
+            args: [
+              userId,
+              description,
+              amountUsd,
+              'USD',
+              rate,
+              categoryMap[cat.name],
+              date,
+              `${date}T${String(randInt(8, 22)).padStart(2, '0')}:${String(randInt(0, 59)).padStart(2, '0')}:00`,
+            ],
+          });
 
-            // Assign 1-3 tags based on category affinity
-            const affinityTags = CATEGORY_TAG_AFFINITY[cat.name] ?? [];
-            const numTags = randInt(1, Math.min(3, affinityTags.length));
-            const chosenTags = pickN(affinityTags, numTags);
-            for (const tagName of chosenTags) {
-              if (tagMap[tagName]) {
-                expenseTagPairs.push({ expenseIndex: expenseCount, tagId: tagMap[tagName] });
-              }
+          // Assign 1-3 tags based on category affinity
+          const affinityTags = CATEGORY_TAG_AFFINITY[cat.name] ?? [];
+          const numTags = randInt(1, Math.min(3, affinityTags.length));
+          const chosenTags = pickN(affinityTags, numTags);
+          for (const tagName of chosenTags) {
+            if (tagMap[tagName]) {
+              expenseTagPairs.push({ expenseIndex: expenseCount, tagId: tagMap[tagName] });
             }
-
-            expenseCount++;
           }
+
+          expenseCount++;
         }
       }
     }
@@ -604,102 +450,80 @@ async function seedDemo() {
     const incomeStatements: InStatement[] = [];
     let incomeCount = 0;
 
-    for (let year = 2021; year <= 2026; year++) {
-      const maxMonth = year === 2026 ? 1 : 12;
-      const baseSalary = 3500 + (year - 2021) * 300;
+    for (const { year, month } of PERIODS) {
+      // Modest salary with small yearly raises (a bit above monthly expenses,
+      // so the renter saves a little each month).
+      const baseSalary = 1000 + (year - START_YEAR) * 80;
+      const rate = getExchangeRate(year, month);
 
-      for (let month = 1; month <= maxMonth; month++) {
-        const rate = getExchangeRate(year, month);
+      // Monthly salary (1st of the month)
+      const salaryDate = `${year}-${pad2(month)}-${pad2(clampDay(year, month, 1))}T09:00:00`;
+      const salaryUsd = randFloat(baseSalary - 100, baseSalary + 100);
+      incomeStatements.push({
+        sql: `INSERT INTO incomes (userId, amount, currency, entryRate, month, year, incomeType, source, notes, createdAt, updatedAt)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        args: [
+          userId,
+          salaryUsd,
+          'USD',
+          rate,
+          month,
+          year,
+          'salary',
+          'Employer Inc.',
+          'Monthly salary',
+          salaryDate,
+          salaryDate,
+        ],
+      });
+      incomeCount++;
 
-        // Monthly salary
-        const salaryUsd = randFloat(baseSalary - 100, baseSalary + 100);
+      // Occasional freelance side income (~20% of months)
+      if (rand() < 0.2) {
+        const freelanceDate = `${year}-${pad2(month)}-${pad2(clampDay(year, month, 15))}T10:00:00`;
+        const freelanceUsd = randFloat(150, 600);
         incomeStatements.push({
           sql: `INSERT INTO incomes (userId, amount, currency, entryRate, month, year, incomeType, source, notes, createdAt, updatedAt)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           args: [
             userId,
-            salaryUsd,
+            freelanceUsd,
             'USD',
             rate,
             month,
             year,
-            'salary',
-            'Employer Inc.',
-            'Monthly salary',
-            `${year}-${String(month).padStart(2, '0')}-01T09:00:00`,
-            `${year}-${String(month).padStart(2, '0')}-01T09:00:00`,
+            'freelance',
+            pick(['Web project', 'Consulting', 'Design work', 'Code review', 'Tech writing']),
+            'Freelance work',
+            freelanceDate,
+            freelanceDate,
           ],
         });
         incomeCount++;
+      }
 
-        // Freelance (~25% chance per month)
-        if (rand() < 0.25) {
-          const freelanceUsd = randFloat(500, 2500);
-          incomeStatements.push({
-            sql: `INSERT INTO incomes (userId, amount, currency, entryRate, month, year, incomeType, source, notes, createdAt, updatedAt)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            args: [
-              userId,
-              freelanceUsd,
-              'USD',
-              rate,
-              month,
-              year,
-              'freelance',
-              pick(['Web project', 'Consulting', 'Design work', 'Code review', 'Tech writing']),
-              'Freelance work',
-              `${year}-${String(month).padStart(2, '0')}-15T10:00:00`,
-              `${year}-${String(month).padStart(2, '0')}-15T10:00:00`,
-            ],
-          });
-          incomeCount++;
-        }
-
-        // Annual investment returns (December)
-        if (month === 12) {
-          const investmentUsd = randFloat(800, 3000);
-          incomeStatements.push({
-            sql: `INSERT INTO incomes (userId, amount, currency, entryRate, month, year, incomeType, source, notes, createdAt, updatedAt)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            args: [
-              userId,
-              investmentUsd,
-              'USD',
-              rate,
-              month,
-              year,
-              'investment',
-              'Investment portfolio',
-              'Annual dividend/returns',
-              `${year}-12-20T10:00:00`,
-              `${year}-12-20T10:00:00`,
-            ],
-          });
-          incomeCount++;
-        }
-
-        // Birthday gift (March) and holiday gift (December)
-        if (month === 3 || month === 12) {
-          const giftUsd = randFloat(50, 300);
-          incomeStatements.push({
-            sql: `INSERT INTO incomes (userId, amount, currency, entryRate, month, year, incomeType, source, notes, createdAt, updatedAt)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            args: [
-              userId,
-              giftUsd,
-              'USD',
-              rate,
-              month,
-              year,
-              'gift',
-              month === 3 ? 'Family' : 'Friends & Family',
-              month === 3 ? 'Birthday gift' : 'Holiday gift',
-              `${year}-${String(month).padStart(2, '0')}-${month === 3 ? '15' : '25'}T12:00:00`,
-              `${year}-${String(month).padStart(2, '0')}-${month === 3 ? '15' : '25'}T12:00:00`,
-            ],
-          });
-          incomeCount++;
-        }
+      // A gift around Nowruz (March) and year-end (December)
+      if (month === 3 || month === 12) {
+        const giftDate = `${year}-${pad2(month)}-${pad2(clampDay(year, month, month === 3 ? 15 : 25))}T12:00:00`;
+        const giftUsd = randFloat(30, 150);
+        incomeStatements.push({
+          sql: `INSERT INTO incomes (userId, amount, currency, entryRate, month, year, incomeType, source, notes, createdAt, updatedAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          args: [
+            userId,
+            giftUsd,
+            'USD',
+            rate,
+            month,
+            year,
+            'gift',
+            'Family',
+            month === 3 ? 'Nowruz eidi' : 'Year-end gift',
+            giftDate,
+            giftDate,
+          ],
+        });
+        incomeCount++;
       }
     }
 
@@ -709,14 +533,14 @@ async function seedDemo() {
     // 7. Insert assets
     console.log('Inserting assets...');
     const assetStatements: InStatement[] = [];
-    const now = '2026-01-15T10:00:00';
+    const now = NOW.toISOString();
+    const createdAt = `${START_YEAR}-${pad2(START_MONTH)}-01T10:00:00`;
 
     for (const asset of ASSET_DEFS) {
-      // Current value (after ~5 years of growth)
-      const yearsGrown = 5;
-      const currentUnitValue = asset.baseUnitValueUsd * Math.pow(asset.growth, yearsGrown);
+      // Current value (after WINDOW_YEARS of growth)
+      const currentUnitValue = asset.baseUnitValueUsd * Math.pow(asset.growth, WINDOW_YEARS);
       const totalValueUsd = parseFloat((asset.quantity * currentUnitValue).toFixed(2));
-      const rate = getExchangeRate(2026, 1);
+      const rate = getExchangeRate(END_YEAR, END_MONTH);
 
       assetStatements.push({
         sql: `INSERT INTO assets (userId, category, name, quantity, unit, unitValue, amount, currency, entryRate, notes, lastValuedAt, createdAt, updatedAt)
@@ -733,7 +557,7 @@ async function seedDemo() {
           rate,
           null,
           now,
-          '2021-01-01T10:00:00',
+          createdAt,
           now,
         ],
       });
@@ -760,34 +584,25 @@ async function seedDemo() {
       const assetId = assetIdMap[asset.name];
       if (!assetId) continue;
 
-      // Semi-annual snapshots: Jan and Jul of each year
-      for (let year = 2021; year <= 2026; year++) {
-        const months = year === 2026 ? [1] : [1, 7];
-        for (const month of months) {
-          const yearsElapsed = year - 2021 + (month - 1) / 12;
-          const unitValue = asset.baseUnitValueUsd * Math.pow(asset.growth, yearsElapsed);
-          // Add some noise to valuations
-          const noise = 1 + (rand() - 0.5) * 0.08;
-          const noisyUnitValue = parseFloat((unitValue * noise).toFixed(2));
-          const totalUsd = parseFloat((asset.quantity * noisyUnitValue).toFixed(2));
-          const rate = getExchangeRate(year, month);
+      // Semi-annual snapshots (Jan & Jul) plus one for the current month.
+      for (const { year, month } of PERIODS) {
+        if (month !== 1 && month !== 7 && !isCurrentMonth(year, month)) continue;
 
-          valuationStatements.push({
-            sql: `INSERT INTO assetValuations (assetId, quantity, unitValue, amount, currency, entryRate, valuedAt, createdAt)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            args: [
-              assetId,
-              asset.quantity,
-              noisyUnitValue,
-              totalUsd,
-              'USD',
-              rate,
-              `${year}-${String(month).padStart(2, '0')}-15T10:00:00`,
-              `${year}-${String(month).padStart(2, '0')}-15T10:00:00`,
-            ],
-          });
-          valuationCount++;
-        }
+        const yearsElapsed = year - START_YEAR + (month - 1) / 12;
+        const unitValue = asset.baseUnitValueUsd * Math.pow(asset.growth, yearsElapsed);
+        // Add some noise to valuations
+        const noise = 1 + (rand() - 0.5) * 0.08;
+        const noisyUnitValue = parseFloat((unitValue * noise).toFixed(2));
+        const totalUsd = parseFloat((asset.quantity * noisyUnitValue).toFixed(2));
+        const rate = getExchangeRate(year, month);
+        const valuedAt = `${year}-${pad2(month)}-${pad2(clampDay(year, month, 15))}T10:00:00`;
+
+        valuationStatements.push({
+          sql: `INSERT INTO assetValuations (assetId, quantity, unitValue, amount, currency, entryRate, valuedAt, createdAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          args: [assetId, asset.quantity, noisyUnitValue, totalUsd, 'USD', rate, valuedAt, valuedAt],
+        });
+        valuationCount++;
       }
     }
 
@@ -798,23 +613,20 @@ async function seedDemo() {
     //    display (one row per month, plus a current row for "latest" lookups).
     console.log('Seeding currency rates...');
     const rateStatements: InStatement[] = [];
-    const nowIso = new Date().toISOString();
-    for (let year = 2021; year <= 2026; year++) {
-      const maxMonth = year === 2026 ? 1 : 12;
-      for (let month = 1; month <= maxMonth; month++) {
-        const rateDate = `${year}-${String(month).padStart(2, '0')}-01`;
-        rateStatements.push({
-          sql: `INSERT OR IGNORE INTO currencyRates (currency, baseCurrency, rate, rateDate, fetchedAt)
-                VALUES ('USD', 'IRT', ?, ?, ?)`,
-          args: [getExchangeRate(year, month), rateDate, nowIso],
-        });
-      }
+    const nowIso = NOW.toISOString();
+    for (const { year, month } of PERIODS) {
+      const rateDate = `${year}-${pad2(month)}-01`;
+      rateStatements.push({
+        sql: `INSERT OR IGNORE INTO currencyRates (currency, baseCurrency, rate, rateDate, fetchedAt)
+              VALUES ('USD', 'IRT', ?, ?, ?)`,
+        args: [getExchangeRate(year, month), rateDate, nowIso],
+      });
     }
     // A current-dated row so latest-rate lookups resolve.
     rateStatements.push({
       sql: `INSERT OR IGNORE INTO currencyRates (currency, baseCurrency, rate, rateDate, fetchedAt)
             VALUES ('USD', 'IRT', ?, ?, ?)`,
-      args: [getExchangeRate(2026, 1), nowIso.slice(0, 10), nowIso],
+      args: [getExchangeRate(END_YEAR, END_MONTH), nowIso.slice(0, 10), nowIso],
     });
     await executeBatch(client, rateStatements);
     console.log(`  Created ${rateStatements.length} currency rate rows`);
@@ -828,6 +640,16 @@ async function seedDemo() {
     console.log(`   Incomes: ${incomeCount}`);
     console.log(`   Assets: ${ASSET_DEFS.length}`);
     console.log(`   Asset valuations: ${valuationCount}`);
+
+    return {
+      tags: TAG_NAMES.length,
+      expenses: expenseCount,
+      tagAssociations: tagAssocStatements.length,
+      incomes: incomeCount,
+      assets: ASSET_DEFS.length,
+      assetValuations: valuationCount,
+      window: { start: `${START_YEAR}-${pad2(START_MONTH)}`, end: `${END_YEAR}-${pad2(END_MONTH)}` },
+    };
   } catch (error) {
     console.error('❌ Demo seed failed:', error);
     throw error;
@@ -836,4 +658,11 @@ async function seedDemo() {
   }
 }
 
-seedDemo();
+// CLI entry: only auto-run when executed directly (e.g. `pnpm db:seed-demo`),
+// not when imported by the cron route.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  // Load env from .env.local only for local CLI runs; the cron route relies on
+  // the platform-provided environment variables.
+  config({ path: '.env.local' });
+  seedDemo();
+}
