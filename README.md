@@ -1,54 +1,76 @@
-# Kharji / خرجی
+<div align="center">
 
-Personal finance tracker for Iranians living with dual currencies — track expenses, income, and assets in both Toman and USD with real-time exchange rates.
+<img src="public/apple-touch-icon.png" alt="Kharji logo" width="80" height="80" style="border-radius: 16px" />
+
+# Kharji
+
+**Your finances, finally clear.**
+
+A calm personal-finance app for people who think in more than one currency.
+Track expenses, manage income, and watch your assets grow.
+
+[**Live App**](https://kharji.app) · [Try the Demo](https://kharji.app/login) · [Report a Bug](https://github.com/erfanansari/kharji/issues)
+
+![Next.js](https://img.shields.io/badge/Next.js_16-black?logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/React_19-087ea4?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178c6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_v4-38bdf8?logo=tailwindcss&logoColor=white)
+![License](https://img.shields.io/badge/License-Source--Available-blue)
+
+<br />
+
+![Kharji Overview](.github/screenshots/overview.png)
+
+</div>
 
 ---
+
+## Why Kharji?
+
+Most finance apps assume you live in one currency. Kharji is built for people who don't — expats, freelancers with international clients, and anyone living between a local currency and the dollar. Every transaction is stored with the exchange rate of its day, so your history stays accurate even when rates move.
+
+The entire codebase is public so you can read every line of code that touches your financial data before trusting it with your money.
+
+## Features
+
+- 💸 **Expense tracking** — log daily expenses with custom categories, tags, and full-text search
+- 💰 **Income management** — track monthly income by type (salary, freelance, investment, and more)
+- 🏦 **Asset portfolio** — track wealth across cash, crypto, commodities, vehicles, property, bank accounts, and investments, with full valuation history and a net-worth chart
+- 🌍 **Multi-currency** — six currencies (IRT, USD, EUR, GBP, AED, TRY) with live exchange rates and per-date historical conversion
+- 📊 **Reports** — spending analytics with daily, weekly, and monthly granularity, category breakdowns, and trends
+- 🏷️ **Tags & categories** — create tags inline as you type, manage everything centrally in Settings
+- 📤 **Excel export & import** — your data is never locked in
+- 📧 **Email reports** — optional monthly and yearly summaries delivered to your inbox
+- 🌙 **Dark mode** — easy on the eyes, day or night
+- ⌨️ **Command palette** — jump anywhere with a keystroke
+- 📱 **Installable PWA** — add it to your home screen like a native app
+- 🔐 **Privacy-first auth** — custom JWT auth with HTTP-only cookies, PBKDF2-hashed passwords, no third-party auth provider
+- 💾 **Daily backups** — automated encrypted database dumps with 30-day retention
+
+## Screenshots
+
+|                      Expenses                       |                   Reports                   |
+| :-------------------------------------------------: | :-----------------------------------------: |
+|    ![Expenses](.github/screenshots/expenses.png)    | ![Reports](.github/screenshots/reports.png) |
+|                     **Assets**                      |                 **Income**                  |
+|      ![Assets](.github/screenshots/assets.png)      |  ![Income](.github/screenshots/income.png)  |
+|                    **Dark Mode**                    |              **Landing Page**               |
+| ![Dark Mode](.github/screenshots/overview-dark.png) | ![Landing](.github/screenshots/landing.png) |
 
 ## Tech Stack
 
-| Layer           | Choice                                |
-| --------------- | ------------------------------------- |
-| Framework       | Next.js 16 (App Router, React 19)     |
-| Language        | TypeScript (strict)                   |
-| Database        | Turso (libSQL / SQLite)               |
-| Styling         | Tailwind CSS v4                       |
-| Charts          | Recharts                              |
-| Tables          | TanStack Table v8                     |
-| Data fetching   | TanStack Query v5                     |
-| Auth            | Custom-built (JWT, HTTP-only cookies) |
-| Email           | Resend + React Email                  |
-| Export          | xlsx                                  |
-| Validation      | Zod                                   |
-| Package manager | pnpm                                  |
-
----
-
-## Project Structure
-
-```
-kharji/
-├── src/
-│   ├── @schemas/            Zod validation schemas + unit tests
-│   ├── @types/              TypeScript type definitions
-│   ├── app/
-│   │   ├── (auth)/          Login, signup, forgot/reset-password pages
-│   │   ├── (dashboard)/     All protected app pages (overview, expenses, income, assets, reports, settings)
-│   │   ├── api/             API route handlers
-│   │   ├── layout.tsx       Root layout (fonts, providers, analytics)
-│   │   └── page.tsx         Root redirect
-│   ├── components/          Shared UI primitives (Button, Modal, Toast, DeleteConfirmModal, …)
-│   ├── constants/           Centralised category/type definitions
-│   ├── core/
-│   │   ├── api/             Auth middleware (withAuth) and request helpers
-│   │   └── database/        Turso client + SQL migrations
-│   ├── emails/              React Email templates (MonthlyReport, YearlyReport)
-│   ├── features/            Feature-scoped components (expenses, income, assets)
-│   ├── hooks/               Shared React hooks
-│   ├── styles/              globals.css (Tailwind theme tokens)
-│   └── utils/               Pure utility functions + unit tests
-```
-
----
+| Layer         | Choice                                                  |
+| ------------- | ------------------------------------------------------- |
+| Framework     | [Next.js 16](https://nextjs.org) (App Router, React 19) |
+| Language      | TypeScript (strict)                                     |
+| Database      | [Turso](https://turso.tech) (libSQL / SQLite)           |
+| Styling       | Tailwind CSS v4                                         |
+| Charts        | Recharts                                                |
+| Tables & data | TanStack Table v8 · TanStack Query v5                   |
+| Auth          | Custom-built (JWT, HTTP-only cookies)                   |
+| Email         | Resend + React Email                                    |
+| Validation    | Zod                                                     |
+| PWA           | Serwist                                                 |
 
 ## Getting Started
 
@@ -56,317 +78,87 @@ kharji/
 
 - Node.js 22+
 - pnpm 10+
-- A [Turso](https://turso.tech) database
+- A free [Turso](https://turso.tech) database
 
-### Development
+### Setup
 
 ```bash
-# Install dependencies
+# 1. Clone and install
+git clone https://github.com/erfanansari/kharji.git
+cd kharji
 pnpm install
 
-# Copy env template and fill in values
-cp .env.example .env.local
+# 2. Configure environment
+cp .env.example .env.local   # then fill in your values
 
-# Run database migrations
+# 3. Run database migrations
 pnpm migrate
 
-# (Optional) seed a demo user
+# 4. (Optional) seed a demo user with sample data
 pnpm db:seed
 
-# Start the dev server — http://localhost:3000
-pnpm dev
+# 5. Start the dev server
+pnpm dev                     # http://localhost:3000
 ```
 
-### Preview emails
+### Environment Variables
+
+Only four variables are required — everything else degrades gracefully when unset.
+
+| Variable                                                              | Required | Description                                                                        |
+| --------------------------------------------------------------------- | :------: | ---------------------------------------------------------------------------------- |
+| `TURSO_DATABASE_URL`                                                  |    ✅    | Turso database connection URL                                                      |
+| `TURSO_AUTH_TOKEN`                                                    |    ✅    | Turso authentication token                                                         |
+| `JWT_SECRET`                                                          |    ✅    | Long random string used to sign session tokens                                     |
+| `APP_URL`                                                             |    ✅    | Public URL of the app (e.g. `http://localhost:3000`)                               |
+| `NAVASAN_API_KEY`                                                     |    —     | Live exchange rates ([Navasan](https://navasan.tech)); falls back to the free tier |
+| `RESEND_API_KEY`                                                      |    —     | Transactional email ([Resend](https://resend.com)); emails are skipped if unset    |
+| `CRON_SECRET`                                                         |    —     | Authenticates scheduled jobs (reports, backups, rate refresh)                      |
+| `B2_KEY_ID` / `B2_APPLICATION_KEY` / `B2_BUCKET_NAME` / `B2_ENDPOINT` |    —     | Daily database backups to Backblaze B2                                             |
+
+## Development
 
 ```bash
-pnpm email:dev   # http://localhost:3001
+pnpm dev          # start dev server
+pnpm build        # production build
+pnpm check        # lint + format check + typecheck
+pnpm test         # run unit tests (Jest + React Testing Library)
+pnpm email:dev    # preview email templates at http://localhost:3001
 ```
 
----
-
-## Environment Variables
-
-Copy `.env.example` to `.env.local`. For Vercel deployments, set these in the project settings.
-
-### Required
-
-| Variable             | Description                                                             |
-| -------------------- | ----------------------------------------------------------------------- |
-| `TURSO_DATABASE_URL` | Turso database connection URL                                           |
-| `TURSO_AUTH_TOKEN`   | Turso authentication token                                              |
-| `JWT_SECRET`         | Long random string — signs JWT session tokens                           |
-| `APP_URL`            | Public URL of the app (e.g. `https://kharji.app`) — used in email links |
-
-### Optional: exchange rate
-
-| Variable          | Default | Description                                                                                   |
-| ----------------- | ------- | --------------------------------------------------------------------------------------------- |
-| `NAVASAN_API_KEY` | —       | Navasan API key for live USD/Toman rates. Falls back to free tier (120 req/month) if not set. |
-
-### Optional: email
-
-If `RESEND_API_KEY` is not set, emails are skipped and the app works normally.
-
-| Variable         | Description                             |
-| ---------------- | --------------------------------------- |
-| `RESEND_API_KEY` | Resend API key for transactional emails |
-
-### Optional: cron
-
-| Variable      | Description                                                       |
-| ------------- | ----------------------------------------------------------------- |
-| `CRON_SECRET` | Secret token Vercel sends with cron requests to authenticate them |
-
-### Optional: database backups (Backblaze B2)
-
-Daily SQL dumps of the whole database are gzipped and uploaded to a B2 bucket via its S3-compatible API; backups older than 30 days are pruned automatically.
-
-| Variable             | Description                                                               |
-| -------------------- | ------------------------------------------------------------------------- |
-| `B2_KEY_ID`          | Backblaze B2 application key ID                                           |
-| `B2_APPLICATION_KEY` | Backblaze B2 application key secret (shown once at creation)              |
-| `B2_BUCKET_NAME`     | B2 bucket to store backups in                                             |
-| `B2_ENDPOINT`        | B2 bucket's S3-compatible endpoint, e.g. `s3.ca-east-006.backblazeb2.com` |
-
-### Optional: debugging
-
-| Variable                 | Description                                                                  |
-| ------------------------ | ---------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_COMMIT_SHA` | Git commit SHA injected at build time (displayed in footer for traceability) |
-
----
-
-## Email Notifications
-
-The following emails are sent automatically when `RESEND_API_KEY` is configured:
-
-| Trigger                   | Recipient                    | Description                          |
-| ------------------------- | ---------------------------- | ------------------------------------ |
-| Forgot password           | Requesting user              | Password reset link (expires 1 hour) |
-| Monthly cron (daily 9 AM) | Users with reporting enabled | Monthly expense + income summary     |
-| Yearly cron               | Users with reporting enabled | Annual financial summary             |
-
-Users can manage notification preferences in **Settings → Notifications** and unsubscribe via the link in any email.
-
----
-
-## Pages & Routes
-
-| Route                    | Description                                                                    |
-| ------------------------ | ------------------------------------------------------------------------------ |
-| `/`                      | Redirect → `/overview` (or `/login` if unauthenticated)                        |
-| `/login`                 | Email + password sign-in                                                       |
-| `/signup`                | New account registration                                                       |
-| `/forgot-password`       | Request a password reset link                                                  |
-| `/reset-password?token=` | Set a new password from emailed link                                           |
-| `/overview`              | Dashboard: monthly summary cards, income vs expenses chart, asset distribution |
-| `/expenses`              | Expense list with date range filter, category filter, tags, export             |
-| `/income`                | Monthly income entries by type (salary, freelance, investment, gift, other)    |
-| `/assets`                | Asset portfolio across 7 categories with valuation history                     |
-| `/reports`               | Spending analysis: charts, category breakdown, daily heatmap                   |
-| `/settings`              | Tags, custom categories, notification preferences, profile                     |
-
----
-
-## API Routes
-
-### Auth
-
-- `POST /api/auth/signup` — Create account
-- `POST /api/auth/login` — Sign in
-- `POST /api/auth/logout` — Sign out
-- `GET  /api/auth/me` — Current user
-- `POST /api/auth/forgot-password` — Send reset email
-- `POST /api/auth/reset-password` — Apply new password with token
-
-### Expenses
-
-- `GET/POST /api/expenses`
-- `GET/PUT/DELETE /api/expenses/[id]`
-
-### Income
-
-- `GET/POST /api/incomes`
-- `GET/PUT/DELETE /api/incomes/[id]`
-
-### Assets
-
-- `GET/POST /api/assets`
-- `GET/PUT/DELETE /api/assets/[id]`
-
-### Tags
-
-- `GET/POST /api/tags` — supports `?includeUsage=true`
-- `PUT/DELETE /api/tags/[id]`
-
-### Categories
-
-- `GET/POST /api/categories`
-- `PUT/DELETE /api/categories/[id]`
-
-### Other
-
-- `GET /api/exchange-rate` — Live USD/Toman rate with 24-hour caching
-- `GET /api/summary` — Monthly financial overview for dashboard
-- `GET /api/net-worth/history` — Asset value history over time
-- `GET /api/export` — Download expenses as Excel
-- `GET/PUT /api/settings/notifications` — Notification preferences
-- `PUT /api/user/profile` — Update name/email
-- `GET /api/unsubscribe/[token]` — One-click email unsubscribe
-- `POST /api/cron/reports` — Vercel cron trigger (daily 9 AM UTC) for report emails
-- `POST /api/cron/backup` — Vercel cron trigger (daily 3 AM UTC) for database backups to Backblaze B2
-
----
-
-## Database Schema
-
-### users
-
-| Column        | Type    | Notes            |
-| ------------- | ------- | ---------------- |
-| id            | INTEGER | PK               |
-| email         | TEXT    | unique           |
-| password_hash | TEXT    | PBKDF2 with salt |
-| name          | TEXT    | nullable         |
-| created_at    | TEXT    |                  |
-| updated_at    | TEXT    |                  |
-
-### expenses
-
-| Column      | Type    | Notes           |
-| ----------- | ------- | --------------- |
-| id          | INTEGER | PK              |
-| user_id     | INTEGER | FK → users      |
-| date        | TEXT    | YYYY-MM-DD      |
-| category_id | INTEGER | FK → categories |
-| description | TEXT    |                 |
-| price_toman | REAL    |                 |
-| price_usd   | REAL    |                 |
-| created_at  | TEXT    |                 |
-
-### incomes
-
-| Column           | Type    | Notes                                          |
-| ---------------- | ------- | ---------------------------------------------- |
-| id               | INTEGER | PK                                             |
-| userId           | INTEGER | FK → users                                     |
-| amountUsd        | REAL    |                                                |
-| amountToman      | REAL    |                                                |
-| exchangeRateUsed | REAL    |                                                |
-| month            | INTEGER | 1–12                                           |
-| year             | INTEGER |                                                |
-| incomeType       | TEXT    | salary / freelance / investment / gift / other |
-| source           | TEXT    | nullable                                       |
-| notes            | TEXT    | nullable                                       |
-| createdAt        | TEXT    |                                                |
-| updatedAt        | TEXT    |                                                |
-
-### assets
-
-| Column           | Type    | Notes                                                              |
-| ---------------- | ------- | ------------------------------------------------------------------ |
-| id               | INTEGER | PK                                                                 |
-| userId           | INTEGER | FK → users                                                         |
-| category         | TEXT    | cash / crypto / commodity / vehicle / property / bank / investment |
-| name             | TEXT    | user-provided label                                                |
-| quantity         | REAL    |                                                                    |
-| unit             | TEXT    | nullable                                                           |
-| unitValueUsd     | REAL    | nullable                                                           |
-| totalValueUsd    | REAL    |                                                                    |
-| totalValueToman  | REAL    |                                                                    |
-| exchangeRateUsed | REAL    |                                                                    |
-| notes            | TEXT    | nullable                                                           |
-| lastValuedAt     | TEXT    |                                                                    |
-| createdAt        | TEXT    |                                                                    |
-| updatedAt        | TEXT    |                                                                    |
-
-### assetValuations
-
-Snapshot created every time an asset value changes.
-
-| Column           | Type    | Notes                        |
-| ---------------- | ------- | ---------------------------- |
-| id               | INTEGER | PK                           |
-| assetId          | INTEGER | FK → assets (cascade delete) |
-| quantity         | REAL    |                              |
-| unitValueUsd     | REAL    | nullable                     |
-| totalValueUsd    | REAL    |                              |
-| totalValueToman  | REAL    |                              |
-| exchangeRateUsed | REAL    |                              |
-| valuedAt         | TEXT    |                              |
-
-### tags / expense_tags
-
-| Column                  | Type    | Notes                          |
-| ----------------------- | ------- | ------------------------------ |
-| tags.id                 | INTEGER | PK                             |
-| tags.user_id            | INTEGER | FK → users                     |
-| tags.name               | TEXT    | unique per user                |
-| expense_tags.expense_id | INTEGER | FK → expenses (cascade delete) |
-| expense_tags.tag_id     | INTEGER | FK → tags (cascade delete)     |
-
-### categories
-
-User-defined expense categories (replaces hardcoded list).
-
-### exchange_rates
-
-Cached USD/Toman rates fetched from Navasan.
-
-### userNotificationPreferences
-
-Per-user email notification settings.
-
-### password_reset_tokens
-
-Short-lived tokens for the forgot-password flow (1-hour expiry).
-
----
-
-## Auth
-
-Custom-built authentication — no NextAuth, Better Auth, or Clerk.
-
-- **Tokens**: JWT signed with `JWT_SECRET`
-- **Storage**: HTTP-only cookies (no localStorage exposure)
-- **Session expiry**: 30 days
-- **Passwords**: PBKDF2 with per-user salt
-- **Password requirements**: ≥8 chars, uppercase, lowercase, digit
-- **Reset tokens**: cryptographically random, expire after 1 hour
-
----
-
-## Testing
-
-```bash
-# Run all unit tests
-pnpm test
-
-# Watch mode
-pnpm test:watch
+### Project Structure
+
+```
+src/
+├── @schemas/      Zod validation schemas + tests
+├── @types/        TypeScript type definitions
+├── app/           Next.js App Router pages + API routes
+├── components/    Shared UI primitives (Button, Modal, Toast, …)
+├── constants/     Centralized category/type/currency definitions
+├── core/          Database client, migrations, auth, exchange rates
+├── emails/        React Email templates
+├── features/      Feature-scoped components (expenses, income, assets)
+├── hooks/         Shared React hooks
+└── utils/         Pure utility functions + tests
 ```
 
-Uses **Jest** + **ts-jest** + **jsdom** + **React Testing Library**.
+## Contributing
 
-| File                                                                             | What's tested                                                   |
-| -------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `src/@schemas/__tests__/expense.test.ts`                                         | Zod expense schema — valid input, missing fields, invalid types |
-| `src/@schemas/__tests__/income.test.ts`                                          | Zod income schema validation                                    |
-| `src/@schemas/__tests__/asset.test.ts`                                           | Zod asset schema validation                                     |
-| `src/utils/format/__tests__/format.test.ts`                                      | Currency/number formatting helpers                              |
-| `src/utils/date/__tests__/formatChartTooltipDate.test.ts`                        | Date formatting for chart tooltips                              |
-| `src/features/expenses/components/DateRangeSelector/__tests__/dateRange.test.ts` | Date range selection logic                                      |
-
----
+Bug reports and pull requests are welcome. For larger changes, please open an issue first to discuss what you'd like to change, and make sure `pnpm check && pnpm test` passes before submitting.
 
 ## License
 
 Kharji is published under the **Kharji Source-Available License (View-Only) v1.0** — see [LICENSE](./LICENSE) for the full text.
 
-The source is public for auditability: you should be able to read every line of code that touches your financial data before trusting it. This is not an OSI-approved open-source license.
+The source is public for transparency and auditability: you should be able to read every line of code that touches your financial data before trusting it.
 
-**You can:** read, audit, quote excerpts, submit pull requests.
-**You cannot:** run/host/deploy, fork, reuse in another project, redistribute.
+- **You can:** read, audit, quote excerpts, and submit pull requests
+- **You cannot:** run/host/deploy, fork, reuse in another project, or redistribute
 
 To use Kharji outside these terms, contact **dev.erfanansari@gmail.com**.
+
+---
+
+<div align="center">
+Made with ❤️ by <a href="https://github.com/erfanansari">Erfan Ansari</a>
+</div>
