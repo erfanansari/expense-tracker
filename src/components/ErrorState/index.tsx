@@ -46,7 +46,7 @@ const ErrorState = ({
       <button
         type="button"
         onClick={onRetry}
-        className="bg-primary hover:bg-primary-hover inline-flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-medium text-white transition-colors"
+        className="bg-primary hover:bg-primary-hover text-primary-foreground inline-flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-medium transition-colors"
       >
         <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
         {retryLabel}

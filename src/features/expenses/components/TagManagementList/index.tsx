@@ -171,7 +171,7 @@ const TagManagementList = () => {
           <button
             onClick={handleCreateTag}
             disabled={isCreating || !newTagName.trim()}
-            className="bg-primary hover:bg-button-primary-bg-hover flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-all disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-primary hover:bg-button-primary-bg-hover text-primary-foreground flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
             {isCreating ? 'Creating...' : 'Create'}

@@ -30,6 +30,9 @@
   /* Primary (Black) */
   --color-primary: #171717;
   --color-primary-hover: #404040;
+  /* Foreground on primary surfaces (buttons, logo boxes, tooltip).
+     Inverts in dark so white icons/text stay legible on the light primary. */
+  --color-primary-foreground: #ffffff;
 
   /* Blue (Links, Primary Actions) */
   --color-blue: #0070f3;
@@ -144,6 +147,129 @@
   --radius-lg: 12px;
 }
 
+/* ===================================
+   DARK THEME
+   Neutral / Vercel-Geist cool dark. next-themes toggles `.dark` on <html>;
+   overriding the token values here flows through @theme inline to every
+   Tailwind utility, base class, datepicker override and scrollbar automatically.
+   =================================== */
+.dark {
+  /* Backgrounds — Notion-inspired clean neutral dark. True grayscale (equal RGB)
+     so the page carries no color cast, with clearly-separated layers so
+     page < card < elevated < input each read as a distinct surface. */
+  --color-background: #191919;
+  --color-background-secondary: #202020;
+  --color-background-content: #1c1c1c;
+  --color-background-elevated: #2c2c2c;
+  --color-background-hover: #2f2f2f;
+
+  /* Borders — visibly present so rows/cards are delineated */
+  --color-border-subtle: #2a2a2a;
+  --color-border-default: #383838;
+  --color-border-strong: #4e4e4e;
+
+  /* Text — crisp neutral off-white (Notion ~rgba(255,255,255,0.9)) */
+  --color-text-primary: #e6e6e5;
+  --color-text-secondary: #a0a0a0;
+  --color-text-tertiary: #8a8a8a;
+  --color-text-muted: #6f6f6f;
+
+  /* Semantic — primary inverts to light (black button -> light button) */
+  --color-primary: #fafafa;
+  --color-primary-hover: #ececec;
+  --color-primary-foreground: #191919;
+
+  --color-blue: #4c9fff;
+  --color-blue-hover: #6bb0ff;
+  --color-blue-light: #17324f;
+
+  --color-success: #2fcc6a;
+  --color-success-hover: #26b85e;
+  --color-success-light: #14331f;
+
+  --color-danger: #ff5c67;
+  --color-danger-hover: #ff757e;
+  --color-danger-light: #3a1c20;
+
+  --color-warning: #fbbf24;
+  --color-warning-hover: #f59e0b;
+  --color-warning-light: #332810;
+
+  --color-info: #a78bfa;
+  --color-info-hover: #b9a3fb;
+  --color-info-light: #271f40;
+
+  /* Buttons */
+  --color-button-primary-bg: #fafafa;
+  --color-button-primary-bg-hover: #ffffff;
+  --color-button-primary-text: #1c1c20;
+
+  --color-button-outline-border: #383838;
+  --color-button-outline-bg-hover: #2c2c2c;
+  --color-button-outline-text: #a0a0a0;
+  --color-button-outline-text-hover: #e6e6e5;
+
+  --color-button-danger-bg: #e5484d;
+  --color-button-danger-bg-hover: #ff5c67;
+  --color-button-danger-text: #ffffff;
+
+  /* Action buttons */
+  --color-action-default: #6f6f6f;
+  --color-action-edit-bg-hover: rgba(76, 159, 255, 0.16);
+  --color-action-edit-text-hover: #4c9fff;
+  --color-action-delete-bg-hover: rgba(255, 92, 103, 0.16);
+  --color-action-delete-text-hover: #ff5c67;
+  --color-action-save-bg-hover: rgba(47, 204, 106, 0.16);
+  --color-action-save-text-hover: #2fcc6a;
+  --color-action-cancel-bg-hover: #2c2c2c;
+  --color-action-cancel-text-hover: #a0a0a0;
+
+  /* Inputs — default fill for bare inputs; most form inputs use bg-background
+     to blend with their surface (see :where() baseline in the base layer). */
+  --color-input-bg: #202020;
+  --color-input-text: #e6e6e5;
+  --color-input-border: #383838;
+  --color-input-border-focus: #4c9fff;
+  --color-input-placeholder: #6f6f6f;
+
+  /* Tags */
+  --color-tag-bg: #2c2c2c;
+  --color-tag-text: #a0a0a0;
+  --color-tag-border: #383838;
+
+  /* Cards — clearly elevated above the page background */
+  --color-card-bg: #202020;
+  --color-card-header-bg: #242424;
+  --color-card-border: #2a2a2a;
+
+  /* Icon boxes */
+  --color-icon-box-bg: #2c2c2c;
+  --color-icon-box-border: #2a2a2a;
+
+  /* Category accents — brightened so deep hues stay legible on dark */
+  --color-cat-blue: #3b9eff;
+  --color-cat-green: #22c55e;
+  --color-cat-amber: #fbbf24;
+  --color-cat-violet: #a78bfa;
+  --color-cat-red: #ff5964;
+  --color-cat-sky: #38bdf8;
+  --color-cat-orange: #fb923c;
+  --color-cat-rose: #fb7185;
+  --color-cat-pink: #f472b6;
+  --color-cat-cyan: #22d3ee;
+  --color-cat-emerald: #34d399;
+  --color-cat-teal: #2dd4bf;
+  --color-cat-indigo: #818cf8;
+  --color-cat-lime: #a3e635;
+  --color-cat-slate: #94a3b8;
+  --color-cat-gray: #9ca3af;
+
+  /* Shadows — deeper on dark */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
 @theme inline {
   /* Expose theme colors as Tailwind utilities */
 
@@ -168,6 +294,7 @@
   /* Semantic colors */
   --color-primary: var(--color-primary);
   --color-primary-hover: var(--color-primary-hover);
+  --color-primary-foreground: var(--color-primary-foreground);
   --color-blue: var(--color-blue);
   --color-blue-hover: var(--color-blue-hover);
   --color-blue-light: var(--color-blue-light);
@@ -223,24 +350,25 @@
   --color-icon-box-bg: var(--color-icon-box-bg);
   --color-icon-box-border: var(--color-icon-box-border);
 
-  /* Category accent palette — values inlined here (not var() refs) because
-     Tailwind v4's @theme inline resolves the literal at build time. */
-  --color-cat-blue: #0070f3;
-  --color-cat-green: #10b981;
-  --color-cat-amber: #f59e0b;
-  --color-cat-violet: #8b5cf6;
-  --color-cat-red: #ea001d;
-  --color-cat-sky: #0284c7;
-  --color-cat-orange: #c2410c;
-  --color-cat-rose: #be123c;
-  --color-cat-pink: #be185d;
-  --color-cat-cyan: #0e7490;
-  --color-cat-emerald: #047857;
-  --color-cat-teal: #0f766e;
-  --color-cat-indigo: #4338ca;
-  --color-cat-lime: #4d7c0f;
-  --color-cat-slate: #475569;
-  --color-cat-gray: #4b5563;
+  /* Category accent palette — var() refs (not literals) so the `.dark` block
+     can retune each hue. Light values live in :root; dark values in .dark.
+     Tailwind v4 applies /opacity modifiers to these via color-mix. */
+  --color-cat-blue: var(--color-cat-blue);
+  --color-cat-green: var(--color-cat-green);
+  --color-cat-amber: var(--color-cat-amber);
+  --color-cat-violet: var(--color-cat-violet);
+  --color-cat-red: var(--color-cat-red);
+  --color-cat-sky: var(--color-cat-sky);
+  --color-cat-orange: var(--color-cat-orange);
+  --color-cat-rose: var(--color-cat-rose);
+  --color-cat-pink: var(--color-cat-pink);
+  --color-cat-cyan: var(--color-cat-cyan);
+  --color-cat-emerald: var(--color-cat-emerald);
+  --color-cat-teal: var(--color-cat-teal);
+  --color-cat-indigo: var(--color-cat-indigo);
+  --color-cat-lime: var(--color-cat-lime);
+  --color-cat-slate: var(--color-cat-slate);
+  --color-cat-gray: var(--color-cat-gray);
 
   /* Font family */
   --font-sans: var(--font-persian);
@@ -248,7 +376,7 @@
 
 /* Light theme */
 html {
-  color-scheme: light;
+  /* color-scheme is managed by next-themes (light | dark) */
   background: var(--color-background);
   min-height: 100%;
   min-height: 100dvh;
@@ -288,17 +416,26 @@ body {
 }
 
 /* Input styles */
+
+/* Baseline appearance at ZERO specificity (:where) so component-level utility
+   classes (bg-background, bg-transparent, bg-input-bg, text-*) always override it.
+   In light mode input-bg == background so this changed nothing; in dark mode it
+   lets inputs blend with their container instead of being forced to a lighter
+   fill (fixes nested/mismatched input boxes in forms, money field, filters). */
+:where(input[type='text'], input[type='number'], input[type='email'], input[type='password'], textarea) {
+  background-color: var(--color-input-bg);
+  color: var(--color-input-text);
+}
+
 input[type='text'],
 input[type='number'],
 input[type='email'],
 input[type='password'],
 textarea {
   font-family: var(--font-geist-sans), sans-serif !important;
-  background: var(--color-input-bg) !important;
-  background-color: var(--color-input-bg) !important;
-  color: var(--color-input-text) !important;
   transition: all 0.2s ease;
-  color-scheme: light !important;
+  /* inherit from <html> so native controls (spinners, autofill) follow the theme */
+  color-scheme: inherit !important;
 }
 
 input[type='text']:focus,
@@ -450,6 +587,14 @@ textarea:focus {
 .tf__input-container {
   margin: 0 !important;
   padding: 0 !important;
+}
+
+/* react-select's internal <input> must stay transparent so it never shows a fill
+   against the control (the control owns the background). */
+.ti__control input,
+.tf__control input {
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 /* Clear button — styled to match the app's custom X icon buttons */

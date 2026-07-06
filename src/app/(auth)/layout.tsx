@@ -27,7 +27,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           <div className="mb-4 flex flex-col items-center">
             <div className="mb-1 flex items-center gap-2">
               <div className="bg-primary rounded-md p-2">
-                <Zap className="h-5 w-5 text-white" />
+                <Zap className="text-primary-foreground h-5 w-5" />
               </div>
               <span className="text-text-primary text-xl font-bold">Kharji</span>
             </div>

@@ -79,7 +79,10 @@ export const viewport: Viewport = {
   // dvh-sized drawers resize natively. iOS ignores this hint (handled by
   // useKeyboardInset instead).
   interactiveWidget: 'resizes-content',
-  themeColor: '#ffffff',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+  ],
 };
 
 export default function RootLayout({
@@ -88,9 +91,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="bg-background">
+    <html lang="en" className="bg-background" suppressHydrationWarning>
       <head>
-        <meta name="color-scheme" content="light" />
         <AppleSplashScreens />
       </head>
       <body className={twMerge(geistSans.variable, persianFont.variable, 'bg-background antialiased')}>

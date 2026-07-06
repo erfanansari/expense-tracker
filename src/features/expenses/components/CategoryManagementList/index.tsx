@@ -230,7 +230,7 @@ const CategoryManagementList = () => {
               type="button"
               onClick={handleCreate}
               disabled={createCategory.isPending || !newName.trim()}
-              className="bg-primary hover:bg-button-primary-bg-hover flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all disabled:cursor-not-allowed disabled:opacity-50"
+              className="bg-primary hover:bg-button-primary-bg-hover text-primary-foreground flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50"
             >
               {createCategory.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               {createCategory.isPending ? 'Creating...' : 'Create category'}
@@ -328,7 +328,7 @@ const CategoryManagementList = () => {
                         type="button"
                         onClick={() => saveEdit(category.id)}
                         disabled={updateCategory.isPending}
-                        className="bg-primary hover:bg-button-primary-bg-hover flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all disabled:opacity-50"
+                        className="bg-primary hover:bg-button-primary-bg-hover text-primary-foreground flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all disabled:opacity-50"
                       >
                         {updateCategory.isPending ? (
                           <Loader2 className="h-4 w-4 animate-spin" />

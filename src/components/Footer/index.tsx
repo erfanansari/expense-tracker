@@ -18,7 +18,7 @@ const Footer = () => {
         <div className="flex flex-col items-center gap-5 sm:flex-row sm:gap-6">
           <Link href="/" className="transition-opacity hover:opacity-80" aria-label="Kharji home">
             <div className="bg-primary rounded-md p-2">
-              <Zap className="h-4 w-4 text-white" aria-hidden="true" />
+              <Zap className="text-primary-foreground h-4 w-4" aria-hidden="true" />
             </div>
           </Link>
 

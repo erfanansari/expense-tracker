@@ -11,7 +11,7 @@ export default function OfflinePage() {
     <main className="bg-background flex min-h-dvh flex-col items-center justify-center px-6 text-center">
       <div className="flex items-center gap-2">
         <div className="bg-primary rounded-md p-2">
-          <Zap className="h-5 w-5 text-white" aria-hidden="true" />
+          <Zap className="text-primary-foreground h-5 w-5" aria-hidden="true" />
         </div>
         <span className="text-text-primary text-xl font-bold">Kharji</span>
       </div>

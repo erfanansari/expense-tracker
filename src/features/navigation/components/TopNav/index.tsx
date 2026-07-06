@@ -57,7 +57,7 @@ const TopNav: FC = () => {
           {/* Logo */}
           <Link href={ROUTES.OVERVIEW} className="flex items-center gap-2.5">
             <div className="bg-button-primary-bg rounded-md p-2">
-              <Zap className="h-4 w-4 text-white" />
+              <Zap className="text-primary-foreground h-4 w-4" />
             </div>
             <span className="text-text-primary text-base font-semibold">Kharji</span>
           </Link>
@@ -71,10 +71,10 @@ const TopNav: FC = () => {
                 className="border-border-subtle hover:bg-background-elevated flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors"
               >
                 <div className="relative">
-                  <div className="bg-button-primary-bg flex h-7 w-7 items-center justify-center rounded-lg text-xs font-semibold text-white">
+                  <div className="bg-button-primary-bg text-primary-foreground flex h-7 w-7 items-center justify-center rounded-lg text-xs font-semibold">
                     {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
                   </div>
-                  <div className="bg-success absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border-2 border-white" />
+                  <div className="bg-success border-background absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border-2" />
                 </div>
                 <ChevronDown
                   className={twMerge(

@@ -18,7 +18,7 @@ export default function NotFound() {
           <div className="border-border-subtle absolute inset-0 rotate-12 rounded-xl border-2 border-dashed" />
           {/* Inner brand icon */}
           <div className="bg-primary relative z-10 translate-x-2 translate-y-2 rounded-lg p-3">
-            <Zap className="h-6 w-6 text-white" aria-hidden="true" />
+            <Zap className="text-primary-foreground h-6 w-6" aria-hidden="true" />
           </div>
         </div>
 
@@ -32,7 +32,7 @@ export default function NotFound() {
         {/* CTA */}
         <Link
           href="/overview"
-          className="bg-primary hover:bg-primary-hover rounded-full px-6 py-2.5 text-sm font-medium text-white transition-colors"
+          className="bg-primary hover:bg-primary-hover text-primary-foreground rounded-full px-6 py-2.5 text-sm font-medium transition-colors"
         >
           Go to Dashboard
         </Link>

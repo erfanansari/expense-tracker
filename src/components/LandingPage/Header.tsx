@@ -12,7 +12,7 @@ const Header = () => {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2" aria-label="Kharji home">
           <div className="bg-primary rounded-md p-2">
-            <Zap className="h-4 w-4 text-white" aria-hidden="true" />
+            <Zap className="text-primary-foreground h-4 w-4" aria-hidden="true" />
           </div>
           <span className="text-text-primary text-base font-bold sm:text-lg">Kharji</span>
         </Link>
