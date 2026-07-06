@@ -5,8 +5,11 @@ import { useState } from 'react';
 import { Database, Download, Loader2, Trash2, Upload } from 'lucide-react';
 
 import Button from '@components/Button';
+import DeleteAccountModal from '@components/DeleteAccountModal';
 
 import { useToast } from '@/components/Toast/ToastProvider';
+import { useAuth } from '@/hooks/use-auth';
+import { beginSignout } from '@/lib/api/auth-handler';
 import { downloadFile } from '@/utils/export';
 
 import ImportModal from './ImportModal';
@@ -14,7 +17,10 @@ import ImportModal from './ImportModal';
 const DataManagement = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { showToast } = useToast();
+  const { user } = useAuth();
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -33,6 +39,21 @@ const DataManagement = () => {
       showToast('Export failed. Please try again.', 'error');
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      const res = await fetch('/api/user/account', { method: 'DELETE' });
+      if (!res.ok) throw new Error('Delete failed');
+      // Own the signout so the 401 listener doesn't stack a second redirect.
+      // Hard navigation wipes all in-memory state, including the query cache.
+      beginSignout();
+      window.location.href = '/login';
+    } catch {
+      showToast('Failed to delete account. Please try again.', 'error');
+      setIsDeleting(false);
     }
   };
 
@@ -64,18 +85,33 @@ const DataManagement = () => {
               <Upload className="h-4 w-4" aria-hidden="true" />
               Import Expenses
             </Button>
-            <Button variant="danger" disabled className="cursor-not-allowed opacity-50">
+            <Button
+              variant="danger"
+              onClick={() => setIsDeleteOpen(true)}
+              disabled={user?.isDemo}
+              className={user?.isDemo ? 'cursor-not-allowed opacity-50' : undefined}
+              title={user?.isDemo ? 'Not available on the demo account' : undefined}
+            >
               <Trash2 className="h-4 w-4" aria-hidden="true" />
-              Delete All Data
+              Delete Account
             </Button>
           </div>
           <p className="text-text-muted mt-3 text-xs">
-            Export downloads an Excel file with all your expenses, income, and assets.
+            Export downloads an Excel file with all your expenses, income, and assets. Deleting your account permanently
+            erases the account and all of its data.
           </p>
         </div>
       </div>
 
       <ImportModal isOpen={isImportOpen} onClose={() => setIsImportOpen(false)} />
+
+      <DeleteAccountModal
+        isOpen={isDeleteOpen}
+        userEmail={user?.email ?? ''}
+        onConfirm={handleDeleteAccount}
+        onCancel={() => setIsDeleteOpen(false)}
+        isDeleting={isDeleting}
+      />
     </>
   );
 };
