@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: 'Assets' };
 
 const AssetsPage = () => (
   <>
-    <Assets />;
+    <Assets />
   </>
 );
 

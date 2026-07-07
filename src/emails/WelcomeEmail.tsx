@@ -26,6 +26,16 @@ const FEATURES = [
     title: 'Assets & Net Worth',
     description: 'Monitor cash, crypto, gold, real estate, and investments in one place.',
   },
+  {
+    color: '#f59e0b',
+    title: 'Reports & Insights',
+    description: 'Spending charts and trends, plus monthly and yearly summaries in your inbox.',
+  },
+  {
+    color: '#171717',
+    title: 'Your Data, Yours',
+    description: 'Download a full Excel backup anytime, or import expenses from CSV.',
+  },
 ];
 
 const WelcomeEmail = ({ userName, dashboardUrl, logoUrl }: WelcomeEmailProps) => {
@@ -56,7 +66,7 @@ const WelcomeEmail = ({ userName, dashboardUrl, logoUrl }: WelcomeEmailProps) =>
                     width="32"
                     height="32"
                     alt="Kharji"
-                    style={{ display: 'block', borderRadius: '8px' }}
+                    style={{ display: 'block', borderRadius: '8px', backgroundColor: '#171717' }}
                   />
                 </td>
                 <td style={{ paddingLeft: '10px', verticalAlign: 'middle' }}>
