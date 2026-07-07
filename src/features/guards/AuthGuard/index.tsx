@@ -3,12 +3,13 @@
 import { useEffect } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 
+import { beginSignout } from '@core/client/auth-handler';
+
 import FullPageLoader from '@components/FullPageLoader';
-import { useToast } from '@components/Toast/ToastProvider';
 
 import { useAuth } from '@hooks/use-auth';
 
-import { beginSignout } from '@/lib/api/auth-handler';
+import { useToast } from '@stores/toast';
 
 const AuthGuard: FC<PropsWithChildren> = ({ children }) => {
   const { user, loading } = useAuth();

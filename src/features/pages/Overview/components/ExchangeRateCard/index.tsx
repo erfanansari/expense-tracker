@@ -1,8 +1,9 @@
 import { Coins, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
-import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
 import { formatMoney, rateOn } from '@features/ExchangeRate/utils/currency';
+
+import { useCurrency } from '@hooks/use-currency';
 
 import { getCurrency } from '@/constants/currencies';
 

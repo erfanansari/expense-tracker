@@ -2,7 +2,9 @@
 
 import { createElement, useState } from 'react';
 
+import { getCategoryListKeyGenerator } from '@api/getCategoryListQuery';
 import { getCategoryColor, getCategoryIcon } from '@constants/categories';
+import { useQuery } from '@tanstack/react-query';
 import { Check, ChevronDown, Plus } from 'lucide-react';
 import ReactSelect, { components } from 'react-select';
 import type {
@@ -14,8 +16,6 @@ import type {
   StylesConfig,
 } from 'react-select';
 import { twMerge } from 'tailwind-merge';
-
-import { useCategories } from '@hooks/use-categories';
 
 import type { Category } from '@/@types/expense';
 
@@ -135,7 +135,7 @@ interface CategorySelectProps {
 }
 
 const CategorySelect = ({ value, onChange, disabled, placeholder = 'Select category…' }: CategorySelectProps) => {
-  const { data: categories = [] } = useCategories();
+  const { data: categories = [] } = useQuery<Category[]>({ queryKey: getCategoryListKeyGenerator() });
   const [quickCreateOpen, setQuickCreateOpen] = useState(false);
 
   const options: AnyOption[] = [

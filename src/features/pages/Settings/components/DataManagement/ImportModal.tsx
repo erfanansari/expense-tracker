@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 
+import { EXPENSES_SCOPE } from '@api/getExpenseListQuery';
 import { useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CheckCircle, Upload } from 'lucide-react';
 import Papa from 'papaparse';
@@ -9,9 +10,9 @@ import Papa from 'papaparse';
 import Button from '@components/Button';
 import Modal from '@components/Modal';
 
-import { useToast } from '@/components/Toast/ToastProvider';
+import { useToast } from '@stores/toast';
+
 import { isSupportedCurrency, PIVOT_CURRENCY, SUPPORTED_CURRENCY_CODES } from '@/constants/currencies';
-import { queryKeys } from '@/lib/query-keys';
 
 interface ImportModalProps {
   isOpen: boolean;
@@ -154,7 +155,7 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
       setProgress(i + 1);
     }
 
-    await queryClient.invalidateQueries({ queryKey: queryKeys.expenses.all() });
+    await queryClient.invalidateQueries({ queryKey: EXPENSES_SCOPE });
     showToast(`Imported ${successCount} expenses successfully`, 'success');
     handleClose();
   };

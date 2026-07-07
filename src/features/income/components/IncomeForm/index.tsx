@@ -1,45 +1,66 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 
+import { createIncomeKeyGenerator } from '@api/createIncomeMutation';
+import { INCOMES_SCOPE } from '@api/getIncomeListQuery';
+import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
+import { updateIncomeKeyGenerator } from '@api/updateIncomeMutation';
+import type { UpdateIncomeRequestData } from '@api/updateIncomeMutation';
+import { PIVOT_CURRENCY } from '@constants/currencies';
 import { INCOME_TYPES, MONTHS } from '@constants/income';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { numberToWords } from '@persian-tools/persian-tools';
+import type { QueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Briefcase, Calendar, Coins, FileText, Loader2, Plus } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+
+import type { Income } from '@types';
 
 import { createIncomeSchema } from '@schemas';
-
-import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
+import type { CreateIncomeSchema } from '@schemas';
 
 import Button from '@components/Button';
-import MoneyInput from '@components/MoneyInput';
-import Select from '@components/Select';
-import { useToast } from '@components/Toast/ToastProvider';
+import Form from '@components/Form';
+import FormMoneyInput from '@components/Form/components/FormMoneyInput';
+import FormSelect from '@components/Form/components/FormSelect';
 import Tooltip from '@components/Tooltip';
 
-import { useCreateIncome, useUpdateIncome } from '@hooks/use-incomes';
+import { useCurrency } from '@hooks/use-currency';
+
+import { useToast } from '@stores/toast';
 
 import { ensureError, getJalaliMonthName } from '@utils';
 
-import type { CreateIncomeInput, Income } from '@/@types/income';
-import { PIVOT_CURRENCY } from '@/constants/currencies';
+import type { IncomeFormProps } from './@types';
 
-interface IncomeFormProps {
-  onIncomeAdded: () => void;
-  editingIncome?: Income;
-  onCancelEdit?: () => void;
-  setIsDirty?: (dirty: boolean) => void;
-}
+const invalidateIncomeData = (queryClient: QueryClient) =>
+  Promise.all([
+    queryClient.invalidateQueries({ queryKey: INCOMES_SCOPE }),
+    queryClient.invalidateQueries({ queryKey: SUMMARY_SCOPE }),
+  ]);
+
+const buildFormData = (income: Income): CreateIncomeSchema => ({
+  amount: income.amount,
+  currency: income.currency,
+  month: income.month,
+  year: income.year,
+  incomeType: income.incomeType,
+  source: income.source || '',
+  notes: income.notes || '',
+});
 
 const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: IncomeFormProps) => {
+  // Customs
+  const queryClient = useQueryClient();
   const { showToast } = useToast();
   const { primaryCurrency } = useCurrency();
 
-  const createIncome = useCreateIncome();
-  const updateIncome = useUpdateIncome();
-
   const currentDate = new Date();
 
-  const defaultFormData: CreateIncomeInput = useMemo(
+  // Variables
+  const defaultFormData: CreateIncomeSchema = useMemo(
     () => ({
       amount: 0,
       currency: primaryCurrency || PIVOT_CURRENCY,
@@ -53,76 +74,56 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
     [primaryCurrency]
   );
 
-  const buildFormData = (income: Income): CreateIncomeInput => ({
-    amount: income.amount,
-    currency: income.currency,
-    month: income.month,
-    year: income.year,
-    incomeType: income.incomeType,
-    source: income.source || '',
-    notes: income.notes || '',
+  // Forms
+  const methods = useForm<CreateIncomeSchema>({
+    resolver: zodResolver(createIncomeSchema),
+    defaultValues: editingIncome ? buildFormData(editingIncome) : defaultFormData,
+    mode: 'all',
   });
 
-  const [formData, setFormData] = useState<CreateIncomeInput>(
-    editingIncome ? buildFormData(editingIncome) : defaultFormData
-  );
-  const [initialFormData, setInitialFormData] = useState<CreateIncomeInput | null>(
-    editingIncome ? buildFormData(editingIncome) : null
-  );
+  const { formState, reset, watch } = methods;
+  const amount = watch('amount');
+  const currency = watch('currency');
+  const year = watch('year');
 
-  const isSubmitting = createIncome.isPending || updateIncome.isPending;
+  // Mutations
+  const createMutation = useMutation<unknown, Error, CreateIncomeSchema>({
+    mutationKey: createIncomeKeyGenerator(),
+  });
+  const updateMutation = useMutation<unknown, Error, UpdateIncomeRequestData>({
+    mutationKey: updateIncomeKeyGenerator(),
+  });
 
-  // Sync form data when editingIncome prop changes
-  const [prevEditingIncome, setPrevEditingIncome] = useState(editingIncome);
-  if (prevEditingIncome !== editingIncome) {
-    setPrevEditingIncome(editingIncome);
-    if (editingIncome) {
-      const initialData = buildFormData(editingIncome);
-      setFormData(initialData);
-      setInitialFormData(initialData);
-    }
-  }
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+  // Effects — resync when the drawer switches to a different income entry.
+  useEffect(() => {
+    if (editingIncome) reset(buildFormData(editingIncome));
+  }, [editingIncome, reset]);
 
   useEffect(() => {
-    if (!initialFormData || !setIsDirty) return;
-
-    const isDirty =
-      formData.amount !== initialFormData.amount ||
-      formData.currency !== initialFormData.currency ||
-      formData.month !== initialFormData.month ||
-      formData.year !== initialFormData.year ||
-      formData.incomeType !== initialFormData.incomeType ||
-      formData.source !== initialFormData.source ||
-      formData.notes !== initialFormData.notes;
-
-    setIsDirty(isDirty);
-  }, [formData, initialFormData, setIsDirty]);
+    setIsDirty?.(formState.isDirty);
+  }, [formState.isDirty, setIsDirty]);
 
   const numberToPersianWord = useMemo(() => {
-    if (formData.currency !== PIVOT_CURRENCY || formData.amount <= 0) return '';
-    const rounded = Math.round(formData.amount);
+    if (currency !== PIVOT_CURRENCY || amount <= 0) return '';
+    const rounded = Math.round(amount);
     return Number.isSafeInteger(rounded) ? `${numberToWords(rounded)} تومان` : '';
-  }, [formData.amount, formData.currency]);
+  }, [amount, currency]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const validated = createIncomeSchema.safeParse(formData);
-    if (!validated.success) {
-      showToast(validated.error.issues[0].message, 'error');
-      return;
-    }
-
+  const handleSubmit = async (data: CreateIncomeSchema) => {
     try {
       if (editingIncome) {
-        await updateIncome.mutateAsync({ id: editingIncome.id, data: formData });
+        await updateMutation.mutateAsync({ id: editingIncome.id, ...data });
+        await invalidateIncomeData(queryClient);
         showToast('Income updated successfully!', 'success');
       } else {
-        await createIncome.mutateAsync(formData);
+        await createMutation.mutateAsync(data);
+        await invalidateIncomeData(queryClient);
         showToast('Income added successfully!', 'success');
       }
 
-      setFormData(defaultFormData);
+      reset(defaultFormData);
       onIncomeAdded();
       if (editingIncome && onCancelEdit) onCancelEdit();
     } catch (err) {
@@ -131,7 +132,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
   };
 
   const handleCancel = () => {
-    setFormData(defaultFormData);
+    reset(defaultFormData);
     if (onCancelEdit) onCancelEdit();
   };
 
@@ -142,7 +143,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <Form methods={methods} onSubmit={handleSubmit} className="space-y-3">
       {/* Row 1: Income Type, Month, Year */}
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <div className="space-y-1">
@@ -150,11 +151,9 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
             <Briefcase className="text-text-muted h-4 w-4" />
             Type
           </label>
-          <Select
-            value={formData.incomeType}
-            onChange={(val) => setFormData({ ...formData, incomeType: val as CreateIncomeInput['incomeType'] })}
+          <FormSelect
+            name="incomeType"
             options={INCOME_TYPES.map((type) => ({ value: type.value, label: type.label }))}
-            required
           />
         </div>
 
@@ -163,14 +162,13 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
             <Calendar className="text-text-muted h-4 w-4" />
             Month
           </label>
-          <Select
-            value={String(formData.month)}
-            onChange={(val) => setFormData({ ...formData, month: parseInt(val, 10) })}
+          <FormSelect
+            name="month"
+            valueAsNumber
             options={MONTHS.map((month) => ({
               value: String(month.value),
-              label: `${month.label} / ${getJalaliMonthName(month.value, formData.year)}`,
+              label: `${month.label} / ${getJalaliMonthName(month.value, year)}`,
             }))}
-            required
           />
         </div>
 
@@ -179,11 +177,10 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
             <Calendar className="text-text-muted h-4 w-4" />
             Year
           </label>
-          <Select
-            value={String(formData.year)}
-            onChange={(val) => setFormData({ ...formData, year: parseInt(val, 10) })}
-            options={yearOptions.map((year) => ({ value: String(year), label: String(year) }))}
-            required
+          <FormSelect
+            name="year"
+            valueAsNumber
+            options={yearOptions.map((yearOption) => ({ value: String(yearOption), label: String(yearOption) }))}
           />
         </div>
       </div>
@@ -197,8 +194,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
         <input
           type="text"
           placeholder="e.g., Company Name, Client..."
-          value={formData.source}
-          onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+          {...methods.register('source')}
           className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
         />
       </div>
@@ -212,8 +208,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
         <textarea
           placeholder="Any additional notes..."
           rows={2}
-          value={formData.notes}
-          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+          {...methods.register('notes')}
           className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full resize-none rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
         />
       </div>
@@ -225,14 +220,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
           Amount
         </label>
         <Tooltip content={numberToPersianWord} position="top">
-          <MoneyInput
-            amount={formData.amount}
-            currency={formData.currency}
-            onAmountChange={(value) => setFormData({ ...formData, amount: value })}
-            onCurrencyChange={(currency) => setFormData({ ...formData, currency })}
-            placeholder="e.g. 390m, 4.5b"
-            required
-          />
+          <FormMoneyInput amountName="amount" currencyName="currency" placeholder="e.g. 390m, 4.5b" />
         </Tooltip>
       </div>
 
@@ -257,7 +245,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
           </Button>
         )}
       </div>
-    </form>
+    </Form>
   );
 };
 

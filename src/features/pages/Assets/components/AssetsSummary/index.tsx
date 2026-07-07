@@ -3,8 +3,8 @@ import { TrendingUp, Wallet } from 'lucide-react';
 
 import type { Asset, AssetCategory } from '@types';
 
-import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
-import type { MoneyItem } from '@features/ExchangeRate/CurrencyProvider';
+import { useCurrency } from '@hooks/use-currency';
+import type { MoneyItem } from '@hooks/use-currency';
 
 import type { AssetsSummaryProps } from '../../@types';
 import { CATEGORY_ICONS } from '../../constants';

@@ -2,14 +2,19 @@
 
 import { useState } from 'react';
 
+import { deleteAccountKeyGenerator } from '@api/deleteAccountMutation';
+import { useMutation } from '@tanstack/react-query';
 import { Database, Download, Loader2, Trash2, Upload } from 'lucide-react';
+
+import { beginSignout } from '@core/client/auth-handler';
 
 import Button from '@components/Button';
 import DeleteAccountModal from '@components/DeleteAccountModal';
 
-import { useToast } from '@/components/Toast/ToastProvider';
-import { useAuth } from '@/hooks/use-auth';
-import { beginSignout } from '@/lib/api/auth-handler';
+import { useAuth } from '@hooks/use-auth';
+
+import { useToast } from '@stores/toast';
+
 import { downloadFile } from '@/utils/export';
 
 import ImportModal from './ImportModal';
@@ -21,6 +26,10 @@ const DataManagement = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const { showToast } = useToast();
   const { user } = useAuth();
+
+  const { mutateAsync: deleteAccountAsync } = useMutation<void, Error, void>({
+    mutationKey: deleteAccountKeyGenerator(),
+  });
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -45,8 +54,7 @@ const DataManagement = () => {
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
     try {
-      const res = await fetch('/api/user/account', { method: 'DELETE' });
-      if (!res.ok) throw new Error('Delete failed');
+      await deleteAccountAsync();
       // Own the signout so the 401 listener doesn't stack a second redirect.
       // Hard navigation wipes all in-memory state, including the query cache.
       beginSignout();

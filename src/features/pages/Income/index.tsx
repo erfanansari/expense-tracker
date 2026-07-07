@@ -1,19 +1,24 @@
 'use client';
 
+import { deleteIncomeKeyGenerator } from '@api/deleteIncomeMutation';
+import type { DeleteIncomeRequestData } from '@api/deleteIncomeMutation';
+import { getIncomeListKeyGenerator, INCOMES_SCOPE } from '@api/getIncomeListQuery';
+import type { GetIncomeListResponse } from '@api/getIncomeListQuery';
+import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
 import { getIncomeTypeLabel, getMonthLabel } from '@constants/income';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 
 import type { Income } from '@types';
 
-import { useGlobalDrawer } from '@features/drawers/GlobalDrawerProvider';
-
 import Button from '@components/Button';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import Pulse from '@components/Skeleton';
-import { useToast } from '@components/Toast/ToastProvider';
 
 import { useDeleteConfirmation } from '@hooks/use-delete-confirmation';
-import { useDeleteIncome, useIncomes } from '@hooks/use-incomes';
+
+import { useDrawerStore } from '@stores/drawer';
+import { useToast } from '@stores/toast';
 
 import { ensureError, getJalaliMonthName } from '@utils';
 
@@ -36,13 +41,24 @@ function IncomeSummarySkeleton() {
 }
 
 const IncomePage = () => {
-  // Queries
-  const { data: incomes = [], isLoading, error, refetch } = useIncomes();
-  const deleteIncome = useDeleteIncome();
-
   // Customs
+  const queryClient = useQueryClient();
   const { showToast } = useToast();
-  const { openIncomeDrawer } = useGlobalDrawer();
+
+  // Queries
+  const {
+    data: incomes = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery<GetIncomeListResponse>({ queryKey: getIncomeListKeyGenerator() });
+
+  // Mutations
+  const { mutateAsync: deleteIncomeAsync } = useMutation<void, Error, DeleteIncomeRequestData>({
+    mutationKey: deleteIncomeKeyGenerator(),
+  });
+
+  const openIncomeDrawer = useDrawerStore((state) => state.openIncomeDrawer);
   const {
     itemToDelete: incomeToDelete,
     isModalOpen: isDeleteModalOpen,
@@ -52,7 +68,11 @@ const IncomePage = () => {
     confirmDelete,
   } = useDeleteConfirmation<Income>({
     onDelete: async (id) => {
-      await deleteIncome.mutateAsync(id);
+      await deleteIncomeAsync({ id });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: INCOMES_SCOPE }),
+        queryClient.invalidateQueries({ queryKey: SUMMARY_SCOPE }),
+      ]);
       showToast('Income entry deleted.', 'info');
     },
     onError: (err) => showToast(ensureError(err).message, 'error'),

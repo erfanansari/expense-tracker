@@ -4,47 +4,47 @@ import { useState } from 'react';
 
 import Link from 'next/link';
 
+import { getMeKeyGenerator } from '@api/getMeQuery';
+import { signupKeyGenerator } from '@api/signupMutation';
+import type { SignupRequestData, SignupResponse } from '@api/signupMutation';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 
-import { useToast } from '@components/Toast/ToastProvider';
+import { signupSchema } from '@schemas';
 
-import { signup } from '@/lib/api/auth';
-import { queryKeys } from '@/lib/query-keys';
+import Form from '@components/Form';
+import FormInput from '@components/Form/components/FormInput';
+
+import { useToast } from '@stores/toast';
 
 const Signup = () => {
-  // States
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(false);
-  const [error, setError] = useState('');
+  // Customs
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
+  // States
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [error, setError] = useState('');
+
+  // Forms
+  const methods = useForm<SignupRequestData>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: { name: '', email: '', password: '', passwordConfirm: '' },
+    mode: 'all',
+  });
+
   // Mutations
-  const signupMutation = useMutation({
-    mutationFn: ({
-      name,
-      email,
-      password,
-      passwordConfirm,
-    }: {
-      name: string;
-      email: string;
-      password: string;
-      passwordConfirm: string;
-    }) => signup(name, email, password, passwordConfirm),
-    onSuccess: (user) => {
+  const signupMutation = useMutation<SignupResponse, Error, SignupRequestData>({
+    mutationKey: signupKeyGenerator(),
+    onSuccess: ({ user }) => {
       // Setting the `me` query data is enough — GuestGuard sees the user and
       // redirects (honoring ?rp=). Pushing /overview here too would race it.
-      queryClient.setQueryData(queryKeys.auth.me(), user);
+      queryClient.setQueryData(getMeKeyGenerator(), user);
       showToast('Account created. Welcome to Kharji!', 'success');
     },
-    onError: (err: Error) => {
+    onError: (err) => {
       setError(err.message || 'Signup failed');
     },
   });
@@ -52,8 +52,7 @@ const Signup = () => {
   // Variables
   const loading = signupMutation.isPending;
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const handleSubmit = (data: SignupRequestData) => {
     setError('');
 
     if (!agreeTerms) {
@@ -61,13 +60,8 @@ const Signup = () => {
       return;
     }
 
-    if (password !== passwordConfirm) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    signupMutation.mutate({ name: fullName, email, password, passwordConfirm });
-  }
+    signupMutation.mutate(data);
+  };
 
   return (
     <>
@@ -82,97 +76,35 @@ const Signup = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-        <div>
-          <label htmlFor="fullName" className="text-text-primary mb-1.5 block text-xs font-medium sm:mb-2 sm:text-sm">
-            Full Name
-          </label>
-          <input
-            id="fullName"
-            type="text"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            required
-            placeholder="John Doe"
-            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-primary w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none sm:px-4 sm:py-3 sm:text-base"
-            disabled={loading}
-          />
-        </div>
+      <Form methods={methods} onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+        <FormInput name="name" label="Full Name" placeholder="John Doe" autoComplete="name" disabled={loading} />
 
-        <div>
-          <label htmlFor="email" className="text-text-primary mb-1.5 block text-xs font-medium sm:mb-2 sm:text-sm">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            placeholder="you@example.com"
-            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-primary w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none sm:px-4 sm:py-3 sm:text-base"
-            disabled={loading}
-          />
-        </div>
+        <FormInput
+          name="email"
+          type="email"
+          label="Email"
+          placeholder="you@example.com"
+          autoComplete="email"
+          disabled={loading}
+        />
 
-        <div>
-          <label htmlFor="password" className="text-text-primary mb-1.5 block text-xs font-medium sm:mb-2 sm:text-sm">
-            Password
-          </label>
-          <div className="relative">
-            <input
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="Create a strong password"
-              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-primary w-full rounded-lg border px-3 py-2.5 pr-10 text-sm focus:outline-none sm:px-4 sm:py-3 sm:pr-12 sm:text-base"
-              disabled={loading}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="text-text-muted hover:text-text-secondary absolute top-1/2 right-2.5 -translate-y-1/2 sm:right-3"
-              tabIndex={-1}
-            >
-              {showPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
-            </button>
-          </div>
-        </div>
+        <FormInput
+          name="password"
+          type="password"
+          label="Password"
+          placeholder="Create a strong password"
+          autoComplete="new-password"
+          disabled={loading}
+        />
 
-        <div>
-          <label
-            htmlFor="passwordConfirm"
-            className="text-text-primary mb-1.5 block text-xs font-medium sm:mb-2 sm:text-sm"
-          >
-            Confirm Password
-          </label>
-          <div className="relative">
-            <input
-              id="passwordConfirm"
-              type={showConfirmPassword ? 'text' : 'password'}
-              value={passwordConfirm}
-              onChange={(e) => setPasswordConfirm(e.target.value)}
-              required
-              placeholder="Confirm your password"
-              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-primary w-full rounded-lg border px-3 py-2.5 pr-10 text-sm focus:outline-none sm:px-4 sm:py-3 sm:pr-12 sm:text-base"
-              disabled={loading}
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="text-text-muted hover:text-text-secondary absolute top-1/2 right-2.5 -translate-y-1/2 sm:right-3"
-              tabIndex={-1}
-            >
-              {showConfirmPassword ? (
-                <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" />
-              ) : (
-                <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
-              )}
-            </button>
-          </div>
-        </div>
+        <FormInput
+          name="passwordConfirm"
+          type="password"
+          label="Confirm Password"
+          placeholder="Confirm your password"
+          autoComplete="new-password"
+          disabled={loading}
+        />
 
         <label className="flex cursor-pointer items-start gap-2">
           <input
@@ -207,7 +139,7 @@ const Signup = () => {
             'Create Account'
           )}
         </button>
-      </form>
+      </Form>
     </>
   );
 };

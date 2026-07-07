@@ -2,6 +2,15 @@
 
 import { useState } from 'react';
 
+import { createCategoryKeyGenerator } from '@api/createCategoryMutation';
+import type { CreateCategoryRequestData } from '@api/createCategoryMutation';
+import { deleteCategoryKeyGenerator } from '@api/deleteCategoryMutation';
+import type { DeleteCategoryRequestData, DeleteCategoryResponse } from '@api/deleteCategoryMutation';
+import { CATEGORIES_SCOPE, getCategoryListWithUsageKeyGenerator } from '@api/getCategoryListQuery';
+import { EXPENSES_SCOPE } from '@api/getExpenseListQuery';
+import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
+import { updateCategoryKeyGenerator } from '@api/updateCategoryMutation';
+import type { UpdateCategoryRequestData } from '@api/updateCategoryMutation';
 import {
   CATEGORY_COLORS,
   DEFAULT_CATEGORY_COLOR,
@@ -9,28 +18,39 @@ import {
   getCategoryColor,
   getCategoryIcon,
 } from '@constants/categories';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Edit2, Folder, Loader2, Plus, Search, Trash2, X } from 'lucide-react';
+
+import type { Category, CategoryWithUsage } from '@types';
 
 import CategoryBadge from '@components/CategoryBadge';
 import ColorPicker from '@components/ColorPicker';
 import DeleteCategoryModal from '@components/DeleteCategoryModal';
 import IconPicker from '@components/IconPicker';
-import { useToast } from '@components/Toast/ToastProvider';
 
-import { useCategoriesWithUsage, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@hooks/use-categories';
+import { useToast } from '@stores/toast';
 
 import { ensureError } from '@utils';
 
-import type { CategoryWithUsage } from '@/@types/expense';
-
 const CategoryManagementList = () => {
-  const { data: categories = [], isLoading } = useCategoriesWithUsage();
-
-  const createCategory = useCreateCategory();
-  const updateCategory = useUpdateCategory();
-  const deleteCategory = useDeleteCategory();
-
+  const queryClient = useQueryClient();
   const { showToast } = useToast();
+
+  const { data: categories = [], isLoading } = useQuery<CategoryWithUsage[]>({
+    queryKey: getCategoryListWithUsageKeyGenerator(),
+  });
+
+  const createCategory = useMutation<Category, Error, CreateCategoryRequestData>({
+    mutationKey: createCategoryKeyGenerator(),
+  });
+  const updateCategory = useMutation<Category, Error, UpdateCategoryRequestData>({
+    mutationKey: updateCategoryKeyGenerator(),
+  });
+  const deleteCategory = useMutation<DeleteCategoryResponse, Error, DeleteCategoryRequestData>({
+    mutationKey: deleteCategoryKeyGenerator(),
+  });
+
+  const invalidateCategoryData = () => queryClient.invalidateQueries({ queryKey: CATEGORIES_SCOPE });
 
   // Create form state
   const [isCreating, setIsCreating] = useState(false);
@@ -76,6 +96,7 @@ const CategoryManagementList = () => {
     setCreateError('');
     try {
       const created = await createCategory.mutateAsync({ name: trimmed, icon: newIcon, color: newColor });
+      await invalidateCategoryData();
       showToast(`Category "${created.name}" created.`, 'success');
       resetCreateForm();
     } catch (err) {
@@ -110,10 +131,8 @@ const CategoryManagementList = () => {
     }
     setEditError('');
     try {
-      await updateCategory.mutateAsync({
-        id,
-        input: { name: trimmed, icon: editIcon, color: editColor },
-      });
+      await updateCategory.mutateAsync({ id, name: trimmed, icon: editIcon, color: editColor });
+      await invalidateCategoryData();
       showToast('Category updated.', 'info');
       cancelEdit();
     } catch (err) {
@@ -136,6 +155,12 @@ const CategoryManagementList = () => {
     try {
       const name = deletingCategory.name;
       await deleteCategory.mutateAsync({ id: deletingCategory.id, reassignTo: reassignToId });
+      await Promise.all([
+        invalidateCategoryData(),
+        // reassign / delete affects expense rows and category totals
+        queryClient.invalidateQueries({ queryKey: EXPENSES_SCOPE }),
+        queryClient.invalidateQueries({ queryKey: SUMMARY_SCOPE }),
+      ]);
       setDeletingCategory(null);
       showToast(`Category "${name}" deleted.`, 'info');
     } catch (err) {

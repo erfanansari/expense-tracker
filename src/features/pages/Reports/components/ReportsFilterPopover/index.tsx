@@ -2,17 +2,19 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+import { getCategoryListKeyGenerator } from '@api/getCategoryListQuery';
+import { getTagListKeyGenerator } from '@api/getTagListQuery';
+import { useQuery } from '@tanstack/react-query';
 import { Check, X } from 'lucide-react';
 import { components as rsComponents } from 'react-select';
 import type { CSSObjectWithLabel, MenuListProps, MultiValue, OptionProps, StylesConfig } from 'react-select';
 import Select2 from 'react-select';
 import { twMerge } from 'tailwind-merge';
 
+import type { Category } from '@types';
+
 import Button from '@components/Button';
 import Modal from '@components/Modal';
-
-import { useCategories } from '@hooks/use-categories';
-import { useTags } from '@hooks/use-tags';
 
 import type { Tag } from '@/@types/expense';
 
@@ -215,8 +217,8 @@ const ReportsFilterPopover = ({
   onCategoriesChange,
   onReset,
 }: ReportsFilterPopoverProps) => {
-  const { data: allTags = [] } = useTags();
-  const { data: allCategories = [] } = useCategories();
+  const { data: allTags = [] } = useQuery<Tag[]>({ queryKey: getTagListKeyGenerator() });
+  const { data: allCategories = [] } = useQuery<Category[]>({ queryKey: getCategoryListKeyGenerator() });
   const popoverRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
 

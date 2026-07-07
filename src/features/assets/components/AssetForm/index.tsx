@@ -1,44 +1,66 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 
+import { createAssetKeyGenerator } from '@api/createAssetMutation';
+import { ASSETS_SCOPE } from '@api/getAssetListQuery';
+import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
+import { updateAssetKeyGenerator } from '@api/updateAssetMutation';
+import type { UpdateAssetRequestData } from '@api/updateAssetMutation';
 import { ASSET_CATEGORIES } from '@constants/assets';
+import { PIVOT_CURRENCY } from '@constants/currencies';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { numberToWords } from '@persian-tools/persian-tools';
+import type { QueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Coins, FileText, Loader2, Package, Plus } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+
+import type { Asset } from '@types';
 
 import { createAssetSchema } from '@schemas';
-
-import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
+import type { CreateAssetSchema } from '@schemas';
 
 import AmountInput from '@components/AmountInput';
 import Button from '@components/Button';
-import MoneyInput from '@components/MoneyInput';
-import Select from '@components/Select';
-import { useToast } from '@components/Toast/ToastProvider';
+import Form from '@components/Form';
+import FormMoneyInput from '@components/Form/components/FormMoneyInput';
+import FormSelect from '@components/Form/components/FormSelect';
 import Tooltip from '@components/Tooltip';
 
-import { useCreateAsset, useUpdateAsset } from '@hooks/use-assets';
+import { useCurrency } from '@hooks/use-currency';
+
+import { useToast } from '@stores/toast';
 
 import { ensureError } from '@utils';
 
-import type { Asset, AssetCategory, CreateAssetInput } from '@/@types/asset';
-import { PIVOT_CURRENCY } from '@/constants/currencies';
+import type { AssetFormProps } from './@types';
 
-interface AssetFormProps {
-  onAssetAdded: () => void;
-  editingAsset?: Asset;
-  onCancelEdit?: () => void;
-  setIsDirty?: (dirty: boolean) => void;
-}
+const invalidateAssetData = (queryClient: QueryClient) =>
+  Promise.all([
+    queryClient.invalidateQueries({ queryKey: ASSETS_SCOPE }),
+    queryClient.invalidateQueries({ queryKey: SUMMARY_SCOPE }),
+  ]);
+
+const buildFormData = (asset: Asset): CreateAssetSchema => ({
+  category: asset.category,
+  name: asset.name,
+  quantity: asset.quantity,
+  unit: asset.unit || '',
+  unitValue: asset.unitValue || 0,
+  amount: asset.amount,
+  currency: asset.currency,
+  notes: asset.notes || '',
+});
 
 const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: AssetFormProps) => {
+  // Customs
+  const queryClient = useQueryClient();
   const { showToast } = useToast();
   const { primaryCurrency } = useCurrency();
 
-  const createAsset = useCreateAsset();
-  const updateAsset = useUpdateAsset();
-
-  const defaultFormData: CreateAssetInput = useMemo(
+  // Variables
+  const defaultFormData: CreateAssetSchema = useMemo(
     () => ({
       category: 'cash',
       name: '',
@@ -52,106 +74,81 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
     [primaryCurrency]
   );
 
-  const buildFormData = (asset: Asset): CreateAssetInput => ({
-    category: asset.category,
-    name: asset.name,
-    quantity: asset.quantity,
-    unit: asset.unit || '',
-    unitValue: asset.unitValue || 0,
-    amount: asset.amount,
-    currency: asset.currency,
-    notes: asset.notes || '',
+  // Forms
+  const methods = useForm<CreateAssetSchema>({
+    resolver: zodResolver(createAssetSchema),
+    defaultValues: editingAsset ? buildFormData(editingAsset) : defaultFormData,
+    mode: 'all',
   });
 
-  const [formData, setFormData] = useState<CreateAssetInput>(
-    editingAsset ? buildFormData(editingAsset) : defaultFormData
-  );
-  const [initialFormData, setInitialFormData] = useState<CreateAssetInput | null>(
-    editingAsset ? buildFormData(editingAsset) : null
-  );
+  const { formState, reset, setValue, watch } = methods;
+  const quantity = watch('quantity');
+  const unitValue = watch('unitValue');
+  const amount = watch('amount');
+  const currency = watch('currency');
+  const name = watch('name');
 
-  const isSubmitting = createAsset.isPending || updateAsset.isPending;
+  // Mutations
+  const createMutation = useMutation<unknown, Error, CreateAssetSchema>({
+    mutationKey: createAssetKeyGenerator(),
+  });
+  const updateMutation = useMutation<unknown, Error, UpdateAssetRequestData>({
+    mutationKey: updateAssetKeyGenerator(),
+  });
 
-  // Sync form data when editingAsset prop changes
-  const [prevEditingAsset, setPrevEditingAsset] = useState(editingAsset);
-  if (prevEditingAsset !== editingAsset) {
-    setPrevEditingAsset(editingAsset);
-    if (editingAsset) {
-      const initialData = buildFormData(editingAsset);
-      setFormData(initialData);
-      setInitialFormData(initialData);
-    }
-  }
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+  // Effects — resync when the drawer switches to a different asset.
+  useEffect(() => {
+    if (editingAsset) reset(buildFormData(editingAsset));
+  }, [editingAsset, reset]);
 
   useEffect(() => {
-    if (!initialFormData || !setIsDirty) return;
-
-    const isDirty =
-      formData.category !== initialFormData.category ||
-      formData.name !== initialFormData.name ||
-      formData.quantity !== initialFormData.quantity ||
-      formData.unit !== initialFormData.unit ||
-      formData.unitValue !== initialFormData.unitValue ||
-      formData.amount !== initialFormData.amount ||
-      formData.currency !== initialFormData.currency ||
-      formData.notes !== initialFormData.notes;
-
-    setIsDirty(isDirty);
-  }, [formData, initialFormData, setIsDirty]);
+    setIsDirty?.(formState.isDirty);
+  }, [formState.isDirty, setIsDirty]);
 
   const numberToPersianWord = useMemo(() => {
-    if (formData.currency !== PIVOT_CURRENCY || (formData.amount ?? 0) <= 0) return '';
-    const rounded = Math.round(formData.amount);
+    if (currency !== PIVOT_CURRENCY || (amount ?? 0) <= 0) return '';
+    const rounded = Math.round(amount);
     return Number.isSafeInteger(rounded) ? `${numberToWords(rounded)} تومان` : '';
-  }, [formData.amount, formData.currency]);
+  }, [amount, currency]);
 
   // Quantity × unitValue = total amount (in the entry currency).
   const handleQuantityChange = (value: number) => {
-    const unitValue = formData.unitValue ?? 0;
-    setFormData({
-      ...formData,
-      quantity: value,
-      amount: unitValue ? Math.round(value * unitValue * 100) / 100 : formData.amount,
-    });
+    setValue('quantity', value, { shouldDirty: true, shouldValidate: true });
+    if (unitValue) {
+      setValue('amount', Math.round(value * unitValue * 100) / 100, { shouldDirty: true, shouldValidate: true });
+    }
   };
 
   const handleUnitValueChange = (value: number) => {
-    setFormData({
-      ...formData,
-      unitValue: value,
-      amount: Math.round(formData.quantity * value * 100) / 100,
-    });
+    setValue('unitValue', value, { shouldDirty: true, shouldValidate: true });
+    setValue('amount', Math.round(quantity * value * 100) / 100, { shouldDirty: true, shouldValidate: true });
   };
 
   const handleTotalValueChange = (value: number) => {
-    setFormData({
-      ...formData,
-      amount: value,
-      unitValue: formData.quantity > 0 ? Math.round((value / formData.quantity) * 100) / 100 : 0,
+    setValue('amount', value, { shouldDirty: true, shouldValidate: true });
+    setValue('unitValue', quantity > 0 ? Math.round((value / quantity) * 100) / 100 : 0, {
+      shouldDirty: true,
+      shouldValidate: true,
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const dataToSubmit = { ...formData, lastValuedAt: new Date().toISOString() };
-
-    const validated = createAssetSchema.safeParse(dataToSubmit);
-    if (!validated.success) {
-      showToast(validated.error.issues[0].message, 'error');
-      return;
-    }
+  const handleSubmit = async (data: CreateAssetSchema) => {
+    const dataToSubmit = { ...data, lastValuedAt: new Date().toISOString() };
 
     try {
       if (editingAsset) {
-        await updateAsset.mutateAsync({ id: editingAsset.id, data: dataToSubmit });
+        await updateMutation.mutateAsync({ id: editingAsset.id, ...dataToSubmit });
+        await invalidateAssetData(queryClient);
         showToast('Asset updated successfully!', 'success');
       } else {
-        await createAsset.mutateAsync(dataToSubmit);
+        await createMutation.mutateAsync(dataToSubmit);
+        await invalidateAssetData(queryClient);
         showToast('Asset added successfully!', 'success');
       }
 
-      setFormData(defaultFormData);
+      reset(defaultFormData);
       onAssetAdded();
       if (editingAsset && onCancelEdit) onCancelEdit();
     } catch (err) {
@@ -160,12 +157,12 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
   };
 
   const handleCancel = () => {
-    setFormData(defaultFormData);
+    reset(defaultFormData);
     if (onCancelEdit) onCancelEdit();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <Form methods={methods} onSubmit={handleSubmit} className="space-y-3">
       {/* Row 1: Category and Name */}
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
         <div className="space-y-1">
@@ -173,11 +170,9 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
             <Package className="text-text-muted h-4 w-4" />
             Category
           </label>
-          <Select
-            value={formData.category}
-            onChange={(val) => setFormData({ ...formData, category: val as AssetCategory })}
+          <FormSelect
+            name="category"
             options={ASSET_CATEGORIES.map((cat) => ({ value: cat.value, label: cat.label }))}
-            required
           />
         </div>
 
@@ -189,11 +184,12 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
           <input
             type="text"
             placeholder="e.g., BTC, Gold 18K, Bank Melli..."
-            required
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            {...methods.register('name')}
             className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
           />
+          {formState.errors.name?.message && (
+            <p className="text-danger mt-1 text-xs">{formState.errors.name.message}</p>
+          )}
         </div>
       </div>
 
@@ -207,7 +203,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
           <AmountInput
             placeholder="e.g. 1, 2.5k"
             required
-            value={formData.quantity}
+            value={quantity}
             onChange={handleQuantityChange}
             className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
           />
@@ -220,8 +216,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
           <input
             type="text"
             placeholder="e.g., BTC, gram, unit..."
-            value={formData.unit || ''}
-            onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+            {...methods.register('unit')}
             className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
           />
         </div>
@@ -231,11 +226,11 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
       <div className="space-y-1">
         <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
           <Coins className="text-text-muted h-4 w-4" />
-          Unit Value ({formData.currency})
+          Unit Value ({currency})
         </label>
         <AmountInput
           placeholder="e.g. 93k, 100"
-          value={formData.unitValue ?? 0}
+          value={unitValue ?? 0}
           onChange={handleUnitValueChange}
           className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
         />
@@ -248,13 +243,11 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
           Total Value
         </label>
         <Tooltip content={numberToPersianWord} position="top">
-          <MoneyInput
-            amount={formData.amount}
-            currency={formData.currency}
-            onAmountChange={handleTotalValueChange}
-            onCurrencyChange={(currency) => setFormData({ ...formData, currency })}
+          <FormMoneyInput
+            amountName="amount"
+            currencyName="currency"
             placeholder="e.g. 1k, 50m"
-            required
+            onAmountChange={handleTotalValueChange}
           />
         </Tooltip>
       </div>
@@ -268,15 +261,14 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
         <textarea
           placeholder="Any additional notes..."
           rows={2}
-          value={formData.notes}
-          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+          {...methods.register('notes')}
           className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full resize-none rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
         />
       </div>
 
       {/* Buttons */}
       <div className="flex gap-3 pt-1">
-        <Button type="submit" disabled={isSubmitting || !formData.name} variant="primary" className="flex-1">
+        <Button type="submit" disabled={isSubmitting || !name} variant="primary" className="flex-1">
           {isSubmitting ? (
             <>
               <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
@@ -295,7 +287,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
           </Button>
         )}
       </div>
-    </form>
+    </Form>
   );
 };
 

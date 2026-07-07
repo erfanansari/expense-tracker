@@ -2,21 +2,24 @@
 
 import { useState } from 'react';
 
+import { createCategoryKeyGenerator } from '@api/createCategoryMutation';
+import type { CreateCategoryRequestData } from '@api/createCategoryMutation';
+import { CATEGORIES_SCOPE, getCategoryListKeyGenerator } from '@api/getCategoryListQuery';
 import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR, DEFAULT_CATEGORY_ICON } from '@constants/categories';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2, Plus } from 'lucide-react';
+
+import type { Category } from '@types';
 
 import Button from '@components/Button';
 import CategoryBadge from '@components/CategoryBadge';
 import ColorPicker from '@components/ColorPicker';
 import IconPicker from '@components/IconPicker';
 import Modal from '@components/Modal';
-import { useToast } from '@components/Toast/ToastProvider';
 
-import { useCategories, useCreateCategory } from '@hooks/use-categories';
+import { useToast } from '@stores/toast';
 
 import { ensureError } from '@utils';
-
-import type { Category } from '@/@types/expense';
 
 interface CategoryQuickCreateModalProps {
   isOpen: boolean;
@@ -25,9 +28,12 @@ interface CategoryQuickCreateModalProps {
 }
 
 const CategoryQuickCreateModal = ({ isOpen, onClose, onCreated }: CategoryQuickCreateModalProps) => {
-  const createCategory = useCreateCategory();
-  const { data: categories = [] } = useCategories();
+  const queryClient = useQueryClient();
   const { showToast } = useToast();
+  const createCategory = useMutation<Category, Error, CreateCategoryRequestData>({
+    mutationKey: createCategoryKeyGenerator(),
+  });
+  const { data: categories = [] } = useQuery<Category[]>({ queryKey: getCategoryListKeyGenerator() });
 
   const [name, setName] = useState('');
   const [icon, setIcon] = useState<string>(DEFAULT_CATEGORY_ICON);
@@ -61,6 +67,7 @@ const CategoryQuickCreateModal = ({ isOpen, onClose, onCreated }: CategoryQuickC
     setError('');
     try {
       const created = await createCategory.mutateAsync({ name: trimmed, icon, color });
+      await queryClient.invalidateQueries({ queryKey: CATEGORIES_SCOPE });
       showToast(`Category "${created.name}" created.`, 'success');
       onCreated(created);
     } catch (err) {

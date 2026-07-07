@@ -1,19 +1,24 @@
 'use client';
 
+import { deleteAssetKeyGenerator } from '@api/deleteAssetMutation';
+import type { DeleteAssetRequestData } from '@api/deleteAssetMutation';
+import { ASSETS_SCOPE, getAssetListKeyGenerator } from '@api/getAssetListQuery';
+import type { GetAssetListResponse } from '@api/getAssetListQuery';
+import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
 import { ASSET_CATEGORY_COLORS, getAssetCategoryLabel } from '@constants/assets';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 
 import type { Asset, AssetCategory } from '@types';
 
-import { useGlobalDrawer } from '@features/drawers/GlobalDrawerProvider';
-
 import Button from '@components/Button';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import Pulse from '@components/Skeleton';
-import { useToast } from '@components/Toast/ToastProvider';
 
-import { useAssets, useDeleteAsset } from '@hooks/use-assets';
 import { useDeleteConfirmation } from '@hooks/use-delete-confirmation';
+
+import { useDrawerStore } from '@stores/drawer';
+import { useToast } from '@stores/toast';
 
 import { ensureError } from '@utils';
 
@@ -41,13 +46,24 @@ function AssetsSummarySkeleton() {
 }
 
 const AssetsPage = () => {
-  // Queries
-  const { data: assets = [], isLoading, error, refetch } = useAssets();
-  const deleteAsset = useDeleteAsset();
-
   // Customs
+  const queryClient = useQueryClient();
   const { showToast } = useToast();
-  const { openAssetDrawer } = useGlobalDrawer();
+
+  // Queries
+  const {
+    data: assets = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery<GetAssetListResponse>({ queryKey: getAssetListKeyGenerator() });
+
+  // Mutations
+  const { mutateAsync: deleteAssetAsync } = useMutation<void, Error, DeleteAssetRequestData>({
+    mutationKey: deleteAssetKeyGenerator(),
+  });
+
+  const openAssetDrawer = useDrawerStore((state) => state.openAssetDrawer);
   const {
     itemToDelete: assetToDelete,
     isModalOpen: isDeleteModalOpen,
@@ -57,7 +73,11 @@ const AssetsPage = () => {
     confirmDelete,
   } = useDeleteConfirmation<Asset>({
     onDelete: async (id) => {
-      await deleteAsset.mutateAsync(id);
+      await deleteAssetAsync({ id });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ASSETS_SCOPE }),
+        queryClient.invalidateQueries({ queryKey: SUMMARY_SCOPE }),
+      ]);
       showToast('Asset deleted.', 'info');
     },
     onError: (err) => showToast(ensureError(err).message, 'error'),

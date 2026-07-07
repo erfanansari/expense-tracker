@@ -2,28 +2,43 @@
 
 import { useState } from 'react';
 
+import { createTagKeyGenerator } from '@api/createTagMutation';
+import type { CreateTagRequestData } from '@api/createTagMutation';
+import { deleteTagKeyGenerator } from '@api/deleteTagMutation';
+import type { DeleteTagRequestData, DeleteTagResponse } from '@api/deleteTagMutation';
+import { EXPENSES_SCOPE } from '@api/getExpenseListQuery';
+import { getTagListWithUsageKeyGenerator, TAGS_SCOPE } from '@api/getTagListQuery';
+import { updateTagKeyGenerator } from '@api/updateTagMutation';
+import type { UpdateTagRequestData } from '@api/updateTagMutation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Edit2, Loader2, Plus, Search, Tag as TagIcon, Trash2, X } from 'lucide-react';
 
-import DeleteTagModal from '@components/DeleteTagModal';
-import { useToast } from '@components/Toast/ToastProvider';
+import type { Tag, TagWithUsage } from '@types';
 
-import { useCreateTag, useDeleteTag, useTagsWithUsage, useUpdateTag } from '@hooks/use-tags';
+import DeleteTagModal from '@components/DeleteTagModal';
+
+import { useToast } from '@stores/toast';
 
 import { ensureError } from '@utils';
 
-import type { TagWithUsage } from '@/@types/expense';
-
 const TagManagementList = () => {
+  // Customs
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
+
   // Queries
-  const { data: tags = [], isLoading } = useTagsWithUsage();
+  const { data: tags = [], isLoading } = useQuery<TagWithUsage[]>({
+    queryKey: getTagListWithUsageKeyGenerator(),
+  });
 
   // Mutations
-  const createTag = useCreateTag();
-  const updateTag = useUpdateTag();
-  const deleteTag = useDeleteTag();
+  const createTag = useMutation<Tag, Error, CreateTagRequestData>({ mutationKey: createTagKeyGenerator() });
+  const updateTag = useMutation<Tag, Error, UpdateTagRequestData>({ mutationKey: updateTagKeyGenerator() });
+  const deleteTag = useMutation<DeleteTagResponse, Error, DeleteTagRequestData>({
+    mutationKey: deleteTagKeyGenerator(),
+  });
 
-  // Customs
-  const { showToast } = useToast();
+  const invalidateTagData = () => queryClient.invalidateQueries({ queryKey: TAGS_SCOPE });
 
   // States
   const [searchQuery, setSearchQuery] = useState('');
@@ -68,6 +83,7 @@ const TagManagementList = () => {
 
     try {
       await updateTag.mutateAsync({ id: tagId, name: editingName.trim() });
+      await invalidateTagData();
       setEditingTagId(null);
       setEditingName('');
       showToast('Tag renamed.', 'info');
@@ -97,7 +113,12 @@ const TagManagementList = () => {
 
     try {
       const tagName = deletingTag.name;
-      await deleteTag.mutateAsync(deletingTag.id);
+      await deleteTag.mutateAsync({ id: deletingTag.id });
+      await Promise.all([
+        invalidateTagData(),
+        // Tag deletion affects expense display
+        queryClient.invalidateQueries({ queryKey: EXPENSES_SCOPE }),
+      ]);
       setDeletingTag(null);
       showToast(`Tag "${tagName}" deleted.`, 'info');
     } catch (error) {
@@ -121,7 +142,8 @@ const TagManagementList = () => {
     setCreateError('');
 
     try {
-      const created = await createTag.mutateAsync(newTagName.trim());
+      const created = await createTag.mutateAsync({ name: newTagName.trim() });
+      await invalidateTagData();
       setNewTagName('');
       setCreateError('');
       showToast(`Tag "${created.name}" created.`, 'success');

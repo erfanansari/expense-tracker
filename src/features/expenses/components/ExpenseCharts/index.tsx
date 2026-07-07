@@ -18,10 +18,10 @@ import {
   YAxis,
 } from 'recharts';
 
-import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
-import type { MoneyItem } from '@features/ExchangeRate/CurrencyProvider';
-
 import ChartTooltip from '@components/ChartTooltip';
+
+import { useCurrency } from '@hooks/use-currency';
+import type { MoneyItem } from '@hooks/use-currency';
 
 import { formatAxisNumber, formatChartTooltipDate } from '@utils';
 

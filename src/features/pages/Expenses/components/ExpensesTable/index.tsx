@@ -2,10 +2,15 @@
 
 import { useMemo, useRef } from 'react';
 
+import { getCategoryListKeyGenerator } from '@api/getCategoryListQuery';
+import { getTagListKeyGenerator } from '@api/getTagListQuery';
+import { useQuery } from '@tanstack/react-query';
 import { Calendar, FileText, Loader2, Search, Tag as TagIcon, X } from 'lucide-react';
 import type { DatePicker as ReactDatePickerType } from 'react-datepicker';
 import type { MultiValue } from 'react-select';
 import Select2 from 'react-select';
+
+import type { Category } from '@types';
 
 import { ApiError } from '@core/errors';
 
@@ -16,9 +21,6 @@ import DatePicker from '@components/DatePicker';
 import ErrorState from '@components/ErrorState';
 import Select from '@components/Select';
 import Pulse from '@components/Skeleton';
-
-import { useCategories } from '@hooks/use-categories';
-import { useTags } from '@hooks/use-tags';
 
 import type { Tag } from '@/@types/expense';
 
@@ -57,7 +59,7 @@ const tagSelectStyles: any = {
 };
 
 function TagFilterSelect({ value, onChange }: TagFilterSelectProps) {
-  const { data: allTags = [] } = useTags();
+  const { data: allTags = [] } = useQuery<Tag[]>({ queryKey: getTagListKeyGenerator() });
 
   const options: TagOption[] = allTags.map((t) => ({ value: t.id, label: t.name }));
   const selected: TagOption[] = value.map((t) => ({ value: t.id, label: t.name }));
@@ -187,8 +189,8 @@ const ExpensesTable = ({
   const toPickerRef = useRef<ReactDatePickerType>(null);
 
   // Derived state
-  const { data: allTags = [] } = useTags();
-  const { data: allCategories = [] } = useCategories();
+  const { data: allTags = [] } = useQuery<Tag[]>({ queryKey: getTagListKeyGenerator() });
+  const { data: allCategories = [] } = useQuery<Category[]>({ queryKey: getCategoryListKeyGenerator() });
   const selectedTagObjects: Tag[] = useMemo(
     () => (filters.tagIds ?? []).map((id) => allTags.find((t) => t.id === id)).filter(Boolean) as Tag[],
     [filters.tagIds, allTags]

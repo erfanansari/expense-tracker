@@ -2,25 +2,31 @@
 
 import { useEffect, useState } from 'react';
 
+import { deleteExpenseKeyGenerator } from '@api/deleteExpenseMutation';
+import type { DeleteExpenseRequestData } from '@api/deleteExpenseMutation';
+import { EXPENSES_SCOPE, getExpenseListKeyGenerator } from '@api/getExpenseListQuery';
+import type { ExpenseFilters, ExpensesPage as ExpensesPageData } from '@api/getExpenseListQuery';
+import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
+import { keepPreviousData, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 
 import { type Expense } from '@types';
 
-import { useGlobalDrawer } from '@features/drawers/GlobalDrawerProvider';
 import ExpenseDetailsDrawer from '@features/expenses/components/ExpenseDetailsDrawer';
 
 import Button from '@components/Button';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
-import { useToast } from '@components/Toast/ToastProvider';
 
 import { useDeleteConfirmation } from '@hooks/use-delete-confirmation';
-import { useDeleteExpense, useInfiniteExpenses } from '@hooks/use-expenses';
+
+import { useDrawerStore } from '@stores/drawer';
+import { useToast } from '@stores/toast';
 
 import { ensureError } from '@utils';
 
-import { type ExpenseFilters } from '@/lib/api/expenses';
-
 import ExpensesTable from './components/ExpensesTable';
+
+const ITEMS_PER_PAGE = 20;
 
 const ExpensesPage = () => {
   // States
@@ -29,14 +35,27 @@ const ExpensesPage = () => {
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Queries
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error, refetch } =
-    useInfiniteExpenses(filters);
-  const deleteExpense = useDeleteExpense();
-
   // Customs
+  const queryClient = useQueryClient();
   const { showToast } = useToast();
-  const { openExpenseDrawer } = useGlobalDrawer();
+  const openExpenseDrawer = useDrawerStore((state) => state.openExpenseDrawer);
+
+  // Queries
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error, refetch } = useInfiniteQuery<
+    ExpensesPageData,
+    Error
+  >({
+    queryKey: getExpenseListKeyGenerator({ ...filters, limit: ITEMS_PER_PAGE }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.nextCursor : undefined),
+    placeholderData: keepPreviousData,
+  });
+
+  // Mutations
+  const { mutateAsync: deleteExpenseAsync } = useMutation<void, Error, DeleteExpenseRequestData>({
+    mutationKey: deleteExpenseKeyGenerator(),
+  });
+
   const {
     itemToDelete: expenseToDelete,
     isModalOpen: isDeleteModalOpen,
@@ -46,7 +65,11 @@ const ExpensesPage = () => {
     confirmDelete,
   } = useDeleteConfirmation<Expense>({
     onDelete: async (id) => {
-      await deleteExpense.mutateAsync(id);
+      await deleteExpenseAsync({ id });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: EXPENSES_SCOPE }),
+        queryClient.invalidateQueries({ queryKey: SUMMARY_SCOPE }),
+      ]);
       showToast('Expense deleted.', 'info');
     },
     onError: (err) => showToast(ensureError(err).message, 'error'),

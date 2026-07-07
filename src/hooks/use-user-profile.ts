@@ -1,31 +1,33 @@
 'use client';
 
+import { getMeKeyGenerator } from '@api/getMeQuery';
+import { updateUserProfileKeyGenerator } from '@api/updateUserProfileMutation';
+import type { UpdateUserProfileRequestData } from '@api/updateUserProfileMutation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import type { AuthUser } from '@/lib/api/auth';
-import { updateUserProfile } from '@/lib/api/user';
-import { queryKeys } from '@/lib/query-keys';
+import type { AuthUser } from '@types';
 
 export function useUpdateUserProfile() {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: updateUserProfile,
-    onMutate: async (name: string) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.auth.me() });
-      const previous = queryClient.getQueryData<AuthUser | null>(queryKeys.auth.me());
-      queryClient.setQueryData(queryKeys.auth.me(), (prev: AuthUser | null | undefined) =>
+  return useMutation<{ user: Pick<AuthUser, 'id' | 'email' | 'name'> }, Error, UpdateUserProfileRequestData>({
+    mutationKey: updateUserProfileKeyGenerator(),
+    onMutate: async ({ name }) => {
+      await queryClient.cancelQueries({ queryKey: getMeKeyGenerator() });
+      const previous = queryClient.getQueryData<AuthUser | null>(getMeKeyGenerator());
+      queryClient.setQueryData(getMeKeyGenerator(), (prev: AuthUser | null | undefined) =>
         prev ? { ...prev, name } : null
       );
       return { previous };
     },
-    onError: (_err, _name, context) => {
-      if (context?.previous !== undefined) {
-        queryClient.setQueryData(queryKeys.auth.me(), context.previous);
+    onError: (_err, _data, context) => {
+      const typedContext = context as { previous?: AuthUser | null } | undefined;
+      if (typedContext?.previous !== undefined) {
+        queryClient.setQueryData(getMeKeyGenerator(), typedContext.previous);
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.auth.me() });
+      queryClient.invalidateQueries({ queryKey: getMeKeyGenerator() });
     },
   });
 }

@@ -1,23 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
-import { usePathname } from 'next/navigation';
+import { beginSignout, setUnauthorizedHandler } from '@core/client/auth-handler';
 
-import { useToast } from '@components/Toast/ToastProvider';
-
-import { beginSignout, setUnauthorizedHandler } from '@/lib/api/auth-handler';
+import toastStore from '@stores/toast';
 
 const UnauthorizedListener = () => {
-  const pathname = usePathname();
-  const { showToast } = useToast();
-
-  const pathRef = useRef(pathname);
-
-  useEffect(() => {
-    pathRef.current = pathname;
-  }, [pathname]);
-
   useEffect(() => {
     setUnauthorizedHandler(async () => {
       if (!beginSignout()) return;
@@ -35,14 +24,14 @@ const UnauthorizedListener = () => {
         // ignore — best-effort
       }
 
-      if (pathRef.current !== '/login') {
-        showToast("You've been signed out.", 'error');
+      if (window.location.pathname !== '/login') {
+        toastStore.getState().showToast("You've been signed out.", 'error');
       }
       // Hard navigation guarantees the proxy re-evaluates fresh server-side
       // and clears any client-router state from the (now-invalid) session.
       window.location.href = '/login';
     });
-  }, [showToast]);
+  }, []);
 
   return null;
 };

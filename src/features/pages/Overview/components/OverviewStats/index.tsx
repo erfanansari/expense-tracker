@@ -1,10 +1,9 @@
 import type { FC, ReactNode } from 'react';
 
+import type { SummaryPair } from '@api/getSummaryQuery';
 import { Banknote, TrendingDown, TrendingUp } from 'lucide-react';
 
-import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
-
-import type { SummaryPair } from '@/lib/api/summary';
+import { useCurrency } from '@hooks/use-currency';
 
 import type { OverviewStatsProps } from '../../@types';
 

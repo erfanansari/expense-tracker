@@ -1,17 +1,16 @@
 'use client';
 
+import { getCurrencyPreferencesKeyGenerator } from '@api/getCurrencyPreferencesQuery';
+import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
+import { updateCurrencyPreferencesKeyGenerator } from '@api/updateCurrencyPreferencesMutation';
+import type { UpdateCurrencyPreferencesRequestData } from '@api/updateCurrencyPreferencesMutation';
+import { PIVOT_CURRENCY } from '@constants/currencies';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { PIVOT_CURRENCY } from '@/constants/currencies';
-import { queryKeys } from '@/lib/query-keys';
+import type { CurrencyPreferencesPayload } from '@stores/currency';
 
-export type NumberFormat = 'auto' | 'compact' | 'full';
-
-export interface CurrencyPreferencesPayload {
-  primaryCurrency: string;
-  secondaryCurrency: string | null;
-  numberFormat: NumberFormat;
-}
+export type { NumberFormat } from '@stores/currency';
+export type { CurrencyPreferencesPayload };
 
 const DEFAULTS: CurrencyPreferencesPayload = {
   primaryCurrency: PIVOT_CURRENCY,
@@ -19,40 +18,14 @@ const DEFAULTS: CurrencyPreferencesPayload = {
   numberFormat: 'auto',
 };
 
-async function fetchCurrencyPreferences(): Promise<CurrencyPreferencesPayload> {
-  const res = await fetch('/api/settings/currency', { method: 'GET' });
-  if (!res.ok) throw new Error('Failed to load currency preferences');
-  return res.json();
-}
-
-async function updateCurrencyPreferences(
-  patch: Partial<CurrencyPreferencesPayload>
-): Promise<CurrencyPreferencesPayload> {
-  const res = await fetch('/api/settings/currency', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(patch),
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body?.error ?? 'Failed to update currency preferences');
-  }
-  return res.json();
-}
-
 export function useCurrencyPreferences(enabled = true) {
   const queryClient = useQueryClient();
-  const queryKey = queryKeys.currencyPreferences.all();
+  const queryKey = getCurrencyPreferencesKeyGenerator();
 
-  const { data: prefs, isLoading } = useQuery({
-    queryKey,
-    queryFn: fetchCurrencyPreferences,
-    staleTime: 5 * 60 * 1000,
-    enabled,
-  });
+  const { data: prefs, isLoading } = useQuery<CurrencyPreferencesPayload>({ queryKey, enabled });
 
-  const mutation = useMutation({
-    mutationFn: updateCurrencyPreferences,
+  const mutation = useMutation<CurrencyPreferencesPayload, Error, UpdateCurrencyPreferencesRequestData>({
+    mutationKey: updateCurrencyPreferencesKeyGenerator(),
     onMutate: async (patch) => {
       await queryClient.cancelQueries({ queryKey });
       const previous = queryClient.getQueryData<CurrencyPreferencesPayload>(queryKey);
@@ -60,14 +33,15 @@ export function useCurrencyPreferences(enabled = true) {
       return { previous };
     },
     onError: (_err, _patch, context) => {
-      if (context?.previous) queryClient.setQueryData(queryKey, context.previous);
+      const typedContext = context as { previous?: CurrencyPreferencesPayload } | undefined;
+      if (typedContext?.previous) queryClient.setQueryData(queryKey, typedContext.previous);
     },
     onSettled: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey }),
         // /api/summary computes totals in the user's currency server-side, so its
         // cache is stale after a currency change — refetch it in the new currency.
-        queryClient.invalidateQueries({ queryKey: queryKeys.summary.all() }),
+        queryClient.invalidateQueries({ queryKey: SUMMARY_SCOPE }),
       ]),
   });
 

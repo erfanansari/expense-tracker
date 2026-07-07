@@ -5,48 +5,61 @@ import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+import { resetPasswordKeyGenerator } from '@api/resetPasswordMutation';
+import type { ResetPasswordRequestData } from '@api/resetPasswordMutation';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+
+import { resetPasswordSchema } from '@schemas';
 
 import Button from '@components/Button';
+import Form from '@components/Form';
+import FormInput from '@components/Form/components/FormInput';
 import Loading from '@components/Loading';
 
-import { resetPassword } from '@/lib/api/auth';
-
 function ResetPasswordContent() {
-  // States
-  const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  // Customs
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // States
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+
+  // Variables
+  const token = searchParams.get('token');
+  const tokenValid = !!token;
+
+  // Forms
+  const methods = useForm<ResetPasswordRequestData>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: { token: token ?? '', password: '', passwordConfirm: '' },
+    mode: 'all',
+  });
+
   // Mutations
-  const resetMutation = useMutation({
-    mutationFn: ({ token, password }: { token: string; password: string }) => resetPassword(token, password),
+  const resetMutation = useMutation<void, Error, ResetPasswordRequestData>({
+    mutationKey: resetPasswordKeyGenerator(),
     onSuccess: () => {
       setMessage('Password reset successfully! Redirecting to login...');
       setTimeout(() => {
         router.push('/login');
       }, 2000);
     },
-    onError: (err: Error) => {
+    onError: (err) => {
       setError(err.message || 'Reset failed');
     },
   });
 
   // Variables
   const loading = resetMutation.isPending;
-  const token = searchParams.get('token');
-  const tokenValid = !!token;
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const handleSubmit = (data: ResetPasswordRequestData) => {
     setError('');
     setMessage('');
-    if (!token) return;
-    resetMutation.mutate({ token, password });
-  }
+    resetMutation.mutate(data);
+  };
 
   if (!tokenValid) {
     return (
@@ -75,44 +88,32 @@ function ResetPasswordContent() {
         <div className="border-success bg-success-light text-success mb-4 rounded-lg border p-4 text-sm">{message}</div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <Form methods={methods} onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="password" className="text-text-primary mb-2 block text-sm font-medium">
-            New password
-          </label>
-          <input
-            id="password"
+          <FormInput
+            name="password"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            label="New password"
             placeholder="Create a new password"
-            className="bg-background border-border-subtle text-text-primary placeholder:text-text-muted focus:border-primary w-full rounded-lg border px-4 py-3 focus:outline-none"
+            autoComplete="new-password"
             disabled={loading}
           />
           <p className="text-text-muted mt-2 text-xs">At least 8 characters, 1 uppercase, 1 lowercase, 1 number</p>
         </div>
 
-        <div>
-          <label htmlFor="passwordConfirm" className="text-text-primary mb-2 block text-sm font-medium">
-            Confirm password
-          </label>
-          <input
-            id="passwordConfirm"
-            type="password"
-            value={passwordConfirm}
-            onChange={(e) => setPasswordConfirm(e.target.value)}
-            required
-            placeholder="Confirm your new password"
-            className="bg-background border-border-subtle text-text-primary placeholder:text-text-muted focus:border-primary w-full rounded-lg border px-4 py-3 focus:outline-none"
-            disabled={loading}
-          />
-        </div>
+        <FormInput
+          name="passwordConfirm"
+          type="password"
+          label="Confirm password"
+          placeholder="Confirm your new password"
+          autoComplete="new-password"
+          disabled={loading}
+        />
 
         <Button type="submit" disabled={loading} className="w-full py-3">
           {loading ? 'Resetting...' : 'Reset password'}
         </Button>
-      </form>
+      </Form>
 
       <div className="mt-6 text-center text-sm">
         <p className="text-text-secondary">

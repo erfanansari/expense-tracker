@@ -2,25 +2,38 @@
 
 import { useState } from 'react';
 
+import { forgotPasswordKeyGenerator } from '@api/forgotPasswordMutation';
+import type { ForgotPasswordRequestData, ForgotPasswordResponse } from '@api/forgotPasswordMutation';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 
-import { forgotPassword } from '@/lib/api/auth';
+import { forgotPasswordSchema } from '@schemas';
+
+import Form from '@components/Form';
+import FormInput from '@components/Form/components/FormInput';
 
 const ForgotPassword = () => {
   // States
-  const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
+  // Forms
+  const methods = useForm<ForgotPasswordRequestData>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: { email: '' },
+    mode: 'all',
+  });
+
   // Mutations
-  const forgotPasswordMutation = useMutation({
-    mutationFn: (email: string) => forgotPassword(email),
+  const forgotPasswordMutation = useMutation<ForgotPasswordResponse, Error, ForgotPasswordRequestData>({
+    mutationKey: forgotPasswordKeyGenerator(),
     onSuccess: (data) => {
       setMessage(data.message);
-      setEmail('');
+      methods.reset();
     },
-    onError: (err: Error) => {
+    onError: (err) => {
       setError(err.message || 'Request failed');
     },
   });
@@ -28,12 +41,11 @@ const ForgotPassword = () => {
   // Variables
   const loading = forgotPasswordMutation.isPending;
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const handleSubmit = (data: ForgotPasswordRequestData) => {
     setError('');
     setMessage('');
-    forgotPasswordMutation.mutate(email);
-  }
+    forgotPasswordMutation.mutate(data);
+  };
 
   return (
     <>
@@ -54,22 +66,15 @@ const ForgotPassword = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-        <div>
-          <label htmlFor="email" className="text-text-primary mb-1.5 block text-xs font-medium sm:mb-2 sm:text-sm">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            placeholder="you@example.com"
-            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-primary w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none sm:px-4 sm:py-3 sm:text-base"
-            disabled={loading}
-          />
-        </div>
+      <Form methods={methods} onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+        <FormInput
+          name="email"
+          type="email"
+          label="Email"
+          placeholder="you@example.com"
+          autoComplete="email"
+          disabled={loading}
+        />
 
         <button
           type="submit"
@@ -85,7 +90,7 @@ const ForgotPassword = () => {
             'Send Reset Link'
           )}
         </button>
-      </form>
+      </Form>
     </>
   );
 };

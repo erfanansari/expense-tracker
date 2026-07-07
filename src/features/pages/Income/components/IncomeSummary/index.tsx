@@ -1,8 +1,8 @@
 import { getMonthLabel } from '@constants/income';
 import { Banknote, DollarSign, TrendingUp } from 'lucide-react';
 
-import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
-import type { MoneyItem } from '@features/ExchangeRate/CurrencyProvider';
+import { useCurrency } from '@hooks/use-currency';
+import type { MoneyItem } from '@hooks/use-currency';
 
 import type { Income } from '@/@types/income';
 

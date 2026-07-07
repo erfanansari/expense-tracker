@@ -1,14 +1,16 @@
 'use client';
 
+import { createTagKeyGenerator } from '@api/createTagMutation';
+import type { CreateTagRequestData } from '@api/createTagMutation';
+import { getTagListKeyGenerator, TAGS_SCOPE } from '@api/getTagListQuery';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Plus } from 'lucide-react';
 import { components as rsComponents } from 'react-select';
 import type { CSSObjectWithLabel, MenuListProps, MultiValue, OptionProps, StylesConfig } from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 import { twMerge } from 'tailwind-merge';
 
-import { useCreateTag, useTags } from '@hooks/use-tags';
-
-import { type Tag } from '@/@types/expense';
+import { type Tag } from '@types';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -97,8 +99,9 @@ interface TagInputProps {
 const tagToOption = (tag: Tag): TagOption => ({ value: String(tag.id), label: tag.name, tag });
 
 const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
-  const { data: allTags = [] } = useTags();
-  const createTag = useCreateTag();
+  const queryClient = useQueryClient();
+  const { data: allTags = [] } = useQuery<Tag[]>({ queryKey: getTagListKeyGenerator() });
+  const createTag = useMutation<Tag, Error, CreateTagRequestData>({ mutationKey: createTagKeyGenerator() });
 
   const handleChange = (newValue: MultiValue<TagOption>) => {
     onTagsChange(newValue.flatMap((o) => (o.tag ? [o.tag] : [])));
@@ -106,7 +109,8 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
 
   const handleCreate = async (inputValue: string) => {
     try {
-      const newTag = await createTag.mutateAsync(inputValue.trim());
+      const newTag = await createTag.mutateAsync({ name: inputValue.trim() });
+      await queryClient.invalidateQueries({ queryKey: TAGS_SCOPE });
       onTagsChange([...selectedTags, newTag]);
     } catch (error) {
       console.error('Failed to create tag:', error);
