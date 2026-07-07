@@ -1,4 +1,4 @@
-import type { SummaryData } from '@/lib/api/summary';
+import type { SummaryData } from '@api/getSummaryQuery';
 
 export interface OverviewStatsProps {
   summary: SummaryData | undefined;

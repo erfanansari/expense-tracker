@@ -3,10 +3,11 @@ import { useState } from 'react';
 import { Loader2, User } from 'lucide-react';
 
 import Button from '@components/Button';
-import { useToast } from '@components/Toast/ToastProvider';
 
 import { useAuth } from '@hooks/use-auth';
 import { useUpdateUserProfile } from '@hooks/use-user-profile';
+
+import { useToast } from '@stores/toast';
 
 import { ensureError } from '@utils';
 
@@ -41,7 +42,7 @@ const ProfileCard = () => {
     }
 
     try {
-      await updateProfile.mutateAsync(editedName.trim());
+      await updateProfile.mutateAsync({ name: editedName.trim() });
       showToast('Profile updated successfully!', 'success');
       setIsEditing(false);
     } catch (err) {

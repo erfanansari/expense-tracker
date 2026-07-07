@@ -2,15 +2,17 @@
 
 import Link from 'next/link';
 
+import { getAllExpensesKeyGenerator } from '@api/getAllExpensesQuery';
+import type { GetAllExpensesResponse } from '@api/getAllExpensesQuery';
+import { getSummaryKeyGenerator } from '@api/getSummaryQuery';
+import type { SummaryData } from '@api/getSummaryQuery';
+import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 
 import type { Expense } from '@types';
 
 import { getButtonClasses } from '@components/Button';
 import Pulse from '@components/Skeleton';
-
-import { useAllExpenses } from '@hooks/use-all-expenses';
-import { useSummary } from '@hooks/use-summary';
 
 import ExchangeRateCard from './components/ExchangeRateCard';
 import OverviewStats from './components/OverviewStats';
@@ -131,8 +133,10 @@ function OverviewSkeleton() {
 
 const Dashboard = () => {
   // Queries
-  const { data: summary, isLoading: summaryLoading } = useSummary();
-  const { data: expensesData, isLoading: expensesLoading } = useAllExpenses();
+  const { data: summary, isLoading: summaryLoading } = useQuery<SummaryData>({ queryKey: getSummaryKeyGenerator() });
+  const { data: expensesData, isLoading: expensesLoading } = useQuery<GetAllExpensesResponse>({
+    queryKey: getAllExpensesKeyGenerator(),
+  });
 
   // Variables
   const expenses: Expense[] = expensesData ?? [];

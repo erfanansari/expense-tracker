@@ -12,7 +12,6 @@ import {
   YAxis,
 } from 'recharts';
 
-import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
 import DateRangeSelector, {
   type DateRange,
   filterExpensesByDateRange,
@@ -21,6 +20,8 @@ import DateRangeSelector, {
 
 import ChartTooltip from '@components/ChartTooltip';
 import EmptyState from '@components/EmptyState';
+
+import { useCurrency } from '@hooks/use-currency';
 
 import { formatAxisNumber, formatChartTooltipDate } from '@utils';
 

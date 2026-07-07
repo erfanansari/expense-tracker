@@ -2,52 +2,58 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
+import { createExpenseKeyGenerator } from '@api/createExpenseMutation';
+import { EXPENSES_SCOPE } from '@api/getExpenseListQuery';
+import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
+import { updateExpenseKeyGenerator } from '@api/updateExpenseMutation';
+import type { UpdateExpenseRequestData } from '@api/updateExpenseMutation';
+import { PIVOT_CURRENCY } from '@constants/currencies';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { numberToWords } from '@persian-tools/persian-tools';
+import type { QueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Calendar, Coins, FileText, Layers, Loader2, Plus } from 'lucide-react';
+import { Controller, useForm } from 'react-hook-form';
+
+import { type Tag } from '@types';
 
 import { createExpenseSchema } from '@schemas';
-
-import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
+import type { CreateExpenseSchema } from '@schemas';
 
 import Button from '@components/Button';
-import DatePicker from '@components/DatePicker';
-import MoneyInput from '@components/MoneyInput';
-import { useToast } from '@components/Toast/ToastProvider';
+import Form from '@components/Form';
+import FormDatePicker from '@components/Form/components/FormDatePicker';
+import FormMoneyInput from '@components/Form/components/FormMoneyInput';
 import Tooltip from '@components/Tooltip';
 
-import { useCreateExpense, useUpdateExpense } from '@hooks/use-expenses';
+import { useCurrency } from '@hooks/use-currency';
+
+import { useToast } from '@stores/toast';
 
 import { ensureError } from '@utils';
-
-import { type Category, type CreateExpenseInput, type Tag } from '@/@types/expense';
-import { PIVOT_CURRENCY } from '@/constants/currencies';
 
 import CategorySelect from '../CategorySelect';
 import TagInput from '../TagInput';
 
-interface ExpenseFormProps {
-  onExpenseAdded: () => void;
-  editingExpense?: {
-    id: number;
-    date: string;
-    category: Category;
-    description: string;
-    amount: number;
-    currency: string;
-    tags?: Tag[];
-  };
-  onCancelEdit?: () => void;
-  setIsDirty?: (dirty: boolean) => void;
-}
+import type { ExpenseFormProps } from './@types';
+
+const invalidateExpenseData = (queryClient: QueryClient) =>
+  Promise.all([
+    queryClient.invalidateQueries({ queryKey: EXPENSES_SCOPE }),
+    queryClient.invalidateQueries({ queryKey: SUMMARY_SCOPE }),
+  ]);
 
 const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty }: ExpenseFormProps) => {
+  // Customs
+  const queryClient = useQueryClient();
   const { showToast } = useToast();
   const { primaryCurrency } = useCurrency();
 
-  const createExpense = useCreateExpense();
-  const updateExpense = useUpdateExpense();
+  // States — TagInput works with Tag objects; tagIds are derived on submit.
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(editingExpense?.tags || []);
 
-  const defaultFormData: CreateExpenseInput = useMemo(
+  // Variables
+  const defaultFormData: CreateExpenseSchema = useMemo(
     () => ({
       date: new Date().toISOString().split('T')[0],
       categoryId: 0,
@@ -59,90 +65,76 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
     [primaryCurrency]
   );
 
-  const buildFormData = (expense: {
-    date: string;
-    category: Category;
-    description: string;
-    amount: number;
-    currency: string;
-    tags?: Tag[];
-  }): CreateExpenseInput => ({
-    date: expense.date,
-    categoryId: expense.category.id,
-    description: expense.description,
-    amount: expense.amount,
-    currency: expense.currency,
-    tagIds: expense.tags?.map((t) => t.id) || [],
+  const editingFormData: CreateExpenseSchema | null = useMemo(
+    () =>
+      editingExpense
+        ? {
+            date: editingExpense.date,
+            categoryId: editingExpense.category.id,
+            description: editingExpense.description,
+            amount: editingExpense.amount,
+            currency: editingExpense.currency,
+            tagIds: editingExpense.tags?.map((t) => t.id) || [],
+          }
+        : null,
+    [editingExpense]
+  );
+
+  // Forms
+  const methods = useForm<CreateExpenseSchema>({
+    resolver: zodResolver(createExpenseSchema),
+    defaultValues: editingFormData ?? defaultFormData,
+    mode: 'all',
   });
 
-  const [formData, setFormData] = useState<CreateExpenseInput>(
-    editingExpense ? buildFormData(editingExpense) : defaultFormData
-  );
-  const [selectedTags, setSelectedTags] = useState<Tag[]>(editingExpense?.tags || []);
-  const [initialFormData, setInitialFormData] = useState<CreateExpenseInput | null>(
-    editingExpense ? buildFormData(editingExpense) : null
-  );
+  const { formState, reset, setValue, watch } = methods;
+  const amount = watch('amount');
+  const currency = watch('currency');
 
-  const isSubmitting = createExpense.isPending || updateExpense.isPending;
+  // Mutations
+  const createMutation = useMutation<unknown, Error, CreateExpenseSchema>({
+    mutationKey: createExpenseKeyGenerator(),
+  });
+  const updateMutation = useMutation<unknown, Error, UpdateExpenseRequestData>({
+    mutationKey: updateExpenseKeyGenerator(),
+  });
 
-  // Sync form data when editingExpense prop changes
-  const [prevEditingExpense, setPrevEditingExpense] = useState(editingExpense);
-  if (prevEditingExpense !== editingExpense) {
-    setPrevEditingExpense(editingExpense);
-    if (editingExpense) {
-      const initialData = buildFormData(editingExpense);
-      setFormData(initialData);
-      setInitialFormData(initialData);
-      setSelectedTags(editingExpense.tags || []);
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+  // Effects — resync when the drawer switches to a different expense.
+  useEffect(() => {
+    if (editingFormData) {
+      reset(editingFormData);
+      setSelectedTags(editingExpense?.tags || []);
     }
-  }
+  }, [editingFormData, editingExpense, reset]);
 
   useEffect(() => {
-    if (!initialFormData || !setIsDirty) return;
-
-    const tagIdsChanged =
-      (formData.tagIds?.length || 0) !== (initialFormData.tagIds?.length || 0) ||
-      (formData.tagIds || []).some((id, idx) => id !== initialFormData.tagIds?.[idx]);
-
-    const isDirty =
-      formData.date !== initialFormData.date ||
-      formData.categoryId !== initialFormData.categoryId ||
-      formData.description !== initialFormData.description ||
-      formData.amount !== initialFormData.amount ||
-      formData.currency !== initialFormData.currency ||
-      tagIdsChanged;
-
-    setIsDirty(isDirty);
-  }, [formData, initialFormData, setIsDirty]);
+    setIsDirty?.(formState.isDirty);
+  }, [formState.isDirty, setIsDirty]);
 
   // Persian words helper only applies when the entry currency is Toman.
   const numberToPersianWord = useMemo(() => {
-    if (formData.currency !== PIVOT_CURRENCY || formData.amount <= 0) return '';
-    const rounded = Math.round(formData.amount);
+    if (currency !== PIVOT_CURRENCY || amount <= 0) return '';
+    const rounded = Math.round(amount);
     return Number.isSafeInteger(rounded) ? `${numberToWords(rounded)} تومان` : '';
-  }, [formData.amount, formData.currency]);
+  }, [amount, currency]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const dataToSubmit = { ...formData, tagIds: selectedTags.map((t) => t.id) };
-
-    const validated = createExpenseSchema.safeParse(dataToSubmit);
-    if (!validated.success) {
-      showToast(validated.error.issues[0].message, 'error');
-      return;
-    }
+  const handleSubmit = async (data: CreateExpenseSchema) => {
+    const dataToSubmit = { ...data, tagIds: selectedTags.map((t) => t.id) };
 
     try {
       if (editingExpense) {
-        await updateExpense.mutateAsync({ id: editingExpense.id, data: dataToSubmit });
+        await updateMutation.mutateAsync({ id: editingExpense.id, ...dataToSubmit });
+        await invalidateExpenseData(queryClient);
         showToast('Expense updated successfully!', 'success');
       } else {
-        await createExpense.mutateAsync(dataToSubmit);
+        await createMutation.mutateAsync(dataToSubmit);
+        await invalidateExpenseData(queryClient);
         showToast('Expense added successfully!', 'success');
       }
 
-      setFormData(defaultFormData);
+      reset(defaultFormData);
       setSelectedTags([]);
       onExpenseAdded();
       if (editingExpense && onCancelEdit) onCancelEdit();
@@ -152,12 +144,12 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
   };
 
   const handleCancel = () => {
-    setFormData(defaultFormData);
+    reset(defaultFormData);
     if (onCancelEdit) onCancelEdit();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <Form methods={methods} onSubmit={handleSubmit} className="space-y-3">
       {/* Row 1: Category and Date */}
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
         <div className="space-y-1">
@@ -165,9 +157,15 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
             <Layers className="text-text-muted h-4 w-4" />
             Category
           </label>
-          <CategorySelect
-            value={formData.categoryId || null}
-            onChange={(id) => setFormData({ ...formData, categoryId: id ?? 0 })}
+          <Controller
+            name="categoryId"
+            control={methods.control}
+            render={({ field, fieldState }) => (
+              <>
+                <CategorySelect value={field.value || null} onChange={(id) => field.onChange(id ?? 0)} />
+                {fieldState.error?.message && <p className="text-danger mt-1 text-xs">{fieldState.error.message}</p>}
+              </>
+            )}
           />
         </div>
 
@@ -176,7 +174,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
             <Calendar className="text-text-muted h-4 w-4" />
             Date
           </label>
-          <DatePicker value={formData.date} onChange={(date) => setFormData({ ...formData, date })} required />
+          <FormDatePicker name="date" />
         </div>
       </div>
 
@@ -188,16 +186,27 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
         </label>
         <textarea
           placeholder="Enter expense details..."
-          required
           rows={2}
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          {...methods.register('description')}
           className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full resize-none rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
         />
+        {formState.errors.description?.message && (
+          <p className="text-danger mt-1 text-xs">{formState.errors.description.message}</p>
+        )}
       </div>
 
       {/* Tags */}
-      <TagInput selectedTags={selectedTags} onTagsChange={setSelectedTags} />
+      <TagInput
+        selectedTags={selectedTags}
+        onTagsChange={(tags) => {
+          setSelectedTags(tags);
+          setValue(
+            'tagIds',
+            tags.map((t) => t.id),
+            { shouldDirty: true }
+          );
+        }}
+      />
 
       {/* Amount + Currency */}
       <div className="space-y-1">
@@ -206,14 +215,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
           Amount
         </label>
         <Tooltip content={numberToPersianWord} position="top">
-          <MoneyInput
-            amount={formData.amount}
-            currency={formData.currency}
-            onAmountChange={(value) => setFormData({ ...formData, amount: value })}
-            onCurrencyChange={(currency) => setFormData({ ...formData, currency })}
-            placeholder="e.g. 60k, 1.5m"
-            required
-          />
+          <FormMoneyInput amountName="amount" currencyName="currency" placeholder="e.g. 60k, 1.5m" />
         </Tooltip>
       </div>
 
@@ -238,7 +240,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
           </Button>
         )}
       </div>
-    </form>
+    </Form>
   );
 };
 

@@ -2,30 +2,27 @@
 
 import { useCallback } from 'react';
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getMeKeyGenerator } from '@api/getMeQuery';
+import type { GetMeResponse } from '@api/getMeQuery';
+import { logoutKeyGenerator } from '@api/logoutMutation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { useToast } from '@components/Toast/ToastProvider';
+import type { AuthUser } from '@types';
 
-import { fetchMe, logout as logoutApi } from '@/lib/api/auth';
-import type { AuthUser } from '@/lib/api/auth';
-import { beginSignout } from '@/lib/api/auth-handler';
-import { queryKeys } from '@/lib/query-keys';
+import { beginSignout } from '@core/client/auth-handler';
+
+import { useToast } from '@stores/toast';
 
 export function useAuth() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
   // Queries
-  const {
-    data: user,
-    isLoading: loading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: queryKeys.auth.me(),
-    queryFn: fetchMe,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: true,
+  const { data: user, isLoading: loading, error, refetch } = useQuery<GetMeResponse>({ queryKey: getMeKeyGenerator() });
+
+  // Mutations
+  const { mutateAsync: logoutAsync } = useMutation<void, Error, void>({
+    mutationKey: logoutKeyGenerator(),
   });
 
   // Callbacks
@@ -34,7 +31,7 @@ export function useAuth() {
     // toast or redirect on top of this one.
     beginSignout();
     try {
-      await logoutApi();
+      await logoutAsync();
     } catch {
       // Even if the request fails, still redirect — /login is the safest
       // state either way, and the proxy will bounce us back if the cookie
@@ -46,11 +43,11 @@ export function useAuth() {
     // full page load wipes all in-memory state (including the query cache) —
     // no need to clear it here, which would only flash a refetch loader.
     window.location.href = '/login';
-  }, [showToast]);
+  }, [logoutAsync, showToast]);
 
   const updateUser = useCallback(
     (updates: Partial<AuthUser>) => {
-      queryClient.setQueryData(queryKeys.auth.me(), (prev: AuthUser | null | undefined) =>
+      queryClient.setQueryData(getMeKeyGenerator(), (prev: AuthUser | null | undefined) =>
         prev ? { ...prev, ...updates } : null
       );
     },

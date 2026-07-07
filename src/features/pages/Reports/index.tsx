@@ -2,6 +2,9 @@
 
 import { useMemo, useState } from 'react';
 
+import { getAllExpensesKeyGenerator } from '@api/getAllExpensesQuery';
+import type { GetAllExpensesResponse } from '@api/getAllExpensesQuery';
+import { useQuery } from '@tanstack/react-query';
 import { Download, Filter } from 'lucide-react';
 
 import { type Expense } from '@types';
@@ -14,8 +17,6 @@ import DateRangeSelector, {
 
 import Button from '@components/Button';
 import Pulse from '@components/Skeleton';
-
-import { useAllExpenses } from '@hooks/use-all-expenses';
 
 import type { Tag } from '@/@types/expense';
 
@@ -65,7 +66,9 @@ const ReportsPage = () => {
   const [filterCategoryIds, setFilterCategoryIds] = useState<number[]>([]);
 
   // Queries
-  const { data: expensesData, isLoading } = useAllExpenses();
+  const { data: expensesData, isLoading } = useQuery<GetAllExpensesResponse>({
+    queryKey: getAllExpensesKeyGenerator(),
+  });
 
   // Variables
   const expenses: Expense[] = expensesData ?? [];

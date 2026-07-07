@@ -2,6 +2,12 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "kharji-dev",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev"],
+      "port": 3000
+    },
+    {
       "name": "kharji-prod",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["start"],

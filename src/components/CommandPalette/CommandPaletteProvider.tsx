@@ -19,7 +19,7 @@ import {
 } from 'kbar';
 import { DollarSign, LayoutDashboard, PieChart, Plus, Receipt, Search, Settings, TrendingUp } from 'lucide-react';
 
-import { useGlobalDrawer } from '@features/drawers/GlobalDrawerProvider';
+import { useDrawerStore } from '@stores/drawer';
 
 interface CommandPaletteContextType {
   isOpen: boolean;
@@ -151,7 +151,9 @@ function RenderResults() {
 export const CommandPaletteProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const { openExpenseDrawer, openIncomeDrawer, openAssetDrawer } = useGlobalDrawer();
+  const openExpenseDrawer = useDrawerStore((state) => state.openExpenseDrawer);
+  const openIncomeDrawer = useDrawerStore((state) => state.openIncomeDrawer);
+  const openAssetDrawer = useDrawerStore((state) => state.openAssetDrawer);
 
   const actions = useMemo<Action[]>(() => {
     const navActions = [

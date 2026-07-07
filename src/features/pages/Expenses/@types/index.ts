@@ -1,6 +1,6 @@
-import type { Expense } from '@types';
+import type { ExpenseFilters } from '@api/getExpenseListQuery';
 
-import type { ExpenseFilters } from '@/lib/api/expenses';
+import type { Expense } from '@types';
 
 export interface ExpensesTableProps {
   expenses: Expense[];

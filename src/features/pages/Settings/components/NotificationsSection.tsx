@@ -2,8 +2,9 @@
 
 import { Bell } from 'lucide-react';
 
-import { useToast } from '@components/Toast/ToastProvider';
 import Toggle from '@components/Toggle';
+
+import { useToast } from '@stores/toast';
 
 import { useNotificationPreferences } from '@/hooks/use-notification-preferences';
 

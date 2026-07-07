@@ -2,7 +2,7 @@
 
 import type { FC } from 'react';
 
-import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
+import { useCurrency } from '@hooks/use-currency';
 
 interface MoneyProps {
   /** Amount in `currency` (the currency the record was entered in). */

@@ -14,14 +14,13 @@ import {
   YAxis,
 } from 'recharts';
 
-import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
-
 import ChartTooltip from '@components/ChartTooltip';
 import EmptyState from '@components/EmptyState';
 import ErrorState from '@components/ErrorState';
 import Select from '@components/Select';
 import Pulse from '@components/Skeleton';
 
+import { useCurrency } from '@hooks/use-currency';
 import { type NetWorthRange, useNetWorthHistory } from '@hooks/use-net-worth-history';
 
 import { formatAxisNumber, formatChartTooltipDate } from '@utils';

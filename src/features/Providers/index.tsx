@@ -2,12 +2,13 @@
 
 import { ThemeProvider } from 'next-themes';
 
-import { GlobalDrawerProvider } from '@features/drawers/GlobalDrawerProvider';
-import { CurrencyProvider } from '@features/ExchangeRate/CurrencyProvider';
+import ClientProvider from '@core/client/provider';
+
+import GlobalDrawers from '@features/drawers/GlobalDrawers';
+import CurrencyHydrator from '@features/ExchangeRate/CurrencyHydrator';
 
 import { CommandPaletteProvider } from '@components/CommandPalette/CommandPaletteProvider';
-import QueryProvider from '@components/QueryProvider';
-import { ToastProvider } from '@components/Toast/ToastProvider';
+import Toaster from '@components/Toast/Toaster';
 
 import UnauthorizedListener from './UnauthorizedListener';
 
@@ -15,20 +16,15 @@ interface ProvidersProps {
   children: React.ReactNode;
 }
 
-// CurrencyProvider wraps GlobalDrawerProvider so money components rendered inside
-// global drawers (e.g. the expense/income/asset forms) have currency context too.
 const Providers = ({ children }: ProvidersProps) => (
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-    <QueryProvider>
-      <ToastProvider>
-        <UnauthorizedListener />
-        <CurrencyProvider>
-          <GlobalDrawerProvider>
-            <CommandPaletteProvider>{children}</CommandPaletteProvider>
-          </GlobalDrawerProvider>
-        </CurrencyProvider>
-      </ToastProvider>
-    </QueryProvider>
+    <ClientProvider>
+      <UnauthorizedListener />
+      <CurrencyHydrator />
+      <CommandPaletteProvider>{children}</CommandPaletteProvider>
+      <GlobalDrawers />
+      <Toaster />
+    </ClientProvider>
   </ThemeProvider>
 );
 

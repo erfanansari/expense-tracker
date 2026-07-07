@@ -4,15 +4,22 @@ import { useState } from 'react';
 
 import Link from 'next/link';
 
+import { getMeKeyGenerator } from '@api/getMeQuery';
+import { loginKeyGenerator } from '@api/loginMutation';
+import type { LoginRequestData, LoginResponse } from '@api/loginMutation';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+
+import { loginSchema } from '@schemas';
 
 import { DEMO_EMAIL, DEMO_PASSWORD } from '@constants';
 
-import { useToast } from '@components/Toast/ToastProvider';
+import Form from '@components/Form';
+import FormInput from '@components/Form/components/FormInput';
 
-import { login } from '@/lib/api/auth';
-import { queryKeys } from '@/lib/query-keys';
+import { useToast } from '@stores/toast';
 
 const Login = () => {
   // Customs
@@ -20,21 +27,25 @@ const Login = () => {
   const { showToast } = useToast();
 
   // States
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
+  // Forms
+  const methods = useForm<LoginRequestData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' },
+    mode: 'all',
+  });
+
   // Mutations
-  const loginMutation = useMutation({
-    mutationFn: ({ email, password }: { email: string; password: string }) => login(email, password),
-    onSuccess: (user) => {
+  const loginMutation = useMutation<LoginResponse, Error, LoginRequestData>({
+    mutationKey: loginKeyGenerator(),
+    onSuccess: ({ user }) => {
       // Setting the `me` query data is enough — GuestGuard sees the user and
       // redirects (honoring ?rp=). Pushing /overview here too would race it.
-      queryClient.setQueryData(queryKeys.auth.me(), user);
+      queryClient.setQueryData(getMeKeyGenerator(), user);
       showToast(`Welcome back${user.name ? `, ${user.name}` : ''}!`, 'success');
     },
-    onError: (err: Error) => {
+    onError: (err) => {
       setError(err.message || 'Login failed');
     },
   });
@@ -42,16 +53,15 @@ const Login = () => {
   // Variables
   const loading = loginMutation.isPending;
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const handleSubmit = (data: LoginRequestData) => {
     setError('');
-    loginMutation.mutate({ email, password });
-  }
+    loginMutation.mutate(data);
+  };
 
-  async function handleDemoLogin() {
+  const handleDemoLogin = () => {
     setError('');
     loginMutation.mutate({ email: DEMO_EMAIL, password: DEMO_PASSWORD });
-  }
+  };
 
   return (
     <>
@@ -66,48 +76,24 @@ const Login = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-        <div>
-          <label htmlFor="email" className="text-text-primary mb-1.5 block text-xs font-medium sm:mb-2 sm:text-sm">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            placeholder="test@example.com"
-            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-primary w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none sm:px-4 sm:py-3 sm:text-base"
-            disabled={loading}
-          />
-        </div>
+      <Form methods={methods} onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+        <FormInput
+          name="email"
+          type="email"
+          label="Email"
+          placeholder="test@example.com"
+          autoComplete="email"
+          disabled={loading}
+        />
 
-        <div>
-          <label htmlFor="password" className="text-text-primary mb-1.5 block text-xs font-medium sm:mb-2 sm:text-sm">
-            Password
-          </label>
-          <div className="relative">
-            <input
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="Enter your password"
-              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-primary w-full rounded-lg border px-3 py-2.5 pr-10 text-sm focus:outline-none sm:px-4 sm:py-3 sm:pr-12 sm:text-base"
-              disabled={loading}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="text-text-muted hover:text-text-secondary absolute top-1/2 right-2.5 -translate-y-1/2 sm:right-3"
-              tabIndex={-1}
-            >
-              {showPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
-            </button>
-          </div>
-        </div>
+        <FormInput
+          name="password"
+          type="password"
+          label="Password"
+          placeholder="Enter your password"
+          autoComplete="current-password"
+          disabled={loading}
+        />
 
         <div className="flex justify-end">
           <Link href="/forgot-password" className="text-text-primary text-xs font-medium hover:underline sm:text-sm">
@@ -129,7 +115,7 @@ const Login = () => {
             'Sign In'
           )}
         </button>
-      </form>
+      </Form>
 
       <div className="relative my-4 sm:my-6">
         <div className="absolute inset-0 flex items-center">

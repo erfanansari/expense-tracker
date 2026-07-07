@@ -1,0 +1,60 @@
+'use client';
+
+import { useState } from 'react';
+
+import { Eye, EyeOff } from 'lucide-react';
+import { useController, useFormContext } from 'react-hook-form';
+
+import type { FormFieldBaseProps } from '../../@types';
+
+interface FormInputProps extends FormFieldBaseProps {
+  type?: 'text' | 'email' | 'password';
+  autoComplete?: string;
+}
+
+const FormInput = ({ name, label, type = 'text', placeholder, disabled, autoComplete, className }: FormInputProps) => {
+  const { control } = useFormContext();
+  const { field, fieldState } = useController({ name, control });
+  const [showPassword, setShowPassword] = useState(false);
+
+  const isPassword = type === 'password';
+  const inputType = isPassword && showPassword ? 'text' : type;
+
+  return (
+    <div className={className}>
+      {label && (
+        <label htmlFor={name} className="text-text-primary mb-1.5 block text-xs font-medium sm:mb-2 sm:text-sm">
+          {label}
+        </label>
+      )}
+      <div className={isPassword ? 'relative' : undefined}>
+        <input
+          {...field}
+          id={name}
+          type={inputType}
+          placeholder={placeholder}
+          disabled={disabled}
+          autoComplete={autoComplete}
+          aria-invalid={fieldState.invalid || undefined}
+          className={`border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-primary w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none sm:px-4 sm:py-3 sm:text-base ${
+            isPassword ? 'pr-10 sm:pr-12' : ''
+          } ${fieldState.error ? 'border-danger' : ''}`}
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="text-text-muted hover:text-text-secondary absolute top-1/2 right-2.5 -translate-y-1/2 sm:right-3"
+            tabIndex={-1}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+          >
+            {showPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
+          </button>
+        )}
+      </div>
+      {fieldState.error?.message && <p className="text-danger mt-1 text-xs">{fieldState.error.message}</p>}
+    </div>
+  );
+};
+
+export default FormInput;

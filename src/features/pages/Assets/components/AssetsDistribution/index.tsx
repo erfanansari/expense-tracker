@@ -1,8 +1,8 @@
 import { PieChart } from 'lucide-react';
 
-import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
-
 import EmptyState from '@components/EmptyState';
+
+import { useCurrency } from '@hooks/use-currency';
 
 import { PIVOT_CURRENCY } from '@/constants/currencies';
 

@@ -5,11 +5,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowLeftRight, Calendar, Coins, Tag as TagIcon, X } from 'lucide-react';
 import { Drawer } from 'vaul';
 
-import { useCurrency } from '@features/ExchangeRate/CurrencyProvider';
 import { formatMoney } from '@features/ExchangeRate/utils/currency';
 
 import CategoryBadge from '@components/CategoryBadge';
 import Money from '@components/Money';
+
+import { useCurrency } from '@hooks/use-currency';
 
 import { formatToFarsiDate } from '@utils';
 
