@@ -33,15 +33,6 @@ export function expensesToCsvString(expenses: Expense[]): string {
   return rows.join('\n');
 }
 
-export function expensesToSheetRows(expenses: Expense[]): (string | number)[][] {
-  const rows: (string | number)[][] = [EXPENSE_CSV_HEADERS];
-  for (const e of expenses) {
-    const tags = (e.tags ?? []).map((t) => t.name).join(';');
-    rows.push([e.id, e.date, e.category.name, e.description, e.amount, e.currency, e.entryRate, tags, e.created_at]);
-  }
-  return rows;
-}
-
 export function downloadFile(content: string | Blob, filename: string, mimeType: string): void {
   const blob = typeof content === 'string' ? new Blob([content], { type: mimeType }) : content;
   const url = URL.createObjectURL(blob);
@@ -55,4 +46,15 @@ export function downloadFile(content: string | Blob, filename: string, mimeType:
 export function buildExportFilename(prefix: string, suffix: string, ext: string): string {
   const date = new Date().toISOString().slice(0, 10);
   return `${prefix}-${suffix}-${date}.${ext}`;
+}
+
+const XLSX_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+/** Downloads the complete backup (all expenses, income, assets, valuations) from /api/export. */
+export async function downloadFullExport(): Promise<void> {
+  const res = await fetch('/api/export');
+  if (!res.ok) throw new Error('Export failed');
+  const blob = await res.blob();
+  const date = new Date().toISOString().slice(0, 10);
+  downloadFile(blob, `kharji-export-${date}.xlsx`, XLSX_MIME_TYPE);
 }

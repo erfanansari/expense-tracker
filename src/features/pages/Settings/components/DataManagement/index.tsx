@@ -15,7 +15,7 @@ import { useAuth } from '@hooks/use-auth';
 
 import { useToast } from '@stores/toast';
 
-import { downloadFile } from '@/utils/export';
+import { downloadFullExport } from '@/utils/export';
 
 import ImportModal from './ImportModal';
 
@@ -34,15 +34,7 @@ const DataManagement = () => {
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      const res = await fetch('/api/export');
-      if (!res.ok) throw new Error('Export failed');
-      const blob = await res.blob();
-      const date = new Date().toISOString().slice(0, 10);
-      downloadFile(
-        blob,
-        `kharji-export-${date}.xlsx`,
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      );
+      await downloadFullExport();
       showToast('Data exported successfully', 'success');
     } catch {
       showToast('Export failed. Please try again.', 'error');
@@ -87,7 +79,7 @@ const DataManagement = () => {
               ) : (
                 <Download className="h-4 w-4" aria-hidden="true" />
               )}
-              {isExporting ? 'Exporting…' : 'Export Data'}
+              {isExporting ? 'Preparing…' : 'Download Backup'}
             </Button>
             <Button variant="outline" onClick={() => setIsImportOpen(true)}>
               <Upload className="h-4 w-4" aria-hidden="true" />
@@ -105,8 +97,9 @@ const DataManagement = () => {
             </Button>
           </div>
           <p className="text-text-muted mt-3 text-xs">
-            Export downloads an Excel file with all your expenses, income, and assets. Deleting your account permanently
-            erases the account and all of its data.
+            Backup downloads one Excel file with everything — expenses, income, assets, and asset valuation history. For
+            a CSV of specific expenses, use Export CSV on the Reports page. Deleting your account permanently erases the
+            account and all of its data.
           </p>
         </div>
       </div>

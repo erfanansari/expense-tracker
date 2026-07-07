@@ -2,7 +2,9 @@
 
 import { useCallback, useRef, useState } from 'react';
 
+import { CATEGORIES_SCOPE } from '@api/getCategoryListQuery';
 import { EXPENSES_SCOPE } from '@api/getExpenseListQuery';
+import { TAGS_SCOPE } from '@api/getTagListQuery';
 import { useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CheckCircle, Upload } from 'lucide-react';
 import Papa from 'papaparse';
@@ -24,10 +26,19 @@ type Step = 'upload' | 'preview' | 'importing';
 type ParsedRow = Record<string, string>;
 
 type ValidatedRow =
-  | { valid: true; date: string; category: string; description: string; amount: number; currency: string }
+  | {
+      valid: true;
+      date: string;
+      category: string;
+      description: string;
+      amount: number;
+      currency: string;
+      tags: string[];
+    }
   | { valid: false; error: string; raw: ParsedRow };
 
-// `currency` is optional; defaults to the pivot currency when omitted.
+// `currency` and `tags` (semicolon-separated) are optional;
+// currency defaults to the pivot currency when omitted.
 const REQUIRED_COLUMNS = ['date', 'category', 'description', 'amount'];
 
 function normalizeHeaders(row: ParsedRow): ParsedRow {
@@ -59,6 +70,16 @@ function validateRow(raw: ParsedRow): ValidatedRow {
     return { valid: false, error: `currency must be one of ${SUPPORTED_CURRENCY_CODES.join(', ')}`, raw };
   }
 
+  const seenTags = new Set<string>();
+  const tags = (row.tags ?? '')
+    .split(';')
+    .map((t) => t.trim())
+    .filter((t) => {
+      if (!t || seenTags.has(t.toLowerCase())) return false;
+      seenTags.add(t.toLowerCase());
+      return true;
+    });
+
   return {
     valid: true,
     date: row.date.trim(),
@@ -66,6 +87,45 @@ function validateRow(raw: ParsedRow): ValidatedRow {
     description: row.description.trim(),
     amount,
     currency,
+    tags,
+  };
+}
+
+/** Case-insensitive name → id resolver backed by a create-or-get endpoint. */
+async function makeNameResolver(listUrl: string, createUrl: string): Promise<(name: string) => Promise<number>> {
+  const idByName = new Map<string, number>();
+  const listRes = await fetch(listUrl);
+  if (listRes.ok) {
+    const items: { id: number; name: string }[] = await listRes.json();
+    for (const item of items) idByName.set(item.name.toLowerCase(), item.id);
+  }
+
+  const create = async (name: string) => {
+    const res = await fetch(createUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    if (!res.ok) throw new Error(`Failed to create "${name}"`);
+    const created: { id: number } = await res.json();
+    return created.id;
+  };
+
+  return async (name: string) => {
+    const key = name.toLowerCase();
+    const cached = idByName.get(key);
+    if (cached !== undefined) return cached;
+
+    let id: number;
+    try {
+      id = await create(name);
+    } catch {
+      // The endpoint is create-or-get, so a retry after a transient
+      // failure (e.g. a write conflict) resolves to the existing row.
+      id = await create(name);
+    }
+    idByName.set(key, id);
+    return id;
   };
 }
 
@@ -134,29 +194,53 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
     setProgress(0);
     let successCount = 0;
 
-    for (let i = 0; i < validRows.length; i++) {
-      const row = validRows[i];
-      try {
-        await fetch('/api/expenses', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            date: row.date,
-            category: row.category,
-            description: row.description,
-            amount: row.amount,
-            currency: row.currency,
-          }),
-        });
-        successCount++;
-      } catch {
-        // continue on individual row failure
+    try {
+      const [resolveCategory, resolveTag] = await Promise.all([
+        makeNameResolver('/api/categories', '/api/categories'),
+        makeNameResolver('/api/tags', '/api/tags'),
+      ]);
+
+      for (let i = 0; i < validRows.length; i++) {
+        const row = validRows[i];
+        try {
+          const categoryId = await resolveCategory(row.category);
+          const tagIds: number[] = [];
+          for (const tag of row.tags) {
+            tagIds.push(await resolveTag(tag));
+          }
+
+          const res = await fetch('/api/expenses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              date: row.date,
+              categoryId,
+              description: row.description,
+              amount: row.amount,
+              currency: row.currency,
+              tagIds,
+            }),
+          });
+          if (res.ok) successCount++;
+        } catch {
+          // continue on individual row failure
+        }
+        setProgress(i + 1);
       }
-      setProgress(i + 1);
+    } finally {
+      await queryClient.invalidateQueries({ queryKey: EXPENSES_SCOPE });
+      await queryClient.invalidateQueries({ queryKey: CATEGORIES_SCOPE });
+      await queryClient.invalidateQueries({ queryKey: TAGS_SCOPE });
     }
 
-    await queryClient.invalidateQueries({ queryKey: EXPENSES_SCOPE });
-    showToast(`Imported ${successCount} expenses successfully`, 'success');
+    const failedCount = validRows.length - successCount;
+    if (failedCount === 0) {
+      showToast(`Imported ${successCount} expense${successCount !== 1 ? 's' : ''} successfully`, 'success');
+    } else if (successCount > 0) {
+      showToast(`Imported ${successCount} of ${validRows.length} expenses (${failedCount} failed)`, 'warning');
+    } else {
+      showToast('Import failed. No expenses were imported.', 'error');
+    }
     handleClose();
   };
 
@@ -169,7 +253,8 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
             <code className="bg-background-secondary rounded px-1 text-xs">category</code>,{' '}
             <code className="bg-background-secondary rounded px-1 text-xs">description</code>,{' '}
             <code className="bg-background-secondary rounded px-1 text-xs">amount</code>,{' '}
-            <code className="bg-background-secondary rounded px-1 text-xs">currency</code> (optional)
+            <code className="bg-background-secondary rounded px-1 text-xs">currency</code> (optional),{' '}
+            <code className="bg-background-secondary rounded px-1 text-xs">tags</code> (optional, separated by ;)
           </p>
 
           <button
@@ -205,7 +290,8 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
           )}
 
           <p className="text-text-muted text-xs">
-            Tip: Export your expenses first to get a valid CSV template. Tags are not imported.
+            Tip: Export CSV on the Reports page gives you a valid CSV template. New categories and tags are created
+            automatically.
           </p>
         </div>
       )}
@@ -223,8 +309,6 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
               )}
             </span>
           </div>
-
-          {invalidRows.length > 0 && <p className="text-text-muted text-xs">Tags are not imported in this version.</p>}
 
           <div className="border-border-subtle max-h-64 overflow-y-auto rounded-xl border">
             <table className="w-full table-fixed border-collapse text-sm">

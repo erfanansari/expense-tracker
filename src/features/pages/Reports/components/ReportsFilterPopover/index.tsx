@@ -285,7 +285,7 @@ const ReportsFilterPopover = ({
     onClose,
   };
 
-  // ─── Mobile: shared Modal (matches ExportModal) ───────────────────────────────
+  // ─── Mobile: shared Modal ───────────────────────────────
   if (isMobile) {
     return (
       <Modal isOpen={isOpen} onClose={onClose} title="Filters" className="max-w-md">

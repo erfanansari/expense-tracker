@@ -3,20 +3,24 @@ import { NextResponse } from 'next/server';
 import { withAuth } from '@core/api/utils';
 import { fetchCategoriesForExpenses } from '@core/database/categories';
 import { db } from '@core/database/client';
-import { mapRowToAsset, mapRowToExpense, mapRowToIncome } from '@core/database/mappers';
+import { mapRowToAsset, mapRowToAssetValuation, mapRowToExpense, mapRowToIncome } from '@core/database/mappers';
 import { fetchTagsForExpenses } from '@core/database/tags';
 
 export const GET = withAuth(async (user) => {
   const date = new Date().toISOString().slice(0, 10);
   const filename = `kharji-export-${date}.xlsx`;
 
-  const [expensesResult, incomesResult, assetsResult] = await Promise.all([
+  const [expensesResult, incomesResult, assetsResult, valuationsResult] = await Promise.all([
     db.execute({
       sql: 'SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC, created_at DESC',
       args: [user.userId],
     }),
     db.execute({ sql: 'SELECT * FROM incomes WHERE userId = ? ORDER BY year DESC, month DESC', args: [user.userId] }),
     db.execute({ sql: 'SELECT * FROM assets WHERE userId = ? ORDER BY category, name', args: [user.userId] }),
+    db.execute({
+      sql: 'SELECT av.*, a.name AS assetName FROM assetValuations av JOIN assets a ON a.id = av.assetId WHERE a.userId = ? ORDER BY av.assetId, av.valuedAt DESC',
+      args: [user.userId],
+    }),
   ]);
 
   const ids = expensesResult.rows.map((r) => r.id);
@@ -30,6 +34,10 @@ export const GET = withAuth(async (user) => {
     .filter((e): e is NonNullable<typeof e> => e !== null);
   const incomes = incomesResult.rows.map(mapRowToIncome);
   const assets = assetsResult.rows.map(mapRowToAsset);
+  const valuations = valuationsResult.rows.map((r) => ({
+    ...mapRowToAssetValuation(r),
+    assetName: r.assetName as string,
+  }));
 
   const xlsx = await import('xlsx');
 
@@ -93,10 +101,38 @@ export const GET = withAuth(async (user) => {
     ]),
   ];
 
+  const valuationRows = [
+    [
+      'ID',
+      'Asset ID',
+      'Asset Name',
+      'Quantity',
+      'Unit Value',
+      'Total Value',
+      'Currency',
+      'Entry Rate (to IRT)',
+      'Valued At',
+      'Created At',
+    ],
+    ...valuations.map((v) => [
+      v.id,
+      v.assetId,
+      v.assetName,
+      v.quantity,
+      v.unitValue ?? '',
+      v.amount,
+      v.currency,
+      v.entryRate,
+      v.valuedAt,
+      v.createdAt,
+    ]),
+  ];
+
   const wb = xlsx.utils.book_new();
   xlsx.utils.book_append_sheet(wb, xlsx.utils.aoa_to_sheet(expenseRows), 'Expenses');
   xlsx.utils.book_append_sheet(wb, xlsx.utils.aoa_to_sheet(incomeRows), 'Income');
   xlsx.utils.book_append_sheet(wb, xlsx.utils.aoa_to_sheet(assetRows), 'Assets');
+  xlsx.utils.book_append_sheet(wb, xlsx.utils.aoa_to_sheet(valuationRows), 'Asset Valuations');
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rawBuffer: any = xlsx.write(wb, { bookType: 'xlsx', type: 'buffer' });

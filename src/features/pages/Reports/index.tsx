@@ -18,9 +18,11 @@ import DateRangeSelector, {
 import Button from '@components/Button';
 import Pulse from '@components/Skeleton';
 
-import type { Tag } from '@/@types/expense';
+import { useToast } from '@stores/toast';
 
-import ExportModal from './components/ExportModal';
+import type { Tag } from '@/@types/expense';
+import { buildExportFilename, downloadFile, expensesToCsvString } from '@/utils/export';
+
 import ReportsCharts from './components/ReportsCharts';
 import ReportsFilterPopover from './components/ReportsFilterPopover';
 import ReportsStats from './components/ReportsStats';
@@ -60,10 +62,10 @@ function ReportsSkeleton() {
 const ReportsPage = () => {
   // States
   const [dateRange, setDateRange] = useState<DateRange>('ALL_TIME');
-  const [isExportOpen, setIsExportOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterTags, setFilterTags] = useState<Tag[]>([]);
   const [filterCategoryIds, setFilterCategoryIds] = useState<number[]>([]);
+  const { showToast } = useToast();
 
   // Queries
   const { data: expensesData, isLoading } = useQuery<GetAllExpensesResponse>({
@@ -92,6 +94,15 @@ const ReportsPage = () => {
   const handleResetFilters = () => {
     setFilterTags([]);
     setFilterCategoryIds([]);
+  };
+
+  const handleExportCsv = () => {
+    const csv = expensesToCsvString(filteredExpenses);
+    downloadFile(csv, buildExportFilename('kharji-expenses', dateRange, 'csv'), 'text/csv;charset=utf-8;');
+    showToast(
+      `Exported ${filteredExpenses.length} expense${filteredExpenses.length !== 1 ? 's' : ''} as CSV`,
+      'success'
+    );
   };
 
   return (
@@ -134,9 +145,15 @@ const ReportsPage = () => {
                 onReset={handleResetFilters}
               />
             </div>
-            <Button variant="primary" className="shrink-0" onClick={() => setIsExportOpen(true)}>
+            <Button
+              variant="primary"
+              className="shrink-0"
+              onClick={handleExportCsv}
+              disabled={filteredExpenses.length === 0}
+              title="Download the expenses in this view as CSV"
+            >
               <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">Export</span>
+              <span className="hidden sm:inline">Export CSV</span>
             </Button>
           </div>
         </div>
@@ -155,13 +172,6 @@ const ReportsPage = () => {
           </>
         )}
       </div>
-
-      <ExportModal
-        isOpen={isExportOpen}
-        onClose={() => setIsExportOpen(false)}
-        expenses={filteredExpenses}
-        dateRange={dateRange}
-      />
     </div>
   );
 };
