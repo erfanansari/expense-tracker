@@ -3,10 +3,14 @@ import { NextResponse } from 'next/server';
 
 import { forgotPasswordSchema } from '@schemas';
 
+import { checkRateLimit } from '@core/auth/rate-limit';
 import { generateResetToken } from '@core/auth/token';
 import { db } from '@core/database/client';
 
 export async function POST(request: NextRequest) {
+  const limited = checkRateLimit(request, { name: 'forgot-password', limit: 5, windowMs: 15 * 60_000 });
+  if (limited) return limited;
+
   try {
     const raw = await request.json();
     const parsed = forgotPasswordSchema.safeParse(raw);

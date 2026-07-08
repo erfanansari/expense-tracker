@@ -4,10 +4,14 @@ import { NextResponse } from 'next/server';
 import { resetPasswordSchema } from '@schemas';
 
 import { hashPassword } from '@core/auth/password';
+import { checkRateLimit } from '@core/auth/rate-limit';
 import { validatePassword } from '@core/auth/validation';
 import { db } from '@core/database/client';
 
 export async function POST(request: NextRequest) {
+  const limited = checkRateLimit(request, { name: 'reset-password', limit: 10, windowMs: 15 * 60_000 });
+  if (limited) return limited;
+
   try {
     const raw = await request.json();
     const parsed = resetPasswordSchema.safeParse(raw);

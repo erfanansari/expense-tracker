@@ -31,6 +31,7 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@react-email/components": "^1.0.12",
     "@react-email/render": "^2.0.8",
+    "@sentry/nextjs": "^10.64.0",
     "@serwist/next": "^9.5.11",
     "@tanstack/react-query": "^5.100.11",
     "@tanstack/react-query-devtools": "^5.100.11",

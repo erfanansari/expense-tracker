@@ -6,6 +6,7 @@ import { signupSchema } from '@schemas';
 import { DEMO_EMAIL } from '@constants';
 
 import { hashPassword } from '@core/auth/password';
+import { checkRateLimit } from '@core/auth/rate-limit';
 import { validatePassword } from '@core/auth/validation';
 import { seedDefaultCategoriesForUser } from '@core/database/categories';
 import { db } from '@core/database/client';
@@ -14,6 +15,9 @@ import { sendWelcomeEmail } from '@core/email/welcome';
 import { createSession } from '@core/session/session';
 
 export async function POST(request: NextRequest) {
+  const limited = checkRateLimit(request, { name: 'signup', limit: 5, windowMs: 10 * 60_000 });
+  if (limited) return limited;
+
   try {
     const raw = await request.json();
     const parsed = signupSchema.safeParse(raw);
