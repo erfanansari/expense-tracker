@@ -8,7 +8,9 @@ if (!process.env.RESEND_API_KEY) {
 
 export const resend = new Resend(process.env.RESEND_API_KEY);
 
-export const FROM_ADDRESS = 'Kharji Reports <reports@kharji.app>';
+// Single sender for all email — reports, auth, and notifications alike.
+// support@ so replies naturally become support requests (REPLY_TO routes them).
+export const FROM_ADDRESS = 'Kharji <support@kharji.app>';
 export const REPLY_TO = 'dev.erfanansari@gmail.com';
 
 export const APP_URL = process.env.APP_URL ?? 'http://localhost:3000';
