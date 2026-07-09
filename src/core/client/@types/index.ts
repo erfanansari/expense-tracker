@@ -9,6 +9,8 @@ export interface EndpointOptions<Data, Response> {
   /** Name of the search param that receives React Query's `pageParam` for infinite queries. */
   pageParamName?: string;
   requestDataSchema?: z.ZodType<Data>;
+  /** Reshapes the validated form data into the wire payload (rename/add/drop fields). */
+  requestNormalizer?: (data: Data) => Record<string, unknown>;
   responseNormalizer?: (response: Response, data?: Data) => Response;
   responseSchema?: z.ZodType<Response>;
   /**

@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { getMeKeyGenerator } from '@api/getMeQuery';
 import { loginKeyGenerator } from '@api/loginMutation';
 import type { LoginRequestData, LoginResponse } from '@api/loginMutation';
+import { resendVerificationKeyGenerator } from '@api/resendVerificationMutation';
+import type { ResendVerificationRequestData, ResendVerificationResponse } from '@api/resendVerificationMutation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
@@ -18,6 +20,7 @@ import { DEMO_EMAIL, DEMO_PASSWORD } from '@constants';
 
 import Form from '@components/Form';
 import FormInput from '@components/Form/components/FormInput';
+import GoogleSignInButton from '@components/GoogleSignInButton';
 
 import { useToast } from '@stores/toast';
 
@@ -28,6 +31,7 @@ const Login = () => {
 
   // States
   const [error, setError] = useState('');
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
 
   // Forms
   const methods = useForm<LoginRequestData>({
@@ -45,8 +49,23 @@ const Login = () => {
       queryClient.setQueryData(getMeKeyGenerator(), user);
       showToast(`Welcome back${user.name ? `, ${user.name}` : ''}!`, 'success');
     },
-    onError: (err) => {
+    onError: (err, variables) => {
+      if (err.message.toLowerCase().includes('email not verified')) {
+        setUnverifiedEmail(variables.email);
+        setError('');
+        return;
+      }
       setError(err.message || 'Login failed');
+    },
+  });
+
+  const resendMutation = useMutation<ResendVerificationResponse, Error, ResendVerificationRequestData>({
+    mutationKey: resendVerificationKeyGenerator(),
+    onSuccess: () => {
+      showToast('Verification email sent — check your inbox.', 'success');
+    },
+    onError: (err) => {
+      setError(err.message || 'Could not resend verification email');
     },
   });
 
@@ -55,6 +74,7 @@ const Login = () => {
 
   const handleSubmit = (data: LoginRequestData) => {
     setError('');
+    setUnverifiedEmail('');
     loginMutation.mutate(data);
   };
 
@@ -73,6 +93,21 @@ const Login = () => {
       {error && (
         <div className="border-danger bg-danger-light text-danger mb-3 rounded-lg border p-2.5 text-xs sm:mb-4 sm:p-3 sm:text-sm">
           {error}
+        </div>
+      )}
+
+      {unverifiedEmail && (
+        <div className="border-warning bg-warning/10 text-text-secondary mb-3 rounded-lg border p-2.5 text-xs sm:mb-4 sm:p-3 sm:text-sm">
+          Your email isn&apos;t verified yet. Check your inbox for the verification link, or{' '}
+          <button
+            type="button"
+            onClick={() => resendMutation.mutate({ email: unverifiedEmail })}
+            disabled={resendMutation.isPending}
+            className="text-text-primary font-medium hover:underline disabled:opacity-50"
+          >
+            {resendMutation.isPending ? 'sending...' : 'resend it'}
+          </button>
+          .
         </div>
       )}
 
@@ -126,14 +161,18 @@ const Login = () => {
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={handleDemoLogin}
-        disabled={loading}
-        className="border-border-subtle bg-background text-text-primary hover:bg-background-secondary flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 sm:py-3 sm:text-base"
-      >
-        Continue with Demo Account
-      </button>
+      <div className="space-y-3">
+        <GoogleSignInButton disabled={loading} onError={setError} />
+
+        <button
+          type="button"
+          onClick={handleDemoLogin}
+          disabled={loading}
+          className="border-border-subtle bg-background text-text-primary hover:bg-background-secondary flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 sm:py-3 sm:text-base"
+        >
+          Continue with Demo Account
+        </button>
+      </div>
     </>
   );
 };

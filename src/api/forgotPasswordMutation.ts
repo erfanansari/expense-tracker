@@ -9,14 +9,16 @@ import type { MutationKeyGenerator } from '@core/client/@types';
 type RequestData = ForgotPasswordSchema;
 type Response = z.infer<typeof responseSchema>;
 
-const responseSchema = z.object({ message: z.string() });
+const responseSchema = z.object({ status: z.boolean() });
 
 const keyGenerator: MutationKeyGenerator = () => ['auth', 'forgot-password'];
 
 client.registerEndpoint<RequestData, Response>(keyGenerator, {
-  url: '/api/auth/forgot-password',
+  url: '/api/auth/request-password-reset',
   type: 'mutation',
   requestDataSchema: forgotPasswordSchema,
+  // redirectTo lands the emailed link on our existing /reset-password?token= page
+  requestNormalizer: (data) => ({ ...data, redirectTo: '/reset-password' }),
   responseSchema,
   skipUnauthorizedHandling: true,
 });

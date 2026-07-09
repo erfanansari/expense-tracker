@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 import type { AuthUser } from '@types';
 
+import { DEMO_EMAIL } from '@constants';
+
 import client from '@core/client';
 import type { QueryKeyGenerator } from '@core/client/@types';
 
@@ -14,6 +16,21 @@ export const authUserSchema = z.object({
   isDemo: z.boolean(),
 });
 
+/**
+ * Maps a Better Auth user object (id typed as string, no isDemo) to the
+ * client-side AuthUser shape.
+ */
+export function toAuthUser(raw: unknown): AuthUser | null {
+  if (!raw || typeof raw !== 'object' || !('id' in raw) || !('email' in raw)) return null;
+  const user = raw as { id: string | number; email: string; name?: string | null };
+  return {
+    id: Number(user.id),
+    email: user.email,
+    name: user.name ?? null,
+    isDemo: user.email === DEMO_EMAIL,
+  };
+}
+
 type Response = AuthUser | null;
 
 const responseSchema = authUserSchema.nullable();
@@ -21,14 +38,14 @@ const responseSchema = authUserSchema.nullable();
 const keyGenerator: QueryKeyGenerator = () => ['auth', 'me'];
 
 client.registerEndpoint<void, Response>(keyGenerator, {
-  url: '/api/auth/me',
+  url: '/api/auth/get-session',
   method: 'GET',
-  // The route wraps the user as { user: AuthUser | null } and returns 200 even
-  // when logged out — unwrap so consumers see AuthUser | null directly.
+  // Better Auth returns { session, user } when signed in, or a null body when
+  // not — unwrap so consumers see AuthUser | null directly.
   responseNormalizer: (response) => {
     const raw = response as unknown;
     if (raw && typeof raw === 'object' && 'user' in raw) {
-      return (raw as { user: AuthUser | null }).user ?? null;
+      return toAuthUser((raw as { user: unknown }).user);
     }
     return null;
   },

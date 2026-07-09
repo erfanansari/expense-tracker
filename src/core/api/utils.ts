@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 
 import type { ZodSchema } from 'zod';
 
+import { auth } from '@core/auth/auth';
 import { db } from '@core/database/client';
-import { getCurrentUser } from '@core/session/session';
 
 import type { Session } from '@/@types/auth';
 
@@ -34,10 +34,13 @@ type AuthHandler<P = any> = (user: Session, request: Request, context: { params:
 export function withAuth<P = any>(handler: AuthHandler<P>, label?: string) {
   return async (request: Request, context: { params: Promise<P> }) => {
     try {
-      const user = await getCurrentUser();
-      if (!user) {
+      const session = await auth.api.getSession({ headers: request.headers });
+      if (!session) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
+      // Better Auth types ids as string; with generateId 'serial' the runtime
+      // value is the integer users.id — coerce for the numeric FK queries.
+      const user: Session = { userId: Number(session.user.id), email: session.user.email };
       return await handler(user, request, context);
     } catch (error) {
       const tag = label ? `[${label}] ` : '';

@@ -3,15 +3,19 @@ import { NextResponse } from 'next/server';
 import { DEMO_EMAIL } from '@constants';
 
 import { withAuth } from '@core/api/utils';
+import { auth } from '@core/auth/auth';
 import { db } from '@core/database/client';
-import { deleteSession } from '@core/session/session';
 
-export const DELETE = withAuth(async (user) => {
+export const DELETE = withAuth(async (user, request) => {
   if (user.email === DEMO_EMAIL) {
     return NextResponse.json({ error: "Demo account can't be deleted" }, { status: 403 });
   }
 
   const userId = user.userId;
+
+  // Revoke the current session and clear the cookie while the session row
+  // still exists; the batch below then removes any other sessions.
+  await auth.api.signOut({ headers: request.headers });
 
   // Older tables use user_id, newer ones userId. assetValuations and
   // expense_tags only reference the user indirectly, so they must be
@@ -32,7 +36,8 @@ export const DELETE = withAuth(async (user) => {
       { sql: 'DELETE FROM assets WHERE userId = ?', args: [userId] },
       { sql: 'DELETE FROM assetTypes WHERE userId = ?', args: [userId] },
       { sql: 'DELETE FROM incomes WHERE userId = ?', args: [userId] },
-      { sql: 'DELETE FROM password_reset_tokens WHERE user_id = ?', args: [userId] },
+      { sql: 'DELETE FROM session WHERE userId = ?', args: [userId] },
+      { sql: 'DELETE FROM account WHERE userId = ?', args: [userId] },
       { sql: 'DELETE FROM userNotificationPreferences WHERE userId = ?', args: [userId] },
       { sql: 'DELETE FROM sentEmailReports WHERE userId = ?', args: [userId] },
       { sql: 'DELETE FROM userCurrencyPreferences WHERE userId = ?', args: [userId] },
@@ -40,8 +45,6 @@ export const DELETE = withAuth(async (user) => {
     ],
     'write'
   );
-
-  await deleteSession();
 
   return NextResponse.json({ success: true });
 }, 'DeleteAccount');

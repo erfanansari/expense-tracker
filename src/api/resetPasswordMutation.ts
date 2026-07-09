@@ -12,6 +12,8 @@ client.registerEndpoint<RequestData, void>(keyGenerator, {
   url: '/api/auth/reset-password',
   type: 'mutation',
   requestDataSchema: resetPasswordSchema,
+  // Better Auth expects { newPassword, token }
+  requestNormalizer: (data) => ({ token: data.token, newPassword: data.password }),
   skipUnauthorizedHandling: true,
 });
 

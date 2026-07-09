@@ -49,13 +49,18 @@ async function seedUser() {
       userId = existingUser.rows[0].id as number;
       console.log(`User ${DEFAULT_USER_EMAIL} already exists with id ${userId}`);
     } else {
-      // Create the user
+      // Create the user; credential password lives in the account table
       const passwordHash = await hashPassword(DEFAULT_PASSWORD);
       const result = await client.execute({
-        sql: 'INSERT INTO users (email, password_hash) VALUES (?, ?)',
-        args: [DEFAULT_USER_EMAIL, passwordHash],
+        sql: 'INSERT INTO users (email, emailVerified) VALUES (?, 1)',
+        args: [DEFAULT_USER_EMAIL],
       });
       userId = Number(result.lastInsertRowid);
+      await client.execute({
+        sql: `INSERT INTO account (accountId, providerId, userId, password, createdAt, updatedAt)
+              VALUES (?, 'credential', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+        args: [String(userId), userId, passwordHash],
+      });
       console.log(`Created user ${DEFAULT_USER_EMAIL} with id ${userId}`);
       console.log(`Default password: ${DEFAULT_PASSWORD} (please change after first login)`);
     }

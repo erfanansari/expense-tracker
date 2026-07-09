@@ -39,6 +39,7 @@ class EndpointCaller<Data, Response> {
       url,
       method = 'POST',
       requestDataSchema,
+      requestNormalizer,
       responseSchema,
       responseNormalizer,
       omitFromBody,
@@ -52,8 +53,12 @@ class EndpointCaller<Data, Response> {
         finalData = requestDataSchema.parse(finalData);
       }
 
-      let payload: Record<string, unknown> | undefined =
-        finalData !== undefined ? { ...(finalData as Record<string, unknown>) } : undefined;
+      let payload: Record<string, unknown> | undefined;
+      if (requestNormalizer) {
+        payload = requestNormalizer(finalData as Data);
+      } else if (finalData !== undefined) {
+        payload = { ...(finalData as Record<string, unknown>) };
+      }
 
       if (payload && omitFromBody) {
         for (const key of omitFromBody) delete payload[key as string];
@@ -79,10 +84,12 @@ class EndpointCaller<Data, Response> {
 
       if (!response.ok) {
         if (response.status === 401 && !skipUnauthorizedHandling) triggerUnauthorized();
-        const message =
-          json && typeof json === 'object' && 'error' in json && typeof json.error === 'string'
-            ? json.error
-            : 'Request failed';
+        // Our routes return { error }, Better Auth returns { message, code }
+        let message = 'Request failed';
+        if (json && typeof json === 'object') {
+          if ('error' in json && typeof json.error === 'string') message = json.error;
+          else if ('message' in json && typeof json.message === 'string') message = json.message;
+        }
         throw new ApiError(message, response.status);
       }
 

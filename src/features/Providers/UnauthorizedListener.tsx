@@ -19,7 +19,11 @@ const UnauthorizedListener = () => {
       // bounce /login back to /overview. Await it so the browser actually
       // processes the Set-Cookie before the next request.
       try {
-        await fetch('/api/auth/logout', { method: 'POST' });
+        await fetch('/api/auth/sign-out', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: '{}',
+        });
       } catch {
         // ignore — best-effort
       }

@@ -290,23 +290,40 @@ export async function seedDemo() {
 
     let userId: number;
 
+    const passwordHash = await hashPassword(DEMO_PASSWORD);
+
     if (existingUser.rows.length > 0) {
       userId = existingUser.rows[0].id as number;
-      // Update password and name
-      const passwordHash = await hashPassword(DEMO_PASSWORD);
       await client.execute({
-        sql: 'UPDATE users SET password_hash = ?, name = ? WHERE id = ?',
-        args: [passwordHash, DEMO_NAME, userId],
+        sql: 'UPDATE users SET name = ?, emailVerified = 1 WHERE id = ?',
+        args: [DEMO_NAME, userId],
       });
       console.log(`Updated existing demo user (id: ${userId})`);
     } else {
-      const passwordHash = await hashPassword(DEMO_PASSWORD);
       const result = await client.execute({
-        sql: 'INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)',
-        args: [DEMO_EMAIL, passwordHash, DEMO_NAME],
+        sql: 'INSERT INTO users (email, name, emailVerified) VALUES (?, ?, 1)',
+        args: [DEMO_EMAIL, DEMO_NAME],
       });
       userId = Number(result.lastInsertRowid);
       console.log(`Created demo user (id: ${userId})`);
+    }
+
+    // Better Auth reads credential passwords from the account table
+    const credentialAccount = await client.execute({
+      sql: "SELECT id FROM account WHERE userId = ? AND providerId = 'credential'",
+      args: [userId],
+    });
+    if (credentialAccount.rows.length > 0) {
+      await client.execute({
+        sql: "UPDATE account SET password = ?, updatedAt = CURRENT_TIMESTAMP WHERE userId = ? AND providerId = 'credential'",
+        args: [passwordHash, userId],
+      });
+    } else {
+      await client.execute({
+        sql: `INSERT INTO account (accountId, providerId, userId, password, createdAt, updatedAt)
+              VALUES (?, 'credential', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+        args: [String(userId), userId, passwordHash],
+      });
     }
 
     // 2. Clear existing data (idempotent). Expenses must go before categories

@@ -1,18 +1,8 @@
-if (!process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required');
-}
+// Pre-Better-Auth JWT cookie; proxy.ts deletes it when seen so stale sessions
+// land cleanly on /login.
+export const LEGACY_COOKIE = 'auth_token';
 
 export const authConfig = {
-  jwt: {
-    secret: process.env.JWT_SECRET,
-    issuer: 'kharji',
-    audience: 'kharji-users',
-    expiration: '30d',
-  },
-  cookie: {
-    name: 'auth_token',
-    maxAge: 60 * 60 * 24 * 30, // 30 days in seconds
-  },
   routes: {
     public: [
       '/',
@@ -24,13 +14,7 @@ export const authConfig = {
       '/offline',
       '/privacy',
       '/terms',
-    ],
-    apiPublic: [
-      '/api/auth/login',
-      '/api/auth/signup',
-      '/api/auth/forgot-password',
-      '/api/auth/reset-password',
-      '/api/auth/me',
+      '/verify-email',
     ],
     auth: ['/login', '/signup', '/forgot-password', '/reset-password'],
   },

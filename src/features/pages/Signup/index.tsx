@@ -3,12 +3,12 @@
 import { useState } from 'react';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-import { getMeKeyGenerator } from '@api/getMeQuery';
 import { signupKeyGenerator } from '@api/signupMutation';
 import type { SignupRequestData, SignupResponse } from '@api/signupMutation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
@@ -16,13 +16,11 @@ import { signupSchema } from '@schemas';
 
 import Form from '@components/Form';
 import FormInput from '@components/Form/components/FormInput';
-
-import { useToast } from '@stores/toast';
+import GoogleSignInButton from '@components/GoogleSignInButton';
 
 const Signup = () => {
   // Customs
-  const queryClient = useQueryClient();
-  const { showToast } = useToast();
+  const router = useRouter();
 
   // States
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -38,11 +36,10 @@ const Signup = () => {
   // Mutations
   const signupMutation = useMutation<SignupResponse, Error, SignupRequestData>({
     mutationKey: signupKeyGenerator(),
-    onSuccess: ({ user }) => {
-      // Setting the `me` query data is enough — GuestGuard sees the user and
-      // redirects (honoring ?rp=). Pushing /overview here too would race it.
-      queryClient.setQueryData(getMeKeyGenerator(), user);
-      showToast('Account created. Welcome to Kharji!', 'success');
+    onSuccess: ({ email }) => {
+      // No session yet — the account must be verified first. Hand off to the
+      // "check your inbox" screen.
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     },
     onError: (err) => {
       setError(err.message || 'Signup failed');
@@ -140,6 +137,17 @@ const Signup = () => {
           )}
         </button>
       </Form>
+
+      <div className="relative my-4 sm:my-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="border-border-subtle w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background text-text-muted px-2">OR</span>
+        </div>
+      </div>
+
+      <GoogleSignInButton disabled={loading} onError={setError} />
     </>
   );
 };

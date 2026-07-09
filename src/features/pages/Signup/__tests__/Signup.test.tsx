@@ -4,11 +4,15 @@ import userEvent from '@testing-library/user-event';
 
 import { makeTestQueryClient, render, screen, waitFor } from '@/__tests__/test-utils';
 
+const pushMock = jest.fn();
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: pushMock }),
+}));
+
 function renderSignup() {
   const queryClient = makeTestQueryClient();
-  const mutationFn = jest
-    .fn()
-    .mockResolvedValue({ user: { id: 1, email: 'me@example.com', name: 'Me', isDemo: false } });
+  // Mutation resolves the normalized response shape: { email }
+  const mutationFn = jest.fn().mockResolvedValue({ email: 'me@example.com' });
   queryClient.setMutationDefaults([...signupKeyGenerator()], { mutationFn });
   render(<Signup />, { queryClient });
   return { mutationFn };
@@ -42,7 +46,7 @@ describe('Signup page', () => {
     expect(mutationFn).not.toHaveBeenCalled();
   });
 
-  it('submits once the form is valid and terms are accepted', async () => {
+  it('submits once the form is valid and terms are accepted, then redirects to verify-email', async () => {
     const { mutationFn } = renderSignup();
 
     await fillForm('secret123');
@@ -60,5 +64,14 @@ describe('Signup page', () => {
         expect.anything()
       );
     });
+
+    await waitFor(() => {
+      expect(pushMock).toHaveBeenCalledWith(`/verify-email?email=${encodeURIComponent('me@example.com')}`);
+    });
+  });
+
+  it('renders the Google sign-in button', () => {
+    renderSignup();
+    expect(screen.getByRole('button', { name: /continue with google/i })).toBeInTheDocument();
   });
 });

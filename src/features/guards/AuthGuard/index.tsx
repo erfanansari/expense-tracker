@@ -30,7 +30,11 @@ const AuthGuard: FC<PropsWithChildren> = ({ children }) => {
     // server-side. router.replace has been observed to leave the dashboard
     // stuck on a blank screen when the client router state and the cookie
     // state disagree during a logout transition.
-    void fetch('/api/auth/logout', { method: 'POST' })
+    void fetch('/api/auth/sign-out', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}',
+    })
       .catch(() => {})
       .finally(() => {
         window.location.href = '/login';

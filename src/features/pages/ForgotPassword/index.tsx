@@ -29,8 +29,8 @@ const ForgotPassword = () => {
   // Mutations
   const forgotPasswordMutation = useMutation<ForgotPasswordResponse, Error, ForgotPasswordRequestData>({
     mutationKey: forgotPasswordKeyGenerator(),
-    onSuccess: (data) => {
-      setMessage(data.message);
+    onSuccess: () => {
+      setMessage('If that email exists, we sent a password reset link');
       methods.reset();
     },
     onError: (err) => {
