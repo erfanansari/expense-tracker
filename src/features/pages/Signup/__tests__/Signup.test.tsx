@@ -21,7 +21,7 @@ function renderSignup() {
 async function fillForm(passwordConfirm: string) {
   await userEvent.type(screen.getByLabelText('Full Name'), 'Me');
   await userEvent.type(screen.getByLabelText('Email'), 'me@example.com');
-  await userEvent.type(screen.getByLabelText('Password'), 'secret123');
+  await userEvent.type(screen.getByLabelText('Password'), 'Secret123');
   await userEvent.type(screen.getByLabelText('Confirm Password'), passwordConfirm);
 }
 
@@ -29,7 +29,7 @@ describe('Signup page', () => {
   it('shows a mismatch error when passwords differ', async () => {
     const { mutationFn } = renderSignup();
 
-    await fillForm('different123');
+    await fillForm('Different123');
     await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
 
     expect(await screen.findByText('Passwords do not match')).toBeInTheDocument();
@@ -39,7 +39,7 @@ describe('Signup page', () => {
   it('requires agreeing to the terms before submitting', async () => {
     const { mutationFn } = renderSignup();
 
-    await fillForm('secret123');
+    await fillForm('Secret123');
     await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
 
     expect(await screen.findByText('Please agree to the Terms of Service and Privacy Policy')).toBeInTheDocument();
@@ -49,7 +49,7 @@ describe('Signup page', () => {
   it('submits once the form is valid and terms are accepted, then redirects to verify-email', async () => {
     const { mutationFn } = renderSignup();
 
-    await fillForm('secret123');
+    await fillForm('Secret123');
     await userEvent.click(screen.getByRole('checkbox'));
     await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
 
@@ -58,8 +58,8 @@ describe('Signup page', () => {
         {
           name: 'Me',
           email: 'me@example.com',
-          password: 'secret123',
-          passwordConfirm: 'secret123',
+          password: 'Secret123',
+          passwordConfirm: 'Secret123',
         },
         expect.anything()
       );

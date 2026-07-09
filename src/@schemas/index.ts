@@ -6,8 +6,13 @@ export {
   signupSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  changePasswordSchema,
+  setPasswordSchema,
+  strongPassword,
   type LoginSchema,
   type SignupSchema,
   type ForgotPasswordSchema,
   type ResetPasswordSchema,
+  type ChangePasswordSchema,
+  type SetPasswordSchema,
 } from './auth';

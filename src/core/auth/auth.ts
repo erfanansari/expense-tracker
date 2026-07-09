@@ -1,8 +1,11 @@
 import { dash } from '@better-auth/infra';
 import { LibsqlDialect } from '@libsql/kysely-libsql';
 import * as Sentry from '@sentry/nextjs';
-import { betterAuth } from 'better-auth';
+import { APIError, betterAuth } from 'better-auth';
+import { createAuthMiddleware, getSessionFromCtx } from 'better-auth/api';
 import { nextCookies } from 'better-auth/next-js';
+
+import { DEMO_EMAIL } from '@constants';
 
 import { hashPassword, verifyPassword } from '@core/auth/password';
 import { seedDefaultCategoriesForUser } from '@core/database/categories';
@@ -64,6 +67,18 @@ export const auth = betterAuth({
       enabled: true,
       trustedProviders: ['google'],
     },
+  },
+  hooks: {
+    // The demo account is shared — block anything that would change its
+    // credentials or linked accounts and lock other visitors out.
+    before: createAuthMiddleware(async (ctx) => {
+      const guardedPaths = ['/change-password', '/link-social', '/unlink-account'];
+      if (!guardedPaths.includes(ctx.path)) return;
+      const session = await getSessionFromCtx(ctx);
+      if (session?.user?.email === DEMO_EMAIL) {
+        throw new APIError('FORBIDDEN', { message: "Demo account can't change security settings" });
+      }
+    }),
   },
   databaseHooks: {
     user: {

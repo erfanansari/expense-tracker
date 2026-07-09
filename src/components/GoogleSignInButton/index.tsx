@@ -10,7 +10,7 @@ interface GoogleSignInButtonProps {
   onError?: (message: string) => void;
 }
 
-const GoogleIcon = () => (
+export const GoogleIcon = () => (
   <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
     <path
       fill="#4285F4"
