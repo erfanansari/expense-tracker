@@ -10,7 +10,7 @@ import { DEMO_EMAIL } from '@constants';
 import { hashPassword, verifyPassword } from '@core/auth/password';
 import { seedDefaultCategoriesForUser } from '@core/database/categories';
 import { createDefaultNotificationPreferences } from '@core/database/notification-preferences';
-import { sendResetPasswordEmail, sendVerificationEmail } from '@core/email/auth-emails';
+import { sendPasswordChangedEmail, sendResetPasswordEmail, sendVerificationEmail } from '@core/email/auth-emails';
 import { sendWelcomeEmail } from '@core/email/welcome';
 
 const dialect = new LibsqlDialect({
@@ -35,6 +35,12 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 30, // 30 days (parity with old JWT)
     updateAge: 60 * 60 * 24,
+    // Signed session copy in the cookie skips the Turso round-trip on most
+    // requests. Tradeoff: cross-device revocation can lag up to maxAge.
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+    },
   },
   emailAndPassword: {
     enabled: true,
@@ -46,6 +52,13 @@ export const auth = betterAuth({
     },
     sendResetPassword: async ({ user, url }) => {
       await sendResetPasswordEmail({ email: user.email, name: user.name ?? null }, url);
+    },
+    onPasswordReset: async ({ user }) => {
+      // Security notification; never block the reset on email delivery
+      sendPasswordChangedEmail({ email: user.email, name: user.name ?? null }).catch((error) => {
+        console.error('Password-changed email failed:', error);
+        Sentry.captureException(error);
+      });
     },
   },
   emailVerification: {
@@ -78,6 +91,17 @@ export const auth = betterAuth({
       if (session?.user?.email === DEMO_EMAIL) {
         throw new APIError('FORBIDDEN', { message: "Demo account can't change security settings" });
       }
+    }),
+    // Security notification after a successful in-app password change (the
+    // reset flow is covered by onPasswordReset above).
+    after: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== '/change-password') return;
+      const session = await getSessionFromCtx(ctx);
+      if (!session?.user?.email) return;
+      sendPasswordChangedEmail({ email: session.user.email, name: session.user.name ?? null }).catch((error) => {
+        console.error('Password-changed email failed:', error);
+        Sentry.captureException(error);
+      });
     }),
   },
   databaseHooks: {

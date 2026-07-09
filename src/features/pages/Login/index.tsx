@@ -172,6 +172,18 @@ const Login = () => {
         >
           Continue with Demo Account
         </button>
+
+        <p className="text-text-muted text-center text-xs">
+          By continuing, you agree to our{' '}
+          <Link href="/terms" className="text-text-secondary hover:underline">
+            Terms of Service
+          </Link>{' '}
+          and{' '}
+          <Link href="/privacy" className="text-text-secondary hover:underline">
+            Privacy Policy
+          </Link>
+          .
+        </p>
       </div>
     </>
   );

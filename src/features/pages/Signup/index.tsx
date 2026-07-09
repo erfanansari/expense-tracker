@@ -148,6 +148,18 @@ const Signup = () => {
       </div>
 
       <GoogleSignInButton disabled={loading} onError={setError} />
+
+      <p className="text-text-muted mt-3 text-center text-xs">
+        By continuing with Google, you agree to our{' '}
+        <Link href="/terms" className="text-text-secondary hover:underline">
+          Terms of Service
+        </Link>{' '}
+        and{' '}
+        <Link href="/privacy" className="text-text-secondary hover:underline">
+          Privacy Policy
+        </Link>
+        .
+      </p>
     </>
   );
 };
