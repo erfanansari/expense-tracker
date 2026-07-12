@@ -29,6 +29,7 @@
     "@hookform/resolvers": "^5.4.0",
     "@libsql/client": "^0.17.3",
     "@libsql/kysely-libsql": "^0.4.1",
+    "@number-flow/react": "^0.6.1",
     "@persian-tools/persian-tools": "^4.0.4",
     "@radix-ui/react-tabs": "^1.1.13",
     "@react-email/components": "^1.0.12",

@@ -3,6 +3,8 @@ import type { FC, ReactNode } from 'react';
 import type { SummaryPair } from '@api/getSummaryQuery';
 import { Banknote, TrendingDown, TrendingUp } from 'lucide-react';
 
+import AnimatedMoney from '@components/AnimatedMoney';
+
 import { useCurrency } from '@hooks/use-currency';
 
 import type { OverviewStatsProps } from '../../@types';
@@ -16,11 +18,10 @@ interface StatCardProps {
   pair?: SummaryPair;
   primaryCurrency: string;
   secondaryCurrency: string | null;
-  format: (value: number, currency: string, opts?: { compact?: boolean }) => string;
   formatFull: (value: number, currency: string) => string;
 }
 
-const StatCard: FC<StatCardProps> = ({ label, icon, pair, primaryCurrency, secondaryCurrency, format, formatFull }) => {
+const StatCard: FC<StatCardProps> = ({ label, icon, pair, primaryCurrency, secondaryCurrency, formatFull }) => {
   const p = pair?.primary ?? 0;
   const s = pair?.secondary ?? 0;
   return (
@@ -30,11 +31,11 @@ const StatCard: FC<StatCardProps> = ({ label, icon, pair, primaryCurrency, secon
       </div>
       <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{label}</p>
       <p className={primaryClass} title={formatFull(p, primaryCurrency)}>
-        {format(p, primaryCurrency, { compact: true })}
+        <AnimatedMoney amount={p} currency={primaryCurrency} />
       </p>
       {secondaryCurrency && (
         <p className={secondaryClass} title={formatFull(s, secondaryCurrency)}>
-          {format(s, secondaryCurrency, { compact: true })}
+          <AnimatedMoney amount={s} currency={secondaryCurrency} />
         </p>
       )}
     </div>
@@ -42,13 +43,13 @@ const StatCard: FC<StatCardProps> = ({ label, icon, pair, primaryCurrency, secon
 };
 
 const OverviewStats = ({ summary }: OverviewStatsProps) => {
-  const { format, formatFull, primaryCurrency: ctxPrimary, secondaryCurrency: ctxSecondary } = useCurrency();
+  const { formatFull, primaryCurrency: ctxPrimary, secondaryCurrency: ctxSecondary } = useCurrency();
 
   // Totals arrive already converted (per-record, historical). Fall back to the
   // context currencies while the summary is still loading.
   const primaryCurrency = summary?.primaryCurrency ?? ctxPrimary;
   const secondaryCurrency = summary?.secondaryCurrency ?? ctxSecondary;
-  const shared = { primaryCurrency, secondaryCurrency, format, formatFull };
+  const shared = { primaryCurrency, secondaryCurrency, formatFull };
 
   return (
     <>

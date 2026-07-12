@@ -2,6 +2,8 @@
 
 import { BarChart3, Hash, TrendingUp } from 'lucide-react';
 
+import AnimatedMoney, { AnimatedCount } from '@components/AnimatedMoney';
+
 import { useCurrency } from '@hooks/use-currency';
 
 import { type Expense } from '@/@types/expense';
@@ -11,7 +13,7 @@ interface ExpenseStatsProps {
 }
 
 const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
-  const { primaryCurrency, secondaryCurrency, sumTo, format, formatFull } = useCurrency();
+  const { primaryCurrency, secondaryCurrency, sumTo, formatFull } = useCurrency();
 
   // Sum each expense converted at ITS OWN date — historically accurate & stable.
   const items = expenses.map((e) => ({ amount: e.amount, currency: e.currency, date: e.date }));
@@ -47,14 +49,14 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
             className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl"
             title={formatFull(totalPrimary, primaryCurrency)}
           >
-            {format(totalPrimary, primaryCurrency, { compact: true })}
+            <AnimatedMoney amount={totalPrimary} currency={primaryCurrency} />
           </p>
           {showSecondary && (
             <p
               className="text-text-secondary mt-1.5 text-sm font-medium"
               title={formatFull(totalSecondary, secondaryCurrency)}
             >
-              {format(totalSecondary, secondaryCurrency, { compact: true })}
+              <AnimatedMoney amount={totalSecondary} currency={secondaryCurrency} />
             </p>
           )}
         </div>
@@ -70,7 +72,9 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
 
         <div>
           <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Expenses</p>
-          <p className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl">{expenses.length}</p>
+          <p className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl">
+            <AnimatedCount value={expenses.length} />
+          </p>
           <p className="text-text-secondary mt-1.5 text-sm font-medium">Expenses</p>
         </div>
       </div>
@@ -89,14 +93,14 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
             className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl"
             title={formatFull(totalPrimary / div, primaryCurrency)}
           >
-            {format(totalPrimary / div, primaryCurrency, { compact: true })}
+            <AnimatedMoney amount={totalPrimary / div} currency={primaryCurrency} />
           </p>
           {showSecondary && (
             <p
               className="text-text-secondary mt-1.5 text-sm font-medium"
               title={formatFull(totalSecondary / div, secondaryCurrency)}
             >
-              {format(totalSecondary / div, secondaryCurrency, { compact: true })}
+              <AnimatedMoney amount={totalSecondary / div} currency={secondaryCurrency} />
             </p>
           )}
         </div>

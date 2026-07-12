@@ -3,6 +3,8 @@ import { TrendingUp, Wallet } from 'lucide-react';
 
 import type { Asset, AssetCategory } from '@types';
 
+import AnimatedMoney from '@components/AnimatedMoney';
+
 import { useCurrency } from '@hooks/use-currency';
 import type { MoneyItem } from '@hooks/use-currency';
 
@@ -19,7 +21,7 @@ const toItem = (a: Asset): MoneyItem => ({
 });
 
 const AssetsSummary = ({ assetsByCategory }: AssetsSummaryProps) => {
-  const { primaryCurrency, secondaryCurrency, sumTo, format, formatFull } = useCurrency();
+  const { primaryCurrency, secondaryCurrency, sumTo, formatFull } = useCurrency();
   const showSecondary = !!secondaryCurrency && secondaryCurrency !== primaryCurrency;
 
   const allAssets = Object.values(assetsByCategory).flatMap((d) => d.assets);
@@ -37,11 +39,11 @@ const AssetsSummary = ({ assetsByCategory }: AssetsSummaryProps) => {
   const renderPair = (p: number, s: number) => (
     <>
       <p className="text-text-primary text-2xl font-semibold tabular-nums" title={formatFull(p, primaryCurrency)}>
-        {format(p, primaryCurrency, { compact: true })}
+        <AnimatedMoney amount={p} currency={primaryCurrency} />
       </p>
       {showSecondary && secondaryCurrency && (
         <p className="text-text-muted text-xs" title={formatFull(s, secondaryCurrency)}>
-          {format(s, secondaryCurrency, { compact: true })}
+          <AnimatedMoney amount={s} currency={secondaryCurrency} />
         </p>
       )}
     </>

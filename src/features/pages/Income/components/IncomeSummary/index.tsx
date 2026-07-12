@@ -1,6 +1,8 @@
 import { getMonthLabel } from '@constants/income';
 import { Banknote, DollarSign, TrendingUp } from 'lucide-react';
 
+import AnimatedMoney from '@components/AnimatedMoney';
+
 import { useCurrency } from '@hooks/use-currency';
 import type { MoneyItem } from '@hooks/use-currency';
 
@@ -16,7 +18,7 @@ const toItem = (inc: Income): MoneyItem => ({
 });
 
 const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
-  const { primaryCurrency, secondaryCurrency, sumTo, format, formatFull } = useCurrency();
+  const { primaryCurrency, secondaryCurrency, sumTo, formatFull } = useCurrency();
   const showSecondary = !!secondaryCurrency && secondaryCurrency !== primaryCurrency;
 
   const currentYear = new Date().getFullYear();
@@ -54,11 +56,11 @@ const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
   const renderPair = (p: number, s: number, primaryClass: string) => (
     <>
       <p className={primaryClass} title={formatFull(p, primaryCurrency)}>
-        {format(p, primaryCurrency, { compact: true })}
+        <AnimatedMoney amount={p} currency={primaryCurrency} />
       </p>
       {showSecondary && secondaryCurrency && (
         <p className="text-text-muted text-xs" title={formatFull(s, secondaryCurrency)}>
-          {format(s, secondaryCurrency, { compact: true })}
+          <AnimatedMoney amount={s} currency={secondaryCurrency} />
         </p>
       )}
     </>

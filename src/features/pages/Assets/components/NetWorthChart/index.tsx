@@ -14,6 +14,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import AnimatedMoney from '@components/AnimatedMoney';
 import ChartTooltip from '@components/ChartTooltip';
 import EmptyState from '@components/EmptyState';
 import ErrorState from '@components/ErrorState';
@@ -65,7 +66,7 @@ function NetWorthTooltip({
 // Shows only the absolute change over the range. A percentage would conflate
 // asset contributions with performance — snapshots can't tell them apart.
 function DeltaBadge({ data }: { data: Array<{ value: number }> }) {
-  const { display } = useCurrency();
+  const { convert, primaryCurrency } = useCurrency();
   const { deltaPivot, isPositive } = useMemo(() => {
     if (data.length < 2) return { deltaPivot: 0, isPositive: true };
     const d = data[data.length - 1].value - data[0].value;
@@ -76,11 +77,14 @@ function DeltaBadge({ data }: { data: Array<{ value: number }> }) {
 
   const sign = isPositive ? '+' : '-';
   const color = isPositive ? 'text-success' : 'text-danger';
+  // Numeric conversion (latest rate, like display() with no date) so the value
+  // can animate when the range selector changes it.
+  const converted = convert(Math.abs(deltaPivot), PIVOT_CURRENCY, primaryCurrency);
 
   return (
     <span className={`text-sm font-medium ${color}`}>
       {sign}
-      {display(Math.abs(deltaPivot), PIVOT_CURRENCY, undefined, { compact: true }).primary}
+      {converted === null ? '—' : <AnimatedMoney amount={converted} currency={primaryCurrency} />}
     </span>
   );
 }
