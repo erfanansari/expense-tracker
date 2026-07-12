@@ -6,10 +6,13 @@ import IncomeForm from '@features/income/components/IncomeForm';
 
 import FormDrawer from '@components/FormDrawer';
 
+import { useAuth } from '@hooks/use-auth';
+
 import { useDrawerStore } from '@stores/drawer';
 
 /** Render-only host for the global expense/income/asset form drawers (state lives in the drawer store). */
 const GlobalDrawers = () => {
+  const { user } = useAuth();
   const expense = useDrawerStore((state) => state.expense);
   const income = useDrawerStore((state) => state.income);
   const asset = useDrawerStore((state) => state.asset);
@@ -19,6 +22,10 @@ const GlobalDrawers = () => {
   const setExpenseDirty = useDrawerStore((state) => state.setExpenseDirty);
   const setIncomeDirty = useDrawerStore((state) => state.setIncomeDirty);
   const setAssetDirty = useDrawerStore((state) => state.setAssetDirty);
+
+  // The forms are meaningless (and broken) without a session — don't let
+  // drawers render over auth pages.
+  if (!user) return null;
 
   return (
     <>
