@@ -1,7 +1,7 @@
 'use client';
 
-import { createContext, useContext, useMemo } from 'react';
-import type { ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef } from 'react';
+import type { MutableRefObject, ReactNode } from 'react';
 
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -15,16 +15,15 @@ import {
   KBarSearch,
   useKBar,
   useMatches,
-  VisualState,
+  useRegisterActions,
 } from 'kbar';
 import { DollarSign, LayoutDashboard, PieChart, Plus, Receipt, Search, Settings, TrendingUp } from 'lucide-react';
+
+import { useAuth } from '@hooks/use-auth';
 
 import { useDrawerStore } from '@stores/drawer';
 
 interface CommandPaletteContextType {
-  isOpen: boolean;
-  open: () => void;
-  close: () => void;
   toggle: () => void;
 }
 
@@ -38,29 +37,127 @@ export const useCommandPalette = () => {
   return context;
 };
 
-// Inner component that uses kbar hooks
-function CommandPaletteInner({ children }: { children: ReactNode }) {
-  const { query, visualState } = useKBar((state) => ({
-    visualState: state.visualState,
-  }));
+type ToggleRef = MutableRefObject<(() => void) | null>;
 
-  // Memos
-  const contextValue = useMemo<CommandPaletteContextType>(
-    () => ({
-      isOpen: visualState !== VisualState.hidden,
-      open: () => visualState === VisualState.hidden && query.toggle(),
-      close: () => visualState !== VisualState.hidden && query.toggle(),
-      toggle: () => query.toggle(),
-    }),
-    [visualState, query]
-  );
+/**
+ * The kbar tree is mounted ONLY for signed-in users — kbar hardwires a global
+ * ⌘K handler and body scroll-lock that can't be configured away, so on auth
+ * pages the palette simply doesn't exist. Children render outside KBarProvider
+ * (they don't need kbar context), which keeps auth changes from remounting the
+ * app; the toggle ref is how the app (TopNav) reaches the palette while it's
+ * mounted.
+ */
+export const CommandPaletteProvider = ({ children }: { children: ReactNode }) => {
+  const { user } = useAuth();
+  const toggleRef: ToggleRef = useRef(null);
+
+  const contextValue = useMemo<CommandPaletteContextType>(() => ({ toggle: () => toggleRef.current?.() }), []);
 
   return (
     <CommandPaletteContext.Provider value={contextValue}>
       {children}
-      <CommandPaletteUI />
+      {user && <CommandPalette toggleRef={toggleRef} />}
     </CommandPaletteContext.Provider>
   );
+};
+
+// The actual palette — only ever mounted with a signed-in user.
+function CommandPalette({ toggleRef }: { toggleRef: ToggleRef }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const openExpenseDrawer = useDrawerStore((state) => state.openExpenseDrawer);
+  const openIncomeDrawer = useDrawerStore((state) => state.openIncomeDrawer);
+  const openAssetDrawer = useDrawerStore((state) => state.openAssetDrawer);
+
+  const actions = useMemo<Action[]>(() => {
+    const navActions = [
+      { id: 'nav-overview', name: 'Go to Overview', path: '/overview', icon: <LayoutDashboard className="h-4 w-4" /> },
+      {
+        id: 'nav-expenses',
+        name: 'Go to Expenses',
+        path: '/expenses',
+        icon: <Receipt className="h-4 w-4" />,
+      },
+      { id: 'nav-income', name: 'Go to Income', path: '/income', icon: <DollarSign className="h-4 w-4" /> },
+      { id: 'nav-assets', name: 'Go to Assets', path: '/assets', icon: <TrendingUp className="h-4 w-4" /> },
+      { id: 'nav-reports', name: 'Go to Reports', path: '/reports', icon: <PieChart className="h-4 w-4" /> },
+      { id: 'nav-settings', name: 'Go to Settings', path: '/settings', icon: <Settings className="h-4 w-4" /> },
+    ]
+      .filter((a) => pathname !== a.path)
+      .map((a) => ({
+        id: a.id,
+        name: a.name,
+        icon: a.icon,
+        section: 'Navigation',
+        perform: () => router.push(a.path),
+      }));
+
+    const createActions: Action[] = [
+      {
+        id: 'create-expense',
+        name: 'Add Expense',
+        section: 'Create',
+        icon: <Plus className="h-4 w-4" />,
+        shortcut: ['e'],
+        keywords: 'add new expense spend',
+        perform: () => openExpenseDrawer(),
+      },
+      {
+        id: 'create-income',
+        name: 'Add Income',
+        section: 'Create',
+        icon: <Plus className="h-4 w-4" />,
+        shortcut: ['i'],
+        keywords: 'add new income earn salary',
+        perform: () => openIncomeDrawer(),
+      },
+      {
+        id: 'create-asset',
+        name: 'Add Asset',
+        section: 'Create',
+        icon: <Plus className="h-4 w-4" />,
+        shortcut: ['a'],
+        keywords: 'add new asset wealth investment',
+        perform: () => openAssetDrawer(),
+      },
+    ];
+
+    return [...createActions, ...navActions];
+  }, [pathname, router, openExpenseDrawer, openIncomeDrawer, openAssetDrawer]);
+
+  return (
+    // The palette must NOT lock body scroll — not kbar's lock, not ours.
+    // Locks around the palette race with Radix's lock (inside vaul drawers)
+    // in both orders and shift the layout by a scrollbar width:
+    //  - drawer→⌘K: kbar's lock stacks inline margin-right on top of Radix's
+    //    stylesheet compensation;
+    //  - ⌘K→"Add expense": the drawer mounts while a palette lock holds the
+    //    scrollbar hidden, so Radix measures a 0 gap and under-compensates
+    //    when the palette lock releases.
+    // A transient keyboard overlay doesn't need scroll-locking; the backdrop
+    // already swallows pointer interaction.
+    <KBarProvider options={{ disableDocumentLock: true }}>
+      <KBarConnector toggleRef={toggleRef} actions={actions} />
+      <CommandPaletteUI />
+    </KBarProvider>
+  );
+}
+
+// Registers the (pathname-dependent) actions and exposes kbar's toggle to the
+// provider's ref for the lifetime of the palette.
+function KBarConnector({ toggleRef, actions }: { toggleRef: ToggleRef; actions: Action[] }) {
+  const { query } = useKBar();
+
+  useRegisterActions(actions, [actions]);
+
+  useEffect(() => {
+    toggleRef.current = () => query.toggle();
+    return () => {
+      toggleRef.current = null;
+    };
+  }, [query, toggleRef]);
+
+  return null;
 }
 
 // Custom UI component using kbar primitives
@@ -146,74 +243,3 @@ function RenderResults() {
     </div>
   );
 }
-
-// Main provider component
-export const CommandPaletteProvider = ({ children }: { children: ReactNode }) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const openExpenseDrawer = useDrawerStore((state) => state.openExpenseDrawer);
-  const openIncomeDrawer = useDrawerStore((state) => state.openIncomeDrawer);
-  const openAssetDrawer = useDrawerStore((state) => state.openAssetDrawer);
-
-  const actions = useMemo<Action[]>(() => {
-    const navActions = [
-      { id: 'nav-overview', name: 'Go to Overview', path: '/overview', icon: <LayoutDashboard className="h-4 w-4" /> },
-      {
-        id: 'nav-expenses',
-        name: 'Go to Expenses',
-        path: '/expenses',
-        icon: <Receipt className="h-4 w-4" />,
-      },
-      { id: 'nav-income', name: 'Go to Income', path: '/income', icon: <DollarSign className="h-4 w-4" /> },
-      { id: 'nav-assets', name: 'Go to Assets', path: '/assets', icon: <TrendingUp className="h-4 w-4" /> },
-      { id: 'nav-reports', name: 'Go to Reports', path: '/reports', icon: <PieChart className="h-4 w-4" /> },
-      { id: 'nav-settings', name: 'Go to Settings', path: '/settings', icon: <Settings className="h-4 w-4" /> },
-    ]
-      .filter((a) => pathname !== a.path)
-      .map((a) => ({
-        id: a.id,
-        name: a.name,
-        icon: a.icon,
-        section: 'Navigation',
-        perform: () => router.push(a.path),
-      }));
-
-    const createActions: Action[] = [
-      {
-        id: 'create-expense',
-        name: 'Add Expense',
-        section: 'Create',
-        icon: <Plus className="h-4 w-4" />,
-        shortcut: ['e'],
-        keywords: 'add new expense spend',
-        perform: () => openExpenseDrawer(),
-      },
-      {
-        id: 'create-income',
-        name: 'Add Income',
-        section: 'Create',
-        icon: <Plus className="h-4 w-4" />,
-        shortcut: ['i'],
-        keywords: 'add new income earn salary',
-        perform: () => openIncomeDrawer(),
-      },
-      {
-        id: 'create-asset',
-        name: 'Add Asset',
-        section: 'Create',
-        icon: <Plus className="h-4 w-4" />,
-        shortcut: ['a'],
-        keywords: 'add new asset wealth investment',
-        perform: () => openAssetDrawer(),
-      },
-    ];
-
-    return [...createActions, ...navActions];
-  }, [pathname, router, openExpenseDrawer, openIncomeDrawer, openAssetDrawer]);
-
-  return (
-    <KBarProvider actions={actions}>
-      <CommandPaletteInner>{children}</CommandPaletteInner>
-    </KBarProvider>
-  );
-};
