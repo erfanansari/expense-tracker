@@ -7,9 +7,15 @@ import type { AssetCategory } from '@types';
 
 import { ApiError } from '@core/errors';
 
+import { onboardingCopy } from '@features/onboarding/copy';
+
+import Button from '@components/Button';
 import DataTable from '@components/DataTable';
+import EmptyState from '@components/EmptyState';
 import ErrorState from '@components/ErrorState';
 import Pulse from '@components/Skeleton';
+
+import { useDrawerStore } from '@stores/drawer';
 
 import type { AssetsTableProps } from '../../@types';
 import { ASSETS_TABLE_MIN_WIDTH, buildAssetColumns, CATEGORY_ICONS } from '../../constants';
@@ -53,6 +59,7 @@ const AssetsTable = ({
   deletingId,
   onRetry,
 }: AssetsTableProps) => {
+  const openAssetDrawer = useDrawerStore((state) => state.openAssetDrawer);
   // Memos
   const assetColumns = useMemo(() => buildAssetColumns(onEdit, onDelete, deletingId), [onEdit, onDelete, deletingId]);
 
@@ -71,12 +78,18 @@ const AssetsTable = ({
 
   if (assetsCount === 0) {
     return (
-      <div className="border-border-subtle bg-background relative rounded-xl border p-16 text-center shadow-sm">
-        <div className="border-border-subtle bg-background-secondary mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl border">
-          <Wallet className="text-text-muted h-8 w-8" />
-        </div>
-        <p className="text-text-secondary font-medium">No assets recorded yet</p>
-        <p className="text-text-muted mt-1 text-sm">Add your first asset above!</p>
+      <div className="border-border-subtle bg-background relative rounded-xl border shadow-sm">
+        <EmptyState
+          icon={Wallet}
+          title={onboardingCopy.emptyStates.assetsTable.title}
+          description={onboardingCopy.emptyStates.assetsTable.description}
+          className="py-16"
+          action={
+            <Button variant="outline" onClick={() => openAssetDrawer()}>
+              {onboardingCopy.emptyStates.addAsset}
+            </Button>
+          }
+        />
       </div>
     );
   }

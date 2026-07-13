@@ -31,6 +31,12 @@ export const auth = betterAuth({
       createdAt: 'created_at',
       updatedAt: 'updated_at',
     },
+    // First-run flags — read-only through the session (written only by
+    // /api/user/onboarding). NULL onboardedAt = show the welcome screen.
+    additionalFields: {
+      onboardedAt: { type: 'string', required: false, input: false, fieldName: 'onboarded_at' },
+      checklistDismissedAt: { type: 'string', required: false, input: false, fieldName: 'checklist_dismissed_at' },
+    },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 30, // 30 days (parity with old JWT)

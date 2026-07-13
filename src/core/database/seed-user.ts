@@ -52,7 +52,7 @@ async function seedUser() {
       // Create the user; credential password lives in the account table
       const passwordHash = await hashPassword(DEFAULT_PASSWORD);
       const result = await client.execute({
-        sql: 'INSERT INTO users (email, emailVerified) VALUES (?, 1)',
+        sql: 'INSERT INTO users (email, emailVerified, onboarded_at, checklist_dismissed_at) VALUES (?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)',
         args: [DEFAULT_USER_EMAIL],
       });
       userId = Number(result.lastInsertRowid);

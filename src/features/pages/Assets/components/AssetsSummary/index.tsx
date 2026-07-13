@@ -1,9 +1,12 @@
-import { ASSET_CATEGORY_COLORS, getAssetCategoryLabel } from '@constants/assets';
+import { ASSET_CATEGORIES, ASSET_CATEGORY_COLORS, getAssetCategoryLabel } from '@constants/assets';
 import { TrendingUp, Wallet } from 'lucide-react';
 
 import type { Asset, AssetCategory } from '@types';
 
+import { onboardingCopy } from '@features/onboarding/copy';
+
 import AnimatedMoney from '@components/AnimatedMoney';
+import StatZeroState from '@components/StatZeroState';
 
 import { useCurrency } from '@hooks/use-currency';
 import type { MoneyItem } from '@hooks/use-currency';
@@ -59,11 +62,38 @@ const AssetsSummary = ({ assetsByCategory }: AssetsSummaryProps) => {
           </div>
         </div>
         <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Net Worth</p>
-        {renderPair(net.p, net.s)}
-        <p className="text-text-secondary mt-1.5 text-sm font-medium">
-          {totalAssetCount} asset{totalAssetCount !== 1 ? 's' : ''}
-        </p>
+        {totalAssetCount === 0 ? (
+          <StatZeroState caption={onboardingCopy.zeroCaptions.assetsNetWorth} />
+        ) : (
+          <>
+            {renderPair(net.p, net.s)}
+            <p className="text-text-secondary mt-1.5 text-sm font-medium">
+              {totalAssetCount} asset{totalAssetCount !== 1 ? 's' : ''}
+            </p>
+          </>
+        )}
       </div>
+
+      {/* No assets yet: ghost cards preview the categories that will fill in */}
+      {totalAssetCount === 0 &&
+        ASSET_CATEGORIES.slice(0, 3).map((category) => {
+          const Icon = CATEGORY_ICONS[category.value] || Wallet;
+          const color = CATEGORY_COLORS[category.value] || '#525252';
+          return (
+            <div
+              key={category.value}
+              className="border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm"
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
+                  <Icon className="h-5 w-5" style={{ color }} />
+                </div>
+              </div>
+              <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{category.label}</p>
+              <StatZeroState caption={onboardingCopy.zeroCaptions.assetCategoryPlaceholder} />
+            </div>
+          );
+        })}
 
       {/* Every asset category, highest value first */}
       {Object.entries(assetsByCategory)

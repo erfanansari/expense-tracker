@@ -221,7 +221,7 @@ const NetWorthChart = () => {
         <EmptyState
           icon={TrendingUp}
           title="No history yet"
-          description="Update an asset value to record a snapshot and start charting your net worth."
+          description="Add assets and update their values over time — each update records a snapshot on this chart."
           className="min-h-[280px]"
         />
       )}

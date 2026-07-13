@@ -11,7 +11,10 @@ import { Plus } from 'lucide-react';
 
 import type { Expense } from '@types';
 
+import { ApiError } from '@core/errors';
+
 import { getButtonClasses } from '@components/Button';
+import ErrorState from '@components/ErrorState';
 import Pulse from '@components/Skeleton';
 
 import ExchangeRateCard from './components/ExchangeRateCard';
@@ -133,14 +136,28 @@ function OverviewSkeleton() {
 
 const Dashboard = () => {
   // Queries
-  const { data: summary, isLoading: summaryLoading } = useQuery<SummaryData>({ queryKey: getSummaryKeyGenerator() });
-  const { data: expensesData, isLoading: expensesLoading } = useQuery<GetAllExpensesResponse>({
+  const {
+    data: summary,
+    isLoading: summaryLoading,
+    error: summaryError,
+    refetch: refetchSummary,
+  } = useQuery<SummaryData>({ queryKey: getSummaryKeyGenerator() });
+  const {
+    data: expensesData,
+    isLoading: expensesLoading,
+    error: expensesError,
+    refetch: refetchExpenses,
+  } = useQuery<GetAllExpensesResponse>({
     queryKey: getAllExpensesKeyGenerator(),
   });
 
   // Variables
   const expenses: Expense[] = expensesData ?? [];
   const isLoading = summaryLoading || expensesLoading;
+  // Never dress a failed fetch up as an empty account — show the error honestly.
+  // 401 means the auth redirect is already in flight; don't flash an error banner.
+  const rawError = summaryError ?? expensesError;
+  const error = rawError instanceof ApiError && rawError.status === 401 ? null : rawError;
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
@@ -159,23 +176,34 @@ const Dashboard = () => {
           </Link>
         </div>
 
-        {isLoading ? (
-          <OverviewSkeleton />
-        ) : (
-          <>
-            {/* Summary Cards */}
-            <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
-              <OverviewStats summary={summary} />
-              <ExchangeRateCard />
+        {isLoading && <OverviewSkeleton />}
+        {!isLoading &&
+          (error ? (
+            <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
+              <ErrorState
+                title="Couldn't load your overview"
+                description={error.message}
+                onRetry={() => {
+                  void refetchSummary();
+                  void refetchExpenses();
+                }}
+              />
             </div>
+          ) : (
+            <>
+              {/* Summary Cards */}
+              <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
+                <OverviewStats summary={summary} />
+                <ExchangeRateCard />
+              </div>
 
-            {/* Charts row */}
-            <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-3">
-              <SpendingTrendChart expenses={expenses} />
-              <RecentExpenses expenses={expenses} />
-            </div>
-          </>
-        )}
+              {/* Charts row */}
+              <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-3">
+                <SpendingTrendChart expenses={expenses} />
+                <RecentExpenses expenses={expenses} />
+              </div>
+            </>
+          ))}
       </div>
     </div>
   );

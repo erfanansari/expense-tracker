@@ -15,6 +15,7 @@ const AssetsDistribution = ({ chartData, totalValue }: AssetsDistributionProps) 
     return (
       <div className="border-border-subtle bg-background rounded-xl border p-6 shadow-sm">
         <h3 className="text-text-primary mb-2 text-lg font-semibold">Asset Distribution</h3>
+        {/* No CTA here — the assets table empty state right above already offers one */}
         <EmptyState
           icon={PieChart}
           title="No assets to distribute"

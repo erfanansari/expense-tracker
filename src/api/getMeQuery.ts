@@ -14,7 +14,16 @@ export const authUserSchema = z.object({
   email: z.string(),
   name: z.string().nullable(),
   isDemo: z.boolean(),
+  onboardedAt: z.string().nullable(),
+  checklistDismissedAt: z.string().nullable(),
 });
+
+/** Better Auth may hydrate date-ish fields as Date objects — normalize to ISO. */
+function toIsoOrNull(value: unknown): string | null {
+  if (typeof value === 'string') return value;
+  if (value instanceof Date) return value.toISOString();
+  return null;
+}
 
 /**
  * Maps a Better Auth user object (id typed as string, no isDemo) to the
@@ -22,12 +31,20 @@ export const authUserSchema = z.object({
  */
 export function toAuthUser(raw: unknown): AuthUser | null {
   if (!raw || typeof raw !== 'object' || !('id' in raw) || !('email' in raw)) return null;
-  const user = raw as { id: string | number; email: string; name?: string | null };
+  const user = raw as {
+    id: string | number;
+    email: string;
+    name?: string | null;
+    onboardedAt?: unknown;
+    checklistDismissedAt?: unknown;
+  };
   return {
     id: Number(user.id),
     email: user.email,
     name: user.name ?? null,
     isDemo: user.email === DEMO_EMAIL,
+    onboardedAt: toIsoOrNull(user.onboardedAt),
+    checklistDismissedAt: toIsoOrNull(user.checklistDismissedAt),
   };
 }
 

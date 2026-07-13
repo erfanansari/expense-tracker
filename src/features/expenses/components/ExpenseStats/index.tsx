@@ -2,7 +2,10 @@
 
 import { BarChart3, Hash, TrendingUp } from 'lucide-react';
 
+import { onboardingCopy } from '@features/onboarding/copy';
+
 import AnimatedMoney, { AnimatedCount } from '@components/AnimatedMoney';
+import StatZeroState from '@components/StatZeroState';
 
 import { useCurrency } from '@hooks/use-currency';
 
@@ -45,13 +48,17 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
 
         <div>
           <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Expenses</p>
-          <p
-            className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl"
-            title={formatFull(totalPrimary, primaryCurrency)}
-          >
-            <AnimatedMoney amount={totalPrimary} currency={primaryCurrency} />
-          </p>
-          {showSecondary && (
+          {expenses.length === 0 ? (
+            <StatZeroState caption={onboardingCopy.zeroCaptions.expensesTotal} />
+          ) : (
+            <p
+              className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl"
+              title={formatFull(totalPrimary, primaryCurrency)}
+            >
+              <AnimatedMoney amount={totalPrimary} currency={primaryCurrency} />
+            </p>
+          )}
+          {showSecondary && expenses.length > 0 && (
             <p
               className="text-text-secondary mt-1.5 text-sm font-medium"
               title={formatFull(totalSecondary, secondaryCurrency)}
@@ -72,10 +79,16 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
 
         <div>
           <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Expenses</p>
-          <p className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl">
-            <AnimatedCount value={expenses.length} />
-          </p>
-          <p className="text-text-secondary mt-1.5 text-sm font-medium">Expenses</p>
+          {expenses.length === 0 ? (
+            <StatZeroState caption={onboardingCopy.zeroCaptions.expensesCount} />
+          ) : (
+            <>
+              <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl">
+                <AnimatedCount value={expenses.length} />
+              </p>
+              <p className="text-text-secondary mt-1.5 text-sm font-medium">Expenses</p>
+            </>
+          )}
         </div>
       </div>
 
@@ -89,13 +102,17 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
 
         <div>
           <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Daily Average</p>
-          <p
-            className="text-text-primary text-2xl font-bold tabular-nums sm:text-3xl"
-            title={formatFull(totalPrimary / div, primaryCurrency)}
-          >
-            <AnimatedMoney amount={totalPrimary / div} currency={primaryCurrency} />
-          </p>
-          {showSecondary && (
+          {expenses.length === 0 ? (
+            <StatZeroState caption={onboardingCopy.zeroCaptions.expensesDailyAverage} />
+          ) : (
+            <p
+              className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl"
+              title={formatFull(totalPrimary / div, primaryCurrency)}
+            >
+              <AnimatedMoney amount={totalPrimary / div} currency={primaryCurrency} />
+            </p>
+          )}
+          {showSecondary && expenses.length > 0 && (
             <p
               className="text-text-secondary mt-1.5 text-sm font-medium"
               title={formatFull(totalSecondary / div, secondaryCurrency)}

@@ -301,7 +301,7 @@ export async function seedDemo() {
       console.log(`Updated existing demo user (id: ${userId})`);
     } else {
       const result = await client.execute({
-        sql: 'INSERT INTO users (email, name, emailVerified) VALUES (?, ?, 1)',
+        sql: 'INSERT INTO users (email, name, emailVerified, onboarded_at, checklist_dismissed_at) VALUES (?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)',
         args: [DEMO_EMAIL, DEMO_NAME],
       });
       userId = Number(result.lastInsertRowid);

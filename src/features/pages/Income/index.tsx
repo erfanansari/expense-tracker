@@ -109,7 +109,13 @@ const IncomePage = () => {
           </Button>
         </div>
 
-        {isLoading && incomes.length === 0 ? <IncomeSummarySkeleton /> : <IncomeSummary incomes={incomes} />}
+        {/* On a failed fetch with no cached data, the table below shows the error —
+            don't render a summary of zeros that reads as an empty account. */}
+        {isLoading && incomes.length === 0 ? (
+          <IncomeSummarySkeleton />
+        ) : (
+          !(error && incomes.length === 0) && <IncomeSummary incomes={incomes} />
+        )}
 
         <IncomeTable
           incomesByYear={incomesByYear}

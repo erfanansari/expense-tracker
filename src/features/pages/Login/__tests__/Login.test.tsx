@@ -5,7 +5,14 @@ import userEvent from '@testing-library/user-event';
 
 import { makeTestQueryClient, render, screen, waitFor } from '@/__tests__/test-utils';
 
-const user: LoginResponse['user'] = { id: 1, email: 'me@example.com', name: 'Me', isDemo: false };
+const user: LoginResponse['user'] = {
+  id: 1,
+  email: 'me@example.com',
+  name: 'Me',
+  isDemo: false,
+  onboardedAt: '2026-01-01T00:00:00Z',
+  checklistDismissedAt: null,
+};
 
 function renderLogin(mutationFn = jest.fn().mockResolvedValue({ user })) {
   const queryClient = makeTestQueryClient();

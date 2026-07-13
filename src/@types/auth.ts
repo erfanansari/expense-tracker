@@ -16,4 +16,8 @@ export interface AuthUser {
   email: string;
   name: string | null;
   isDemo: boolean;
+  /** null = user has not completed the first-run welcome screen */
+  onboardedAt: string | null;
+  /** null = the getting-started checklist may render */
+  checklistDismissedAt: string | null;
 }

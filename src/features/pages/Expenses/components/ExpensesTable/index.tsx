@@ -5,7 +5,7 @@ import { useMemo, useRef } from 'react';
 import { getCategoryListKeyGenerator } from '@api/getCategoryListQuery';
 import { getTagListKeyGenerator } from '@api/getTagListQuery';
 import { useQuery } from '@tanstack/react-query';
-import { Calendar, FileText, Loader2, Search, Tag as TagIcon, X } from 'lucide-react';
+import { Calendar, FileText, Loader2, Search, SearchX, Tag as TagIcon, X } from 'lucide-react';
 import type { DatePicker as ReactDatePickerType } from 'react-datepicker';
 import type { MultiValue } from 'react-select';
 import Select2 from 'react-select';
@@ -14,13 +14,18 @@ import type { Category } from '@types';
 
 import { ApiError } from '@core/errors';
 
+import { onboardingCopy } from '@features/onboarding/copy';
+
 import Button from '@components/Button';
 import CategoryBadge from '@components/CategoryBadge';
 import DataTable from '@components/DataTable';
 import DatePicker from '@components/DatePicker';
+import EmptyState from '@components/EmptyState';
 import ErrorState from '@components/ErrorState';
 import Select from '@components/Select';
 import Pulse from '@components/Skeleton';
+
+import { useDrawerStore } from '@stores/drawer';
 
 import type { Tag } from '@/@types/expense';
 
@@ -187,6 +192,8 @@ const ExpensesTable = ({
 }: ExpensesTableProps) => {
   // References
   const toPickerRef = useRef<ReactDatePickerType>(null);
+
+  const openExpenseDrawer = useDrawerStore((state) => state.openExpenseDrawer);
 
   // Derived state
   const { data: allTags = [] } = useQuery<Tag[]>({ queryKey: getTagListKeyGenerator() });
@@ -396,20 +403,37 @@ const ExpensesTable = ({
         </div>
       }
       emptyState={
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center">
           {isLoading && <Loader2 className="text-text-muted h-6 w-6 animate-spin" />}
           {!isLoading && hasActiveFilter && (
-            <>
-              <p className="text-text-secondary font-medium">No expenses found</p>
-              <p className="text-text-muted text-sm">Try adjusting your filters</p>
-            </>
+            <EmptyState
+              icon={SearchX}
+              title={onboardingCopy.emptyStates.noMatch.title}
+              description={onboardingCopy.emptyStates.noMatch.description}
+              action={
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    onDescInputChange('');
+                    onFiltersChange(() => ({}));
+                  }}
+                >
+                  {onboardingCopy.emptyStates.noMatch.clearFilters}
+                </Button>
+              }
+            />
           )}
           {!isLoading && !hasActiveFilter && (
-            <>
-              <FileText className="text-text-muted h-8 w-8" />
-              <p className="text-text-secondary font-medium">No expenses yet</p>
-              <p className="text-text-muted text-sm">Add your first expense above!</p>
-            </>
+            <EmptyState
+              icon={FileText}
+              title={onboardingCopy.emptyStates.expensesTable.title}
+              description={onboardingCopy.emptyStates.expensesTable.description}
+              action={
+                <Button variant="outline" onClick={() => openExpenseDrawer()}>
+                  {onboardingCopy.emptyStates.addExpense}
+                </Button>
+              }
+            />
           )}
         </div>
       }

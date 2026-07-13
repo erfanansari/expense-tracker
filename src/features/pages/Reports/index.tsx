@@ -9,6 +9,8 @@ import { Download, Filter } from 'lucide-react';
 
 import { type Expense } from '@types';
 
+import { ApiError } from '@core/errors';
+
 import DateRangeSelector, {
   type DateRange,
   filterExpensesByDateRange,
@@ -16,6 +18,7 @@ import DateRangeSelector, {
 } from '@features/expenses/components/DateRangeSelector';
 
 import Button from '@components/Button';
+import ErrorState from '@components/ErrorState';
 import Pulse from '@components/Skeleton';
 
 import { useToast } from '@stores/toast';
@@ -68,12 +71,19 @@ const ReportsPage = () => {
   const { showToast } = useToast();
 
   // Queries
-  const { data: expensesData, isLoading } = useQuery<GetAllExpensesResponse>({
+  const {
+    data: expensesData,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery<GetAllExpensesResponse>({
     queryKey: getAllExpensesKeyGenerator(),
   });
 
   // Variables
   const expenses: Expense[] = expensesData ?? [];
+  // 401 means the auth redirect is already in flight; don't flash an error banner.
+  const loadError = error instanceof ApiError && error.status === 401 ? null : error;
   const activeFilterCount = filterTags.length + filterCategoryIds.length;
 
   // Memos
@@ -94,6 +104,11 @@ const ReportsPage = () => {
   const handleResetFilters = () => {
     setFilterTags([]);
     setFilterCategoryIds([]);
+  };
+
+  const handleClearAllFilters = () => {
+    handleResetFilters();
+    setDateRange('ALL_TIME');
   };
 
   const handleExportCsv = () => {
@@ -163,14 +178,23 @@ const ReportsPage = () => {
           <DateRangeSelector value={dateRange} onChange={setDateRange} />
         </div>
 
-        {isLoading ? (
-          <ReportsSkeleton />
-        ) : (
-          <>
-            <ReportsStats expenses={filteredExpenses} />
-            <ReportsCharts expenses={filteredExpenses} granularity={chartGranularity} />
-          </>
-        )}
+        {isLoading && <ReportsSkeleton />}
+        {!isLoading &&
+          (loadError ? (
+            <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
+              <ErrorState title="Couldn't load reports" description={loadError.message} onRetry={() => refetch()} />
+            </div>
+          ) : (
+            <>
+              <ReportsStats expenses={filteredExpenses} />
+              <ReportsCharts
+                expenses={filteredExpenses}
+                granularity={chartGranularity}
+                hasAnyExpenses={expenses.length > 0}
+                onClearFilters={handleClearAllFilters}
+              />
+            </>
+          ))}
       </div>
     </div>
   );

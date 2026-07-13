@@ -17,11 +17,15 @@ import DateRangeSelector, {
   filterExpensesByDateRange,
   getChartGranularity,
 } from '@features/expenses/components/DateRangeSelector';
+import { onboardingCopy } from '@features/onboarding/copy';
 
+import Button from '@components/Button';
 import ChartTooltip from '@components/ChartTooltip';
 import EmptyState from '@components/EmptyState';
 
 import { useCurrency } from '@hooks/use-currency';
+
+import { useDrawerStore } from '@stores/drawer';
 
 import { formatAxisNumber, formatChartTooltipDate } from '@utils';
 
@@ -69,6 +73,7 @@ function getMonthKey(date: Date): string {
 }
 
 const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
+  const openExpenseDrawer = useDrawerStore((state) => state.openExpenseDrawer);
   // States
   const [dateRange, setDateRange] = useState<DateRange>('30D');
 
@@ -127,11 +132,18 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
       {spendingTrend.length === 0 ? (
         <EmptyState
           icon={TrendingUp}
-          title="No spending to show"
+          title={onboardingCopy.emptyStates.spendingTrend.title}
           description={
             expenses.length === 0
-              ? 'Add your first expense to start tracking your spending trend.'
+              ? onboardingCopy.emptyStates.spendingTrend.description
               : 'No spending recorded in this date range. Try a wider range.'
+          }
+          action={
+            expenses.length === 0 ? (
+              <Button variant="outline" onClick={() => openExpenseDrawer()}>
+                {onboardingCopy.emptyStates.addExpense}
+              </Button>
+            ) : undefined
           }
           className="min-h-[320px]"
         />

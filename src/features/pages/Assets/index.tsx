@@ -123,10 +123,14 @@ const AssetsPage = () => {
           </Button>
         </div>
 
+        {/* On a failed fetch with no cached data, the table below shows the error —
+            don't render zero-state cards that read as an empty account. */}
         {showingSkeleton ? (
           <AssetsSummarySkeleton />
         ) : (
-          <AssetsSummary totalValue={totalValue} assetsByCategory={assetsByCategory} />
+          !(error && assets.length === 0) && (
+            <AssetsSummary totalValue={totalValue} assetsByCategory={assetsByCategory} />
+          )
         )}
 
         <AssetsTable
@@ -140,7 +144,10 @@ const AssetsPage = () => {
           onRetry={() => refetch()}
         />
 
-        {assets.length > 0 && (
+        {/* Always render the full page layout — sections show their own empty
+            states instead of vanishing, so a fresh account never looks broken.
+            Exception: a failed fetch — their empty states would be lying. */}
+        {!(error && assets.length === 0) && (
           <>
             <div className="mt-6">
               <AssetsDistribution chartData={chartData} totalValue={totalValue} />

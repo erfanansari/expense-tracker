@@ -7,16 +7,16 @@ import { ArrowRight, Receipt, Tag } from 'lucide-react';
 
 import type { Expense } from '@types';
 
+import { onboardingCopy } from '@features/onboarding/copy';
+
 import DataTable from '@components/DataTable';
 import EmptyState from '@components/EmptyState';
 import Money from '@components/Money';
 
 // ─── Table layout config ──────────────────────────────────────────────────────
 // Centralized so column widths can be tuned in one place. Percentages must sum
-// to 100; `RECENT_EXPENSES_TABLE_MIN_WIDTH` is the smallest width before the
-// table starts scrolling horizontally on narrow viewports.
-
-export const RECENT_EXPENSES_TABLE_MIN_WIDTH = 'min-w-[480px]';
+// to 100. No min-width: descriptions truncate and amounts stay nowrap, so the
+// two-column table shrinks with the card instead of scrolling.
 
 export const RECENT_EXPENSES_COLUMN_WIDTHS = {
   description: 'w-[60%]',
@@ -94,7 +94,6 @@ const RecentExpenses = ({ expenses }: RecentExpensesProps) => {
       data={recentExpenses}
       columns={overviewColumns}
       minimal={true}
-      minWidth={RECENT_EXPENSES_TABLE_MIN_WIDTH}
       header={
         <div className="flex items-center justify-between px-6 py-5">
           <h2 className="text-text-primary text-lg font-semibold">Recent Expenses</h2>
@@ -105,7 +104,12 @@ const RecentExpenses = ({ expenses }: RecentExpensesProps) => {
         </div>
       }
       emptyState={
-        <EmptyState icon={Receipt} title="No expenses yet" description="Your most recent expenses will appear here." />
+        // No CTA — the Spending Trend empty state next to it already offers one
+        <EmptyState
+          icon={Receipt}
+          title={onboardingCopy.emptyStates.recentExpenses.title}
+          description={onboardingCopy.emptyStates.recentExpenses.description}
+        />
       }
     />
   );
