@@ -70,7 +70,8 @@
     "verifyEmail": "Verify Email",
     "forgotPassword": "Forgot Password",
     "resetPassword": "Reset Password",
-    "login": "Login"
+    "login": "Login",
+    "offline": "Offline"
   },
   "zod": {
     "expense": {
@@ -217,6 +218,10 @@
     "description": "An unexpected error occurred. You can try again or return to the dashboard.",
     "tryAgain": "Try again",
     "goToDashboard": "Go to Dashboard"
+  },
+  "offlinePage": {
+    "title": "You're offline",
+    "description": "Kharji needs an internet connection to load your finances. Check your connection and try again."
   },
   "onboarding": {
     "welcome": {

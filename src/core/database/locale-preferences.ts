@@ -22,25 +22,38 @@ const DEFAULTS: LocalePreferences = {
   secondaryDateCaptions: true,
 };
 
-/** Insert default locale preferences for a new user (idempotent). */
-export async function createDefaultLocalePreferences(userId: number, executor: Executor = db): Promise<void> {
+/** Insert default locale preferences for a new user (idempotent). `locale`
+ * defaults to 'en' but callers with a signal for the user's actual locale
+ * (e.g. the request's locale cookie) should pass it so the row doesn't start
+ * out of sync with what the user already sees. */
+export async function createDefaultLocalePreferences(
+  userId: number,
+  executor: Executor = db,
+  locale: AppLocale = DEFAULTS.locale
+): Promise<void> {
   await executor.execute({
     sql: `INSERT OR IGNORE INTO userLocalePreferences (userId, locale, calendar, secondaryDateCaptions)
           VALUES (?, ?, ?, ?)`,
-    args: [userId, DEFAULTS.locale, DEFAULTS.calendar, DEFAULTS.secondaryDateCaptions ? 1 : 0],
+    args: [userId, locale, DEFAULTS.calendar, DEFAULTS.secondaryDateCaptions ? 1 : 0],
   });
 }
 
-/** Fetch a user's locale preferences, lazy-creating the row if missing. */
-export async function getLocalePreferences(userId: number): Promise<LocalePreferences> {
+/** Fetch a user's locale preferences, lazy-creating the row if missing.
+ * `fallbackLocale` seeds a first-time row (e.g. from the request's locale
+ * cookie) instead of silently defaulting to English for users who were
+ * already browsing in Farsi before this row existed. */
+export async function getLocalePreferences(
+  userId: number,
+  fallbackLocale: AppLocale = DEFAULTS.locale
+): Promise<LocalePreferences> {
   const existing = await db.execute({
     sql: `SELECT locale, calendar, secondaryDateCaptions FROM userLocalePreferences WHERE userId = ?`,
     args: [userId],
   });
 
   if (existing.rows.length === 0) {
-    await createDefaultLocalePreferences(userId);
-    return { ...DEFAULTS };
+    await createDefaultLocalePreferences(userId, db, fallbackLocale);
+    return { ...DEFAULTS, locale: fallbackLocale };
   }
 
   const row = existing.rows[0];

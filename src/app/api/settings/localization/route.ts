@@ -7,7 +7,7 @@ import { validateBody, withAuth } from '@core/api/utils';
 import type { LocalePreferences } from '@core/database/locale-preferences';
 import { getLocalePreferences, updateLocalePreferences } from '@core/database/locale-preferences';
 
-import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE, LOCALES } from '@/i18n/config';
+import { DEFAULT_LOCALE, isAppLocale, LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE, LOCALES } from '@/i18n/config';
 
 const updateSchema = z
   .object({
@@ -31,10 +31,15 @@ function withLocaleCookie(response: NextResponse, prefs: LocalePreferences): Nex
 }
 
 export const GET = withAuth(async (user) => {
-  const prefs = await getLocalePreferences(user.userId);
+  const cookieLocale = (await cookies()).get(LOCALE_COOKIE)?.value;
+  // First-ever read for this user (e.g. the onboarding wizard's initial
+  // fetch): seed the row from whatever locale they were already browsing in
+  // (the same cookie the signup/landing switcher writes) instead of silently
+  // defaulting to English and then overwriting their cookie to match.
+  const fallbackLocale = isAppLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+  const prefs = await getLocalePreferences(user.userId, fallbackLocale);
   const response = NextResponse.json(prefs);
   // Re-sync the cookie when it drifted (new device, cleared cookies).
-  const cookieLocale = (await cookies()).get(LOCALE_COOKIE)?.value;
   if (cookieLocale !== prefs.locale) withLocaleCookie(response, prefs);
   return response;
 }, 'LocalizationGET');

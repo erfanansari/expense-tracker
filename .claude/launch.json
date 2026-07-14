@@ -5,7 +5,7 @@
       "name": "kharji-dev",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["dev"],
-      "port": 3000
+      "port": 3001
     },
     {
       "name": "kharji-prod",
