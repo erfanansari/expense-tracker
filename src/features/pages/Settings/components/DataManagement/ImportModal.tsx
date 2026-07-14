@@ -2,6 +2,8 @@
 
 import { useCallback, useRef, useState } from 'react';
 
+import { useLocale, useTranslations } from 'next-intl';
+
 import { CATEGORIES_SCOPE } from '@api/getCategoryListQuery';
 import { EXPENSES_SCOPE } from '@api/getExpenseListQuery';
 import { TAGS_SCOPE } from '@api/getTagListQuery';
@@ -13,6 +15,8 @@ import Button from '@components/Button';
 import Modal from '@components/Modal';
 
 import { useToast } from '@stores/toast';
+
+import { formatNumber } from '@utils';
 
 import { isSupportedCurrency, PIVOT_CURRENCY, SUPPORTED_CURRENCY_CODES } from '@/constants/currencies';
 
@@ -49,25 +53,25 @@ function normalizeHeaders(row: ParsedRow): ParsedRow {
   return normalized;
 }
 
-function validateRow(raw: ParsedRow): ValidatedRow {
+function validateRow(raw: ParsedRow, t: ReturnType<typeof useTranslations<'settings.import'>>): ValidatedRow {
   const row = normalizeHeaders(raw);
 
   if (!row.date || !/^\d{4}-\d{2}-\d{2}$/.test(row.date.trim())) {
-    return { valid: false, error: 'Invalid date (expected YYYY-MM-DD)', raw };
+    return { valid: false, error: t('invalidDate'), raw };
   }
   if (!row.category?.trim()) {
-    return { valid: false, error: 'Category is required', raw };
+    return { valid: false, error: t('categoryRequired'), raw };
   }
   if (!row.description?.trim()) {
-    return { valid: false, error: 'Description is required', raw };
+    return { valid: false, error: t('descriptionRequired'), raw };
   }
   const amount = parseFloat(row.amount);
   if (isNaN(amount) || amount < 0) {
-    return { valid: false, error: 'amount must be a non-negative number', raw };
+    return { valid: false, error: t('amountInvalid'), raw };
   }
   const currency = (row.currency?.trim() || PIVOT_CURRENCY).toUpperCase();
   if (!isSupportedCurrency(currency)) {
-    return { valid: false, error: `currency must be one of ${SUPPORTED_CURRENCY_CODES.join(', ')}`, raw };
+    return { valid: false, error: t('currencyInvalid', { codes: SUPPORTED_CURRENCY_CODES.join(', ') }), raw };
   }
 
   const seenTags = new Set<string>();
@@ -130,6 +134,9 @@ async function makeNameResolver(listUrl: string, createUrl: string): Promise<(na
 }
 
 const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
+  const t = useTranslations('settings.import');
+  const tTables = useTranslations('tables');
+  const locale = useLocale() as 'en' | 'fa';
   const [step, setStep] = useState<Step>('upload');
   const [isDragging, setIsDragging] = useState(false);
   const [parseError, setParseError] = useState('');
@@ -160,14 +167,14 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
         const headers = (result.meta.fields ?? []).map((h) => h.toLowerCase().trim());
         const missing = REQUIRED_COLUMNS.filter((col) => !headers.includes(col));
         if (missing.length > 0) {
-          setParseError(`Missing required columns: ${missing.join(', ')}`);
+          setParseError(t('missingColumns', { columns: missing.join(', ') }));
           return;
         }
-        setRows(result.data.map(validateRow));
+        setRows(result.data.map((row) => validateRow(row, t)));
         setStep('preview');
       },
       error: (err) => {
-        setParseError(`Failed to parse CSV: ${err.message}`);
+        setParseError(t('parseFailed', { message: err.message }));
       },
     });
   };
@@ -178,16 +185,20 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
     e.target.value = '';
   };
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file?.name.endsWith('.csv')) {
-      processFile(file);
-    } else {
-      setParseError('Please drop a .csv file');
-    }
-  }, []);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      const file = e.dataTransfer.files[0];
+      if (file?.name.endsWith('.csv')) {
+        processFile(file);
+      } else {
+        setParseError(t('dropCsvOnly'));
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [t]
+  );
 
   const handleImport = async () => {
     setStep('importing');
@@ -235,26 +246,28 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
 
     const failedCount = validRows.length - successCount;
     if (failedCount === 0) {
-      showToast(`Imported ${successCount} expense${successCount !== 1 ? 's' : ''} successfully`, 'success');
+      showToast(t('importedSuccess', { count: successCount }), 'success');
     } else if (successCount > 0) {
-      showToast(`Imported ${successCount} of ${validRows.length} expenses (${failedCount} failed)`, 'warning');
+      showToast(t('importedPartial', { count: successCount, total: validRows.length, failed: failedCount }), 'warning');
     } else {
-      showToast('Import failed. No expenses were imported.', 'error');
+      showToast(t('importFailed'), 'error');
     }
     handleClose();
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Import Expenses">
+    <Modal isOpen={isOpen} onClose={handleClose} title={t('title')}>
       {step === 'upload' && (
         <div className="space-y-4">
           <p className="text-text-secondary text-sm">
-            Upload a CSV file with columns: <code className="bg-background-secondary rounded px-1 text-xs">date</code>,{' '}
-            <code className="bg-background-secondary rounded px-1 text-xs">category</code>,{' '}
-            <code className="bg-background-secondary rounded px-1 text-xs">description</code>,{' '}
-            <code className="bg-background-secondary rounded px-1 text-xs">amount</code>,{' '}
-            <code className="bg-background-secondary rounded px-1 text-xs">currency</code> (optional),{' '}
-            <code className="bg-background-secondary rounded px-1 text-xs">tags</code> (optional, separated by ;)
+            {t.rich('instructions', {
+              c0: (chunks) => <code className="bg-background-secondary rounded px-1 text-xs">{chunks}</code>,
+              c1: (chunks) => <code className="bg-background-secondary rounded px-1 text-xs">{chunks}</code>,
+              c2: (chunks) => <code className="bg-background-secondary rounded px-1 text-xs">{chunks}</code>,
+              c3: (chunks) => <code className="bg-background-secondary rounded px-1 text-xs">{chunks}</code>,
+              c4: (chunks) => <code className="bg-background-secondary rounded px-1 text-xs">{chunks}</code>,
+              c5: (chunks) => <code className="bg-background-secondary rounded px-1 text-xs">{chunks}</code>,
+            })}
           </p>
 
           <button
@@ -274,10 +287,13 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
           >
             <Upload className="text-text-muted mx-auto mb-3 h-8 w-8" aria-hidden="true" />
             <div className="text-text-secondary text-sm font-medium">
-              Drag & drop a CSV file here, or{' '}
-              <span className="text-text-primary font-semibold underline underline-offset-2">browse</span>
+              {t.rich('dropzone', {
+                browse: (chunks) => (
+                  <span className="text-text-primary font-semibold underline underline-offset-2">{chunks}</span>
+                ),
+              })}
             </div>
-            <div className="text-text-muted mt-1 text-xs">Only .csv files are supported</div>
+            <div className="text-text-muted mt-1 text-xs">{t('csvOnly')}</div>
           </button>
 
           <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={handleFileChange} />
@@ -289,10 +305,7 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
             </div>
           )}
 
-          <p className="text-text-muted text-xs">
-            Tip: Export CSV on the Reports page gives you a valid CSV template. New categories and tags are created
-            automatically.
-          </p>
+          <p className="text-text-muted text-xs">{t('tip')}</p>
         </div>
       )}
 
@@ -301,11 +314,12 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
           <div className="flex items-center gap-2">
             <CheckCircle className="text-success h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="text-text-secondary text-sm">
-              <span className="text-text-primary font-semibold">{validRows.length}</span> rows ready to import
+              {t.rich('rowsReady', {
+                count: validRows.length,
+                b: (chunks) => <span className="text-text-primary font-semibold">{chunks}</span>,
+              })}
               {invalidRows.length > 0 && (
-                <span className="text-warning ml-1">
-                  ({invalidRows.length} row{invalidRows.length > 1 ? 's' : ''} with errors will be skipped)
-                </span>
+                <span className="text-warning ms-1">{t('rowsWithErrors', { count: invalidRows.length })}</span>
               )}
             </span>
           </div>
@@ -314,10 +328,18 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
             <table className="w-full table-fixed border-collapse text-sm">
               <thead className="bg-background-secondary sticky top-0">
                 <tr>
-                  <th className="text-text-muted w-[22%] px-3 py-2 text-left text-xs font-medium">Date</th>
-                  <th className="text-text-muted w-[20%] px-3 py-2 text-left text-xs font-medium">Category</th>
-                  <th className="text-text-muted w-[32%] px-3 py-2 text-left text-xs font-medium">Description</th>
-                  <th className="text-text-muted w-[26%] px-3 py-2 text-right text-xs font-medium">Amount</th>
+                  <th className="text-text-muted w-[22%] px-3 py-2 text-start text-xs font-medium">
+                    {tTables('expenses.date')}
+                  </th>
+                  <th className="text-text-muted w-[20%] px-3 py-2 text-start text-xs font-medium">
+                    {tTables('expenses.category')}
+                  </th>
+                  <th className="text-text-muted w-[32%] px-3 py-2 text-start text-xs font-medium">
+                    {tTables('expenses.description')}
+                  </th>
+                  <th className="text-text-muted w-[26%] px-3 py-2 text-end text-xs font-medium">
+                    {tTables('expenses.amount')}
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -327,15 +349,15 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
                       <td className="text-text-secondary truncate px-3 py-2 text-xs">{row.date}</td>
                       <td className="text-text-secondary truncate px-3 py-2 text-xs">{row.category}</td>
                       <td className="text-text-secondary truncate px-3 py-2 text-xs">{row.description}</td>
-                      <td className="text-text-secondary px-3 py-2 text-right text-xs">
-                        {row.amount.toLocaleString()} {row.currency}
+                      <td className="text-text-secondary px-3 py-2 text-end text-xs">
+                        {formatNumber(row.amount, locale)} {row.currency}
                       </td>
                     </tr>
                   ) : (
                     <tr key={i} className="border-border-subtle bg-danger/5 border-t">
                       <td colSpan={4} className="text-danger px-3 py-2 text-xs">
-                        <AlertTriangle className="mr-1 inline h-3 w-3" aria-hidden="true" />
-                        Row {i + 1}: {row.error}
+                        <AlertTriangle className="me-1 inline h-3 w-3" aria-hidden="true" />
+                        {t('rowError', { row: i + 1, error: row.error })}
                       </td>
                     </tr>
                   )
@@ -344,12 +366,14 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
             </table>
           </div>
 
+          {/* No rtl override: Back is coded first, so a plain flex row under RTL
+              already puts Back on the right and Import/primary on the left. */}
           <div className="flex gap-3">
             <Button variant="outline" onClick={() => setStep('upload')} className="flex-1">
-              Back
+              {t('back')}
             </Button>
             <Button variant="primary" onClick={handleImport} disabled={validRows.length === 0} className="flex-1">
-              Import {validRows.length} row{validRows.length !== 1 ? 's' : ''}
+              {t('importRows', { count: validRows.length })}
             </Button>
           </div>
         </div>
@@ -358,8 +382,12 @@ const ImportModal = ({ isOpen, onClose }: ImportModalProps) => {
       {step === 'importing' && (
         <div className="space-y-4 py-4 text-center">
           <div className="text-text-secondary text-sm">
-            Importing row <span className="text-text-primary font-semibold">{progress}</span> of{' '}
-            <span className="text-text-primary font-semibold">{validRows.length}</span>…
+            {t.rich('importingProgress', {
+              progress,
+              total: validRows.length,
+              p: (chunks) => <span className="text-text-primary font-semibold">{chunks}</span>,
+              tot: (chunks) => <span className="text-text-primary font-semibold">{chunks}</span>,
+            })}
           </div>
           <div className="bg-background-elevated h-2 w-full overflow-hidden rounded-full">
             <div

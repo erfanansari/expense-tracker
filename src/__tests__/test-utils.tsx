@@ -1,8 +1,12 @@
 import type { ReactElement, ReactNode } from 'react';
 
+import { NextIntlClientProvider } from 'next-intl';
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { RenderHookOptions, RenderOptions } from '@testing-library/react';
 import { render, renderHook } from '@testing-library/react';
+
+import en from '../../messages/en.json';
 
 /**
  * Fresh client per render so cache/mutation defaults never bleed across tests.
@@ -21,13 +25,21 @@ interface ProviderRenderOptions {
   queryClient?: QueryClient;
 }
 
+/**
+ * Real English catalog, so tests keep asserting the actual user-facing
+ * strings as components migrate to useTranslations().
+ */
+const Providers = ({ queryClient, children }: { queryClient: QueryClient; children: ReactNode }) => (
+  <NextIntlClientProvider locale="en" messages={en}>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  </NextIntlClientProvider>
+);
+
 const customRender = (ui: ReactElement, options: Omit<RenderOptions, 'wrapper'> & ProviderRenderOptions = {}) => {
   const { queryClient = makeTestQueryClient(), ...renderOptions } = options;
 
   const result = render(ui, {
-    wrapper: ({ children }: { children: ReactNode }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    ),
+    wrapper: ({ children }: { children: ReactNode }) => <Providers queryClient={queryClient}>{children}</Providers>,
     ...renderOptions,
   });
 
@@ -41,9 +53,7 @@ const customRenderHook = <Result, Props>(
   const { queryClient = makeTestQueryClient(), ...renderOptions } = options;
 
   return renderHook(hook, {
-    wrapper: ({ children }: { children: ReactNode }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    ),
+    wrapper: ({ children }: { children: ReactNode }) => <Providers queryClient={queryClient}>{children}</Providers>,
     ...renderOptions,
   });
 };

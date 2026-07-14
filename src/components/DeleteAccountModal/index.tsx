@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { AlertTriangle, Loader2 } from 'lucide-react';
 
 import Button from '@components/Button';
@@ -15,13 +17,7 @@ interface DeleteAccountModalProps {
   isDeleting?: boolean;
 }
 
-const ERASED_ITEMS = [
-  'Your account and login',
-  'All expenses and tags',
-  'All income entries',
-  'All assets and valuation history',
-  'Custom categories and preferences',
-];
+const ERASED_KEYS = ['account', 'expenses', 'income', 'assets', 'preferences'] as const;
 
 const DeleteAccountModal = ({
   isOpen,
@@ -30,6 +26,7 @@ const DeleteAccountModal = ({
   onCancel,
   isDeleting = false,
 }: DeleteAccountModalProps) => {
+  const t = useTranslations('settings.deleteAccount');
   const [confirmation, setConfirmation] = useState('');
 
   // Clear the typed confirmation whenever the modal is reopened. Render-phase
@@ -50,26 +47,28 @@ const DeleteAccountModal = ({
         </div>
 
         <div className="mt-4">
-          <h3 className="text-text-primary text-lg font-semibold">Delete account?</h3>
+          <h3 className="text-text-primary text-lg font-semibold">{t('title')}</h3>
         </div>
 
         <div className="mt-3 space-y-3">
-          <p className="text-text-secondary text-sm">This will permanently erase:</p>
-          <ul className="border-border-subtle bg-background-secondary rounded-lg border p-3 text-left">
-            {ERASED_ITEMS.map((item) => (
-              <li key={item} className="text-text-secondary flex items-center gap-2 py-0.5 text-sm">
+          <p className="text-text-secondary text-sm">{t('willErase')}</p>
+          <ul className="border-border-subtle bg-background-secondary rounded-lg border p-3 text-start">
+            {ERASED_KEYS.map((key) => (
+              <li key={key} className="text-text-secondary flex items-center gap-2 py-0.5 text-sm">
                 <span className="bg-danger h-1 w-1 shrink-0 rounded-full" aria-hidden="true" />
-                {item}
+                {t(`erased.${key}`)}
               </li>
             ))}
           </ul>
-          <p className="text-text-secondary text-sm font-medium">This action cannot be undone.</p>
-          <p className="text-text-muted text-xs">Tip: export your data first from Data Management.</p>
+          <p className="text-text-secondary text-sm font-medium">{t('cannotUndo')}</p>
+          <p className="text-text-muted text-xs">{t('exportTip')}</p>
         </div>
 
-        <div className="mt-5 text-left">
+        <div className="mt-5 text-start">
           <label htmlFor="delete-account-confirm" className="text-text-secondary text-sm font-medium">
-            Type <span className="text-text-primary font-semibold">{userEmail}</span> to confirm
+            {t.rich('typeToConfirm', {
+              email: (chunks) => <span className="text-text-primary font-semibold">{chunks}</span>,
+            })}
           </label>
           <input
             id="delete-account-confirm"
@@ -87,9 +86,11 @@ const DeleteAccountModal = ({
           />
         </div>
 
+        {/* No rtl override: Cancel is coded first, so a plain flex row under RTL
+            already puts Cancel on the right and Confirm/primary on the left. */}
         <div className="mt-6 flex gap-3">
           <Button variant="outline" onClick={onCancel} disabled={isDeleting} className="flex-1">
-            Cancel
+            {t('cancel')}
           </Button>
           <Button
             variant="primary"
@@ -100,10 +101,10 @@ const DeleteAccountModal = ({
             {isDeleting ? (
               <>
                 <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-                <span>Deleting...</span>
+                <span>{t('deleting')}</span>
               </>
             ) : (
-              'Delete Account'
+              t('confirmAction')
             )}
           </Button>
         </div>

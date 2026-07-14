@@ -2,6 +2,8 @@
 
 import { useMemo } from 'react';
 
+import { useLocale } from 'next-intl';
+
 import { convert, formatMoney } from '@features/ExchangeRate/utils/currency';
 import type { RatesSeries } from '@features/ExchangeRate/utils/currency';
 
@@ -64,6 +66,7 @@ export function useCurrency(): CurrencyHelpers {
   // (via global drawers), so gating avoids firing authed requests on login.
   const { user } = useAuth();
   const { data: ratesData, isLoading: ratesLoading } = useRates(!!user);
+  const locale = useLocale() as 'en' | 'fa';
 
   const primaryCurrency = useCurrencyStore((state) => state.primaryCurrency);
   const secondaryCurrency = useCurrencyStore((state) => state.secondaryCurrency);
@@ -89,7 +92,7 @@ export function useCurrency(): CurrencyHelpers {
       convert(amount, from, to, series, date ?? todayStr);
 
     const fmt = (value: number, currency: string, opts?: FormatOpts): string =>
-      formatMoney(value, currency, { compact: isCompact(opts) });
+      formatMoney(value, currency, { compact: isCompact(opts), locale });
 
     const display = (amount: number, currency: string, date?: string, opts?: FormatOpts): MoneyDisplay => {
       const primaryValue = boundConvert(amount, currency, primaryCurrency, date);
@@ -129,9 +132,9 @@ export function useCurrency(): CurrencyHelpers {
       display,
       convert: boundConvert,
       format: fmt,
-      formatFull: (value: number, currency: string) => formatMoney(value, currency),
+      formatFull: (value: number, currency: string) => formatMoney(value, currency, { locale }),
       sumTo,
       sumDisplay,
     };
-  }, [primaryCurrency, secondaryCurrency, numberFormat, hydrated, ratesData?.series, ratesLoading]);
+  }, [primaryCurrency, secondaryCurrency, numberFormat, hydrated, ratesData?.series, ratesLoading, locale]);
 }

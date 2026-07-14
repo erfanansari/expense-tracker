@@ -20,7 +20,7 @@ export async function sendWelcomeEmail(user: { userId: number; email: string; na
       from: FROM_ADDRESS,
       to: user.email,
       replyTo: REPLY_TO,
-      subject: 'Welcome to Kharji 👋',
+      subject: 'Welcome to Kharji',
       html,
     },
     { idempotencyKey: `welcome-${user.userId}` }

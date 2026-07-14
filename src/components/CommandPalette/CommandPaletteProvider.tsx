@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 import type { MutableRefObject, ReactNode } from 'react';
 
+import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 
 import {
@@ -17,11 +18,24 @@ import {
   useMatches,
   useRegisterActions,
 } from 'kbar';
-import { DollarSign, LayoutDashboard, PieChart, Plus, Receipt, Search, Settings, TrendingUp } from 'lucide-react';
+import {
+  DollarSign,
+  Languages,
+  LayoutDashboard,
+  PieChart,
+  Plus,
+  Receipt,
+  Search,
+  Settings,
+  TrendingUp,
+} from 'lucide-react';
 
 import { useAuth } from '@hooks/use-auth';
+import { useLocalePreferences } from '@hooks/use-locale-preferences';
 
 import { useDrawerStore } from '@stores/drawer';
+
+import type { AppLocale } from '@/i18n/config';
 
 interface CommandPaletteContextType {
   toggle: () => void;
@@ -63,67 +77,96 @@ export const CommandPaletteProvider = ({ children }: { children: ReactNode }) =>
 
 // The actual palette — only ever mounted with a signed-in user.
 function CommandPalette({ toggleRef }: { toggleRef: ToggleRef }) {
+  const t = useTranslations();
   const router = useRouter();
   const pathname = usePathname();
+  const locale = useLocale() as AppLocale;
+  const { mutate: mutateLocale } = useLocalePreferences();
   const openExpenseDrawer = useDrawerStore((state) => state.openExpenseDrawer);
   const openIncomeDrawer = useDrawerStore((state) => state.openIncomeDrawer);
   const openAssetDrawer = useDrawerStore((state) => state.openAssetDrawer);
 
   const actions = useMemo<Action[]>(() => {
+    const goTo = (name: string) => t('common.commandPalette.goTo', { name });
     const navActions = [
-      { id: 'nav-overview', name: 'Go to Overview', path: '/overview', icon: <LayoutDashboard className="h-4 w-4" /> },
+      {
+        id: 'nav-overview',
+        name: goTo(t('nav.overview')),
+        path: '/overview',
+        icon: <LayoutDashboard className="h-4 w-4" />,
+      },
       {
         id: 'nav-expenses',
-        name: 'Go to Expenses',
+        name: goTo(t('nav.expenses')),
         path: '/expenses',
         icon: <Receipt className="h-4 w-4" />,
       },
-      { id: 'nav-income', name: 'Go to Income', path: '/income', icon: <DollarSign className="h-4 w-4" /> },
-      { id: 'nav-assets', name: 'Go to Assets', path: '/assets', icon: <TrendingUp className="h-4 w-4" /> },
-      { id: 'nav-reports', name: 'Go to Reports', path: '/reports', icon: <PieChart className="h-4 w-4" /> },
-      { id: 'nav-settings', name: 'Go to Settings', path: '/settings', icon: <Settings className="h-4 w-4" /> },
+      { id: 'nav-income', name: goTo(t('nav.income')), path: '/income', icon: <DollarSign className="h-4 w-4" /> },
+      { id: 'nav-assets', name: goTo(t('nav.assets')), path: '/assets', icon: <TrendingUp className="h-4 w-4" /> },
+      { id: 'nav-reports', name: goTo(t('nav.reports')), path: '/reports', icon: <PieChart className="h-4 w-4" /> },
+      {
+        id: 'nav-settings',
+        name: goTo(t('nav.settings')),
+        path: '/settings',
+        icon: <Settings className="h-4 w-4" />,
+      },
     ]
       .filter((a) => pathname !== a.path)
       .map((a) => ({
         id: a.id,
         name: a.name,
         icon: a.icon,
-        section: 'Navigation',
+        section: t('common.commandPalette.sectionNavigation'),
         perform: () => router.push(a.path),
       }));
 
+    // Keywords carry both languages so search works regardless of UI locale.
     const createActions: Action[] = [
       {
         id: 'create-expense',
-        name: 'Add Expense',
-        section: 'Create',
+        name: t('common.addExpense'),
+        section: t('common.commandPalette.sectionCreate'),
         icon: <Plus className="h-4 w-4" />,
         shortcut: ['e'],
-        keywords: 'add new expense spend',
+        keywords: 'add new expense spend افزودن هزینه خرج',
         perform: () => openExpenseDrawer(),
       },
       {
         id: 'create-income',
-        name: 'Add Income',
-        section: 'Create',
+        name: t('common.addIncome'),
+        section: t('common.commandPalette.sectionCreate'),
         icon: <Plus className="h-4 w-4" />,
         shortcut: ['i'],
-        keywords: 'add new income earn salary',
+        keywords: 'add new income earn salary افزودن درآمد حقوق',
         perform: () => openIncomeDrawer(),
       },
       {
         id: 'create-asset',
-        name: 'Add Asset',
-        section: 'Create',
+        name: t('common.addAsset'),
+        section: t('common.commandPalette.sectionCreate'),
         icon: <Plus className="h-4 w-4" />,
         shortcut: ['a'],
-        keywords: 'add new asset wealth investment',
+        keywords: 'add new asset wealth investment افزودن دارایی سرمایه',
         perform: () => openAssetDrawer(),
       },
     ];
 
-    return [...createActions, ...navActions];
-  }, [pathname, router, openExpenseDrawer, openIncomeDrawer, openAssetDrawer]);
+    const settingsActions: Action[] = [
+      {
+        id: 'change-language',
+        name: t('common.commandPalette.changeLanguage'),
+        section: t('common.commandPalette.sectionSettings'),
+        icon: <Languages className="h-4 w-4" />,
+        keywords: 'language locale english farsi persian فارسی انگلیسی زبان',
+        perform: () => {
+          const next: AppLocale = locale === 'fa' ? 'en' : 'fa';
+          mutateLocale({ locale: next }, { onSuccess: () => router.refresh() });
+        },
+      },
+    ];
+
+    return [...createActions, ...navActions, ...settingsActions];
+  }, [t, pathname, router, locale, mutateLocale, openExpenseDrawer, openIncomeDrawer, openAssetDrawer]);
 
   return (
     // The palette must NOT lock body scroll — not kbar's lock, not ours.
@@ -162,6 +205,7 @@ function KBarConnector({ toggleRef, actions }: { toggleRef: ToggleRef; actions: 
 
 // Custom UI component using kbar primitives
 function CommandPaletteUI() {
+  const t = useTranslations('common.commandPalette');
   return (
     <KBarPortal>
       <KBarPositioner className="fixed inset-0 z-(--z-command-palette) flex items-start justify-center bg-black/30 px-4 pt-[20vh] backdrop-blur-[2px]">
@@ -171,7 +215,8 @@ function CommandPaletteUI() {
             <Search className="text-text-muted h-4 w-4 shrink-0" />
             <KBarSearch
               className="text-text-primary placeholder:text-text-muted flex-1 bg-transparent text-sm outline-none"
-              placeholder="Type a command or search..."
+              placeholder={t('placeholder')}
+              dir="auto"
             />
             <kbd className="bg-background-elevated text-text-muted hidden rounded px-2 py-1 text-[11px] font-medium sm:inline-block">
               ESC
@@ -185,15 +230,15 @@ function CommandPaletteUI() {
           <div className="border-border-subtle text-text-muted flex items-center justify-center gap-4 border-t px-4 py-2 text-[11px]">
             <span className="flex items-center gap-1.5">
               <kbd className="bg-background-elevated rounded px-1.5 py-0.5 font-medium">↑↓</kbd>
-              Navigate
+              {t('navigate')}
             </span>
             <span className="flex items-center gap-1.5">
               <kbd className="bg-background-elevated rounded px-1.5 py-0.5 font-medium">↵</kbd>
-              Select
+              {t('select')}
             </span>
             <span className="flex items-center gap-1.5">
               <kbd className="bg-background-elevated rounded px-1.5 py-0.5 font-medium">ESC</kbd>
-              Close
+              {t('close')}
             </span>
           </div>
         </KBarAnimator>
@@ -204,12 +249,13 @@ function CommandPaletteUI() {
 
 // Results renderer
 function RenderResults() {
+  const t = useTranslations('common.commandPalette');
   const { results } = useMatches();
 
   return (
     <div className="flex max-h-96 flex-col gap-0.5 overflow-y-auto overscroll-contain p-1">
       {results.length === 0 ? (
-        <div className="text-text-muted px-4 py-8 text-center text-sm">No commands found</div>
+        <div className="text-text-muted px-4 py-8 text-center text-sm">{t('noResults')}</div>
       ) : (
         <KBarResults
           items={results}
@@ -222,7 +268,7 @@ function RenderResults() {
             ) : (
               // Command item
               <div
-                className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-[13px] transition-colors duration-100 ${
+                className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-start text-[13px] transition-colors duration-100 ${
                   active ? 'bg-background-elevated text-text-primary' : 'text-text-secondary'
                 }`}
               >

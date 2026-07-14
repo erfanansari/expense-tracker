@@ -13,10 +13,10 @@ export const ROUTES = {
 } as const;
 
 export const NAV_ITEMS = [
-  { label: 'Overview', href: ROUTES.OVERVIEW },
-  { label: 'Expenses', href: ROUTES.EXPENSES },
-  { label: 'Income', href: ROUTES.INCOME },
-  { label: 'Reports', href: ROUTES.REPORTS },
-  { label: 'Assets', href: ROUTES.ASSETS },
-  { label: 'Settings', href: ROUTES.SETTINGS },
+  { key: 'overview', href: ROUTES.OVERVIEW },
+  { key: 'expenses', href: ROUTES.EXPENSES },
+  { key: 'income', href: ROUTES.INCOME },
+  { key: 'reports', href: ROUTES.REPORTS },
+  { key: 'assets', href: ROUTES.ASSETS },
+  { key: 'settings', href: ROUTES.SETTINGS },
 ] as const;

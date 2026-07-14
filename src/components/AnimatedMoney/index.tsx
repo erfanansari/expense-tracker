@@ -1,8 +1,12 @@
 'use client';
 
+import { useLocale } from 'next-intl';
+
 import NumberFlow from '@number-flow/react';
 
 import { getCurrency } from '@/constants/currencies';
+import { formatMoney } from '@/features/ExchangeRate/utils/currency';
+import { formatNumber } from '@/utils/format';
 
 interface AnimatedMoneyProps {
   amount: number;
@@ -17,9 +21,19 @@ interface AnimatedMoneyProps {
  * same Intl options and symbol placement. Animates ONLY when the value changes
  * while mounted (NumberFlow's default) — page loads render statically; the roll
  * is feedback for user actions (filters, mutations, currency switches).
+ *
+ * fa-IR renders statically instead: number-flow's core parses each formatted digit
+ * via `parseInt(char)`, which only understands ASCII 0-9 — fa-IR's Persian digit
+ * glyphs parse to NaN there, dropping the digits entirely. Falling back to plain
+ * formatMoney output keeps the (correct, Persian-digit) text and just loses the roll.
  */
 const AnimatedMoney = ({ amount, currency, compact = true, className }: AnimatedMoneyProps) => {
+  const locale = useLocale();
   const def = getCurrency(currency);
+
+  if (locale === 'fa') {
+    return <span className={className}>{formatMoney(amount, currency, { compact, locale: 'fa' })}</span>;
+  }
 
   return (
     <NumberFlow
@@ -37,9 +51,13 @@ const AnimatedMoney = ({ amount, currency, compact = true, className }: Animated
   );
 };
 
-/** Animated plain integer (e.g. filtered result counts). */
-export const AnimatedCount = ({ value, className }: { value: number; className?: string }) => (
-  <NumberFlow value={value} locales="en-US" className={className} />
-);
+/** Animated plain integer (e.g. filtered result counts). fa falls back to static — see AnimatedMoney. */
+export const AnimatedCount = ({ value, className }: { value: number; className?: string }) => {
+  const locale = useLocale();
+  if (locale === 'fa') {
+    return <span className={className}>{formatNumber(value, 'fa')}</span>;
+  }
+  return <NumberFlow value={value} locales="en-US" className={className} />;
+};
 
 export default AnimatedMoney;

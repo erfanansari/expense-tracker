@@ -2,15 +2,19 @@ import { z } from 'zod';
 
 import { SUPPORTED_CURRENCY_CODES } from '@/constants/currencies';
 
+import type { Translator } from './fallback-translator';
+
 export const currencyCodeSchema = z.enum(SUPPORTED_CURRENCY_CODES as [string, ...string[]]);
 
-export const createExpenseSchema = z.object({
-  date: z.string().min(1, 'Date is required'),
-  categoryId: z.number().int().positive('Category is required'),
-  description: z.string().min(1, 'Description is required'),
-  amount: z.number().min(0, 'Amount must be non-negative'),
-  currency: currencyCodeSchema,
-  tagIds: z.array(z.number().int()).optional(),
-});
+export function createExpenseSchema(t: Translator) {
+  return z.object({
+    date: z.string().min(1, t('zod.expense.dateRequired')),
+    categoryId: z.number().int().positive(t('zod.expense.categoryRequired')),
+    description: z.string().min(1, t('zod.expense.descriptionRequired')),
+    amount: z.number().min(0, t('zod.expense.amountNonNegative')),
+    currency: currencyCodeSchema,
+    tagIds: z.array(z.number().int()).optional(),
+  });
+}
 
-export type CreateExpenseSchema = z.infer<typeof createExpenseSchema>;
+export type CreateExpenseSchema = z.infer<ReturnType<typeof createExpenseSchema>>;

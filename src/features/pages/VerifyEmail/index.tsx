@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from 'react';
 
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
@@ -11,6 +12,7 @@ import { useMutation } from '@tanstack/react-query';
 import { Loader2, MailCheck } from 'lucide-react';
 
 const VerifyEmailContent = () => {
+  const t = useTranslations('auth.verify');
   const searchParams = useSearchParams();
   const email = searchParams.get('email') ?? '';
 
@@ -21,11 +23,11 @@ const VerifyEmailContent = () => {
     mutationKey: resendVerificationKeyGenerator(),
     onSuccess: () => {
       setError('');
-      setMessage('Verification email sent — check your inbox.');
+      setMessage(t('sent'));
     },
     onError: (err) => {
       setMessage('');
-      setError(err.message || 'Could not resend verification email');
+      setError(err.message || t('resendFailed'));
     },
   });
 
@@ -37,12 +39,9 @@ const VerifyEmailContent = () => {
         </div>
       </div>
 
-      <h1 className="text-text-primary mb-1.5 text-center text-lg font-semibold sm:mb-2 sm:text-xl">
-        Check your inbox
-      </h1>
+      <h1 className="text-text-primary mb-1.5 text-center text-lg font-semibold sm:mb-2 sm:text-xl">{t('title')}</h1>
       <p className="text-text-tertiary mb-5 text-center text-xs sm:mb-6 sm:text-sm">
-        We sent a verification link{email ? ` to ${email}` : ''}. Click it to activate your account — you can close this
-        tab afterwards.
+        {email ? t('bodyWithEmail', { email }) : t('body')}
       </p>
 
       {message && (
@@ -67,18 +66,18 @@ const VerifyEmailContent = () => {
           {resendMutation.isPending ? (
             <>
               <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden="true" />
-              <span>Sending...</span>
+              <span>{t('sending')}</span>
             </>
           ) : (
-            'Resend verification email'
+            t('resend')
           )}
         </button>
       )}
 
       <p className="text-text-tertiary mt-4 text-center text-xs sm:text-sm">
-        Already verified?{' '}
+        {t('alreadyVerified')}{' '}
         <Link href="/login" className="text-text-primary font-medium hover:underline">
-          Sign in
+          {t('signIn')}
         </Link>
       </p>
     </>

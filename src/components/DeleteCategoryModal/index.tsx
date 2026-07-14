@@ -2,6 +2,8 @@
 
 import { createElement, useState } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { getCategoryColor, getCategoryIcon } from '@constants/categories';
 import { AlertTriangle, ArrowRight, Loader2 } from 'lucide-react';
 
@@ -29,6 +31,8 @@ const DeleteCategoryModal = ({
   onCancel,
   isDeleting = false,
 }: DeleteCategoryModalProps) => {
+  const t = useTranslations('settings.deleteCategory');
+  const tCommon = useTranslations('common');
   const [reassignToId, setReassignToId] = useState<number | null>(null);
 
   // Reset selection whenever the modal opens against a new category.
@@ -55,21 +59,21 @@ const DeleteCategoryModal = ({
         </div>
 
         <div className="mt-4">
-          <h3 className="text-text-primary text-lg font-semibold">Delete category &ldquo;{category.name}&rdquo;?</h3>
+          <h3 className="text-text-primary text-lg font-semibold">{t('title', { name: category.name })}</h3>
         </div>
 
         {hasUsage ? (
           <div className="mt-3 space-y-3">
             <p className="text-text-secondary text-sm">
-              This category is used in <span className="font-semibold">{category.usage_count}</span>{' '}
-              {category.usage_count === 1 ? 'expense' : 'expenses'}. Pick a category to move them into:
+              {t.rich('usedInReassign', {
+                count: category.usage_count,
+                b: (chunks) => <span className="font-semibold">{chunks}</span>,
+              })}
             </p>
 
-            <div className="border-border-subtle bg-background-secondary mt-2 max-h-56 overflow-y-auto rounded-lg border p-2 text-left">
+            <div className="border-border-subtle bg-background-secondary mt-2 max-h-56 overflow-y-auto rounded-lg border p-2 text-start">
               {candidates.length === 0 ? (
-                <p className="text-text-muted px-2 py-3 text-center text-xs">
-                  No other categories exist — create one first before deleting this.
-                </p>
+                <p className="text-text-muted px-2 py-3 text-center text-xs">{t('noOtherCategories')}</p>
               ) : (
                 <ul className="space-y-1">
                   {candidates.map((c) => {
@@ -98,11 +102,11 @@ const DeleteCategoryModal = ({
                           </span>
                           <span className="text-text-primary flex-1 text-sm font-medium">{c.name}</span>
                           <span className="text-text-muted text-xs">
-                            {c.usage_count} {c.usage_count === 1 ? 'expense' : 'expenses'}
+                            {t('categoryUsage', { count: c.usage_count })}
                           </span>
                           {selected && (
                             <span className="text-blue text-xs font-semibold" aria-hidden="true">
-                              <ArrowRight className="h-3.5 w-3.5" />
+                              <ArrowRight className="h-3.5 w-3.5 rtl:-scale-x-100" />
                             </span>
                           )}
                         </label>
@@ -116,7 +120,7 @@ const DeleteCategoryModal = ({
             {reassignToId !== null && (
               <p className="text-text-secondary flex flex-wrap items-center justify-center gap-1.5 text-xs">
                 <CategoryBadge category={category} />
-                <ArrowRight className="text-text-muted h-3 w-3" aria-hidden="true" />
+                <ArrowRight className="text-text-muted h-3 w-3 rtl:-scale-x-100" aria-hidden="true" />
                 {(() => {
                   const target = candidates.find((c) => c.id === reassignToId);
                   return target ? <CategoryBadge category={target} /> : null;
@@ -126,14 +130,16 @@ const DeleteCategoryModal = ({
           </div>
         ) : (
           <div className="mt-3 space-y-2">
-            <p className="text-text-secondary text-sm">This category is not used by any expenses.</p>
-            <p className="text-text-secondary text-sm font-medium">This action cannot be undone.</p>
+            <p className="text-text-secondary text-sm">{t('notUsed')}</p>
+            <p className="text-text-secondary text-sm font-medium">{tCommon('actionUndone')}</p>
           </div>
         )}
 
+        {/* No rtl override: Cancel is coded first, so a plain flex row under RTL
+            already puts Cancel on the right and Confirm/primary on the left. */}
         <div className="mt-6 flex gap-3">
           <Button variant="outline" onClick={onCancel} disabled={isDeleting} className="flex-1">
-            Cancel
+            {tCommon('cancel')}
           </Button>
           <Button
             variant="primary"
@@ -144,12 +150,12 @@ const DeleteCategoryModal = ({
             {isDeleting ? (
               <>
                 <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-                <span>Deleting...</span>
+                <span>{tCommon('deleting')}</span>
               </>
             ) : hasUsage ? (
-              'Reassign & Delete'
+              t('reassignAndDelete')
             ) : (
-              'Delete'
+              t('delete')
             )}
           </Button>
         </div>

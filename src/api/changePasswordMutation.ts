@@ -1,4 +1,4 @@
-import { changePasswordSchema } from '@schemas';
+import { createChangePasswordSchema, fallbackT } from '@schemas';
 import type { ChangePasswordSchema } from '@schemas';
 
 import client from '@core/client';
@@ -11,7 +11,7 @@ const keyGenerator: MutationKeyGenerator = () => ['auth', 'change-password'];
 client.registerEndpoint<RequestData, void>(keyGenerator, {
   url: '/api/auth/change-password',
   type: 'mutation',
-  requestDataSchema: changePasswordSchema,
+  requestDataSchema: createChangePasswordSchema(fallbackT),
   // Changing the password signs every other device out
   requestNormalizer: (data) => ({
     currentPassword: data.currentPassword,

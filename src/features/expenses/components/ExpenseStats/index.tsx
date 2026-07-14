@@ -1,8 +1,8 @@
 'use client';
 
-import { BarChart3, Hash, TrendingUp } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
-import { onboardingCopy } from '@features/onboarding/copy';
+import { BarChart3, Hash, TrendingUp } from 'lucide-react';
 
 import AnimatedMoney, { AnimatedCount } from '@components/AnimatedMoney';
 import StatZeroState from '@components/StatZeroState';
@@ -16,6 +16,8 @@ interface ExpenseStatsProps {
 }
 
 const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
+  const t = useTranslations('pages.expenses.stats');
+  const tZero = useTranslations('onboarding.zeroCaptions');
   const { primaryCurrency, secondaryCurrency, sumTo, formatFull } = useCurrency();
 
   // Sum each expense converted at ITS OWN date — historically accurate & stable.
@@ -47,9 +49,9 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
         </div>
 
         <div>
-          <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Expenses</p>
+          <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{t('total')}</p>
           {expenses.length === 0 ? (
-            <StatZeroState caption={onboardingCopy.zeroCaptions.expensesTotal} />
+            <StatZeroState caption={tZero('expensesTotal')} />
           ) : (
             <p
               className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl"
@@ -78,15 +80,15 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
         </div>
 
         <div>
-          <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Expenses</p>
+          <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{t('count')}</p>
           {expenses.length === 0 ? (
-            <StatZeroState caption={onboardingCopy.zeroCaptions.expensesCount} />
+            <StatZeroState caption={tZero('expensesCount')} />
           ) : (
             <>
               <p className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl">
                 <AnimatedCount value={expenses.length} />
               </p>
-              <p className="text-text-secondary mt-1.5 text-sm font-medium">Expenses</p>
+              <p className="text-text-secondary mt-1.5 text-sm font-medium">{t('count')}</p>
             </>
           )}
         </div>
@@ -101,9 +103,9 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
         </div>
 
         <div>
-          <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Daily Average</p>
+          <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{t('dailyAverage')}</p>
           {expenses.length === 0 ? (
-            <StatZeroState caption={onboardingCopy.zeroCaptions.expensesDailyAverage} />
+            <StatZeroState caption={tZero('expensesDailyAverage')} />
           ) : (
             <p
               className="text-text-primary text-2xl font-semibold tabular-nums sm:text-3xl"

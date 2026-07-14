@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo } from 'react';
 
+import { useLocale, useTranslations } from 'next-intl';
+
 import { createIncomeKeyGenerator } from '@api/createIncomeMutation';
 import { INCOMES_SCOPE } from '@api/getIncomeListQuery';
 import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
@@ -25,13 +27,24 @@ import Button from '@components/Button';
 import Form from '@components/Form';
 import FormMoneyInput from '@components/Form/components/FormMoneyInput';
 import FormSelect from '@components/Form/components/FormSelect';
+import Select from '@components/Select';
 import Tooltip from '@components/Tooltip';
 
+import { useIncomeTypeLabel, useMonthLabel } from '@hooks/use-constant-labels';
 import { useCurrency } from '@hooks/use-currency';
+import { useLocalePreferences } from '@hooks/use-locale-preferences';
 
 import { useToast } from '@stores/toast';
 
-import { ensureError, getJalaliMonthName } from '@utils';
+import {
+  ensureError,
+  formatJalaliDigits,
+  gregorianToJalali,
+  JALALI_MONTH_NAMES,
+  jalaliToGregorian,
+  resolveCalendar,
+} from '@utils';
+import type { AppLocale } from '@utils';
 
 import type { IncomeFormProps } from './@types';
 
@@ -53,6 +66,14 @@ const buildFormData = (income: Income): CreateIncomeSchema => ({
 
 const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: IncomeFormProps) => {
   // Customs
+  const t = useTranslations('forms');
+  const tCommon = useTranslations('common');
+  const tZod = useTranslations();
+  const locale = useLocale() as AppLocale;
+  const incomeTypeLabel = useIncomeTypeLabel();
+  const monthLabel = useMonthLabel();
+  const { prefs: localePrefs } = useLocalePreferences();
+  const calendar = resolveCalendar(localePrefs.calendar, locale);
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const { primaryCurrency } = useCurrency();
@@ -76,15 +97,16 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
 
   // Forms
   const methods = useForm<CreateIncomeSchema>({
-    resolver: zodResolver(createIncomeSchema),
+    resolver: zodResolver(createIncomeSchema(tZod)),
     defaultValues: editingIncome ? buildFormData(editingIncome) : defaultFormData,
     mode: 'all',
   });
 
-  const { formState, reset, watch } = methods;
+  const { formState, reset, watch, setValue } = methods;
   const amount = watch('amount');
   const currency = watch('currency');
   const year = watch('year');
+  const month = watch('month');
 
   // Mutations
   const createMutation = useMutation<unknown, Error, CreateIncomeSchema>({
@@ -116,11 +138,11 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
       if (editingIncome) {
         await updateMutation.mutateAsync({ id: editingIncome.id, ...data });
         await invalidateIncomeData(queryClient);
-        showToast('Income updated successfully!', 'success');
+        showToast(t('income.updated'), 'success');
       } else {
         await createMutation.mutateAsync(data);
         await invalidateIncomeData(queryClient);
-        showToast('Income added successfully!', 'success');
+        showToast(t('income.added'), 'success');
       }
 
       reset(defaultFormData);
@@ -136,9 +158,36 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
     if (onCancelEdit) onCancelEdit();
   };
 
-  // Generate year options (current year - 5 to current year + 1)
+  // Jalali month/year selection — only relevant when the resolved calendar is
+  // Jalali. Income's month/year fields are always stored as Gregorian ints
+  // (matches the DB schema); the day=15 anchor keeps the mapping consistent
+  // with getJalaliMonthName/getDisplayYear used elsewhere for this same data.
+  const jalaliSelection = useMemo(
+    () => (calendar === 'jalali' ? gregorianToJalali(new Date(year, month - 1, 15)) : null),
+    [calendar, year, month]
+  );
+
+  const handleJalaliMonthChange = (jalaliMonth: number) => {
+    if (!jalaliSelection) return;
+    const gregorian = jalaliToGregorian(jalaliSelection.year, jalaliMonth, 15);
+    setValue('month', gregorian.getMonth() + 1, { shouldDirty: true, shouldValidate: true });
+    setValue('year', gregorian.getFullYear(), { shouldDirty: true, shouldValidate: true });
+  };
+
+  const handleJalaliYearChange = (jalaliYear: number) => {
+    if (!jalaliSelection) return;
+    const gregorian = jalaliToGregorian(jalaliYear, jalaliSelection.month, 15);
+    setValue('month', gregorian.getMonth() + 1, { shouldDirty: true, shouldValidate: true });
+    setValue('year', gregorian.getFullYear(), { shouldDirty: true, shouldValidate: true });
+  };
+
+  // Generate year options (current year - 5 to current year + 1), in
+  // whichever calendar the Year dropdown is currently showing.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const todayJalali = useMemo(() => gregorianToJalali(currentDate), []);
+  const yearRangeCenter = calendar === 'jalali' ? todayJalali.year : currentDate.getFullYear();
   const yearOptions = [];
-  for (let y = currentDate.getFullYear() + 1; y >= currentDate.getFullYear() - 5; y--) {
+  for (let y = yearRangeCenter + 1; y >= yearRangeCenter - 5; y--) {
     yearOptions.push(y);
   }
 
@@ -149,39 +198,52 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
         <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <Briefcase className="text-text-muted h-4 w-4" />
-            Type
+            {t('income.type')}
           </label>
           <FormSelect
             name="incomeType"
-            options={INCOME_TYPES.map((type) => ({ value: type.value, label: type.label }))}
+            options={INCOME_TYPES.map((type) => ({ value: type.value, label: incomeTypeLabel(type.value) }))}
           />
         </div>
 
         <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <Calendar className="text-text-muted h-4 w-4" />
-            Month
+            {t('income.month')}
           </label>
-          <FormSelect
-            name="month"
-            valueAsNumber
-            options={MONTHS.map((month) => ({
-              value: String(month.value),
-              label: `${month.label} / ${getJalaliMonthName(month.value, year)}`,
-            }))}
-          />
+          {jalaliSelection ? (
+            <Select
+              value={String(jalaliSelection.month)}
+              onChange={(value) => handleJalaliMonthChange(Number(value))}
+              options={JALALI_MONTH_NAMES.map((name, i) => ({ value: String(i + 1), label: name }))}
+            />
+          ) : (
+            <FormSelect
+              name="month"
+              valueAsNumber
+              options={MONTHS.map((m) => ({ value: String(m.value), label: monthLabel(m.value) }))}
+            />
+          )}
         </div>
 
         <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <Calendar className="text-text-muted h-4 w-4" />
-            Year
+            {t('income.year')}
           </label>
-          <FormSelect
-            name="year"
-            valueAsNumber
-            options={yearOptions.map((yearOption) => ({ value: String(yearOption), label: String(yearOption) }))}
-          />
+          {jalaliSelection ? (
+            <Select
+              value={String(jalaliSelection.year)}
+              onChange={(value) => handleJalaliYearChange(Number(value))}
+              options={yearOptions.map((y) => ({ value: String(y), label: formatJalaliDigits(y) }))}
+            />
+          ) : (
+            <FormSelect
+              name="year"
+              valueAsNumber
+              options={yearOptions.map((y) => ({ value: String(y), label: String(y) }))}
+            />
+          )}
         </div>
       </div>
 
@@ -189,11 +251,11 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
       <div className="space-y-1">
         <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
           <Briefcase className="text-text-muted h-4 w-4" />
-          Source (Optional)
+          {t('income.source')}
         </label>
         <input
           type="text"
-          placeholder="e.g., Company Name, Client..."
+          placeholder={t('income.sourcePlaceholder')}
           {...methods.register('source')}
           className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
         />
@@ -203,10 +265,10 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
       <div className="space-y-1">
         <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
           <FileText className="text-text-muted h-4 w-4" />
-          Notes (Optional)
+          {t('shared.notes')}
         </label>
         <textarea
-          placeholder="Any additional notes..."
+          placeholder={t('shared.notesPlaceholder')}
           rows={2}
           {...methods.register('notes')}
           className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full resize-none rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
@@ -217,31 +279,31 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
       <div className="space-y-1">
         <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
           <Coins className="text-text-muted h-4 w-4" />
-          Amount
+          {t('shared.amount')}
         </label>
         <Tooltip content={numberToPersianWord} position="top">
-          <FormMoneyInput amountName="amount" currencyName="currency" placeholder="e.g. 390m, 4.5b" />
+          <FormMoneyInput amountName="amount" currencyName="currency" placeholder={t('income.amountPlaceholder')} />
         </Tooltip>
       </div>
 
       {/* Buttons */}
-      <div className="flex gap-3 pt-1">
+      <div className="flex gap-3 pt-1 rtl:flex-row-reverse">
         <Button type="submit" disabled={isSubmitting} variant="primary" className="flex-1">
           {isSubmitting ? (
             <>
               <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-              <span>Saving...</span>
+              <span>{t('shared.saving')}</span>
             </>
           ) : (
             <>
               {!editingIncome && <Plus className="h-4 w-4 shrink-0" />}
-              <span>{editingIncome ? 'Update' : 'Add'}</span>
+              <span>{editingIncome ? t('shared.update') : t('shared.add')}</span>
             </>
           )}
         </Button>
         {editingIncome && (
           <Button type="button" onClick={handleCancel} variant="outline">
-            Cancel
+            {tCommon('cancel')}
           </Button>
         )}
       </div>

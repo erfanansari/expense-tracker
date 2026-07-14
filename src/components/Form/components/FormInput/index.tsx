@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { Eye, EyeOff } from 'lucide-react';
 import { useController, useFormContext } from 'react-hook-form';
 
@@ -13,6 +15,7 @@ interface FormInputProps extends FormFieldBaseProps {
 }
 
 const FormInput = ({ name, label, type = 'text', placeholder, disabled, autoComplete, className }: FormInputProps) => {
+  const t = useTranslations('common');
   const { control } = useFormContext();
   const { field, fieldState } = useController({ name, control });
   const [showPassword, setShowPassword] = useState(false);
@@ -37,16 +40,16 @@ const FormInput = ({ name, label, type = 'text', placeholder, disabled, autoComp
           autoComplete={autoComplete}
           aria-invalid={fieldState.invalid || undefined}
           className={`border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-primary w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none sm:px-4 sm:py-3 sm:text-base ${
-            isPassword ? 'pr-10 sm:pr-12' : ''
+            isPassword ? 'pe-10 sm:pe-12' : ''
           } ${fieldState.error ? 'border-danger' : ''}`}
         />
         {isPassword && (
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="text-text-muted hover:text-text-secondary absolute top-1/2 right-2.5 -translate-y-1/2 sm:right-3"
+            className="text-text-muted hover:text-text-secondary absolute end-2.5 top-1/2 -translate-y-1/2 sm:end-3"
             tabIndex={-1}
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            aria-label={showPassword ? t('hidePassword') : t('showPassword')}
           >
             {showPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
           </button>

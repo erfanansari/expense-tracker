@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { X } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
@@ -12,13 +14,15 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
-  titleFa?: string;
   children: ReactNode;
   className?: string;
   showCloseButton?: boolean;
 }
 
-const Modal = ({ isOpen, onClose, title, titleFa, children, className, showCloseButton = true }: ModalProps) => {
+const Modal = ({ isOpen, onClose, title, children, className, showCloseButton = true }: ModalProps) => {
+  // Customs
+  const t = useTranslations('common');
+
   // References
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -90,11 +94,6 @@ const Modal = ({ isOpen, onClose, title, titleFa, children, className, showClose
                 <h2 id="modal-title" className="text-text-primary truncate text-base font-semibold sm:text-lg">
                   {title}
                 </h2>
-                {titleFa && (
-                  <p className="text-text-muted mt-0.5 text-xs" dir="rtl">
-                    {titleFa}
-                  </p>
-                )}
               </div>
             ) : (
               <div />
@@ -102,8 +101,8 @@ const Modal = ({ isOpen, onClose, title, titleFa, children, className, showClose
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="text-text-muted hover:bg-background-elevated hover:text-text-primary focus-visible:ring-blue/30 focus-visible:border-blue -mr-1 ml-4 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none"
-                aria-label="Close modal"
+                className="text-text-muted hover:bg-background-elevated hover:text-text-primary focus-visible:ring-blue/30 focus-visible:border-blue ms-4 -me-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none"
+                aria-label={t('closeModal')}
               >
                 <X className="h-4 w-4" />
               </button>

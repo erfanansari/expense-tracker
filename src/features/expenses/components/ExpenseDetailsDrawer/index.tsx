@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { useLocale, useTranslations } from 'next-intl';
+
 import { ArrowLeftRight, Calendar, Coins, Tag as TagIcon, X } from 'lucide-react';
 import { Drawer } from 'vaul';
 
@@ -10,9 +12,11 @@ import { formatMoney } from '@features/ExchangeRate/utils/currency';
 import CategoryBadge from '@components/CategoryBadge';
 import Money from '@components/Money';
 
+import { useAppDate } from '@hooks/use-app-date';
 import { useCurrency } from '@hooks/use-currency';
+import { useLocalePreferences } from '@hooks/use-locale-preferences';
 
-import { formatToFarsiDate } from '@utils';
+import { formatAppDateTime, resolveCalendar } from '@utils';
 
 import { type Expense } from '@/@types/expense';
 
@@ -42,15 +46,6 @@ const MetaCell = ({ icon, label, primary, secondary }: MetaCellProps) => (
     {secondary && <div className="text-text-muted text-xs tabular-nums">{secondary}</div>}
   </div>
 );
-
-const formatCreatedAt = (iso: string) =>
-  new Date(iso).toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
 
 type ConvertFn = (amount: number, from: string, to: string, date?: string) => number | null;
 
@@ -85,6 +80,13 @@ function expenseRate(
 }
 
 const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawerProps) => {
+  // Customs
+  const t = useTranslations();
+  const locale = useLocale() as 'en' | 'fa';
+  const isRtl = locale === 'fa';
+  const { prefs: localePrefs } = useLocalePreferences();
+  const calendar = resolveCalendar(localePrefs.calendar, locale);
+
   // Currency context (for the exchange-rate cell)
   const { primaryCurrency, secondaryCurrency, convert } = useCurrency();
 
@@ -132,8 +134,13 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
   }, [isOpen, handleClose]);
 
   // Variables
-  const farsiDate = expense ? formatToFarsiDate(expense.date) : '';
+  const appDate = useAppDate();
+  const expenseDate = expense ? appDate(expense.date) : null;
   const rateInfo = expense ? expenseRate(expense, primaryCurrency, secondaryCurrency, convert) : null;
+
+  let drawerDirection: 'bottom' | 'right' | 'left' = 'left';
+  if (isMobile) drawerDirection = 'bottom';
+  else if (isRtl) drawerDirection = 'right';
 
   return (
     <Drawer.Root
@@ -141,7 +148,7 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
       onOpenChange={(open) => {
         if (!open) handleClose();
       }}
-      direction={isMobile ? 'bottom' : 'left'}
+      direction={drawerDirection}
       shouldScaleBackground={false}
     >
       <Drawer.Portal>
@@ -150,12 +157,12 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
           aria-describedby={undefined}
           className={
             isMobile
-              ? 'bg-background fixed right-0 bottom-0 left-0 z-50 flex h-[85dvh] max-h-[85dvh] flex-col rounded-t-2xl shadow-2xl outline-none'
-              : 'bg-background fixed top-0 bottom-0 left-0 z-50 flex w-[520px] flex-col shadow-2xl outline-none'
+              ? 'bg-background fixed inset-x-0 bottom-0 z-50 flex h-[85dvh] max-h-[85dvh] flex-col rounded-t-2xl shadow-2xl outline-none'
+              : 'bg-background fixed start-0 top-0 bottom-0 z-50 flex w-[520px] flex-col shadow-2xl outline-none'
           }
         >
           {/* Accessibility: Title must be direct child for screen readers */}
-          <Drawer.Title className="sr-only">Expense Details</Drawer.Title>
+          <Drawer.Title className="sr-only">{t('pages.expenses.details.title')}</Drawer.Title>
 
           {/* Header with drag handle */}
           <div className="border-border-subtle shrink-0 border-b">
@@ -171,13 +178,15 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
               className={`bg-background-secondary flex items-center justify-between px-4 pb-4 md:px-6 md:pb-5 ${!isMobile ? 'pt-4 md:pt-5' : ''}`}
             >
               <div className="min-w-0 flex-1">
-                <h2 className="text-text-primary text-base font-semibold sm:text-lg">Expense Details</h2>
+                <h2 className="text-text-primary text-base font-semibold sm:text-lg">
+                  {t('pages.expenses.details.title')}
+                </h2>
               </div>
               <button
                 onClick={handleClose}
-                className="text-action-default hover:bg-action-cancel-bg-hover hover:text-action-cancel-text-hover ml-3 rounded-lg p-2 transition-all duration-200"
-                aria-label="Close drawer"
-                title="Close"
+                className="text-action-default hover:bg-action-cancel-bg-hover hover:text-action-cancel-text-hover ms-3 rounded-lg p-2 transition-all duration-200"
+                aria-label={t('common.closeDrawer')}
+                title={t('common.closeDrawer')}
               >
                 <X className="h-5 w-5" />
               </button>
@@ -195,9 +204,9 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
                     <time
                       dateTime={expense.date}
                       className="text-text-muted shrink-0 text-xs tabular-nums"
-                      title={farsiDate}
+                      title={expenseDate?.secondary ?? undefined}
                     >
-                      {expense.date}
+                      {expenseDate?.primary}
                     </time>
                   </div>
 
@@ -233,33 +242,35 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
                 <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <MetaCell
                     icon={<Calendar className="text-text-muted h-3 w-3" />}
-                    label="Date"
-                    primary={expense.date}
+                    label={t('pages.expenses.details.date')}
+                    primary={expenseDate?.primary}
                     secondary={
-                      <span dir="rtl" className="block">
-                        {farsiDate}
-                      </span>
+                      expenseDate?.secondary && (
+                        <span dir="auto" className="block">
+                          {expenseDate.secondary}
+                        </span>
+                      )
                     }
                   />
                   <MetaCell
                     icon={<ArrowLeftRight className="text-text-muted h-3 w-3" />}
-                    label="Entered in"
+                    label={t('pages.expenses.details.enteredIn')}
                     primary={expense.currency}
                   />
                   {rateInfo && (
                     <MetaCell
                       icon={<Coins className="text-text-muted h-3 w-3" />}
-                      label="Exchange rate"
-                      primary={`1 ${rateInfo.base} = ${formatMoney(rateInfo.rate, rateInfo.quote)}`}
+                      label={t('pages.expenses.details.exchangeRate')}
+                      primary={`1 ${rateInfo.base} = ${formatMoney(rateInfo.rate, rateInfo.quote, { locale })}`}
                     />
                   )}
                 </section>
 
                 {/* ─── Footer metadata ─────────────────────────────────── */}
                 <p className="text-text-muted border-border-subtle/60 mt-1 border-t pt-4 text-xs">
-                  Created{' '}
+                  {t('pages.expenses.details.created')}{' '}
                   <time dateTime={expense.created_at} className="text-text-secondary tabular-nums">
-                    {formatCreatedAt(expense.created_at)}
+                    {formatAppDateTime(expense.created_at, { locale, calendar })}
                   </time>
                 </p>
               </div>

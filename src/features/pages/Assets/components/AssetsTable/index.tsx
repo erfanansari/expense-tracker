@@ -1,19 +1,21 @@
 import { useMemo } from 'react';
 
-import { ASSET_CATEGORY_COLORS, getAssetCategoryLabel } from '@constants/assets';
+import { useTranslations } from 'next-intl';
+
+import { ASSET_CATEGORY_COLORS } from '@constants/assets';
 import { Wallet } from 'lucide-react';
 
 import type { AssetCategory } from '@types';
 
 import { ApiError } from '@core/errors';
 
-import { onboardingCopy } from '@features/onboarding/copy';
-
 import Button from '@components/Button';
 import DataTable from '@components/DataTable';
 import EmptyState from '@components/EmptyState';
 import ErrorState from '@components/ErrorState';
 import Pulse from '@components/Skeleton';
+
+import { useAssetCategoryLabel } from '@hooks/use-constant-labels';
 
 import { useDrawerStore } from '@stores/drawer';
 
@@ -59,9 +61,16 @@ const AssetsTable = ({
   deletingId,
   onRetry,
 }: AssetsTableProps) => {
+  const tTables = useTranslations('tables');
+  const tOnboarding = useTranslations('onboarding.emptyStates');
+  const t = useTranslations('pages.assets');
+  const categoryLabel = useAssetCategoryLabel();
   const openAssetDrawer = useDrawerStore((state) => state.openAssetDrawer);
   // Memos
-  const assetColumns = useMemo(() => buildAssetColumns(onEdit, onDelete, deletingId), [onEdit, onDelete, deletingId]);
+  const assetColumns = useMemo(
+    () => buildAssetColumns(tTables, categoryLabel, onEdit, onDelete, deletingId),
+    [tTables, categoryLabel, onEdit, onDelete, deletingId]
+  );
 
   if (isLoading) {
     return <AssetsTableSkeleton />;
@@ -71,7 +80,7 @@ const AssetsTable = ({
     if (error instanceof ApiError && error.status === 401) return null;
     return (
       <div className="border-border-subtle bg-background relative overflow-hidden rounded-xl border shadow-sm">
-        <ErrorState title="Couldn't load assets" description={error.message} onRetry={onRetry} />
+        <ErrorState title={t('loadError')} description={error.message} onRetry={onRetry} />
       </div>
     );
   }
@@ -81,12 +90,12 @@ const AssetsTable = ({
       <div className="border-border-subtle bg-background relative rounded-xl border shadow-sm">
         <EmptyState
           icon={Wallet}
-          title={onboardingCopy.emptyStates.assetsTable.title}
-          description={onboardingCopy.emptyStates.assetsTable.description}
+          title={tOnboarding('assetsTable.title')}
+          description={tOnboarding('assetsTable.description')}
           className="py-16"
           action={
             <Button variant="outline" onClick={() => openAssetDrawer()}>
-              {onboardingCopy.emptyStates.addAsset}
+              {tOnboarding('addAsset')}
             </Button>
           }
         />
@@ -100,14 +109,13 @@ const AssetsTable = ({
         .sort(([, a], [, b]) => b.total - a.total)
         .map(([category, data]) => {
           const Icon = CATEGORY_ICONS[category as AssetCategory] || Wallet;
-          const labels = getAssetCategoryLabel(category);
           const color = CATEGORY_COLORS[category as AssetCategory] || '#525252';
 
           return (
             <div key={category}>
               <div className="mb-4 flex items-center gap-2">
                 <Icon className="h-5 w-5" style={{ color }} />
-                <h2 className="text-text-primary text-lg font-semibold">{labels.en}</h2>
+                <h2 className="text-text-primary text-lg font-semibold">{categoryLabel(category)}</h2>
               </div>
               <DataTable
                 data={data.assets}

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 import { getMeKeyGenerator } from '@api/getMeQuery';
@@ -14,7 +15,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
-import { loginSchema } from '@schemas';
+import { createLoginSchema } from '@schemas';
 
 import { DEMO_EMAIL, DEMO_PASSWORD } from '@constants';
 
@@ -26,6 +27,8 @@ import { useToast } from '@stores/toast';
 
 const Login = () => {
   // Customs
+  const t = useTranslations('auth');
+  const tZod = useTranslations();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
@@ -35,7 +38,7 @@ const Login = () => {
 
   // Forms
   const methods = useForm<LoginRequestData>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(createLoginSchema(tZod)),
     defaultValues: { email: '', password: '' },
     mode: 'all',
   });
@@ -47,7 +50,7 @@ const Login = () => {
       // Setting the `me` query data is enough — GuestGuard sees the user and
       // redirects (honoring ?rp=). Pushing /overview here too would race it.
       queryClient.setQueryData(getMeKeyGenerator(), user);
-      showToast(`Welcome back${user.name ? `, ${user.name}` : ''}!`, 'success');
+      showToast(user.name ? t('login.welcomeToastNamed', { name: user.name }) : t('login.welcomeToast'), 'success');
     },
     onError: (err, variables) => {
       if (err.message.toLowerCase().includes('email not verified')) {
@@ -55,17 +58,17 @@ const Login = () => {
         setError('');
         return;
       }
-      setError(err.message || 'Login failed');
+      setError(err.message || t('login.loginFailed'));
     },
   });
 
   const resendMutation = useMutation<ResendVerificationResponse, Error, ResendVerificationRequestData>({
     mutationKey: resendVerificationKeyGenerator(),
     onSuccess: () => {
-      showToast('Verification email sent — check your inbox.', 'success');
+      showToast(t('verify.sent'), 'success');
     },
     onError: (err) => {
-      setError(err.message || 'Could not resend verification email');
+      setError(err.message || t('verify.resendFailed'));
     },
   });
 
@@ -85,10 +88,10 @@ const Login = () => {
 
   return (
     <>
-      <h1 className="text-text-primary mb-1.5 text-center text-lg font-semibold sm:mb-2 sm:text-xl">Welcome Back</h1>
-      <p className="text-text-tertiary mb-5 text-center text-xs sm:mb-6 sm:text-sm">
-        Sign in to your account to continue
-      </p>
+      <h1 className="text-text-primary mb-1.5 text-center text-lg font-semibold sm:mb-2 sm:text-xl">
+        {t('login.title')}
+      </h1>
+      <p className="text-text-tertiary mb-5 text-center text-xs sm:mb-6 sm:text-sm">{t('login.subtitle')}</p>
 
       {error && (
         <div className="border-danger bg-danger-light text-danger mb-3 rounded-lg border p-2.5 text-xs sm:mb-4 sm:p-3 sm:text-sm">
@@ -98,16 +101,18 @@ const Login = () => {
 
       {unverifiedEmail && (
         <div className="border-warning bg-warning/10 text-text-secondary mb-3 rounded-lg border p-2.5 text-xs sm:mb-4 sm:p-3 sm:text-sm">
-          Your email isn&apos;t verified yet. Check your inbox for the verification link, or{' '}
-          <button
-            type="button"
-            onClick={() => resendMutation.mutate({ email: unverifiedEmail })}
-            disabled={resendMutation.isPending}
-            className="text-text-primary font-medium hover:underline disabled:opacity-50"
-          >
-            {resendMutation.isPending ? 'sending...' : 'resend it'}
-          </button>
-          .
+          {t.rich('login.unverified', {
+            resend: (chunks) => (
+              <button
+                type="button"
+                onClick={() => resendMutation.mutate({ email: unverifiedEmail })}
+                disabled={resendMutation.isPending}
+                className="text-text-primary font-medium hover:underline disabled:opacity-50"
+              >
+                {resendMutation.isPending ? t('login.sending') : chunks}
+              </button>
+            ),
+          })}
         </div>
       )}
 
@@ -115,8 +120,8 @@ const Login = () => {
         <FormInput
           name="email"
           type="email"
-          label="Email"
-          placeholder="test@example.com"
+          label={t('fields.email')}
+          placeholder={t('login.emailPlaceholder')}
           autoComplete="email"
           disabled={loading}
         />
@@ -124,15 +129,15 @@ const Login = () => {
         <FormInput
           name="password"
           type="password"
-          label="Password"
-          placeholder="Enter your password"
+          label={t('fields.password')}
+          placeholder={t('login.passwordPlaceholder')}
           autoComplete="current-password"
           disabled={loading}
         />
 
-        <div className="flex justify-end">
+        <div className="flex justify-end rtl:justify-start">
           <Link href="/forgot-password" className="text-text-primary text-xs font-medium hover:underline sm:text-sm">
-            Forgot password?
+            {t('login.forgotPassword')}
           </Link>
         </div>
 
@@ -144,10 +149,10 @@ const Login = () => {
           {loading ? (
             <>
               <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-              <span>Signing in...</span>
+              <span>{t('login.signingIn')}</span>
             </>
           ) : (
-            'Sign In'
+            t('login.signIn')
           )}
         </button>
       </Form>
@@ -157,7 +162,7 @@ const Login = () => {
           <div className="border-border-subtle w-full border-t" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background text-text-muted px-2">OR</span>
+          <span className="bg-background text-text-muted px-2">{t('or')}</span>
         </div>
       </div>
 
@@ -170,19 +175,22 @@ const Login = () => {
           disabled={loading}
           className="border-border-subtle bg-background text-text-primary hover:bg-background-secondary flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 sm:py-3 sm:text-base"
         >
-          Continue with Demo Account
+          {t('login.demoButton')}
         </button>
 
         <p className="text-text-muted text-center text-xs">
-          By continuing, you agree to our{' '}
-          <Link href="/terms" className="text-text-secondary hover:underline">
-            Terms of Service
-          </Link>{' '}
-          and{' '}
-          <Link href="/privacy" className="text-text-secondary hover:underline">
-            Privacy Policy
-          </Link>
-          .
+          {t.rich('login.agreeNotice', {
+            terms: (chunks) => (
+              <Link href="/terms" className="text-text-secondary hover:underline">
+                {chunks}
+              </Link>
+            ),
+            privacy: (chunks) => (
+              <Link href="/privacy" className="text-text-secondary hover:underline">
+                {chunks}
+              </Link>
+            ),
+          })}
         </p>
       </div>
     </>

@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from 'react';
 
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -11,7 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 
-import { resetPasswordSchema } from '@schemas';
+import { createResetPasswordSchema } from '@schemas';
 
 import Button from '@components/Button';
 import Form from '@components/Form';
@@ -20,6 +21,8 @@ import Loading from '@components/Loading';
 
 function ResetPasswordContent() {
   // Customs
+  const t = useTranslations('auth');
+  const tZod = useTranslations();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -33,7 +36,7 @@ function ResetPasswordContent() {
 
   // Forms
   const methods = useForm<ResetPasswordRequestData>({
-    resolver: zodResolver(resetPasswordSchema),
+    resolver: zodResolver(createResetPasswordSchema(tZod)),
     defaultValues: { token: token ?? '', password: '', passwordConfirm: '' },
     mode: 'all',
   });
@@ -42,13 +45,13 @@ function ResetPasswordContent() {
   const resetMutation = useMutation<void, Error, ResetPasswordRequestData>({
     mutationKey: resetPasswordKeyGenerator(),
     onSuccess: () => {
-      setMessage('Password reset successfully! Redirecting to login...');
+      setMessage(t('reset.success'));
       setTimeout(() => {
         router.push('/login');
       }, 2000);
     },
     onError: (err) => {
-      setError(err.message || 'Reset failed');
+      setError(err.message || t('reset.resetFailed'));
     },
   });
 
@@ -64,12 +67,10 @@ function ResetPasswordContent() {
   if (!tokenValid) {
     return (
       <>
-        <h1 className="text-text-primary mb-4 text-center text-2xl font-semibold">Invalid reset link</h1>
-        <p className="text-text-secondary mb-6 text-center">
-          This password reset link is invalid or has expired. Please request a new one.
-        </p>
+        <h1 className="text-text-primary mb-4 text-center text-2xl font-semibold">{t('reset.invalidTitle')}</h1>
+        <p className="text-text-secondary mb-6 text-center">{t('reset.invalidBody')}</p>
         <Link href="/forgot-password">
-          <Button className="w-full py-3">Request new reset link</Button>
+          <Button className="w-full py-3">{t('reset.requestNew')}</Button>
         </Link>
       </>
     );
@@ -77,8 +78,8 @@ function ResetPasswordContent() {
 
   return (
     <>
-      <h1 className="text-text-primary mb-2 text-center text-2xl font-semibold">Reset your password</h1>
-      <p className="text-text-secondary mb-6 text-center">Create a new password below</p>
+      <h1 className="text-text-primary mb-2 text-center text-2xl font-semibold">{t('reset.title')}</h1>
+      <p className="text-text-secondary mb-6 text-center">{t('reset.subtitle')}</p>
 
       {error && (
         <div className="border-danger bg-danger-light text-danger mb-4 rounded-lg border p-4 text-sm">{error}</div>
@@ -93,32 +94,32 @@ function ResetPasswordContent() {
           <FormInput
             name="password"
             type="password"
-            label="New password"
-            placeholder="Create a new password"
+            label={t('reset.newPassword')}
+            placeholder={t('reset.newPasswordPlaceholder')}
             autoComplete="new-password"
             disabled={loading}
           />
-          <p className="text-text-muted mt-2 text-xs">At least 8 characters, 1 uppercase, 1 lowercase, 1 number</p>
+          <p className="text-text-muted mt-2 text-xs">{t('reset.passwordHint')}</p>
         </div>
 
         <FormInput
           name="passwordConfirm"
           type="password"
-          label="Confirm password"
-          placeholder="Confirm your new password"
+          label={t('reset.confirmLabel')}
+          placeholder={t('reset.confirmPlaceholder')}
           autoComplete="new-password"
           disabled={loading}
         />
 
         <Button type="submit" disabled={loading} className="w-full py-3">
-          {loading ? 'Resetting...' : 'Reset password'}
+          {loading ? t('reset.resetting') : t('reset.resetAction')}
         </Button>
       </Form>
 
       <div className="mt-6 text-center text-sm">
         <p className="text-text-secondary">
           <Link href="/login" className="text-blue hover:text-blue-hover font-medium">
-            Back to login
+            {t('footer.backToLogin')}
           </Link>
         </p>
       </div>

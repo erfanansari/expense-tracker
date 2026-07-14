@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { getAllExpensesKeyGenerator } from '@api/getAllExpensesQuery';
 import type { GetAllExpensesResponse } from '@api/getAllExpensesQuery';
 import { getAssetListKeyGenerator } from '@api/getAssetListQuery';
@@ -10,7 +12,6 @@ import { updateOnboardingKeyGenerator } from '@api/updateOnboardingMutation';
 import type { UpdateOnboardingRequestData, UpdateOnboardingResponse } from '@api/updateOnboardingMutation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { onboardingCopy } from '@features/onboarding/copy';
 import { refreshSessionCookie } from '@features/onboarding/refresh-session-cookie';
 
 import { useAuth } from '@hooks/use-auth';
@@ -25,8 +26,6 @@ import SuggestionCard from './SuggestionCard';
 import { STEP_ORDER, useGettingStartedFlow } from './use-getting-started-flow';
 import type { StepKey } from './use-getting-started-flow';
 
-const copy = onboardingCopy.checklist;
-
 /**
  * The Chained Getting-Started Flow (spec: docs/superpowers/specs/
  * 2026-07-13-chained-getting-started-design.md): a ring dock bottom-left that
@@ -36,6 +35,7 @@ const copy = onboardingCopy.checklist;
  */
 const GettingStartedLauncher = () => {
   // Customs
+  const t = useTranslations('onboarding.checklist');
   const { user, updateUser } = useAuth();
   const openExpenseDrawer = useDrawerStore((state) => state.openExpenseDrawer);
   const openIncomeDrawer = useDrawerStore((state) => state.openIncomeDrawer);
@@ -98,8 +98,8 @@ const GettingStartedLauncher = () => {
 
   const steps: StepView[] = STEP_ORDER.map((key) => ({
     key,
-    label: copy.steps[key].label,
-    cta: copy.steps[key].cta,
+    label: t(`steps.${key}.label`),
+    cta: t(`steps.${key}.cta`),
     done: (counts[key] ?? 0) > 0,
     loading: loadings[key],
     onOpen: openers[key],
@@ -140,7 +140,7 @@ const GettingStartedLauncher = () => {
   })();
 
   return (
-    <div className="fixed bottom-5 left-5 z-40 flex flex-col items-start gap-3">
+    <div className="fixed start-5 bottom-5 z-40 flex flex-col items-start gap-3">
       {panelContent && (
         <div
           className={`border-border-subtle bg-background w-[344px] max-w-[calc(100vw-2.5rem)] rounded-xl border shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_4px_12px_-4px_rgba(0,0,0,0.1)] ${

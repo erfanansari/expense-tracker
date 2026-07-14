@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { forgotPasswordSchema } from '@schemas';
+import { createForgotPasswordSchema, fallbackT } from '@schemas';
 import type { ForgotPasswordSchema } from '@schemas';
 
 import client from '@core/client';
@@ -16,7 +16,7 @@ const keyGenerator: MutationKeyGenerator = () => ['auth', 'forgot-password'];
 client.registerEndpoint<RequestData, Response>(keyGenerator, {
   url: '/api/auth/request-password-reset',
   type: 'mutation',
-  requestDataSchema: forgotPasswordSchema,
+  requestDataSchema: createForgotPasswordSchema(fallbackT),
   // redirectTo lands the emailed link on our existing /reset-password?token= page
   requestNormalizer: (data) => ({ ...data, redirectTo: '/reset-password' }),
   responseSchema,

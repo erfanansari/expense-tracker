@@ -1,7 +1,6 @@
 export interface TabItem {
   value: string;
   label: string;
-  labelFa?: string;
 }
 
 export interface TabsProps {

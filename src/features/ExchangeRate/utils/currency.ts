@@ -67,16 +67,23 @@ export function seriesFromLatest(latest: LatestRates, rateDate = ''): RatesSerie
  * Format an amount in a currency: localized number + symbol in the right place.
  * `compact` abbreviates large values (10.69B, $61.33K) for space-tight spots
  * like dashboard cards and charts; default is full precision with separators.
+ * `locale` switches digits/grouping to Persian for the fa UI — the currency
+ * code itself (USD, IRT, ...) always stays Latin.
  */
-export function formatMoney(amount: number, currencyCode: string, opts?: { compact?: boolean }): string {
+export function formatMoney(
+  amount: number,
+  currencyCode: string,
+  opts?: { compact?: boolean; locale?: 'en' | 'fa' }
+): string {
   const def = getCurrency(currencyCode);
+  const intlLocale = opts?.locale === 'fa' ? 'fa-IR' : 'en-US';
   const number = opts?.compact
-    ? new Intl.NumberFormat('en-US', {
+    ? new Intl.NumberFormat(intlLocale, {
         notation: 'compact',
         compactDisplay: 'short',
         maximumFractionDigits: 2,
       }).format(amount)
-    : new Intl.NumberFormat('en-US', {
+    : new Intl.NumberFormat(intlLocale, {
         minimumFractionDigits: 0,
         maximumFractionDigits: def.decimals,
       }).format(amount);

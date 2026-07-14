@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 
+import { useLocale, useTranslations } from 'next-intl';
+
 import { DollarSign } from 'lucide-react';
 
 import { ApiError } from '@core/errors';
-
-import { onboardingCopy } from '@features/onboarding/copy';
 
 import Button from '@components/Button';
 import DataTable from '@components/DataTable';
@@ -12,7 +12,12 @@ import EmptyState from '@components/EmptyState';
 import ErrorState from '@components/ErrorState';
 import Pulse from '@components/Skeleton';
 
+import { useIncomeTypeLabel } from '@hooks/use-constant-labels';
+
 import { useDrawerStore } from '@stores/drawer';
+
+import { formatYear } from '@utils';
+import type { NumberLocale } from '@utils';
 
 import type { IncomeTableProps } from '../../@types';
 import { buildIncomeColumns, INCOME_TABLE_MIN_WIDTH } from '../../constants';
@@ -68,9 +73,17 @@ const IncomeTable = ({
   deletingId,
   onRetry,
 }: IncomeTableProps) => {
+  const tTables = useTranslations('tables');
+  const tOnboarding = useTranslations('onboarding.emptyStates');
+  const t = useTranslations('pages.income');
+  const locale = useLocale() as NumberLocale;
+  const incomeTypeLabel = useIncomeTypeLabel();
   const openIncomeDrawer = useDrawerStore((state) => state.openIncomeDrawer);
   // Memos
-  const incomeColumns = useMemo(() => buildIncomeColumns(onEdit, onDelete, deletingId), [onEdit, onDelete, deletingId]);
+  const incomeColumns = useMemo(
+    () => buildIncomeColumns(tTables, incomeTypeLabel, onEdit, onDelete, deletingId),
+    [tTables, incomeTypeLabel, onEdit, onDelete, deletingId]
+  );
 
   if (isLoading) {
     return <IncomeSkeleton />;
@@ -80,7 +93,7 @@ const IncomeTable = ({
     if (error instanceof ApiError && error.status === 401) return null;
     return (
       <div className="border-border-subtle bg-background relative overflow-hidden rounded-xl border shadow-sm">
-        <ErrorState title="Couldn't load income" description={error.message} onRetry={onRetry} />
+        <ErrorState title={t('loadError')} description={error.message} onRetry={onRetry} />
       </div>
     );
   }
@@ -90,12 +103,12 @@ const IncomeTable = ({
       <div className="border-border-subtle bg-background relative rounded-xl border shadow-sm">
         <EmptyState
           icon={DollarSign}
-          title={onboardingCopy.emptyStates.incomeTable.title}
-          description={onboardingCopy.emptyStates.incomeTable.description}
+          title={tOnboarding('incomeTable.title')}
+          description={tOnboarding('incomeTable.description')}
           className="py-16"
           action={
             <Button variant="outline" onClick={() => openIncomeDrawer()}>
-              {onboardingCopy.emptyStates.addIncome}
+              {tOnboarding('addIncome')}
             </Button>
           }
         />
@@ -107,9 +120,9 @@ const IncomeTable = ({
     <div className="space-y-6">
       {sortedYears.map((year) => (
         <div key={year}>
-          <h2 className="text-text-primary mb-4 text-lg font-semibold">{year}</h2>
+          <h2 className="text-text-primary mb-4 text-lg font-semibold">{formatYear(year, locale)}</h2>
           <DataTable
-            data={[...incomesByYear[year]].sort((a, b) => b.month - a.month)}
+            data={[...incomesByYear[year]].sort((a, b) => b.year - a.year || b.month - a.month)}
             columns={incomeColumns}
             minWidth={INCOME_TABLE_MIN_WIDTH}
             getRowId={(row) => String(row.id)}

@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -9,11 +10,14 @@ import { Zap } from 'lucide-react';
 
 import GuestGuard from '@features/guards/GuestGuard';
 
+import LocaleToggle from '@components/LocaleToggle';
+
 interface AuthLayoutProps {
   children: ReactNode;
 }
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
+  const t = useTranslations();
   const pathname = usePathname();
   const isLogin = pathname === '/login';
   const isSignup = pathname === '/signup';
@@ -29,9 +33,9 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
               <div className="bg-primary rounded-md p-2">
                 <Zap className="text-primary-foreground h-5 w-5" />
               </div>
-              <span className="text-text-primary text-xl font-bold">Kharji</span>
+              <span className="text-text-primary text-xl font-bold">{t('common.appName')}</span>
             </div>
-            <p className="text-text-tertiary">Personal Finance Tracker</p>
+            <p className="text-text-tertiary">{t('auth.tagline')}</p>
           </div>
 
           {/* Auth Card */}
@@ -40,27 +44,31 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           {/* Footer Link */}
           {isLogin && (
             <p className="text-text-tertiary mt-4 text-center text-sm sm:mt-6">
-              Don&apos;t have an account?{' '}
+              {t('auth.footer.noAccount')}{' '}
               <Link href="/signup" className="text-text-primary font-semibold hover:underline">
-                Sign up
+                {t('auth.footer.signUp')}
               </Link>
             </p>
           )}
           {isSignup && (
             <p className="text-text-tertiary mt-4 text-center text-sm sm:mt-6">
-              Already have an account?{' '}
+              {t('auth.footer.alreadyHave')}{' '}
               <Link href="/login" className="text-text-primary font-semibold hover:underline">
-                Sign in
+                {t('auth.footer.signIn')}
               </Link>
             </p>
           )}
           {isForgotPassword && (
             <p className="text-text-tertiary mt-4 text-center text-sm sm:mt-6">
               <Link href="/login" className="text-text-primary font-semibold hover:underline">
-                Back to login
+                {t('auth.footer.backToLogin')}
               </Link>
             </p>
           )}
+
+          <div className="mt-5 flex justify-center sm:mt-7">
+            <LocaleToggle />
+          </div>
         </div>
       </div>
     </GuestGuard>

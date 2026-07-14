@@ -1,9 +1,10 @@
+import { useTranslations } from 'next-intl';
+
 import { SearchX, Sparkles, TrendingUp } from 'lucide-react';
 
 import type { Expense } from '@types';
 
 import { ExpenseCharts } from '@features/expenses/components/ExpenseCharts';
-import { onboardingCopy } from '@features/onboarding/copy';
 
 import Button from '@components/Button';
 import EmptyState from '@components/EmptyState';
@@ -19,6 +20,8 @@ interface ReportsChartsProps {
 }
 
 const ReportsCharts = ({ expenses, granularity, hasAnyExpenses, onClearFilters }: ReportsChartsProps) => {
+  const t = useTranslations('pages.reports');
+  const tOnboarding = useTranslations('onboarding.emptyStates');
   const openExpenseDrawer = useDrawerStore((state) => state.openExpenseDrawer);
 
   if (expenses.length === 0) {
@@ -28,12 +31,12 @@ const ReportsCharts = ({ expenses, granularity, hasAnyExpenses, onClearFilters }
           // Filters/date range matched nothing — the data exists, the view doesn't
           <EmptyState
             icon={SearchX}
-            title={onboardingCopy.emptyStates.noMatch.title}
-            description={onboardingCopy.emptyStates.noMatch.description}
+            title={tOnboarding('noMatch.title')}
+            description={tOnboarding('noMatch.description')}
             className="py-20"
             action={
               <Button variant="outline" onClick={onClearFilters}>
-                {onboardingCopy.emptyStates.noMatch.clearFilters}
+                {tOnboarding('noMatch.clearFilters')}
               </Button>
             }
           />
@@ -41,12 +44,12 @@ const ReportsCharts = ({ expenses, granularity, hasAnyExpenses, onClearFilters }
           // First use — no expenses exist at all, so adjusting filters can't help
           <EmptyState
             icon={Sparkles}
-            title={onboardingCopy.emptyStates.reports.title}
-            description={onboardingCopy.emptyStates.reports.description}
+            title={tOnboarding('reports.title')}
+            description={tOnboarding('reports.description')}
             className="py-20"
             action={
               <Button variant="outline" onClick={() => openExpenseDrawer()}>
-                {onboardingCopy.emptyStates.addExpense}
+                {tOnboarding('addExpense')}
               </Button>
             }
           />
@@ -62,7 +65,7 @@ const ReportsCharts = ({ expenses, granularity, hasAnyExpenses, onClearFilters }
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
             <TrendingUp className="text-blue h-4 w-4" />
           </div>
-          <h2 className="text-text-primary text-lg font-semibold">Spending Analytics</h2>
+          <h2 className="text-text-primary text-lg font-semibold">{t('spendingAnalytics')}</h2>
         </div>
         <ExpenseCharts expenses={expenses} granularity={granularity} />
       </div>

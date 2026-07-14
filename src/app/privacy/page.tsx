@@ -1,11 +1,15 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
 import Privacy from '@features/pages/Privacy';
 
-export const metadata: Metadata = {
-  title: 'Privacy Policy',
-  description: 'How Kharji collects, uses, and protects your data.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('legal.privacy');
+  return {
+    title: t('title'),
+    description: t('metaDescription'),
+  };
+}
 
 const PrivacyPage = () => (
   <>

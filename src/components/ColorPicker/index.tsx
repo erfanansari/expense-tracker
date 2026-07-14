@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { CATEGORY_COLORS } from '@constants/categories';
 import { Check } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
@@ -10,8 +12,9 @@ interface ColorPickerProps {
 }
 
 const ColorPicker = ({ value, onChange }: ColorPickerProps) => {
+  const t = useTranslations('settings.categories');
   return (
-    <div role="radiogroup" aria-label="Choose category color" className="flex flex-wrap gap-2">
+    <div role="radiogroup" aria-label={t('chooseColor')} className="flex flex-wrap gap-2">
       {CATEGORY_COLORS.map((color) => {
         const isSelected = color.value === value;
         return (

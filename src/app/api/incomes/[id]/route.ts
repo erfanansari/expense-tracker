@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server';
 import { NextResponse } from 'next/server';
 
 import { createIncomeSchema } from '@schemas';
@@ -27,7 +28,8 @@ export const PUT = withAuth(async (user, request, { params }) => {
   if (existing instanceof NextResponse) return existing;
 
   const raw = await request.json();
-  const result = validateBody(createIncomeSchema.partial(), raw);
+  const t = await getTranslations();
+  const result = validateBody(createIncomeSchema(t).partial(), raw);
   if (result instanceof NextResponse) return result;
 
   const body = result.data;

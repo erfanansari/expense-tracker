@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 import { Zap } from 'lucide-react';
@@ -9,6 +10,7 @@ import GithubIcon from '@components/Icons/GithubIcon';
 import pkg from '../../../package.json';
 
 const Footer = () => {
+  const t = useTranslations();
   const commitSha = process.env.NEXT_PUBLIC_COMMIT_SHA || 'dev';
 
   return (
@@ -16,7 +18,7 @@ const Footer = () => {
       <div className="mx-auto flex max-w-7xl flex-col items-center gap-5 px-4 py-6 sm:flex-row sm:justify-between sm:px-6 lg:px-8">
         {/* Left: Logo + Nav */}
         <div className="flex flex-col items-center gap-5 sm:flex-row sm:gap-6">
-          <Link href="/" className="transition-opacity hover:opacity-80" aria-label="Kharji home">
+          <Link href="/" className="transition-opacity hover:opacity-80" aria-label={t('landing.header.homeAria')}>
             <div className="bg-primary rounded-md p-2">
               <Zap className="text-primary-foreground h-4 w-4" aria-hidden="true" />
             </div>
@@ -29,7 +31,7 @@ const Footer = () => {
                 href={item.href}
                 className="text-text-secondary hover:text-text-primary text-sm transition-colors"
               >
-                {item.label}
+                {t(`nav.${item.key}`)}
               </Link>
             ))}
           </nav>
@@ -37,7 +39,7 @@ const Footer = () => {
 
         {/* Right: Version + GitHub */}
         <div className="flex items-center gap-5">
-          <span className="text-text-muted font-mono text-xs">
+          <span className="text-text-muted font-mono text-xs" dir="ltr">
             v{pkg.version} · {commitSha}
           </span>
           <a
@@ -45,7 +47,7 @@ const Footer = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="text-text-secondary hover:text-text-primary transition-colors"
-            aria-label="View on GitHub"
+            aria-label={t('common.viewOnGithub')}
           >
             <GithubIcon className="h-5 w-5" aria-hidden="true" />
           </a>

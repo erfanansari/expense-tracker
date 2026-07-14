@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 
+import { useLocale, useTranslations } from 'next-intl';
+
 import { format, parseISO, startOfWeek } from 'date-fns';
 import { TrendingUp } from 'lucide-react';
 import {
@@ -17,17 +19,17 @@ import DateRangeSelector, {
   filterExpensesByDateRange,
   getChartGranularity,
 } from '@features/expenses/components/DateRangeSelector';
-import { onboardingCopy } from '@features/onboarding/copy';
 
 import Button from '@components/Button';
 import ChartTooltip from '@components/ChartTooltip';
 import EmptyState from '@components/EmptyState';
 
 import { useCurrency } from '@hooks/use-currency';
+import { useLocalePreferences } from '@hooks/use-locale-preferences';
 
 import { useDrawerStore } from '@stores/drawer';
 
-import { formatAxisNumber, formatChartTooltipDate } from '@utils';
+import { formatAxisNumber, formatChartAxisDate, formatChartTooltipDate, resolveCalendar } from '@utils';
 
 import { PIVOT_CURRENCY } from '@/constants/currencies';
 
@@ -46,6 +48,9 @@ function SpendingTooltip({
   label?: string | number;
   granularity: 'daily' | 'weekly' | 'monthly';
 }) {
+  const locale = useLocale() as 'en' | 'fa';
+  const { prefs } = useLocalePreferences();
+  const calendar = resolveCalendar(prefs.calendar, locale);
   const { display } = useCurrency();
   if (!active || !payload?.length) return null;
   const rawValue = payload[0].value;
@@ -58,7 +63,11 @@ function SpendingTooltip({
     <ChartTooltip
       primary={primary}
       secondary={secondary ?? undefined}
-      accent={label != null ? { text: formatChartTooltipDate(String(label), granularity), tone: 'blue' } : undefined}
+      accent={
+        label != null
+          ? { text: formatChartTooltipDate(String(label), granularity, locale, calendar), tone: 'blue' }
+          : undefined
+      }
     />
   );
 }
@@ -73,6 +82,12 @@ function getMonthKey(date: Date): string {
 }
 
 const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
+  // Customs
+  const t = useTranslations('pages.overview.spendingTrend');
+  const tOnboarding = useTranslations('onboarding.emptyStates');
+  const locale = useLocale() as 'en' | 'fa';
+  const { prefs: localePrefs } = useLocalePreferences();
+  const calendar = resolveCalendar(localePrefs.calendar, locale);
   const openExpenseDrawer = useDrawerStore((state) => state.openExpenseDrawer);
   // States
   const [dateRange, setDateRange] = useState<DateRange>('30D');
@@ -124,7 +139,7 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
             <TrendingUp className="text-blue h-5 w-5" />
           </div>
-          <h2 className="text-text-primary text-lg font-semibold">Spending Trend</h2>
+          <h2 className="text-text-primary text-lg font-semibold">{t('cardTitle')}</h2>
         </div>
         <DateRangeSelector value={dateRange} onChange={setDateRange} />
       </div>
@@ -132,25 +147,27 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
       {spendingTrend.length === 0 ? (
         <EmptyState
           icon={TrendingUp}
-          title={onboardingCopy.emptyStates.spendingTrend.title}
-          description={
-            expenses.length === 0
-              ? onboardingCopy.emptyStates.spendingTrend.description
-              : 'No spending recorded in this date range. Try a wider range.'
-          }
+          title={tOnboarding('spendingTrend.title')}
+          description={expenses.length === 0 ? tOnboarding('spendingTrend.description') : t('noDataInRange')}
           action={
             expenses.length === 0 ? (
               <Button variant="outline" onClick={() => openExpenseDrawer()}>
-                {onboardingCopy.emptyStates.addExpense}
+                {tOnboarding('addExpense')}
               </Button>
             ) : undefined
           }
           className="min-h-[320px]"
         />
       ) : (
-        <div className="min-h-[320px] flex-1">
+        <div className="min-h-[320px] flex-1" dir="ltr">
           <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-            <AreaChart data={spendingTrend} margin={{ left: 0, right: 20, top: 8, bottom: 0 }}>
+            <AreaChart
+              data={spendingTrend}
+              // Farsi's compact notation spells out "میلیون"/"میلیارد" in full
+              // instead of abbreviating to a single letter ("M"/"B"), so the
+              // Y-axis needs extra breathing room to avoid clipping the widest tick.
+              margin={{ left: locale === 'fa' ? 12 : 0, right: 20, top: 8, bottom: 0 }}
+            >
               <defs>
                 <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="var(--color-blue)" stopOpacity={0.2} />
@@ -170,8 +187,8 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
                 minTickGap={40}
                 interval="preserveStartEnd"
                 tickFormatter={(value: string) => {
-                  if (granularity === 'monthly') return format(parseISO(`${value}-01`), 'MMM yyyy');
-                  return format(parseISO(value), 'MMM d');
+                  const date = granularity === 'monthly' ? parseISO(`${value}-01`) : parseISO(value);
+                  return formatChartAxisDate(date, granularity === 'monthly' ? 'month' : 'day', locale, calendar);
                 }}
               />
               <YAxis
@@ -179,7 +196,7 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
                 tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
                 axisLine={{ stroke: 'var(--color-border-subtle)' }}
                 tickLine={{ stroke: 'var(--color-border-subtle)' }}
-                tickFormatter={formatAxisNumber}
+                tickFormatter={(value: number) => formatAxisNumber(value, locale)}
               />
               <RechartsTooltip
                 content={(props) => <SpendingTooltip {...props} granularity={granularity} />}

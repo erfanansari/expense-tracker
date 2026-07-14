@@ -1,11 +1,11 @@
 import { z } from 'zod';
 
-import { createAssetSchema } from '@schemas';
+import { createAssetSchema, fallbackT } from '@schemas';
 
 import client from '@core/client';
 import type { MutationKeyGenerator } from '@core/client/@types';
 
-const requestDataSchema = createAssetSchema.partial().extend({ id: z.number() });
+const requestDataSchema = createAssetSchema(fallbackT).partial().extend({ id: z.number() });
 
 type RequestData = z.infer<typeof requestDataSchema>;
 const responseSchema = z.object({ message: z.string() });

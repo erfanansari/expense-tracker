@@ -3,6 +3,8 @@
 import { useEffect } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { beginSignout } from '@core/client/auth-handler';
 
 import FullPageLoader from '@components/FullPageLoader';
@@ -12,6 +14,7 @@ import { useAuth } from '@hooks/use-auth';
 import { useToast } from '@stores/toast';
 
 const AuthGuard: FC<PropsWithChildren> = ({ children }) => {
+  const t = useTranslations('nav');
   const { user, loading } = useAuth();
   const { showToast } = useToast();
 
@@ -22,7 +25,7 @@ const AuthGuard: FC<PropsWithChildren> = ({ children }) => {
     // signout — it will toast and navigate; we just keep the loader on screen.
     if (!beginSignout()) return;
 
-    showToast("You've been signed out.", 'error');
+    showToast(t('sessionExpiredToast'), 'error');
 
     // The cookie may still be present but invalid (expired JWT). Clear it
     // first so the proxy doesn't bounce /login back to /overview, then
@@ -39,7 +42,7 @@ const AuthGuard: FC<PropsWithChildren> = ({ children }) => {
       .finally(() => {
         window.location.href = '/login';
       });
-  }, [user, loading, showToast]);
+  }, [user, loading, showToast, t]);
 
   // Keep the loader up while signed out and redirecting — returning null here
   // paints a bare white page for the whole cookie-clear + navigation window.

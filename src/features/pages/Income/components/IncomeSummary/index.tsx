@@ -1,13 +1,17 @@
-import { getMonthLabel } from '@constants/income';
-import { Banknote, DollarSign, TrendingUp } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 
-import { onboardingCopy } from '@features/onboarding/copy';
+import { Banknote, DollarSign, TrendingUp } from 'lucide-react';
 
 import AnimatedMoney from '@components/AnimatedMoney';
 import { ZERO_CAPTION_CLASS, ZERO_VALUE_CLASS } from '@components/StatZeroState';
 
 import { useCurrency } from '@hooks/use-currency';
 import type { MoneyItem } from '@hooks/use-currency';
+import { useLocalePreferences } from '@hooks/use-locale-preferences';
+import { useMonthYearDisplay } from '@hooks/use-month-year-display';
+
+import { formatYear, getDisplayYear, resolveCalendar } from '@utils';
+import type { AppLocale } from '@utils';
 
 import type { Income } from '@/@types/income';
 
@@ -21,6 +25,12 @@ const toItem = (inc: Income): MoneyItem => ({
 });
 
 const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
+  const t = useTranslations('pages.income.stats');
+  const tZero = useTranslations('onboarding.zeroCaptions');
+  const locale = useLocale() as AppLocale;
+  const monthYearDisplay = useMonthYearDisplay();
+  const { prefs } = useLocalePreferences();
+  const calendar = resolveCalendar(prefs.calendar, locale);
   const { primaryCurrency, secondaryCurrency, sumTo, formatFull } = useCurrency();
   const showSecondary = !!secondaryCurrency && secondaryCurrency !== primaryCurrency;
 
@@ -28,6 +38,9 @@ const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
   const currentMonth = new Date().getMonth() + 1;
   const lastMonth = currentMonth === 1 ? 12 : currentMonth - 1;
   const lastMonthYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+  // "This year" follows the same calendar as the Income table's grouping below,
+  // so the YTD card always matches the sum of that table's current-year section.
+  const currentDisplayYear = getDisplayYear(currentMonth, currentYear, calendar);
 
   // Each income converted at its OWN month's rate, then summed — accurate & stable.
   const sumPair = (list: Income[]) => {
@@ -39,7 +52,7 @@ const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
   };
 
   const all = sumPair(incomes);
-  const ytd = sumPair(incomes.filter((inc) => inc.year === currentYear));
+  const ytd = sumPair(incomes.filter((inc) => getDisplayYear(inc.month, inc.year, calendar) === currentDisplayYear));
   const last = sumPair(incomes.filter((inc) => inc.year === lastMonthYear && inc.month === lastMonth));
   const distinctMonths = new Set(incomes.map((inc) => `${inc.year}-${inc.month}`)).size;
   const avg = { p: distinctMonths ? all.p / distinctMonths : 0, s: distinctMonths ? all.s / distinctMonths : 0 };
@@ -48,12 +61,12 @@ const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
   const sortedByPeriod = [...incomes].sort((a, b) => a.year - b.year || a.month - b.month);
   const earliest = sortedByPeriod[0];
   const latest = sortedByPeriod[sortedByPeriod.length - 1];
-  let incomeSpanLabel = 'All time';
+  let incomeSpanLabel = t('allTime');
   if (earliest) {
     const sameMonth = earliest.year === latest.year && earliest.month === latest.month;
-    incomeSpanLabel = sameMonth
-      ? `${getMonthLabel(earliest.month).en} ${earliest.year}`
-      : `${getMonthLabel(earliest.month).en.slice(0, 3)} ${earliest.year} – ${getMonthLabel(latest.month).en.slice(0, 3)} ${latest.year}`;
+    const earliestDisplay = monthYearDisplay(earliest.month, earliest.year);
+    const latestDisplay = monthYearDisplay(latest.month, latest.year);
+    incomeSpanLabel = sameMonth ? earliestDisplay.primary : `${earliestDisplay.primary} – ${latestDisplay.primary}`;
   }
 
   const hasIncomes = incomes.length > 0;
@@ -86,9 +99,9 @@ const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
             <Banknote className="text-success h-5 w-5" />
           </div>
         </div>
-        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Total Income</p>
+        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{t('totalIncome')}</p>
         {renderPair(all.p, all.s, 'text-success text-2xl font-semibold tabular-nums')}
-        <p className={captionClass}>{hasIncomes ? incomeSpanLabel : onboardingCopy.zeroCaptions.incomeTotal}</p>
+        <p className={captionClass}>{hasIncomes ? incomeSpanLabel : tZero('incomeTotal')}</p>
       </div>
 
       {/* YTD Income */}
@@ -98,9 +111,9 @@ const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
             <TrendingUp className="text-blue h-5 w-5" />
           </div>
         </div>
-        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">YTD Income</p>
+        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{t('ytdIncome')}</p>
         {renderPair(ytd.p, ytd.s, 'text-text-primary text-2xl font-semibold tabular-nums')}
-        <p className={captionClass}>{hasIncomes ? currentYear : onboardingCopy.zeroCaptions.incomeYtd}</p>
+        <p className={captionClass}>{hasIncomes ? formatYear(currentDisplayYear, locale) : tZero('incomeYtd')}</p>
       </div>
 
       {/* Last Month */}
@@ -110,10 +123,10 @@ const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
             <DollarSign className="text-text-secondary h-5 w-5" />
           </div>
         </div>
-        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Last Month</p>
+        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{t('lastMonth')}</p>
         {renderPair(last.p, last.s, 'text-text-primary text-2xl font-semibold tabular-nums')}
         <p className={captionClass}>
-          {hasIncomes ? `${getMonthLabel(lastMonth).en} ${lastMonthYear}` : onboardingCopy.zeroCaptions.incomeLastMonth}
+          {hasIncomes ? monthYearDisplay(lastMonth, lastMonthYear).primary : tZero('incomeLastMonth')}
         </p>
       </div>
 
@@ -124,12 +137,10 @@ const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {
             <TrendingUp className="text-text-secondary h-5 w-5" />
           </div>
         </div>
-        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Monthly Average</p>
+        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{t('monthlyAverage')}</p>
         {renderPair(avg.p, avg.s, 'text-text-primary text-2xl font-semibold tabular-nums')}
         <p className={captionClass}>
-          {hasIncomes
-            ? `over ${distinctMonths} month${distinctMonths !== 1 ? 's' : ''}`
-            : onboardingCopy.zeroCaptions.incomeAverage}
+          {hasIncomes ? t('overMonths', { count: distinctMonths }) : tZero('incomeAverage')}
         </p>
       </div>
     </div>

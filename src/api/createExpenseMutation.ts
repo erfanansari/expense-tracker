@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { createExpenseSchema } from '@schemas';
+import { createExpenseSchema, fallbackT } from '@schemas';
 import type { CreateExpenseSchema } from '@schemas';
 
 import client from '@core/client';
@@ -15,7 +15,7 @@ const keyGenerator: MutationKeyGenerator = () => ['expenses', 'create'];
 client.registerEndpoint<RequestData, Response>(keyGenerator, {
   url: '/api/expenses',
   type: 'mutation',
-  requestDataSchema: createExpenseSchema,
+  requestDataSchema: createExpenseSchema(fallbackT),
   responseSchema,
 });
 

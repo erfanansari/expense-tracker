@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server';
 import { NextResponse } from 'next/server';
 
 import { createAssetSchema } from '@schemas';
@@ -30,7 +31,8 @@ export const GET = withAuth(async (user, request) => {
 // POST /api/assets - Create a new asset
 export const POST = withAuth(async (user, request) => {
   const raw = await request.json();
-  const result = validateBody(createAssetSchema, raw);
+  const t = await getTranslations();
+  const result = validateBody(createAssetSchema(t), raw);
   if (result instanceof NextResponse) return result;
 
   const body = result.data;

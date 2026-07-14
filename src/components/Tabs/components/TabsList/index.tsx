@@ -13,7 +13,7 @@ const TabsList = ({ items, className }: TabsListProps) => (
     className={twMerge('border-border-subtle bg-background-secondary flex gap-1 rounded-lg border p-1', className)}
   >
     {items.map((item) => (
-      <TabsTrigger key={item.value} value={item.value} label={item.label} labelFa={item.labelFa} />
+      <TabsTrigger key={item.value} value={item.value} label={item.label} />
     ))}
   </RadixTabs.List>
 );
@@ -23,10 +23,9 @@ export default TabsList;
 interface TabsTriggerProps {
   value: string;
   label: string;
-  labelFa?: string;
 }
 
-function TabsTrigger({ value, label, labelFa }: TabsTriggerProps) {
+function TabsTrigger({ value, label }: TabsTriggerProps) {
   return (
     <RadixTabs.Trigger
       value={value}
@@ -38,11 +37,6 @@ function TabsTrigger({ value, label, labelFa }: TabsTriggerProps) {
       )}
     >
       <span>{label}</span>
-      {labelFa && (
-        <span className="text-text-muted text-xs" dir="rtl">
-          {labelFa}
-        </span>
-      )}
     </RadixTabs.Trigger>
   );
 }

@@ -1,6 +1,8 @@
 import { createAssetSchema } from '../asset';
+import { fallbackT } from '../fallback-translator';
 
 describe('createAssetSchema', () => {
+  const schema = createAssetSchema(fallbackT);
   const validAsset = {
     category: 'crypto' as const,
     name: 'Bitcoin',
@@ -10,12 +12,12 @@ describe('createAssetSchema', () => {
   };
 
   it('accepts valid asset data', () => {
-    const result = createAssetSchema.safeParse(validAsset);
+    const result = schema.safeParse(validAsset);
     expect(result.success).toBe(true);
   });
 
   it('accepts asset with optional fields', () => {
-    const result = createAssetSchema.safeParse({
+    const result = schema.safeParse({
       ...validAsset,
       unit: 'BTC',
       unitValue: 100000,
@@ -25,17 +27,17 @@ describe('createAssetSchema', () => {
   });
 
   it('rejects invalid category', () => {
-    const result = createAssetSchema.safeParse({ ...validAsset, category: 'invalid' });
+    const result = schema.safeParse({ ...validAsset, category: 'invalid' });
     expect(result.success).toBe(false);
   });
 
   it('rejects empty name', () => {
-    const result = createAssetSchema.safeParse({ ...validAsset, name: '' });
+    const result = schema.safeParse({ ...validAsset, name: '' });
     expect(result.success).toBe(false);
   });
 
   it('rejects negative quantity', () => {
-    const result = createAssetSchema.safeParse({ ...validAsset, quantity: -1 });
+    const result = schema.safeParse({ ...validAsset, quantity: -1 });
     expect(result.success).toBe(false);
   });
 });

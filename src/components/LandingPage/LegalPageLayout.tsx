@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import Footer from '@components/LandingPage/Footer';
 import Header from '@components/LandingPage/Header';
 
@@ -10,6 +12,7 @@ interface LegalPageLayoutProps {
 }
 
 const LegalPageLayout = ({ title, lastUpdated, children }: LegalPageLayoutProps) => {
+  const t = useTranslations('landing.legal');
   return (
     <div className="bg-background flex min-h-screen flex-col">
       <Header />
@@ -17,7 +20,7 @@ const LegalPageLayout = ({ title, lastUpdated, children }: LegalPageLayoutProps)
         <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
           <h1 className="text-text-primary text-3xl font-bold sm:text-4xl">{title}</h1>
           <p className="text-text-muted mt-2 text-sm">
-            Last updated: <time dateTime={lastUpdated}>{lastUpdated}</time>
+            {t('lastUpdated')} <time dateTime={lastUpdated}>{lastUpdated}</time>
           </p>
           <div className="mt-8 flex flex-col gap-8">{children}</div>
         </div>

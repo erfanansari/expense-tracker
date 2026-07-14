@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { forgotPasswordKeyGenerator } from '@api/forgotPasswordMutation';
 import type { ForgotPasswordRequestData, ForgotPasswordResponse } from '@api/forgotPasswordMutation';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,19 +11,23 @@ import { useMutation } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
-import { forgotPasswordSchema } from '@schemas';
+import { createForgotPasswordSchema } from '@schemas';
 
 import Form from '@components/Form';
 import FormInput from '@components/Form/components/FormInput';
 
 const ForgotPassword = () => {
+  // Customs
+  const t = useTranslations('auth');
+  const tZod = useTranslations();
+
   // States
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
   // Forms
   const methods = useForm<ForgotPasswordRequestData>({
-    resolver: zodResolver(forgotPasswordSchema),
+    resolver: zodResolver(createForgotPasswordSchema(tZod)),
     defaultValues: { email: '' },
     mode: 'all',
   });
@@ -30,11 +36,11 @@ const ForgotPassword = () => {
   const forgotPasswordMutation = useMutation<ForgotPasswordResponse, Error, ForgotPasswordRequestData>({
     mutationKey: forgotPasswordKeyGenerator(),
     onSuccess: () => {
-      setMessage('If that email exists, we sent a password reset link');
+      setMessage(t('forgot.success'));
       methods.reset();
     },
     onError: (err) => {
-      setError(err.message || 'Request failed');
+      setError(err.message || t('forgot.requestFailed'));
     },
   });
 
@@ -49,10 +55,10 @@ const ForgotPassword = () => {
 
   return (
     <>
-      <h1 className="text-text-primary mb-1.5 text-center text-lg font-semibold sm:mb-2 sm:text-xl">Reset Password</h1>
-      <p className="text-text-tertiary mb-5 text-center text-xs sm:mb-6 sm:text-sm">
-        Enter your email and we&apos;ll send you a link to reset your password.
-      </p>
+      <h1 className="text-text-primary mb-1.5 text-center text-lg font-semibold sm:mb-2 sm:text-xl">
+        {t('forgot.title')}
+      </h1>
+      <p className="text-text-tertiary mb-5 text-center text-xs sm:mb-6 sm:text-sm">{t('forgot.subtitle')}</p>
 
       {error && (
         <div className="border-danger bg-danger-light text-danger mb-3 rounded-lg border p-2.5 text-xs sm:mb-4 sm:p-3 sm:text-sm">
@@ -70,8 +76,8 @@ const ForgotPassword = () => {
         <FormInput
           name="email"
           type="email"
-          label="Email"
-          placeholder="you@example.com"
+          label={t('fields.email')}
+          placeholder={t('forgot.emailPlaceholder')}
           autoComplete="email"
           disabled={loading}
         />
@@ -84,10 +90,10 @@ const ForgotPassword = () => {
           {loading ? (
             <>
               <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-              <span>Sending...</span>
+              <span>{t('forgot.sending')}</span>
             </>
           ) : (
-            'Send Reset Link'
+            t('forgot.send')
           )}
         </button>
       </Form>

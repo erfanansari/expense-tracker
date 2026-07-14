@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { loginSchema } from '@schemas';
+import { createLoginSchema, fallbackT } from '@schemas';
 import type { LoginSchema } from '@schemas';
 
 import client from '@core/client';
@@ -18,7 +18,7 @@ const keyGenerator: MutationKeyGenerator = () => ['auth', 'login'];
 client.registerEndpoint<RequestData, Response>(keyGenerator, {
   url: '/api/auth/sign-in/email',
   type: 'mutation',
-  requestDataSchema: loginSchema,
+  requestDataSchema: createLoginSchema(fallbackT),
   // Better Auth returns { redirect, token, user } — reshape to { user: AuthUser }
   responseNormalizer: (response) => {
     const raw = response as unknown;

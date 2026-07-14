@@ -1,9 +1,9 @@
 import type { FC, ReactNode } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import type { SummaryPair } from '@api/getSummaryQuery';
 import { Banknote, TrendingDown, TrendingUp } from 'lucide-react';
-
-import { onboardingCopy } from '@features/onboarding/copy';
 
 import AnimatedMoney from '@components/AnimatedMoney';
 import StatZeroState from '@components/StatZeroState';
@@ -64,6 +64,8 @@ const StatCard: FC<StatCardProps> = ({
 };
 
 const OverviewStats = ({ summary }: OverviewStatsProps) => {
+  const t = useTranslations('pages.overview.stats');
+  const tZero = useTranslations('onboarding.zeroCaptions');
   const { formatFull, primaryCurrency: ctxPrimary, secondaryCurrency: ctxSecondary } = useCurrency();
 
   // Totals arrive already converted (per-record, historical). Fall back to the
@@ -75,24 +77,24 @@ const OverviewStats = ({ summary }: OverviewStatsProps) => {
   return (
     <>
       <StatCard
-        label="Net Worth"
+        label={t('netWorth')}
         icon={<Banknote className="text-success h-5 w-5" />}
         pair={summary?.net_worth}
-        emptyCaption={onboardingCopy.zeroCaptions.netWorth}
+        emptyCaption={tZero('netWorth')}
         {...shared}
       />
       <StatCard
-        label="Total Income"
+        label={t('totalIncome')}
         icon={<TrendingUp className="text-success h-5 w-5" />}
         pair={summary?.total_income}
-        emptyCaption={onboardingCopy.zeroCaptions.income}
+        emptyCaption={tZero('income')}
         {...shared}
       />
       <StatCard
-        label="Total Expenses"
+        label={t('totalExpenses')}
         icon={<TrendingDown className="text-danger h-5 w-5" />}
         pair={summary?.total_expenses}
-        emptyCaption={onboardingCopy.zeroCaptions.expenses}
+        emptyCaption={tZero('expenses')}
         {...shared}
       />
     </>

@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { createAssetKeyGenerator } from '@api/createAssetMutation';
 import { ASSETS_SCOPE } from '@api/getAssetListQuery';
 import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
@@ -28,6 +30,7 @@ import FormMoneyInput from '@components/Form/components/FormMoneyInput';
 import FormSelect from '@components/Form/components/FormSelect';
 import Tooltip from '@components/Tooltip';
 
+import { useAssetCategoryLabel } from '@hooks/use-constant-labels';
 import { useCurrency } from '@hooks/use-currency';
 
 import { useToast } from '@stores/toast';
@@ -55,6 +58,10 @@ const buildFormData = (asset: Asset): CreateAssetSchema => ({
 
 const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: AssetFormProps) => {
   // Customs
+  const t = useTranslations('forms');
+  const tCommon = useTranslations('common');
+  const tZod = useTranslations();
+  const categoryLabel = useAssetCategoryLabel();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const { primaryCurrency } = useCurrency();
@@ -76,7 +83,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
 
   // Forms
   const methods = useForm<CreateAssetSchema>({
-    resolver: zodResolver(createAssetSchema),
+    resolver: zodResolver(createAssetSchema(tZod)),
     defaultValues: editingAsset ? buildFormData(editingAsset) : defaultFormData,
     mode: 'all',
   });
@@ -141,11 +148,11 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
       if (editingAsset) {
         await updateMutation.mutateAsync({ id: editingAsset.id, ...dataToSubmit });
         await invalidateAssetData(queryClient);
-        showToast('Asset updated successfully!', 'success');
+        showToast(t('asset.updated'), 'success');
       } else {
         await createMutation.mutateAsync(dataToSubmit);
         await invalidateAssetData(queryClient);
-        showToast('Asset added successfully!', 'success');
+        showToast(t('asset.added'), 'success');
       }
 
       reset(defaultFormData);
@@ -168,22 +175,22 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
         <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <Package className="text-text-muted h-4 w-4" />
-            Category
+            {t('shared.category')}
           </label>
           <FormSelect
             name="category"
-            options={ASSET_CATEGORIES.map((cat) => ({ value: cat.value, label: cat.label }))}
+            options={ASSET_CATEGORIES.map((cat) => ({ value: cat.value, label: categoryLabel(cat.value) }))}
           />
         </div>
 
         <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <FileText className="text-text-muted h-4 w-4" />
-            Name
+            {t('asset.name')}
           </label>
           <input
             type="text"
-            placeholder="e.g., BTC, Gold 18K, Bank Melli..."
+            placeholder={t('asset.namePlaceholder')}
             {...methods.register('name')}
             className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
           />
@@ -198,10 +205,10 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
         <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <Package className="text-text-muted h-4 w-4" />
-            Quantity
+            {t('asset.quantity')}
           </label>
           <AmountInput
-            placeholder="e.g. 1, 2.5k"
+            placeholder={t('asset.quantityPlaceholder')}
             required
             value={quantity}
             onChange={handleQuantityChange}
@@ -211,11 +218,11 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
         <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <span className="text-text-muted">U</span>
-            Unit (Optional)
+            {t('asset.unit')}
           </label>
           <input
             type="text"
-            placeholder="e.g., BTC, gram, unit..."
+            placeholder={t('asset.unitPlaceholder')}
             {...methods.register('unit')}
             className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
           />
@@ -226,10 +233,10 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
       <div className="space-y-1">
         <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
           <Coins className="text-text-muted h-4 w-4" />
-          Unit Value ({currency})
+          {t('asset.unitValue', { currency })}
         </label>
         <AmountInput
-          placeholder="e.g. 93k, 100"
+          placeholder={t('asset.unitValuePlaceholder')}
           value={unitValue ?? 0}
           onChange={handleUnitValueChange}
           className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
@@ -240,13 +247,13 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
       <div className="space-y-1">
         <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
           <Coins className="text-text-muted h-4 w-4" />
-          Total Value
+          {t('asset.totalValue')}
         </label>
         <Tooltip content={numberToPersianWord} position="top">
           <FormMoneyInput
             amountName="amount"
             currencyName="currency"
-            placeholder="e.g. 1k, 50m"
+            placeholder={t('asset.totalValuePlaceholder')}
             onAmountChange={handleTotalValueChange}
           />
         </Tooltip>
@@ -256,10 +263,10 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
       <div className="space-y-1">
         <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
           <FileText className="text-text-muted h-4 w-4" />
-          Notes (Optional)
+          {t('shared.notes')}
         </label>
         <textarea
-          placeholder="Any additional notes..."
+          placeholder={t('shared.notesPlaceholder')}
           rows={2}
           {...methods.register('notes')}
           className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full resize-none rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
@@ -267,23 +274,23 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
       </div>
 
       {/* Buttons */}
-      <div className="flex gap-3 pt-1">
+      <div className="flex gap-3 pt-1 rtl:flex-row-reverse">
         <Button type="submit" disabled={isSubmitting || !name} variant="primary" className="flex-1">
           {isSubmitting ? (
             <>
               <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-              <span>Saving...</span>
+              <span>{t('shared.saving')}</span>
             </>
           ) : (
             <>
               {!editingAsset && <Plus className="h-4 w-4 shrink-0" />}
-              <span>{editingAsset ? 'Update' : 'Add'}</span>
+              <span>{editingAsset ? t('shared.update') : t('shared.add')}</span>
             </>
           )}
         </Button>
         {editingAsset && (
           <Button type="button" onClick={handleCancel} variant="outline">
-            Cancel
+            {tCommon('cancel')}
           </Button>
         )}
       </div>

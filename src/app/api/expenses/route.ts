@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server';
 import { NextResponse } from 'next/server';
 
 import { createExpenseSchema } from '@schemas';
@@ -115,7 +116,8 @@ export const GET = withAuth(async (user, request) => {
 // POST /api/expenses - Create a new expense
 export const POST = withAuth(async (user, request) => {
   const raw = await request.json();
-  const result = validateBody(createExpenseSchema, raw);
+  const t = await getTranslations();
+  const result = validateBody(createExpenseSchema(t), raw);
   if (result instanceof NextResponse) return result;
 
   const body = result.data;

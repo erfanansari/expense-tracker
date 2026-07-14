@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { AlertTriangle, Loader2 } from 'lucide-react';
 
 import Button from '@components/Button';
@@ -24,6 +26,7 @@ const DeleteConfirmModal = ({
   onCancel,
   isDeleting = false,
 }: DeleteConfirmModalProps) => {
+  const t = useTranslations('common');
   return (
     <Modal isOpen={isOpen} onClose={isDeleting ? () => {} : onCancel} showCloseButton={false}>
       <div className="text-center">
@@ -35,20 +38,22 @@ const DeleteConfirmModal = ({
         {/* Title */}
         <div className="mt-4">
           <h3 className="text-text-primary text-lg font-semibold">
-            {itemName ? `${title} "${itemName}"?` : `${title}?`}
+            {itemName ? t('deleteConfirm.titleWithItem', { title, itemName }) : t('deleteConfirm.titleOnly', { title })}
           </h3>
         </div>
 
         {/* Message */}
         <div className="mt-3 space-y-2">
           <p className="text-text-secondary text-sm">{message}</p>
-          <p className="text-text-secondary text-sm font-medium">This action cannot be undone.</p>
+          <p className="text-text-secondary text-sm font-medium">{t('actionUndone')}</p>
         </div>
 
-        {/* Actions */}
+        {/* Actions — no rtl override: Cancel is coded first, so a plain flex row
+            under RTL already puts Cancel on the right and Confirm/primary on
+            the left. */}
         <div className="mt-6 flex gap-3">
           <Button variant="outline" onClick={onCancel} disabled={isDeleting} className="flex-1">
-            Cancel
+            {t('cancel')}
           </Button>
           <Button
             variant="primary"
@@ -59,10 +64,10 @@ const DeleteConfirmModal = ({
             {isDeleting ? (
               <>
                 <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-                <span>Deleting...</span>
+                <span>{t('deleting')}</span>
               </>
             ) : (
-              'Delete'
+              t('delete')
             )}
           </Button>
         </div>

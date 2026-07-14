@@ -1,11 +1,15 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
 import Terms from '@features/pages/Terms';
 
-export const metadata: Metadata = {
-  title: 'Terms of Service',
-  description: 'The terms that govern your use of Kharji.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('legal.terms');
+  return {
+    title: t('title'),
+    description: t('metaDescription'),
+  };
+}
 
 const TermsPage = () => (
   <>

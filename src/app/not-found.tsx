@@ -1,8 +1,10 @@
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
 import { Zap } from 'lucide-react';
 
-export default function NotFound() {
+export default async function NotFound() {
+  const t = await getTranslations('notFound');
   return (
     <main className="bg-background flex min-h-screen flex-col items-center justify-center px-4 sm:px-6">
       <div className="relative flex max-w-sm flex-col items-center gap-8 py-16 text-center">
@@ -24,9 +26,9 @@ export default function NotFound() {
 
         {/* Text */}
         <div className="flex flex-col items-center gap-3">
-          <p className="text-text-primary text-8xl font-bold tracking-tight">404</p>
-          <p className="text-text-secondary text-sm font-medium">Page not found</p>
-          <p className="text-text-muted text-xs">The page you are looking for doesn&apos;t exist or has been moved.</p>
+          <p className="text-text-primary text-8xl font-bold tracking-tight">{t('code')}</p>
+          <p className="text-text-secondary text-sm font-medium">{t('title')}</p>
+          <p className="text-text-muted text-xs">{t('description')}</p>
         </div>
 
         {/* CTA */}
@@ -34,7 +36,7 @@ export default function NotFound() {
           href="/overview"
           className="bg-primary hover:bg-primary-hover text-primary-foreground rounded-full px-6 py-2.5 text-sm font-medium transition-colors"
         >
-          Go to Dashboard
+          {t('goToDashboard')}
         </Link>
       </div>
     </main>

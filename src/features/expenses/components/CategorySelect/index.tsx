@@ -2,6 +2,8 @@
 
 import { createElement, useState } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { getCategoryListKeyGenerator } from '@api/getCategoryListQuery';
 import { getCategoryColor, getCategoryIcon } from '@constants/categories';
 import { useQuery } from '@tanstack/react-query';
@@ -83,7 +85,7 @@ const Option = (props: OptionProps<AnyOption, false>) => {
         )}
       >
         <Plus className="h-3.5 w-3.5 shrink-0" />
-        <span>Create category…</span>
+        <span>{data.label}</span>
       </div>
     );
   }
@@ -134,13 +136,14 @@ interface CategorySelectProps {
   placeholder?: string;
 }
 
-const CategorySelect = ({ value, onChange, disabled, placeholder = 'Select category…' }: CategorySelectProps) => {
+const CategorySelect = ({ value, onChange, disabled, placeholder }: CategorySelectProps) => {
+  const t = useTranslations('forms.expense');
   const { data: categories = [] } = useQuery<Category[]>({ queryKey: getCategoryListKeyGenerator() });
   const [quickCreateOpen, setQuickCreateOpen] = useState(false);
 
   const options: AnyOption[] = [
     ...categories.map<CategoryOption>((c) => ({ value: c.id, label: c.name, category: c })),
-    { value: CREATE_ACTION_VALUE, label: 'Create category…', __create__: true } as CreateActionOption,
+    { value: CREATE_ACTION_VALUE, label: t('createCategoryOption'), __create__: true } as CreateActionOption,
   ];
 
   const selected = value
@@ -163,7 +166,7 @@ const CategorySelect = ({ value, onChange, disabled, placeholder = 'Select categ
           onChange(opt.value);
         }}
         options={options}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t('selectCategoryPlaceholder')}
         isDisabled={disabled}
         isSearchable={false}
         menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
@@ -188,7 +191,7 @@ const CategorySelect = ({ value, onChange, disabled, placeholder = 'Select categ
           singleValue: () => 'flex-1 min-w-0',
           input: () => 'text-text-primary text-sm',
           valueContainer: () => 'py-0',
-          dropdownIndicator: () => 'ml-1 text-text-muted',
+          dropdownIndicator: () => 'ms-1 text-text-muted',
           noOptionsMessage: () => 'text-text-muted px-3 py-3 text-sm',
         }}
       />

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { getCategoryListKeyGenerator } from '@api/getCategoryListQuery';
 import { getTagListKeyGenerator } from '@api/getTagListQuery';
 import { useQuery } from '@tanstack/react-query';
@@ -65,7 +67,7 @@ const sharedClassNames = {
   multiValue: () =>
     'border-border-subtle bg-background-elevated text-text-secondary hover:border-border-default flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium transition-all',
   multiValueRemove: () =>
-    'text-text-muted hover:text-text-primary hover:bg-background-elevated ml-0.5 rounded p-0.5 transition-colors cursor-pointer',
+    'text-text-muted hover:text-text-primary hover:bg-background-elevated ms-0.5 rounded p-0.5 transition-colors cursor-pointer',
   noOptionsMessage: () => 'text-text-muted px-3 py-3 text-[13px]',
 };
 
@@ -140,73 +142,78 @@ const FilterBody = ({
   activeCount,
   onReset,
   onClose,
-}: FilterBodyProps) => (
-  <div className="space-y-4">
-    <div className="space-y-1.5">
-      <label className="text-text-secondary text-xs font-medium">Tags</label>
-      <Select2<TagOption, true>
-        isMulti
-        classNamePrefix="rfp-tag"
-        value={selectedTagOptions}
-        onChange={onTagsChange}
-        options={tagOptions}
-        placeholder="Tags"
-        isSearchable
-        closeMenuOnSelect={false}
-        menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
-        menuPosition="fixed"
-        menuPlacement="auto"
-        unstyled
-        styles={multiSelectStyles}
-        components={{
-          Option: TagOptionRenderer,
-          MenuList: ScrollSafeMenuList,
-          DropdownIndicator: () => null,
-          IndicatorSeparator: () => null,
-          ClearIndicator: () => null,
-        }}
-        classNames={sharedClassNames}
-        noOptionsMessage={() => 'No tags yet'}
-      />
-    </div>
+}: FilterBodyProps) => {
+  const t = useTranslations('pages.reports.filters');
+  return (
+    <div className="space-y-4">
+      <div className="space-y-1.5">
+        <label className="text-text-secondary text-xs font-medium">{t('tags')}</label>
+        <Select2<TagOption, true>
+          isMulti
+          classNamePrefix="rfp-tag"
+          value={selectedTagOptions}
+          onChange={onTagsChange}
+          options={tagOptions}
+          placeholder={t('tags')}
+          isSearchable
+          closeMenuOnSelect={false}
+          menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+          menuPosition="fixed"
+          menuPlacement="auto"
+          unstyled
+          styles={multiSelectStyles}
+          components={{
+            Option: TagOptionRenderer,
+            MenuList: ScrollSafeMenuList,
+            DropdownIndicator: () => null,
+            IndicatorSeparator: () => null,
+            ClearIndicator: () => null,
+          }}
+          classNames={sharedClassNames}
+          noOptionsMessage={() => t('noTagsYet')}
+        />
+      </div>
 
-    <div className="space-y-1.5">
-      <label className="text-text-secondary text-xs font-medium">Categories</label>
-      <Select2<CategoryOption, true>
-        isMulti
-        classNamePrefix="rfp-cat"
-        value={selectedCategoryOptions}
-        onChange={onCategoriesChange}
-        options={categoryOptions}
-        placeholder="All categories"
-        isSearchable
-        closeMenuOnSelect={false}
-        menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
-        menuPosition="fixed"
-        menuPlacement="auto"
-        unstyled
-        styles={multiSelectStyles}
-        components={{
-          Option: CategoryOptionRenderer,
-          MenuList: ScrollSafeMenuList,
-          DropdownIndicator: () => null,
-          IndicatorSeparator: () => null,
-          ClearIndicator: () => null,
-        }}
-        classNames={sharedClassNames}
-      />
-    </div>
+      <div className="space-y-1.5">
+        <label className="text-text-secondary text-xs font-medium">{t('categories')}</label>
+        <Select2<CategoryOption, true>
+          isMulti
+          classNamePrefix="rfp-cat"
+          value={selectedCategoryOptions}
+          onChange={onCategoriesChange}
+          options={categoryOptions}
+          placeholder={t('allCategories')}
+          isSearchable
+          closeMenuOnSelect={false}
+          menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+          menuPosition="fixed"
+          menuPlacement="auto"
+          unstyled
+          styles={multiSelectStyles}
+          components={{
+            Option: CategoryOptionRenderer,
+            MenuList: ScrollSafeMenuList,
+            DropdownIndicator: () => null,
+            IndicatorSeparator: () => null,
+            ClearIndicator: () => null,
+          }}
+          classNames={sharedClassNames}
+        />
+      </div>
 
-    <div className="flex gap-3 pt-2">
-      <Button variant="outline" onClick={onReset} disabled={activeCount === 0} className="flex-1">
-        Reset
-      </Button>
-      <Button variant="primary" onClick={onClose} className="flex-1">
-        Apply{activeCount > 0 ? ` (${activeCount})` : ''}
-      </Button>
+      {/* No rtl override: Reset is coded first, so a plain flex row under RTL
+          already puts Reset on the right and Apply/primary on the left. */}
+      <div className="flex gap-3 pt-2">
+        <Button variant="outline" onClick={onReset} disabled={activeCount === 0} className="flex-1">
+          {t('reset')}
+        </Button>
+        <Button variant="primary" onClick={onClose} className="flex-1">
+          {activeCount > 0 ? t('applyWithCount', { count: activeCount }) : t('apply')}
+        </Button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ReportsFilterPopover = ({
   isOpen,
@@ -217,6 +224,7 @@ const ReportsFilterPopover = ({
   onCategoriesChange,
   onReset,
 }: ReportsFilterPopoverProps) => {
+  const t = useTranslations('pages.reports.filters');
   const { data: allTags = [] } = useQuery<Tag[]>({ queryKey: getTagListKeyGenerator() });
   const { data: allCategories = [] } = useQuery<Category[]>({ queryKey: getCategoryListKeyGenerator() });
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -288,7 +296,7 @@ const ReportsFilterPopover = ({
   // ─── Mobile: shared Modal ───────────────────────────────
   if (isMobile) {
     return (
-      <Modal isOpen={isOpen} onClose={onClose} title="Filters" className="max-w-md">
+      <Modal isOpen={isOpen} onClose={onClose} title={t('title')} className="max-w-md">
         <FilterBody {...bodyProps} />
       </Modal>
     );
@@ -299,13 +307,13 @@ const ReportsFilterPopover = ({
     <div
       ref={popoverRef}
       role="dialog"
-      aria-label="Filter reports"
-      className="border-border-subtle bg-background animate-modal-pop absolute top-full right-0 z-50 mt-2 w-[420px] overflow-hidden rounded-2xl border shadow-[0_24px_60px_-12px_rgba(0,0,0,0.28),0_8px_24px_-8px_rgba(0,0,0,0.12)]"
+      aria-label={t('filterReportsAria')}
+      className="border-border-subtle bg-background animate-modal-pop absolute end-0 top-full z-50 mt-2 w-[420px] overflow-hidden rounded-2xl border shadow-[0_24px_60px_-12px_rgba(0,0,0,0.28),0_8px_24px_-8px_rgba(0,0,0,0.12)]"
     >
       {/* Header — matches Modal */}
       <div className="border-border-subtle bg-background-secondary flex items-center justify-between border-b px-5 py-3.5 sm:px-6 sm:py-4">
         <div className="flex items-baseline gap-2">
-          <h3 className="text-text-primary text-base font-semibold sm:text-lg">Filters</h3>
+          <h3 className="text-text-primary text-base font-semibold sm:text-lg">{t('title')}</h3>
           {activeCount > 0 && (
             <span className="bg-blue/10 text-blue rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums">
               {activeCount}
@@ -314,8 +322,8 @@ const ReportsFilterPopover = ({
         </div>
         <button
           onClick={onClose}
-          className="text-text-muted hover:bg-background-elevated hover:text-text-primary focus-visible:ring-blue/30 focus-visible:border-blue -mr-1 ml-4 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none"
-          aria-label="Close filters"
+          className="text-text-muted hover:bg-background-elevated hover:text-text-primary focus-visible:ring-blue/30 focus-visible:border-blue ms-4 -me-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none"
+          aria-label={t('closeFiltersAria')}
         >
           <X className="h-4 w-4" />
         </button>

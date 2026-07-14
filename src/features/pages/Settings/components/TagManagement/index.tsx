@@ -1,8 +1,11 @@
+import { useTranslations } from 'next-intl';
+
 import { Tag } from 'lucide-react';
 
 import TagManagementList from '@features/expenses/components/TagManagementList';
 
 const TagManagement = () => {
+  const t = useTranslations('settings.tags');
   return (
     <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
       <div className="border-border-subtle border-b p-6">
@@ -11,8 +14,8 @@ const TagManagement = () => {
             <Tag className="text-text-secondary h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-text-primary text-lg font-semibold">Tags</h2>
-            <p className="text-text-muted text-sm">Manage your expense tags</p>
+            <h2 className="text-text-primary text-lg font-semibold">{t('title')}</h2>
+            <p className="text-text-muted text-sm">{t('subtitle')}</p>
           </div>
         </div>
       </div>

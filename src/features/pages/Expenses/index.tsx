@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { deleteExpenseKeyGenerator } from '@api/deleteExpenseMutation';
 import type { DeleteExpenseRequestData } from '@api/deleteExpenseMutation';
 import { EXPENSES_SCOPE, getExpenseListKeyGenerator } from '@api/getExpenseListQuery';
@@ -29,6 +31,9 @@ import ExpensesTable from './components/ExpensesTable';
 const ITEMS_PER_PAGE = 20;
 
 const ExpensesPage = () => {
+  // Customs
+  const t = useTranslations('pages.expenses');
+
   // States
   const [filters, setFilters] = useState<ExpenseFilters>({});
   const [descInput, setDescInput] = useState('');
@@ -70,7 +75,7 @@ const ExpensesPage = () => {
         queryClient.invalidateQueries({ queryKey: EXPENSES_SCOPE }),
         queryClient.invalidateQueries({ queryKey: SUMMARY_SCOPE }),
       ]);
-      showToast('Expense deleted.', 'info');
+      showToast(t('deleted'), 'info');
     },
     onError: (err) => showToast(ensureError(err).message, 'error'),
   });
@@ -103,12 +108,12 @@ const ExpensesPage = () => {
         {/* Page Header */}
         <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
           <div className="min-w-0 flex-1">
-            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">Expenses</h1>
-            <p className="text-text-muted mt-1 text-xs sm:text-sm">Manage and track all your expenses</p>
+            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">{t('title')}</h1>
+            <p className="text-text-muted mt-1 text-xs sm:text-sm">{t('subtitle')}</p>
           </div>
           <Button variant="primary" onClick={() => openExpenseDrawer()} className="shrink-0">
             <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Add Expense</span>
+            <span className="hidden sm:inline">{t('addExpense')}</span>
           </Button>
         </div>
 
@@ -137,8 +142,8 @@ const ExpensesPage = () => {
         {/* Delete Confirmation Modal */}
         <DeleteConfirmModal
           isOpen={isDeleteModalOpen}
-          title="Delete expense"
-          message="Are you sure you want to delete this expense? All associated data will be removed."
+          title={t('deleteTitle')}
+          message={t('deleteMessage')}
           itemName={expenseToDelete?.description}
           onConfirm={confirmDelete}
           onCancel={closeDeleteModal}

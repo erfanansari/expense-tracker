@@ -1,3 +1,5 @@
+import type { useTranslations } from 'next-intl';
+
 import { type ColumnDef } from '@tanstack/react-table';
 import { Tag } from 'lucide-react';
 
@@ -7,7 +9,25 @@ import ActionButtons from '@components/ActionButtons';
 import CategoryBadge from '@components/CategoryBadge';
 import Money from '@components/Money';
 
-import { formatToFarsiDate } from '@utils';
+import { useAppDate } from '@hooks/use-app-date';
+
+// The primary/secondary calendar pair depends on locale + calendar preference,
+// so this needs its own component to call the hook (react-table cells are plain
+// render functions, not stable components).
+function ExpenseDateCell({ date }: { date: string }) {
+  const appDate = useAppDate();
+  const { primary, secondary } = appDate(date);
+  return (
+    <div className="flex flex-col">
+      <span className="text-text-primary text-sm whitespace-nowrap">{primary}</span>
+      {secondary && (
+        <span className="text-text-muted text-xs whitespace-nowrap" dir="auto">
+          {secondary}
+        </span>
+      )}
+    </div>
+  );
+}
 
 // ─── Table layout config ──────────────────────────────────────────────────────
 // Centralized so column widths can be tuned in one place. Percentages must sum
@@ -28,6 +48,7 @@ export const EXPENSE_COLUMN_WIDTHS = {
 // ─── Column definitions ───────────────────────────────────────────────────────
 
 export function buildExpenseColumns(
+  t: ReturnType<typeof useTranslations<'tables'>>,
   handleEdit: (expense: Expense) => void,
   openDeleteModal: (expense: Expense) => void,
   deletingId: number | null
@@ -36,7 +57,7 @@ export function buildExpenseColumns(
     {
       id: 'description',
       accessorKey: 'description',
-      header: 'Description',
+      header: t('expenses.description'),
       meta: { widthClass: EXPENSE_COLUMN_WIDTHS.description },
       cell: ({ row }) => {
         const expense = row.original;
@@ -63,7 +84,7 @@ export function buildExpenseColumns(
     {
       id: 'category',
       accessorKey: 'category',
-      header: 'Category',
+      header: t('expenses.category'),
       meta: { widthClass: EXPENSE_COLUMN_WIDTHS.category },
       cell: ({ row }) => (
         <div className="flex max-w-full min-w-0">
@@ -74,25 +95,15 @@ export function buildExpenseColumns(
     {
       id: 'date',
       accessorKey: 'date',
-      header: 'Date',
+      header: t('expenses.date'),
       meta: { widthClass: EXPENSE_COLUMN_WIDTHS.date },
-      cell: ({ row }) => {
-        const expense = row.original;
-        return (
-          <div className="flex flex-col">
-            <span className="text-text-primary text-sm whitespace-nowrap">{expense.date}</span>
-            <span className="text-text-muted text-xs whitespace-nowrap" dir="rtl">
-              {formatToFarsiDate(expense.date)}
-            </span>
-          </div>
-        );
-      },
+      cell: ({ row }) => <ExpenseDateCell date={row.original.date} />,
     },
     {
       id: 'amount',
       accessorKey: 'amount',
-      header: 'Amount',
-      meta: { widthClass: EXPENSE_COLUMN_WIDTHS.amount, align: 'right' as const },
+      header: t('expenses.amount'),
+      meta: { widthClass: EXPENSE_COLUMN_WIDTHS.amount, align: 'end' as const },
       cell: ({ row }) => {
         const expense = row.original;
         return (
@@ -109,7 +120,7 @@ export function buildExpenseColumns(
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: t('actions'),
       meta: { widthClass: EXPENSE_COLUMN_WIDTHS.actions, align: 'center' as const },
       cell: ({ row }) => {
         const expense = row.original;

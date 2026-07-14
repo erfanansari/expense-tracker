@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server';
 import { NextResponse } from 'next/server';
 
 import { createExpenseSchema } from '@schemas';
@@ -16,7 +17,8 @@ export const PUT = withAuth(async (user, request, { params }) => {
   if (existing instanceof NextResponse) return existing;
 
   const raw = await request.json();
-  const result = validateBody(createExpenseSchema, raw);
+  const t = await getTranslations();
+  const result = validateBody(createExpenseSchema(t), raw);
   if (result instanceof NextResponse) return result;
 
   const body = result.data;

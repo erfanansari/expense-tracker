@@ -1,13 +1,14 @@
-import { ASSET_CATEGORIES, ASSET_CATEGORY_COLORS, getAssetCategoryLabel } from '@constants/assets';
+import { useTranslations } from 'next-intl';
+
+import { ASSET_CATEGORIES, ASSET_CATEGORY_COLORS } from '@constants/assets';
 import { TrendingUp, Wallet } from 'lucide-react';
 
 import type { Asset, AssetCategory } from '@types';
 
-import { onboardingCopy } from '@features/onboarding/copy';
-
 import AnimatedMoney from '@components/AnimatedMoney';
 import StatZeroState from '@components/StatZeroState';
 
+import { useAssetCategoryLabel } from '@hooks/use-constant-labels';
 import { useCurrency } from '@hooks/use-currency';
 import type { MoneyItem } from '@hooks/use-currency';
 
@@ -24,6 +25,9 @@ const toItem = (a: Asset): MoneyItem => ({
 });
 
 const AssetsSummary = ({ assetsByCategory }: AssetsSummaryProps) => {
+  const t = useTranslations('pages.assets.stats');
+  const tZero = useTranslations('onboarding.zeroCaptions');
+  const categoryLabel = useAssetCategoryLabel();
   const { primaryCurrency, secondaryCurrency, sumTo, formatFull } = useCurrency();
   const showSecondary = !!secondaryCurrency && secondaryCurrency !== primaryCurrency;
 
@@ -61,14 +65,14 @@ const AssetsSummary = ({ assetsByCategory }: AssetsSummaryProps) => {
             <TrendingUp className="text-blue h-5 w-5" />
           </div>
         </div>
-        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Net Worth</p>
+        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{t('netWorth')}</p>
         {totalAssetCount === 0 ? (
-          <StatZeroState caption={onboardingCopy.zeroCaptions.assetsNetWorth} />
+          <StatZeroState caption={tZero('assetsNetWorth')} />
         ) : (
           <>
             {renderPair(net.p, net.s)}
             <p className="text-text-secondary mt-1.5 text-sm font-medium">
-              {totalAssetCount} asset{totalAssetCount !== 1 ? 's' : ''}
+              {t('assetCount', { count: totalAssetCount })}
             </p>
           </>
         )}
@@ -89,8 +93,10 @@ const AssetsSummary = ({ assetsByCategory }: AssetsSummaryProps) => {
                   <Icon className="h-5 w-5" style={{ color }} />
                 </div>
               </div>
-              <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{category.label}</p>
-              <StatZeroState caption={onboardingCopy.zeroCaptions.assetCategoryPlaceholder} />
+              <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">
+                {categoryLabel(category.value)}
+              </p>
+              <StatZeroState caption={tZero('assetCategoryPlaceholder')} />
             </div>
           );
         })}
@@ -100,7 +106,6 @@ const AssetsSummary = ({ assetsByCategory }: AssetsSummaryProps) => {
         .sort(([, a], [, b]) => b.total - a.total)
         .map(([category, data]) => {
           const Icon = CATEGORY_ICONS[category as AssetCategory] || Wallet;
-          const labels = getAssetCategoryLabel(category);
           const color = CATEGORY_COLORS[category as AssetCategory] || '#525252';
           const cat = pair(data.assets);
 
@@ -114,10 +119,12 @@ const AssetsSummary = ({ assetsByCategory }: AssetsSummaryProps) => {
                   <Icon className="h-5 w-5" style={{ color }} />
                 </div>
               </div>
-              <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{labels.en}</p>
+              <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">
+                {categoryLabel(category)}
+              </p>
               {renderPair(cat.p, cat.s)}
               <p className="text-text-secondary mt-1.5 text-sm font-medium">
-                {data.assets.length} asset{data.assets.length !== 1 ? 's' : ''}
+                {t('assetCount', { count: data.assets.length })}
               </p>
             </div>
           );

@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server';
 import { NextResponse } from 'next/server';
 
 import { createAssetSchema } from '@schemas';
@@ -39,7 +40,8 @@ export const PUT = withAuth(async (user, request, { params }) => {
   if (currentAsset instanceof NextResponse) return currentAsset;
 
   const raw = await request.json();
-  const result = validateBody(createAssetSchema.partial(), raw);
+  const t = await getTranslations();
+  const result = validateBody(createAssetSchema(t).partial(), raw);
   if (result instanceof NextResponse) return result;
 
   const body = result.data;

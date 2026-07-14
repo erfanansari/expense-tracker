@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { Bell } from 'lucide-react';
 
 import Toggle from '@components/Toggle';
@@ -36,34 +38,29 @@ const SkeletonRow = () => (
   </div>
 );
 
-const TOGGLE_COPY: Record<
-  'emailEnabled' | 'monthlyReportEnabled' | 'yearlyReportEnabled',
-  { on: string; off: string }
+type ToggleKey = 'emailEnabled' | 'monthlyReportEnabled' | 'yearlyReportEnabled';
+
+const TOGGLE_MESSAGES: Record<
+  ToggleKey,
+  { on: 'email.on' | 'monthly.on' | 'yearly.on'; off: 'email.off' | 'monthly.off' | 'yearly.off' }
 > = {
-  emailEnabled: {
-    on: 'Email notifications on.',
-    off: "You won't receive any more emails from Kharji.",
-  },
-  monthlyReportEnabled: {
-    on: 'Monthly reports on.',
-    off: 'Monthly reports turned off.',
-  },
-  yearlyReportEnabled: {
-    on: 'Yearly reports on.',
-    off: 'Yearly reports turned off.',
-  },
+  emailEnabled: { on: 'email.on', off: 'email.off' },
+  monthlyReportEnabled: { on: 'monthly.on', off: 'monthly.off' },
+  yearlyReportEnabled: { on: 'yearly.on', off: 'yearly.off' },
 };
 
 const NotificationsSection = () => {
+  const t = useTranslations('settings.notifications');
   const { prefs, isLoading, mutate } = useNotificationPreferences();
   const { showToast } = useToast();
 
-  const handleToggle = (key: 'emailEnabled' | 'monthlyReportEnabled' | 'yearlyReportEnabled', next: boolean) => {
+  const handleToggle = (key: ToggleKey, next: boolean) => {
     mutate(
       { [key]: next },
       {
-        onSuccess: () => showToast(next ? TOGGLE_COPY[key].on : TOGGLE_COPY[key].off, next ? 'success' : 'info'),
-        onError: (err) => showToast(err instanceof Error ? err.message : 'Could not save', 'error'),
+        onSuccess: () =>
+          showToast(t(next ? TOGGLE_MESSAGES[key].on : TOGGLE_MESSAGES[key].off), next ? 'success' : 'info'),
+        onError: (err) => showToast(err instanceof Error ? err.message : t('saveFailed'), 'error'),
       }
     );
   };
@@ -78,8 +75,8 @@ const NotificationsSection = () => {
             <Bell className="text-text-secondary h-5 w-5" />
           </div>
           <div className="flex-1">
-            <h2 className="text-text-primary text-lg font-semibold">Notifications</h2>
-            <p className="text-text-muted text-sm">Manage your notification preferences</p>
+            <h2 className="text-text-primary text-lg font-semibold">{t('title')}</h2>
+            <p className="text-text-muted text-sm">{t('subtitle')}</p>
           </div>
         </div>
       </div>
@@ -95,21 +92,21 @@ const NotificationsSection = () => {
           ) : (
             <>
               <Row
-                title="Email Notifications"
-                description="Receive reports and updates from Kharji by email."
+                title={t('email.title')}
+                description={t('email.description')}
                 checked={prefs.emailEnabled}
                 onChange={(next) => handleToggle('emailEnabled', next)}
               />
               <Row
-                title="Monthly Report"
-                description="A summary of last month's finances, delivered on the 1st."
+                title={t('monthly.title')}
+                description={t('monthly.description')}
                 checked={prefs.monthlyReportEnabled}
                 disabled={!emailOn}
                 onChange={(next) => handleToggle('monthlyReportEnabled', next)}
               />
               <Row
-                title="Yearly Report"
-                description="Your year in review, delivered every January 1st."
+                title={t('yearly.title')}
+                description={t('yearly.description')}
                 checked={prefs.yearlyReportEnabled}
                 disabled={!emailOn}
                 onChange={(next) => handleToggle('yearlyReportEnabled', next)}

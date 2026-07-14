@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { CATEGORY_ICONS, getCategoryColor } from '@constants/categories';
 import { twMerge } from 'tailwind-merge';
 
@@ -13,12 +15,13 @@ interface IconPickerProps {
 }
 
 const IconPicker = ({ value, onChange, highlightColor = 'gray' }: IconPickerProps) => {
+  const t = useTranslations('settings.categories');
   const color = getCategoryColor(highlightColor);
 
   return (
     <div
       role="radiogroup"
-      aria-label="Choose category icon"
+      aria-label={t('chooseIcon')}
       className="border-border-subtle bg-background-secondary grid max-h-44 grid-cols-7 gap-1.5 overflow-y-auto rounded-lg border p-2 sm:grid-cols-9"
     >
       {CATEGORY_ICONS.map(({ value: iconValue, Icon }) => {

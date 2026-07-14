@@ -52,7 +52,7 @@ const Money: FC<MoneyProps> = ({
     return (
       <span className={className} title={title}>
         <span className={primaryClassName}>{primary}</span>
-        {secondary && <span className={`ml-1.5 ${secondaryClassName}`}>{secondary}</span>}
+        {secondary && <span className={`ms-1.5 ${secondaryClassName}`}>{secondary}</span>}
       </span>
     );
   }

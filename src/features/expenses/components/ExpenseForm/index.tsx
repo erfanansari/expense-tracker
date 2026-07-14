@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { createExpenseKeyGenerator } from '@api/createExpenseMutation';
 import { EXPENSES_SCOPE } from '@api/getExpenseListQuery';
 import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
@@ -45,6 +47,8 @@ const invalidateExpenseData = (queryClient: QueryClient) =>
 
 const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty }: ExpenseFormProps) => {
   // Customs
+  const t = useTranslations('forms');
+  const tCommon = useTranslations('common');
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const { primaryCurrency } = useCurrency();
@@ -81,8 +85,9 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
   );
 
   // Forms
+  const tZod = useTranslations();
   const methods = useForm<CreateExpenseSchema>({
-    resolver: zodResolver(createExpenseSchema),
+    resolver: zodResolver(createExpenseSchema(tZod)),
     defaultValues: editingFormData ?? defaultFormData,
     mode: 'all',
   });
@@ -127,11 +132,11 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
       if (editingExpense) {
         await updateMutation.mutateAsync({ id: editingExpense.id, ...dataToSubmit });
         await invalidateExpenseData(queryClient);
-        showToast('Expense updated successfully!', 'success');
+        showToast(t('expense.updated'), 'success');
       } else {
         await createMutation.mutateAsync(dataToSubmit);
         await invalidateExpenseData(queryClient);
-        showToast('Expense added successfully!', 'success');
+        showToast(t('expense.added'), 'success');
       }
 
       reset(defaultFormData);
@@ -155,7 +160,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
         <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <Layers className="text-text-muted h-4 w-4" />
-            Category
+            {t('shared.category')}
           </label>
           <Controller
             name="categoryId"
@@ -172,7 +177,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
         <div className="space-y-1">
           <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <Calendar className="text-text-muted h-4 w-4" />
-            Date
+            {t('shared.date')}
           </label>
           <FormDatePicker name="date" />
         </div>
@@ -182,10 +187,10 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
       <div className="space-y-1">
         <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
           <FileText className="text-text-muted h-4 w-4" />
-          Description
+          {t('shared.description')}
         </label>
         <textarea
-          placeholder="Enter expense details..."
+          placeholder={t('expense.descriptionPlaceholder')}
           rows={2}
           {...methods.register('description')}
           className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full resize-none rounded-lg border px-3 py-2 text-sm transition-all focus:outline-none"
@@ -212,31 +217,31 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
       <div className="space-y-1">
         <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
           <Coins className="text-text-muted h-4 w-4" />
-          Amount
+          {t('shared.amount')}
         </label>
         <Tooltip content={numberToPersianWord} position="top">
-          <FormMoneyInput amountName="amount" currencyName="currency" placeholder="e.g. 60k, 1.5m" />
+          <FormMoneyInput amountName="amount" currencyName="currency" placeholder={t('expense.amountPlaceholder')} />
         </Tooltip>
       </div>
 
       {/* Buttons */}
-      <div className="flex gap-3 pt-1">
+      <div className="flex gap-3 pt-1 rtl:flex-row-reverse">
         <Button type="submit" disabled={isSubmitting} variant="primary" className="flex-1">
           {isSubmitting ? (
             <>
               <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-              <span>Saving...</span>
+              <span>{t('shared.saving')}</span>
             </>
           ) : (
             <>
               {!editingExpense && <Plus className="h-4 w-4 shrink-0" />}
-              <span>{editingExpense ? 'Update' : 'Add'}</span>
+              <span>{editingExpense ? t('shared.update') : t('shared.add')}</span>
             </>
           )}
         </Button>
         {editingExpense && (
           <Button type="button" onClick={handleCancel} variant="outline">
-            Cancel
+            {tCommon('cancel')}
           </Button>
         )}
       </div>

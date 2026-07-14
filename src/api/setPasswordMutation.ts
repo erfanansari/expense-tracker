@@ -1,4 +1,4 @@
-import { setPasswordSchema } from '@schemas';
+import { createSetPasswordSchema, fallbackT } from '@schemas';
 import type { SetPasswordSchema } from '@schemas';
 
 import client from '@core/client';
@@ -11,7 +11,7 @@ const keyGenerator: MutationKeyGenerator = () => ['auth', 'set-password'];
 client.registerEndpoint<RequestData, void>(keyGenerator, {
   url: '/api/user/set-password',
   type: 'mutation',
-  requestDataSchema: setPasswordSchema,
+  requestDataSchema: createSetPasswordSchema(fallbackT),
   requestNormalizer: (data) => ({ newPassword: data.password }),
 });
 

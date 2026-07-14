@@ -18,6 +18,10 @@ describe('formatNumber', () => {
   it('handles negative numbers', () => {
     expect(formatNumber(-1500)).toBe('-1,500');
   });
+
+  it('formats with Persian digits and grouping for fa locale', () => {
+    expect(formatNumber(1234567, 'fa')).toBe('۱٬۲۳۴٬۵۶۷');
+  });
 });
 
 describe('formatAxisNumber', () => {
@@ -38,5 +42,13 @@ describe('formatAxisNumber', () => {
   it('leaves small numbers as-is', () => {
     expect(formatAxisNumber(42)).toBe('42');
     expect(formatAxisNumber(0)).toBe('0');
+  });
+
+  it('spells out compact units in Persian for fa locale', () => {
+    // Intl's fa-IR compact formatter joins the value and unit with a
+    // non-breaking space ( ), not a regular space.
+    expect(formatAxisNumber(14_000_000_000, 'fa')).toBe('۱۴ میلیارد');
+    expect(formatAxisNumber(900_000, 'fa')).toBe('۹۰۰ هزار');
+    expect(formatAxisNumber(42, 'fa')).toBe('۴۲');
   });
 });

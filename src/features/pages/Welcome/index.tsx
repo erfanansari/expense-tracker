@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
 import { updateOnboardingKeyGenerator } from '@api/updateOnboardingMutation';
@@ -9,7 +10,6 @@ import type { UpdateOnboardingRequestData, UpdateOnboardingResponse } from '@api
 import { useMutation } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 
-import { onboardingCopy } from '@features/onboarding/copy';
 import { refreshSessionCookie } from '@features/onboarding/refresh-session-cookie';
 
 import FullPageLoader from '@components/FullPageLoader';
@@ -17,19 +17,27 @@ import Select from '@components/Select';
 
 import { useAuth } from '@hooks/use-auth';
 import { useCurrencyPreferences } from '@hooks/use-currency-preferences';
+import { useLocalePreferences } from '@hooks/use-locale-preferences';
 
 import { CURRENCIES } from '@/constants/currencies';
+import type { AppLocale } from '@/i18n/config';
 
 const SECONDARY_DISABLED = 'none';
 const CURRENCY_OPTIONS = CURRENCIES.map((c) => ({ value: c.code, label: `${c.code} (${c.label})` }));
-
-const copy = onboardingCopy.welcome;
+// Each language is shown in its own tongue, so the options never translate.
+const LANGUAGE_OPTIONS = [
+  { value: 'en', label: 'English' },
+  { value: 'fa', label: 'فارسی' },
+];
 
 const Welcome = () => {
   // Customs
+  const t = useTranslations('onboarding.welcome');
+  const tCurrency = useTranslations('settings.currency');
   const router = useRouter();
   const { user, updateUser } = useAuth();
   const { prefs, isLoading, mutate: mutatePrefs, isMutating } = useCurrencyPreferences();
+  const { prefs: localePrefs, mutate: mutateLocale, isMutating: isMutatingLocale } = useLocalePreferences();
 
   // States
   const [error, setError] = useState('');
@@ -55,16 +63,23 @@ const Welcome = () => {
 
   // Variables
   const secondaryOptions = [
-    { value: SECONDARY_DISABLED, label: 'Disabled' },
+    { value: SECONDARY_DISABLED, label: tCurrency('disabled') },
     ...CURRENCY_OPTIONS.filter((o) => o.value !== prefs.primaryCurrency),
   ];
   const busy = onboardingMutation.isPending;
 
+  const handleLanguageChange = (value: string) => {
+    if (value === localePrefs.locale) return;
+    mutateLocale({ locale: value as AppLocale }, { onSuccess: () => router.refresh() });
+  };
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1 text-center">
-        <h1 className="text-text-primary text-lg font-semibold sm:text-xl">{copy.title(user.name)}</h1>
-        <p className="text-text-tertiary text-xs sm:text-sm">{copy.subtitle}</p>
+        <h1 className="text-text-primary text-lg font-semibold sm:text-xl">
+          {user.name ? t('titleNamed', { name: user.name.split(' ')[0] }) : t('titleAnonymous')}
+        </h1>
+        <p className="text-text-tertiary text-xs sm:text-sm">{t('subtitle')}</p>
       </div>
 
       {error && (
@@ -75,7 +90,18 @@ const Welcome = () => {
 
       <div className="flex flex-col gap-4">
         <div>
-          <label className="text-text-secondary mb-1.5 block text-sm font-medium">{copy.primaryLabel}</label>
+          <label className="text-text-secondary mb-1.5 block text-sm font-medium">{t('languageLabel')}</label>
+          <Select
+            value={localePrefs.locale}
+            onChange={handleLanguageChange}
+            options={LANGUAGE_OPTIONS}
+            disabled={isMutatingLocale}
+          />
+          <p className="text-text-muted mt-1.5 text-xs">{t('languageHint')}</p>
+        </div>
+
+        <div>
+          <label className="text-text-secondary mb-1.5 block text-sm font-medium">{t('primaryLabel')}</label>
           <Select
             value={prefs.primaryCurrency}
             onChange={(value) => {
@@ -85,18 +111,18 @@ const Welcome = () => {
             options={CURRENCY_OPTIONS}
             disabled={isLoading || busy}
           />
-          <p className="text-text-muted mt-1.5 text-xs">{copy.primaryHint}</p>
+          <p className="text-text-muted mt-1.5 text-xs">{t('primaryHint')}</p>
         </div>
 
         <div>
-          <label className="text-text-secondary mb-1.5 block text-sm font-medium">{copy.secondaryLabel}</label>
+          <label className="text-text-secondary mb-1.5 block text-sm font-medium">{t('secondaryLabel')}</label>
           <Select
             value={prefs.secondaryCurrency ?? SECONDARY_DISABLED}
             onChange={(value) => mutatePrefs({ secondaryCurrency: value === SECONDARY_DISABLED ? null : value })}
             options={secondaryOptions}
             disabled={isLoading || busy}
           />
-          <p className="text-text-muted mt-1.5 text-xs">{copy.secondaryHint}</p>
+          <p className="text-text-muted mt-1.5 text-xs">{t('secondaryHint')}</p>
         </div>
       </div>
 
@@ -112,14 +138,14 @@ const Welcome = () => {
         {busy ? (
           <>
             <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden="true" />
-            <span>{copy.ctaBusy}</span>
+            <span>{t('ctaBusy')}</span>
           </>
         ) : (
-          copy.cta
+          t('cta')
         )}
       </button>
 
-      <p className="text-text-muted text-center text-xs">{copy.footnote}</p>
+      <p className="text-text-muted text-center text-xs">{t('footnote')}</p>
     </div>
   );
 };

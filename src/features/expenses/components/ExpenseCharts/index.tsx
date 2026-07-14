@@ -1,5 +1,7 @@
 'use client';
 
+import { useLocale, useTranslations } from 'next-intl';
+
 import { getCategoryColor } from '@constants/categories';
 import { format, parseISO, startOfWeek } from 'date-fns';
 import { BarChart3, PieChartIcon, TrendingUp } from 'lucide-react';
@@ -22,8 +24,9 @@ import ChartTooltip from '@components/ChartTooltip';
 
 import { useCurrency } from '@hooks/use-currency';
 import type { MoneyItem } from '@hooks/use-currency';
+import { useLocalePreferences } from '@hooks/use-locale-preferences';
 
-import { formatAxisNumber, formatChartTooltipDate } from '@utils';
+import { formatAxisNumber, formatChartAxisDate, formatChartTooltipDate, resolveCalendar } from '@utils';
 
 import { type Expense } from '@/@types/expense';
 import { PIVOT_CURRENCY } from '@/constants/currencies';
@@ -65,6 +68,9 @@ const AreaTooltip = ({
   label?: string | number;
   granularity: 'daily' | 'weekly' | 'monthly';
 }) => {
+  const locale = useLocale() as 'en' | 'fa';
+  const { prefs } = useLocalePreferences();
+  const calendar = resolveCalendar(prefs.calendar, locale);
   const { display } = useCurrency();
   if (!active || !payload?.length) return null;
   const rawValue = payload[0].value;
@@ -77,12 +83,20 @@ const AreaTooltip = ({
     <ChartTooltip
       primary={primary}
       secondary={secondary ?? undefined}
-      accent={label != null ? { text: formatChartTooltipDate(String(label), granularity), tone: 'blue' } : undefined}
+      accent={
+        label != null
+          ? { text: formatChartTooltipDate(String(label), granularity, locale, calendar), tone: 'blue' }
+          : undefined
+      }
     />
   );
 };
 
 export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseChartsProps) {
+  const t = useTranslations('pages.reports.charts');
+  const locale = useLocale() as 'en' | 'fa';
+  const { prefs: localePrefs } = useLocalePreferences();
+  const calendar = resolveCalendar(localePrefs.calendar, locale);
   const { sumTo, format: fmtMoney, primaryCurrency, secondaryCurrency } = useCurrency();
   const showSecondary = !!secondaryCurrency && secondaryCurrency !== primaryCurrency;
 
@@ -175,10 +189,10 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
             <PieChartIcon className="text-blue h-5 w-5" />
           </div>
-          <h3 className="text-text-primary text-lg font-semibold">By Category</h3>
+          <h3 className="text-text-primary text-lg font-semibold">{t('byCategory')}</h3>
         </div>
 
-        <div className="h-[280px]">
+        <div className="h-[280px]" dir="ltr">
           <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <PieChart>
               <Pie
@@ -222,15 +236,15 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
           <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
             <BarChart3 className="text-success h-5 w-5" />
           </div>
-          <h3 className="text-text-primary text-lg font-semibold">Category Comparison</h3>
+          <h3 className="text-text-primary text-lg font-semibold">{t('categoryComparison')}</h3>
         </div>
 
-        <div className="min-h-[320px] flex-1">
+        <div className="min-h-[320px] flex-1" dir="ltr">
           <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <BarChart data={categoryTotals} layout="vertical" margin={{ left: 0, right: 20 }}>
               <XAxis
                 type="number"
-                tickFormatter={formatAxisNumber}
+                tickFormatter={(value: number) => formatAxisNumber(value, locale)}
                 stroke="var(--color-border-subtle)"
                 tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
                 axisLine={{ stroke: 'var(--color-border-subtle)' }}
@@ -263,15 +277,21 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
             <TrendingUp className="text-blue h-5 w-5" />
           </div>
           <h3 className="text-text-primary text-lg font-semibold">
-            {granularity === 'daily' && 'Daily Spending Trend'}
-            {granularity === 'weekly' && 'Weekly Spending Trend'}
-            {granularity === 'monthly' && 'Monthly Spending Trend'}
+            {granularity === 'daily' && t('dailyTrend')}
+            {granularity === 'weekly' && t('weeklyTrend')}
+            {granularity === 'monthly' && t('monthlyTrend')}
           </h3>
         </div>
 
-        <div className="h-[280px]">
+        <div className="h-[280px]" dir="ltr">
           <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-            <AreaChart data={timeSeriesTotals} margin={{ left: 0, right: 20, top: 10, bottom: 0 }}>
+            <AreaChart
+              data={timeSeriesTotals}
+              // Farsi's compact notation spells out "میلیون"/"میلیارد" in full
+              // instead of abbreviating to a single letter ("M"/"B"), so the
+              // Y-axis needs extra breathing room to avoid clipping the widest tick.
+              margin={{ left: locale === 'fa' ? 12 : 0, right: 20, top: 10, bottom: 0 }}
+            >
               <defs>
                 <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="var(--color-blue)" stopOpacity={0.2} />
@@ -289,8 +309,8 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
                 minTickGap={40}
                 interval="preserveStartEnd"
                 tickFormatter={(value: string) => {
-                  if (granularity === 'monthly') return format(parseISO(`${value}-01`), 'MMM yyyy');
-                  return format(parseISO(value), 'MMM d');
+                  const date = granularity === 'monthly' ? parseISO(`${value}-01`) : parseISO(value);
+                  return formatChartAxisDate(date, granularity === 'monthly' ? 'month' : 'day', locale, calendar);
                 }}
               />
               <YAxis
@@ -298,7 +318,7 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
                 tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
                 axisLine={{ stroke: 'var(--color-border-subtle)' }}
                 tickLine={{ stroke: 'var(--color-border-subtle)' }}
-                tickFormatter={formatAxisNumber}
+                tickFormatter={(value: number) => formatAxisNumber(value, locale)}
               />
               <Tooltip
                 content={(props) => <AreaTooltip {...props} granularity={granularity} />}

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { createAssetSchema } from '@schemas';
+import { createAssetSchema, fallbackT } from '@schemas';
 import type { CreateAssetSchema } from '@schemas';
 
 import client from '@core/client';
@@ -15,7 +15,7 @@ const keyGenerator: MutationKeyGenerator = () => ['assets', 'create'];
 client.registerEndpoint<RequestData, Response>(keyGenerator, {
   url: '/api/assets',
   type: 'mutation',
-  requestDataSchema: createAssetSchema,
+  requestDataSchema: createAssetSchema(fallbackT),
   responseSchema,
 });
 

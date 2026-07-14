@@ -2,11 +2,9 @@
 
 import { useEffect, useRef } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { CheckCircle2 } from 'lucide-react';
-
-import { onboardingCopy } from '@features/onboarding/copy';
-
-const copy = onboardingCopy.checklist.completion;
 
 // One honest celebration: a small hand-rolled particle burst (~1s), no deps.
 const PARTICLE_COUNT = 22;
@@ -53,6 +51,7 @@ function playBurst(canvas: HTMLCanvasElement) {
 
 /** Final state: all three steps done — celebrate once, then the launcher retires. */
 const CompletionCelebration = () => {
+  const t = useTranslations('onboarding.checklist.completion');
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -78,8 +77,8 @@ const CompletionCelebration = () => {
         className="text-success mx-auto h-8 w-8 animate-[gs-pop_0.5s_ease-out_both] motion-reduce:animate-none"
         aria-hidden="true"
       />
-      <div className="text-text-primary mt-2 text-sm font-semibold">{copy.title}</div>
-      <p className="text-text-muted mx-auto mt-1 max-w-[240px] text-xs">{copy.body}</p>
+      <div className="text-text-primary mt-2 text-sm font-semibold">{t('title')}</div>
+      <p className="text-text-muted mx-auto mt-1 max-w-[240px] text-xs">{t('body')}</p>
       <div className="bg-success mt-4 h-1 rounded-full" />
     </div>
   );

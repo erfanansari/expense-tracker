@@ -9,7 +9,6 @@ export interface CategoryData {
 
 export interface ChartEntry {
   name: string;
-  nameFa: string;
   value: number;
   color: string;
 }

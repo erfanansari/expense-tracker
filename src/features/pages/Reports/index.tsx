@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { getAllExpensesKeyGenerator } from '@api/getAllExpensesQuery';
 import type { GetAllExpensesResponse } from '@api/getAllExpensesQuery';
 import { useQuery } from '@tanstack/react-query';
@@ -63,6 +65,7 @@ function ReportsSkeleton() {
 }
 
 const ReportsPage = () => {
+  const t = useTranslations('pages.reports');
   // States
   const [dateRange, setDateRange] = useState<DateRange>('ALL_TIME');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -114,10 +117,7 @@ const ReportsPage = () => {
   const handleExportCsv = () => {
     const csv = expensesToCsvString(filteredExpenses);
     downloadFile(csv, buildExportFilename('kharji-expenses', dateRange, 'csv'), 'text/csv;charset=utf-8;');
-    showToast(
-      `Exported ${filteredExpenses.length} expense${filteredExpenses.length !== 1 ? 's' : ''} as CSV`,
-      'success'
-    );
+    showToast(t('exportSuccess', { count: filteredExpenses.length }), 'success');
   };
 
   return (
@@ -126,8 +126,8 @@ const ReportsPage = () => {
         {/* Page Header */}
         <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
           <div className="min-w-0 flex-1">
-            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">Reports</h1>
-            <p className="text-text-muted mt-1 text-xs sm:text-sm">Analyze your spending patterns</p>
+            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">{t('title')}</h1>
+            <p className="text-text-muted mt-1 text-xs sm:text-sm">{t('subtitle')}</p>
           </div>
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             {/* Date range — inline on desktop, dropped below on mobile */}
@@ -143,9 +143,9 @@ const ReportsPage = () => {
                 aria-haspopup="dialog"
               >
                 <Filter className="h-4 w-4" />
-                <span className="hidden sm:inline">Filter</span>
+                <span className="hidden sm:inline">{t('filterButton')}</span>
                 {activeFilterCount > 0 && (
-                  <span className="bg-blue text-background ml-0.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-semibold tabular-nums">
+                  <span className="bg-blue text-background ms-0.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-semibold tabular-nums">
                     {activeFilterCount}
                   </span>
                 )}
@@ -165,10 +165,10 @@ const ReportsPage = () => {
               className="shrink-0"
               onClick={handleExportCsv}
               disabled={filteredExpenses.length === 0}
-              title="Download the expenses in this view as CSV"
+              title={t('exportCsvTitle')}
             >
               <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">Export CSV</span>
+              <span className="hidden sm:inline">{t('exportCsv')}</span>
             </Button>
           </div>
         </div>
@@ -182,7 +182,7 @@ const ReportsPage = () => {
         {!isLoading &&
           (loadError ? (
             <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
-              <ErrorState title="Couldn't load reports" description={loadError.message} onRetry={() => refetch()} />
+              <ErrorState title={t('loadError')} description={loadError.message} onRetry={() => refetch()} />
             </div>
           ) : (
             <>

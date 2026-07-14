@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { createTagKeyGenerator } from '@api/createTagMutation';
 import type { CreateTagRequestData } from '@api/createTagMutation';
 import { getTagListKeyGenerator, TAGS_SCOPE } from '@api/getTagListQuery';
@@ -42,6 +44,7 @@ const controlClass = (isFocused: boolean) =>
 // ─── Custom Option ───────────────────────────────────────────────────────────
 
 const TagOptionComponent = ({ data, isFocused, isSelected, innerProps, innerRef }: OptionProps<TagOption, true>) => {
+  const t = useTranslations('forms.expense');
   const isNew = (data as TagOption & { __isNew__?: boolean }).__isNew__;
 
   if (isNew) {
@@ -55,7 +58,7 @@ const TagOptionComponent = ({ data, isFocused, isSelected, innerProps, innerRef 
         )}
       >
         <Plus className="h-3.5 w-3.5 shrink-0" />
-        <span>Create &ldquo;{data.label}&rdquo;</span>
+        <span>{t('createTagOption', { label: data.label })}</span>
       </div>
     );
   }
@@ -99,6 +102,7 @@ interface TagInputProps {
 const tagToOption = (tag: Tag): TagOption => ({ value: String(tag.id), label: tag.name, tag });
 
 const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
+  const t = useTranslations('forms.expense');
   const queryClient = useQueryClient();
   const { data: allTags = [] } = useQuery<Tag[]>({ queryKey: getTagListKeyGenerator() });
   const createTag = useMutation<Tag, Error, CreateTagRequestData>({ mutationKey: createTagKeyGenerator() });
@@ -128,7 +132,7 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
       options={options}
       onCreateOption={handleCreate}
       isLoading={createTag.isPending}
-      placeholder="Tags"
+      placeholder={t('tagsPlaceholder')}
       isSearchable
       closeMenuOnSelect={false}
       createOptionPosition="last"
@@ -154,7 +158,7 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
         multiValue: () =>
           'border-border-subtle bg-background-elevated text-text-secondary hover:border-border-default flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium transition-all',
         multiValueRemove: () =>
-          'text-text-muted hover:text-text-primary hover:bg-background-elevated ml-0.5 rounded p-0.5 transition-colors cursor-pointer',
+          'text-text-muted hover:text-text-primary hover:bg-background-elevated ms-0.5 rounded p-0.5 transition-colors cursor-pointer',
         noOptionsMessage: () => 'text-text-muted px-3 py-3 text-[13px]',
         loadingMessage: () => 'text-text-muted px-3 py-3 text-[13px]',
       }}

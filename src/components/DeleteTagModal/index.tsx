@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { AlertTriangle, Loader2 } from 'lucide-react';
 
 import Button from '@components/Button';
@@ -17,6 +19,8 @@ interface DeleteTagModalProps {
 }
 
 const DeleteTagModal = ({ isOpen, tag, usageCount, onConfirm, onCancel, isDeleting = false }: DeleteTagModalProps) => {
+  const t = useTranslations('settings.tags.deleteConfirm');
+  const tCommon = useTranslations('common');
   if (!tag) return null;
 
   return (
@@ -29,7 +33,7 @@ const DeleteTagModal = ({ isOpen, tag, usageCount, onConfirm, onCancel, isDeleti
 
         {/* Title */}
         <div className="mt-4">
-          <h3 className="text-text-primary text-lg font-semibold">Delete tag &ldquo;{tag.name}&rdquo;?</h3>
+          <h3 className="text-text-primary text-lg font-semibold">{t('title', { name: tag.name })}</h3>
         </div>
 
         {/* Message */}
@@ -37,21 +41,25 @@ const DeleteTagModal = ({ isOpen, tag, usageCount, onConfirm, onCancel, isDeleti
           {usageCount > 0 ? (
             <>
               <p className="text-text-secondary text-sm">
-                This tag is used in <span className="font-semibold">{usageCount}</span>{' '}
-                {usageCount === 1 ? 'expense' : 'expenses'}.
+                {t.rich('usedInN', {
+                  count: usageCount,
+                  b: (chunks) => <span className="font-semibold">{chunks}</span>,
+                })}
               </p>
-              <p className="text-text-secondary text-sm">It will be removed from all of them.</p>
+              <p className="text-text-secondary text-sm">{t('willBeRemoved')}</p>
             </>
           ) : (
-            <p className="text-text-secondary text-sm">This tag is not currently used in any expenses.</p>
+            <p className="text-text-secondary text-sm">{t('notUsed')}</p>
           )}
-          <p className="text-text-secondary text-sm font-medium">This action cannot be undone.</p>
+          <p className="text-text-secondary text-sm font-medium">{tCommon('actionUndone')}</p>
         </div>
 
-        {/* Actions */}
+        {/* Actions — no rtl override: Cancel is coded first, so a plain flex row
+            under RTL already puts Cancel on the right and Confirm/primary on
+            the left. */}
         <div className="mt-6 flex gap-3">
           <Button variant="outline" onClick={onCancel} disabled={isDeleting} className="flex-1">
-            Cancel
+            {tCommon('cancel')}
           </Button>
           <Button
             variant="primary"
@@ -62,10 +70,10 @@ const DeleteTagModal = ({ isOpen, tag, usageCount, onConfirm, onCancel, isDeleti
             {isDeleting ? (
               <>
                 <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-                <span>Deleting...</span>
+                <span>{tCommon('deleting')}</span>
               </>
             ) : (
-              'Delete Tag'
+              t('deleteAction')
             )}
           </Button>
         </div>

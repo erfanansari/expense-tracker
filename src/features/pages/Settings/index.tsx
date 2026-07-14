@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import Pulse from '@components/Skeleton';
 
 import { useAuth } from '@hooks/use-auth';
@@ -45,6 +47,7 @@ function SettingsSkeleton() {
 }
 
 const SettingsPage = () => {
+  const t = useTranslations('settings');
   const { loading } = useAuth();
 
   return (
@@ -52,8 +55,8 @@ const SettingsPage = () => {
       <div className="mx-auto max-w-[1600px] px-6 py-8">
         <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
           <div className="min-w-0 flex-1">
-            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">Settings</h1>
-            <p className="text-text-muted mt-1 text-xs sm:text-sm">Manage your account and preferences</p>
+            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">{t('title')}</h1>
+            <p className="text-text-muted mt-1 text-xs sm:text-sm">{t('subtitle')}</p>
           </div>
         </div>
 

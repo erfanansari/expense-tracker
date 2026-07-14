@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { linkGoogleKeyGenerator } from '@api/linkGoogleMutation';
 import type { LinkGoogleResponse } from '@api/linkGoogleMutation';
 import { listAccountsKeyGenerator } from '@api/listAccountsQuery';
@@ -20,6 +22,7 @@ import { useToast } from '@stores/toast';
 
 const ConnectedAccounts = () => {
   // Customs
+  const t = useTranslations('settings.security.connected');
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const { user } = useAuth();
@@ -39,26 +42,26 @@ const ConnectedAccounts = () => {
     onSuccess: ({ url }) => {
       window.location.href = url;
     },
-    onError: (err) => showToast(err.message || 'Failed to start Google linking', 'error'),
+    onError: (err) => showToast(err.message || t('linkFailed'), 'error'),
   });
 
   const unlinkMutation = useMutation<void, Error, void>({
     mutationKey: unlinkGoogleKeyGenerator(),
     onSuccess: () => {
       setIsUnlinkOpen(false);
-      showToast('Google account disconnected.', 'success');
+      showToast(t('disconnected'), 'success');
       void queryClient.invalidateQueries({ queryKey: listAccountsKeyGenerator() });
     },
     onError: (err) => {
       setIsUnlinkOpen(false);
-      showToast(err.message || 'Failed to disconnect Google', 'error');
+      showToast(err.message || t('disconnectFailed'), 'error');
     },
   });
 
   return (
     <div className="max-w-2xl">
-      <h3 className="text-text-primary text-sm font-semibold">Connected Accounts</h3>
-      <p className="text-text-muted mt-1 text-xs">Ways you can sign in to Kharji.</p>
+      <h3 className="text-text-primary text-sm font-semibold">{t('title')}</h3>
+      <p className="text-text-muted mt-1 text-xs">{t('subtitle')}</p>
 
       <div className="mt-4 space-y-3">
         <div className="border-border-subtle flex items-center gap-3 rounded-lg border p-3">
@@ -66,14 +69,14 @@ const ConnectedAccounts = () => {
             <Mail className="text-text-secondary h-4 w-4" aria-hidden="true" />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-text-primary text-sm font-medium">Email &amp; password</div>
+            <div className="text-text-primary text-sm font-medium">{t('emailPassword')}</div>
             <div className="text-text-muted truncate text-xs">{user?.email}</div>
           </div>
           {hasCredential ? (
-            <span className="bg-success/10 text-success rounded px-2 py-0.5 text-xs font-medium">Connected</span>
+            <span className="bg-success/10 text-success rounded px-2 py-0.5 text-xs font-medium">{t('connected')}</span>
           ) : (
             <span className="bg-background-elevated text-text-muted rounded px-2 py-0.5 text-xs font-medium">
-              No password set
+              {t('noPassword')}
             </span>
           )}
         </div>
@@ -83,19 +86,17 @@ const ConnectedAccounts = () => {
             <GoogleIcon />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-text-primary text-sm font-medium">Google</div>
-            <div className="text-text-muted text-xs">
-              {hasGoogle ? 'Sign in with your Google account' : 'Not connected'}
-            </div>
+            <div className="text-text-primary text-sm font-medium">{t('google')}</div>
+            <div className="text-text-muted text-xs">{hasGoogle ? t('googleConnected') : t('notConnected')}</div>
           </div>
           {hasGoogle ? (
             <Button
               variant="danger"
               onClick={() => setIsUnlinkOpen(true)}
               disabled={googleIsOnlyAccount || unlinkMutation.isPending}
-              title={googleIsOnlyAccount ? 'Set a password first so you don’t lose access to your account' : undefined}
+              title={googleIsOnlyAccount ? t('disconnectLockoutHint') : undefined}
             >
-              Disconnect
+              {t('disconnect')}
             </Button>
           ) : (
             <Button
@@ -106,10 +107,10 @@ const ConnectedAccounts = () => {
               {linkMutation.isPending ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  Connecting...
+                  {t('connecting')}
                 </span>
               ) : (
-                'Connect'
+                t('connect')
               )}
             </Button>
           )}
@@ -118,8 +119,8 @@ const ConnectedAccounts = () => {
 
       <DeleteConfirmModal
         isOpen={isUnlinkOpen}
-        title="Disconnect Google"
-        message="You'll no longer be able to sign in with Google. You can reconnect it at any time."
+        title={t('disconnectTitle')}
+        message={t('disconnectMessage')}
         onConfirm={() => unlinkMutation.mutate()}
         onCancel={() => setIsUnlinkOpen(false)}
         isDeleting={unlinkMutation.isPending}

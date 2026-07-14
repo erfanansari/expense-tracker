@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { format, parseISO } from 'date-fns';
+import { useLocale, useTranslations } from 'next-intl';
+
+import { parseISO } from 'date-fns';
 import { TrendingUp } from 'lucide-react';
 import {
   Area,
@@ -22,18 +24,19 @@ import Select from '@components/Select';
 import Pulse from '@components/Skeleton';
 
 import { useCurrency } from '@hooks/use-currency';
+import { useLocalePreferences } from '@hooks/use-locale-preferences';
 import { type NetWorthRange, useNetWorthHistory } from '@hooks/use-net-worth-history';
 
-import { formatAxisNumber, formatChartTooltipDate } from '@utils';
+import { formatAxisNumber, formatChartAxisDate, formatChartTooltipDate, resolveCalendar } from '@utils';
 
 import { PIVOT_CURRENCY } from '@/constants/currencies';
 
-const RANGE_OPTIONS: { value: NetWorthRange; label: string }[] = [
-  { value: '1M', label: '1 Month' },
-  { value: '3M', label: '3 Months' },
-  { value: '6M', label: '6 Months' },
-  { value: '1Y', label: '1 Year' },
-  { value: 'ALL', label: 'All Time' },
+const RANGE_KEYS: { value: NetWorthRange; key: 'range1M' | 'range3M' | 'range6M' | 'range1Y' | 'rangeAll' }[] = [
+  { value: '1M', key: 'range1M' },
+  { value: '3M', key: 'range3M' },
+  { value: '6M', key: 'range6M' },
+  { value: '1Y', key: 'range1Y' },
+  { value: 'ALL', key: 'rangeAll' },
 ];
 
 // ─── Custom tooltip ──────────────────────────────────────────────────────────
@@ -48,6 +51,9 @@ function NetWorthTooltip({
     payload: { date: string; value: number };
   }>;
 }) {
+  const locale = useLocale() as 'en' | 'fa';
+  const { prefs } = useLocalePreferences();
+  const calendar = resolveCalendar(prefs.calendar, locale);
   const { display } = useCurrency();
   if (!active || !payload?.length) return null;
   const point = payload[0].payload;
@@ -57,7 +63,7 @@ function NetWorthTooltip({
     <ChartTooltip
       primary={primary}
       secondary={secondary ?? undefined}
-      accent={{ text: formatChartTooltipDate(point.date, 'daily'), tone: 'success' }}
+      accent={{ text: formatChartTooltipDate(point.date, 'daily', locale, calendar), tone: 'success' }}
     />
   );
 }
@@ -90,6 +96,11 @@ function DeltaBadge({ data }: { data: Array<{ value: number }> }) {
 }
 
 const NetWorthChart = () => {
+  const t = useTranslations('pages.assets.netWorthChart');
+  const locale = useLocale() as 'en' | 'fa';
+  const { prefs: localePrefs } = useLocalePreferences();
+  const calendar = resolveCalendar(localePrefs.calendar, locale);
+  const rangeOptions = RANGE_KEYS.map((r) => ({ value: r.value, label: t(r.key) }));
   const [range, setRange] = useState<NetWorthRange>('6M');
   const { data, isLoading, isError, error, refetch } = useNetWorthHistory(range);
 
@@ -110,8 +121,8 @@ const NetWorthChart = () => {
   }, []);
 
   const formatXTick = useCallback(
-    (value: number) => format(value, isShortRange ? 'MMM d' : "MMM ''yy"),
-    [isShortRange]
+    (value: number) => formatChartAxisDate(new Date(value), isShortRange ? 'day' : 'month', locale, calendar),
+    [isShortRange, locale, calendar]
   );
 
   const hasData = !isLoading && !isError && data && data.length >= 2;
@@ -169,9 +180,9 @@ const NetWorthChart = () => {
         <div className="border-border-subtle bg-background-secondary rounded-lg border p-2.5">
           <TrendingUp className="text-success h-5 w-5" />
         </div>
-        <h2 className="text-text-primary text-lg font-semibold">Net Worth</h2>
+        <h2 className="text-text-primary text-lg font-semibold">{t('title')}</h2>
       </div>
-      <Select value={range} onChange={(val) => setRange(val as NetWorthRange)} options={RANGE_OPTIONS} />
+      <Select value={range} onChange={(val) => setRange(val as NetWorthRange)} options={rangeOptions} />
     </div>
   );
 
@@ -196,8 +207,8 @@ const NetWorthChart = () => {
       <div className="border-border-subtle bg-background rounded-xl border p-5 shadow-sm sm:p-6">
         {cardHeader}
         <ErrorState
-          title="Couldn't load net worth history"
-          description={error?.message ?? 'An unexpected error occurred while loading this data.'}
+          title={t('loadError')}
+          description={error?.message}
           onRetry={() => refetch()}
           className="min-h-[280px]"
         />
@@ -220,17 +231,23 @@ const NetWorthChart = () => {
       {isEmpty && (
         <EmptyState
           icon={TrendingUp}
-          title="No history yet"
-          description="Add assets and update their values over time — each update records a snapshot on this chart."
+          title={t('emptyTitle')}
+          description={t('emptyDescription')}
           className="min-h-[280px]"
         />
       )}
 
       {/* Chart */}
       {hasData && (
-        <div ref={chartContainerRef} className="h-[280px]">
+        <div ref={chartContainerRef} className="h-[280px]" dir="ltr">
           <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-            <AreaChart data={chartData} margin={{ left: 0, right: 20, top: 8, bottom: 0 }}>
+            <AreaChart
+              data={chartData}
+              // Farsi's compact notation spells out "میلیون"/"میلیارد" in full
+              // instead of abbreviating to a single letter ("M"/"B"), so the
+              // Y-axis needs extra breathing room to avoid clipping the widest tick.
+              margin={{ left: locale === 'fa' ? 12 : 0, right: 20, top: 8, bottom: 0 }}
+            >
               <defs>
                 <linearGradient id="colorNetWorth" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="var(--color-success)" stopOpacity={0.2} />
@@ -259,7 +276,7 @@ const NetWorthChart = () => {
                 tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
                 axisLine={{ stroke: 'var(--color-border-subtle)' }}
                 tickLine={{ stroke: 'var(--color-border-subtle)' }}
-                tickFormatter={formatAxisNumber}
+                tickFormatter={(value: number) => formatAxisNumber(value, locale)}
               />
               <RechartsTooltip
                 content={<NetWorthTooltip />}

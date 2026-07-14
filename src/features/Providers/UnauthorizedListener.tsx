@@ -2,11 +2,15 @@
 
 import { useEffect } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { beginSignout, setUnauthorizedHandler } from '@core/client/auth-handler';
 
 import toastStore from '@stores/toast';
 
 const UnauthorizedListener = () => {
+  const t = useTranslations('nav');
+
   useEffect(() => {
     setUnauthorizedHandler(async () => {
       if (!beginSignout()) return;
@@ -29,13 +33,13 @@ const UnauthorizedListener = () => {
       }
 
       if (window.location.pathname !== '/login') {
-        toastStore.getState().showToast("You've been signed out.", 'error');
+        toastStore.getState().showToast(t('sessionExpiredToast'), 'error');
       }
       // Hard navigation guarantees the proxy re-evaluates fresh server-side
       // and clears any client-router state from the (now-invalid) session.
       window.location.href = '/login';
     });
-  }, []);
+  }, [t]);
 
   return null;
 };

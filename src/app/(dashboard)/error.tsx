@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 import Button from '@components/Button';
@@ -10,6 +12,8 @@ interface DashboardErrorProps {
 }
 
 export default function DashboardError({ reset }: DashboardErrorProps) {
+  const t = useTranslations('errors.generic');
+
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-[1600px] px-6 py-12">
@@ -18,14 +22,12 @@ export default function DashboardError({ reset }: DashboardErrorProps) {
             <AlertTriangle className="text-danger h-6 w-6" aria-hidden="true" />
           </div>
           <div className="space-y-1">
-            <p className="text-text-primary text-base font-semibold">Something went wrong on this page</p>
-            <p className="text-text-muted max-w-md text-sm">
-              An unexpected error occurred while rendering this view. You can retry; the rest of the app is unaffected.
-            </p>
+            <p className="text-text-primary text-base font-semibold">{t('title')}</p>
+            <p className="text-text-muted max-w-md text-sm">{t('description')}</p>
           </div>
           <Button variant="primary" onClick={reset} className="mt-2">
             <RefreshCw className="h-4 w-4" />
-            Try again
+            {t('retry')}
           </Button>
         </div>
       </div>

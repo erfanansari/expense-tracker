@@ -2,6 +2,8 @@
 
 import { useEffect } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { AlertTriangle, CheckCircle, Info, X, XCircle } from 'lucide-react';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -18,6 +20,7 @@ interface ToastItemProps {
 }
 
 const ToastItem = ({ toast, onClose }: ToastItemProps) => {
+  const t = useTranslations('common');
   // Effects
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -50,7 +53,7 @@ const ToastItem = ({ toast, onClose }: ToastItemProps) => {
       <button
         onClick={() => onClose(toast.id)}
         className="flex-shrink-0 rounded p-1 transition-colors hover:bg-white/20"
-        aria-label="Close"
+        aria-label={t('close')}
       >
         <X className="h-4 w-4" />
       </button>

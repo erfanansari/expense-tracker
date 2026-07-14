@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import Select from '@components/Select';
 
 export type DateRange = '7D' | '30D' | 'THIS_MONTH' | 'LAST_MONTH' | 'YTD' | 'ALL_TIME';
@@ -9,18 +11,20 @@ interface DateRangeSelectorProps {
   onChange: (range: DateRange) => void;
 }
 
-const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
-  { value: '7D', label: '7 Days' },
-  { value: '30D', label: '30 Days' },
-  { value: 'THIS_MONTH', label: 'This Month' },
-  { value: 'LAST_MONTH', label: 'Last Month' },
-  { value: 'YTD', label: 'Year to Date' },
-  { value: 'ALL_TIME', label: 'All Time' },
+const DATE_RANGE_KEYS: { value: DateRange; key: '7d' | '30d' | 'thisMonth' | 'lastMonth' | 'ytd' | 'allTime' }[] = [
+  { value: '7D', key: '7d' },
+  { value: '30D', key: '30d' },
+  { value: 'THIS_MONTH', key: 'thisMonth' },
+  { value: 'LAST_MONTH', key: 'lastMonth' },
+  { value: 'YTD', key: 'ytd' },
+  { value: 'ALL_TIME', key: 'allTime' },
 ];
 
-const DateRangeSelector = ({ value, onChange }: DateRangeSelectorProps) => (
-  <Select value={value} onChange={(val) => onChange(val as DateRange)} options={DATE_RANGE_OPTIONS} />
-);
+const DateRangeSelector = ({ value, onChange }: DateRangeSelectorProps) => {
+  const t = useTranslations('dateRange');
+  const options = DATE_RANGE_KEYS.map((r) => ({ value: r.value, label: t(r.key) }));
+  return <Select value={value} onChange={(val) => onChange(val as DateRange)} options={options} />;
+};
 
 export function getDateRangeFilter(range: DateRange): { start: Date; end: Date } | null {
   const today = new Date();

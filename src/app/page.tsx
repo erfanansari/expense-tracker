@@ -1,11 +1,15 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
 import Landing from '@features/pages/Landing';
 
-export const metadata: Metadata = {
-  title: 'Kharji - Personal Finance Tracker',
-  description: 'Track expenses, manage income, and grow your wealth with Kharji personal finance tracker.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('metaTitles');
+  return {
+    title: t('landing'),
+    description: t('landingDescription'),
+  };
+}
 
 const LandingPage = () => (
   <>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 import { getAllExpensesKeyGenerator } from '@api/getAllExpensesQuery';
@@ -135,6 +136,8 @@ function OverviewSkeleton() {
 }
 
 const Dashboard = () => {
+  const t = useTranslations('pages.overview');
+  const tCommon = useTranslations('common');
   // Queries
   const {
     data: summary,
@@ -165,14 +168,12 @@ const Dashboard = () => {
         {/* Header */}
         <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">Overview</h1>
-            <p className="text-text-muted mt-1 text-xs sm:text-sm">
-              Welcome back! Here&apos;s your financial overview.
-            </p>
+            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">{t('title')}</h1>
+            <p className="text-text-muted mt-1 text-xs sm:text-sm">{t('subtitle')}</p>
           </div>
           <Link href="/expenses" className={getButtonClasses('primary', 'shrink-0')}>
             <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Add Expense</span>
+            <span className="hidden sm:inline">{tCommon('addExpense')}</span>
           </Link>
         </div>
 
@@ -181,7 +182,7 @@ const Dashboard = () => {
           (error ? (
             <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
               <ErrorState
-                title="Couldn't load your overview"
+                title={t('loadError')}
                 description={error.message}
                 onRetry={() => {
                   void refetchSummary();

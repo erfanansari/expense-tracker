@@ -1,4 +1,9 @@
-import { changePasswordSchema, setPasswordSchema, signupSchema } from '../auth';
+import { createChangePasswordSchema, createSetPasswordSchema, createSignupSchema } from '../auth';
+import { fallbackT } from '../fallback-translator';
+
+const changePasswordSchema = createChangePasswordSchema(fallbackT);
+const setPasswordSchema = createSetPasswordSchema(fallbackT);
+const signupSchema = createSignupSchema(fallbackT);
 
 describe('changePasswordSchema', () => {
   const valid = { currentPassword: 'Oldpass1', password: 'Newpass123', passwordConfirm: 'Newpass123' };

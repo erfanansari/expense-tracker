@@ -1,11 +1,12 @@
 'use client';
 
+import { useLocale, useTranslations } from 'next-intl';
+
 import { deleteIncomeKeyGenerator } from '@api/deleteIncomeMutation';
 import type { DeleteIncomeRequestData } from '@api/deleteIncomeMutation';
 import { getIncomeListKeyGenerator, INCOMES_SCOPE } from '@api/getIncomeListQuery';
 import type { GetIncomeListResponse } from '@api/getIncomeListQuery';
 import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
-import { getIncomeTypeLabel, getMonthLabel } from '@constants/income';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 
@@ -15,12 +16,16 @@ import Button from '@components/Button';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import Pulse from '@components/Skeleton';
 
+import { useIncomeTypeLabel } from '@hooks/use-constant-labels';
 import { useDeleteConfirmation } from '@hooks/use-delete-confirmation';
+import { useLocalePreferences } from '@hooks/use-locale-preferences';
+import { useMonthYearDisplay } from '@hooks/use-month-year-display';
 
 import { useDrawerStore } from '@stores/drawer';
 import { useToast } from '@stores/toast';
 
-import { ensureError, getJalaliMonthName } from '@utils';
+import { ensureError, getDisplayYear, resolveCalendar } from '@utils';
+import type { AppLocale } from '@utils';
 
 import IncomeSummary from './components/IncomeSummary';
 import IncomeTable from './components/IncomeTable';
@@ -42,6 +47,12 @@ function IncomeSummarySkeleton() {
 
 const IncomePage = () => {
   // Customs
+  const t = useTranslations('pages.income');
+  const locale = useLocale() as AppLocale;
+  const monthYearDisplay = useMonthYearDisplay();
+  const incomeTypeLabel = useIncomeTypeLabel();
+  const { prefs: localePrefs } = useLocalePreferences();
+  const calendar = resolveCalendar(localePrefs.calendar, locale);
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
@@ -73,18 +84,32 @@ const IncomePage = () => {
         queryClient.invalidateQueries({ queryKey: INCOMES_SCOPE }),
         queryClient.invalidateQueries({ queryKey: SUMMARY_SCOPE }),
       ]);
-      showToast('Income entry deleted.', 'info');
+      showToast(t('deleted'), 'info');
     },
     onError: (err) => showToast(ensureError(err).message, 'error'),
   });
 
   // Variables
+  let deleteItemName: string | undefined;
+  if (incomeToDelete) {
+    const { primary, secondary } = monthYearDisplay(incomeToDelete.month, incomeToDelete.year);
+    const type = incomeTypeLabel(incomeToDelete.incomeType);
+    deleteItemName = secondary
+      ? t('deleteItemNameWithJalali', { month: primary, jalaliMonth: secondary, type })
+      : t('deleteItemName', { month: primary, type });
+  }
+
+  // Grouped by the resolved calendar's year so each group header is internally
+  // consistent — a Gregorian year can straddle two Jalali years (around Nowruz),
+  // so grouping must follow the same calendar as the displayed month, not the
+  // raw stored (Gregorian) year.
   const incomesByYear = incomes.reduce(
     (acc, income) => {
-      if (!acc[income.year]) {
-        acc[income.year] = [];
+      const displayYear = getDisplayYear(income.month, income.year, calendar);
+      if (!acc[displayYear]) {
+        acc[displayYear] = [];
       }
-      acc[income.year].push(income);
+      acc[displayYear].push(income);
       return acc;
     },
     {} as Record<number, Income[]>
@@ -100,12 +125,12 @@ const IncomePage = () => {
         {/* Page Header */}
         <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
           <div className="min-w-0 flex-1">
-            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">Income</h1>
-            <p className="text-text-muted mt-1 text-xs sm:text-sm">Track your monthly earnings</p>
+            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">{t('title')}</h1>
+            <p className="text-text-muted mt-1 text-xs sm:text-sm">{t('subtitle')}</p>
           </div>
           <Button variant="primary" onClick={() => openIncomeDrawer()} className="shrink-0">
             <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Add Income</span>
+            <span className="hidden sm:inline">{t('addIncome')}</span>
           </Button>
         </div>
 
@@ -131,13 +156,9 @@ const IncomePage = () => {
         {/* Delete Confirmation Modal */}
         <DeleteConfirmModal
           isOpen={isDeleteModalOpen}
-          title="Delete income"
-          message="Are you sure you want to delete this income entry?"
-          itemName={
-            incomeToDelete
-              ? `${getMonthLabel(incomeToDelete.month).en} (${getJalaliMonthName(incomeToDelete.month, incomeToDelete.year)}) ${incomeToDelete.year} - ${getIncomeTypeLabel(incomeToDelete.incomeType).en}`
-              : undefined
-          }
+          title={t('deleteTitle')}
+          message={t('deleteMessage')}
+          itemName={deleteItemName}
           onConfirm={confirmDelete}
           onCancel={closeDeleteModal}
           isDeleting={deletingId === incomeToDelete?.id}

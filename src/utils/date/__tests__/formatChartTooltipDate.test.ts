@@ -39,4 +39,18 @@ describe('formatChartTooltipDate', () => {
       expect(formatChartTooltipDate('2026-01', 'monthly')).toBe('January 2026');
     });
   });
+
+  describe('fa locale', () => {
+    it('renders Persian digits and month names for a daily bucket', () => {
+      expect(formatChartTooltipDate('2026-05-02', 'daily', 'fa')).toBe('شنبه ۲ مه ۲۰۲۶');
+    });
+
+    it('prefixes weekly buckets with the Persian "week of" phrase', () => {
+      expect(formatChartTooltipDate('2026-05-02', 'weekly', 'fa')).toContain('هفتهٔ');
+    });
+
+    it('renders Persian digits and month names for a monthly bucket', () => {
+      expect(formatChartTooltipDate('2026-05', 'monthly', 'fa')).toBe('مهٔ ۲۰۲۶');
+    });
+  });
 });

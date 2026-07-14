@@ -94,6 +94,19 @@ const Select = ({
         maxWidth: 'calc(100vw - 16px)',
         ...(menuAlign === 'right' ? { right: 0, left: 'auto' } : {}),
       }),
+      // react-select's default single-value crossfade uses `display: grid` +
+      // `gridArea: 1/1/2/3` on the value container, which can collapse to
+      // zero visible width under dir="rtl" (implicit grid columns don't
+      // reliably get sized without an explicit template). Swap to a plain
+      // flex row — no crossfade animation, but the selected label always renders.
+      // Non-searchable selects render react-select's DummyInput as the focus
+      // holder; its `position: relative; left: -100px; gridArea` is hardcoded
+      // in the library (not exposed through `styles.input`), and under RTL it
+      // ends up displacing this now-flex singleValue while focused — patched
+      // globally in globals.css since there's no prop-level hook for it.
+      valueContainer: (base: CSSObjectWithLabel) => ({ ...base, display: 'flex' }),
+      singleValue: (base: CSSObjectWithLabel) => ({ ...base, position: 'static', gridArea: 'auto' }),
+      placeholder: (base: CSSObjectWithLabel) => ({ ...base, position: 'static', gridArea: 'auto' }),
     }),
     [menuAlign]
   );
@@ -142,7 +155,7 @@ const Select = ({
         placeholder: () => 'text-text-muted text-sm',
         singleValue: () => 'text-text-primary text-sm font-medium',
         valueContainer: () => 'py-0',
-        dropdownIndicator: () => 'ml-1 text-text-muted',
+        dropdownIndicator: () => 'ms-1 text-text-muted',
         noOptionsMessage: () => 'text-text-muted px-3 py-3 text-sm',
         loadingMessage: () => 'text-text-muted px-3 py-3 text-sm',
       }}

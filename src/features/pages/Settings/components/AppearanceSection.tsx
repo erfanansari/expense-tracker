@@ -2,17 +2,19 @@
 
 import { useEffect, useState } from 'react';
 
+import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
 
 import { Monitor, Moon, Palette, Sun } from 'lucide-react';
 
 const THEME_OPTIONS = [
-  { value: 'system', label: 'System', icon: Monitor },
-  { value: 'light', label: 'Light', icon: Sun },
-  { value: 'dark', label: 'Dark', icon: Moon },
+  { value: 'system', key: 'system', icon: Monitor },
+  { value: 'light', key: 'light', icon: Sun },
+  { value: 'dark', key: 'dark', icon: Moon },
 ] as const;
 
 const AppearanceSection = () => {
+  const t = useTranslations('settings.appearance');
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -34,19 +36,19 @@ const AppearanceSection = () => {
             <Palette className="text-text-secondary h-5 w-5" />
           </div>
           <div className="flex-1">
-            <h2 className="text-text-primary text-lg font-semibold">Appearance</h2>
-            <p className="text-text-muted text-sm">Customize the look and feel</p>
+            <h2 className="text-text-primary text-lg font-semibold">{t('title')}</h2>
+            <p className="text-text-muted text-sm">{t('subtitle')}</p>
           </div>
         </div>
       </div>
       <div className="p-6">
-        <label className="text-text-secondary mb-2 block text-sm font-medium">Theme</label>
+        <label className="text-text-secondary mb-2 block text-sm font-medium">{t('theme')}</label>
         <div
           role="radiogroup"
-          aria-label="Theme"
+          aria-label={t('theme')}
           className="border-border-subtle bg-background-secondary inline-flex w-full gap-1 rounded-lg border p-1"
         >
-          {THEME_OPTIONS.map(({ value, label, icon: Icon }) => {
+          {THEME_OPTIONS.map(({ value, key, icon: Icon }) => {
             const isActive = active === value;
             return (
               <button
@@ -62,14 +64,12 @@ const AppearanceSection = () => {
                 }`}
               >
                 <Icon className="h-4 w-4" aria-hidden="true" />
-                {label}
+                {t(key)}
               </button>
             );
           })}
         </div>
-        <p className="text-text-muted mt-3 text-xs">
-          &quot;System&quot; follows your device&apos;s appearance settings.
-        </p>
+        <p className="text-text-muted mt-3 text-xs">{t('systemHint')}</p>
       </div>
     </div>
   );

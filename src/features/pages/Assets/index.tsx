@@ -1,11 +1,13 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { deleteAssetKeyGenerator } from '@api/deleteAssetMutation';
 import type { DeleteAssetRequestData } from '@api/deleteAssetMutation';
 import { ASSETS_SCOPE, getAssetListKeyGenerator } from '@api/getAssetListQuery';
 import type { GetAssetListResponse } from '@api/getAssetListQuery';
 import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
-import { ASSET_CATEGORY_COLORS, getAssetCategoryLabel } from '@constants/assets';
+import { ASSET_CATEGORY_COLORS } from '@constants/assets';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 
@@ -15,6 +17,7 @@ import Button from '@components/Button';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
 import Pulse from '@components/Skeleton';
 
+import { useAssetCategoryLabel } from '@hooks/use-constant-labels';
 import { useDeleteConfirmation } from '@hooks/use-delete-confirmation';
 
 import { useDrawerStore } from '@stores/drawer';
@@ -47,6 +50,9 @@ function AssetsSummarySkeleton() {
 
 const AssetsPage = () => {
   // Customs
+  const t = useTranslations('pages.assets');
+  const tCommon = useTranslations('common');
+  const categoryLabel = useAssetCategoryLabel();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
@@ -78,7 +84,7 @@ const AssetsPage = () => {
         queryClient.invalidateQueries({ queryKey: ASSETS_SCOPE }),
         queryClient.invalidateQueries({ queryKey: SUMMARY_SCOPE }),
       ]);
-      showToast('Asset deleted.', 'info');
+      showToast(t('deleted'), 'info');
     },
     onError: (err) => showToast(ensureError(err).message, 'error'),
   });
@@ -100,8 +106,7 @@ const AssetsPage = () => {
   );
 
   const chartData: ChartEntry[] = Object.entries(assetsByCategory).map(([category, data]) => ({
-    name: getAssetCategoryLabel(category).en,
-    nameFa: getAssetCategoryLabel(category).fa,
+    name: categoryLabel(category),
     value: data.total,
     color: CATEGORY_COLORS[category as AssetCategory] || '#525252',
   }));
@@ -114,12 +119,12 @@ const AssetsPage = () => {
         {/* Page Header */}
         <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
           <div className="min-w-0 flex-1">
-            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">Assets</h1>
-            <p className="text-text-muted mt-1 text-xs sm:text-sm">Track your wealth portfolio</p>
+            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">{t('title')}</h1>
+            <p className="text-text-muted mt-1 text-xs sm:text-sm">{t('subtitle')}</p>
           </div>
           <Button variant="primary" onClick={() => openAssetDrawer()} className="shrink-0">
             <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Add Asset</span>
+            <span className="hidden sm:inline">{tCommon('addAsset')}</span>
           </Button>
         </div>
 
@@ -161,8 +166,8 @@ const AssetsPage = () => {
         {/* Delete Confirmation Modal */}
         <DeleteConfirmModal
           isOpen={isDeleteModalOpen}
-          title="Delete asset"
-          message="Are you sure you want to delete this asset? All valuation history will be removed."
+          title={t('deleteTitle')}
+          message={t('deleteMessage')}
           itemName={assetToDelete?.name}
           onConfirm={confirmDelete}
           onCancel={closeDeleteModal}

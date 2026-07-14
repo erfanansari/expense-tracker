@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { deleteAccountKeyGenerator } from '@api/deleteAccountMutation';
 import { useMutation } from '@tanstack/react-query';
 import { Database, Download, Loader2, Trash2, Upload } from 'lucide-react';
@@ -20,6 +22,7 @@ import { downloadFullExport } from '@/utils/export';
 import ImportModal from './ImportModal';
 
 const DataManagement = () => {
+  const t = useTranslations('settings.dataManagement');
   const [isExporting, setIsExporting] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -35,9 +38,9 @@ const DataManagement = () => {
     setIsExporting(true);
     try {
       await downloadFullExport();
-      showToast('Data exported successfully', 'success');
+      showToast(t('exportSuccess'), 'success');
     } catch {
-      showToast('Export failed. Please try again.', 'error');
+      showToast(t('exportFailed'), 'error');
     } finally {
       setIsExporting(false);
     }
@@ -52,7 +55,7 @@ const DataManagement = () => {
       beginSignout();
       window.location.href = '/login';
     } catch {
-      showToast('Failed to delete account. Please try again.', 'error');
+      showToast(t('deleteFailed'), 'error');
       setIsDeleting(false);
     }
   };
@@ -66,8 +69,8 @@ const DataManagement = () => {
               <Database className="text-text-secondary h-5 w-5" aria-hidden="true" />
             </div>
             <div>
-              <h2 className="text-text-primary text-lg font-semibold">Data Management</h2>
-              <p className="text-text-muted text-sm">Export or import your financial data</p>
+              <h2 className="text-text-primary text-lg font-semibold">{t('title')}</h2>
+              <p className="text-text-muted text-sm">{t('subtitle')}</p>
             </div>
           </div>
         </div>
@@ -79,28 +82,24 @@ const DataManagement = () => {
               ) : (
                 <Download className="h-4 w-4" aria-hidden="true" />
               )}
-              {isExporting ? 'Preparing…' : 'Download Backup'}
+              {isExporting ? t('preparing') : t('downloadBackup')}
             </Button>
             <Button variant="outline" onClick={() => setIsImportOpen(true)}>
               <Upload className="h-4 w-4" aria-hidden="true" />
-              Import Expenses
+              {t('importExpenses')}
             </Button>
             <Button
               variant="danger"
               onClick={() => setIsDeleteOpen(true)}
               disabled={user?.isDemo}
               className={user?.isDemo ? 'cursor-not-allowed opacity-50' : undefined}
-              title={user?.isDemo ? 'Not available on the demo account' : undefined}
+              title={user?.isDemo ? t('notAvailableDemo') : undefined}
             >
               <Trash2 className="h-4 w-4" aria-hidden="true" />
-              Delete Account
+              {t('deleteAccount')}
             </Button>
           </div>
-          <p className="text-text-muted mt-3 text-xs">
-            Backup downloads one Excel file with everything — expenses, income, assets, and asset valuation history. For
-            a CSV of specific expenses, use Export CSV on the Reports page. Deleting your account permanently erases the
-            account and all of its data.
-          </p>
+          <p className="text-text-muted mt-3 text-xs">{t('hint')}</p>
         </div>
       </div>
 

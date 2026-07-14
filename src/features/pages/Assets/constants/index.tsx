@@ -1,4 +1,5 @@
-import { getAssetCategoryLabel } from '@constants/assets';
+import type { useTranslations } from 'next-intl';
+
 import { type ColumnDef } from '@tanstack/react-table';
 import { Banknote, Bitcoin, Building2, Gem, Landmark, TrendingUp, Wallet } from 'lucide-react';
 
@@ -34,6 +35,8 @@ export const ASSETS_COLUMN_WIDTHS = {
 // ─── Column definitions ───────────────────────────────────────────────────────
 
 export function buildAssetColumns(
+  t: ReturnType<typeof useTranslations<'tables'>>,
+  categoryLabel: (value: string) => string,
   handleEdit: (asset: Asset) => void,
   openDeleteModal: (asset: Asset) => void,
   deletingId: number | null
@@ -42,14 +45,14 @@ export function buildAssetColumns(
     {
       id: 'name',
       accessorKey: 'name',
-      header: 'Asset',
+      header: t('assets.asset'),
       meta: { widthClass: ASSETS_COLUMN_WIDTHS.name },
       cell: ({ row }) => {
         const asset = row.original;
         return (
           <div className="flex min-w-0 flex-col">
             <span className="text-text-primary truncate text-sm font-medium">{asset.name}</span>
-            <span className="text-text-muted truncate text-xs">{getAssetCategoryLabel(asset.category).en}</span>
+            <span className="text-text-muted truncate text-xs">{categoryLabel(asset.category)}</span>
           </div>
         );
       },
@@ -57,13 +60,13 @@ export function buildAssetColumns(
     {
       id: 'quantity',
       accessorKey: 'quantity',
-      header: 'Quantity',
+      header: t('assets.quantity'),
       meta: { widthClass: ASSETS_COLUMN_WIDTHS.quantity },
       cell: ({ row }) => {
         const asset = row.original;
         return (
           <span className="text-text-secondary block truncate text-sm whitespace-nowrap">
-            {asset.quantity} {asset.unit || 'unit'}
+            {asset.quantity} {asset.unit || t('unit')}
           </span>
         );
       },
@@ -71,8 +74,8 @@ export function buildAssetColumns(
     {
       id: 'value',
       accessorKey: 'amount',
-      header: 'Value',
-      meta: { widthClass: ASSETS_COLUMN_WIDTHS.value, align: 'right' as const },
+      header: t('assets.value'),
+      meta: { widthClass: ASSETS_COLUMN_WIDTHS.value, align: 'end' as const },
       cell: ({ row }) => {
         const asset = row.original;
         return (
@@ -89,7 +92,7 @@ export function buildAssetColumns(
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: t('actions'),
       meta: { widthClass: ASSETS_COLUMN_WIDTHS.actions, align: 'center' as const },
       cell: ({ row }) => {
         const asset = row.original;
@@ -98,7 +101,7 @@ export function buildAssetColumns(
             onEdit={() => handleEdit(asset)}
             onDelete={() => openDeleteModal(asset)}
             isDeleting={deletingId === asset.id}
-            editTitle="Update Value"
+            editTitle={t('updateValue')}
           />
         );
       },

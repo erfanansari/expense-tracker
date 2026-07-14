@@ -1,11 +1,11 @@
 import { z } from 'zod';
 
-import { createExpenseSchema } from '@schemas';
+import { createExpenseSchema, fallbackT } from '@schemas';
 
 import client from '@core/client';
 import type { MutationKeyGenerator } from '@core/client/@types';
 
-const requestDataSchema = createExpenseSchema.partial().extend({ id: z.number() });
+const requestDataSchema = createExpenseSchema(fallbackT).partial().extend({ id: z.number() });
 
 type RequestData = z.infer<typeof requestDataSchema>;
 const responseSchema = z.object({ message: z.string() });

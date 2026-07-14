@@ -1,8 +1,8 @@
 'use client';
 
-import { Rocket } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
-import { onboardingCopy } from '@features/onboarding/copy';
+import { Rocket } from 'lucide-react';
 
 const RING_RADIUS = 21;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
@@ -16,6 +16,7 @@ interface RingDockProps {
 
 /** Collapsed launcher: circular button with a progress ring that fills per step. */
 const RingDock = ({ done, total, expanded, onToggle }: RingDockProps) => {
+  const t = useTranslations('onboarding.checklist');
   // A ~4% head-start arc keeps the ring legible as a progress ring at 0/3
   const progress = Math.max(done / total, 0.04);
   const offset = RING_CIRCUMFERENCE * (1 - progress);
@@ -24,8 +25,8 @@ const RingDock = ({ done, total, expanded, onToggle }: RingDockProps) => {
     <button
       onClick={onToggle}
       aria-expanded={expanded}
-      aria-label={`${onboardingCopy.checklist.title} — ${onboardingCopy.checklist.progress(done, total)}`}
-      title={onboardingCopy.checklist.title}
+      aria-label={`${t('title')} — ${t('progress', { done, total })}`}
+      title={t('title')}
       className="group relative h-[52px] w-[52px] rounded-full shadow-lg transition-transform duration-200 hover:scale-105 motion-reduce:transition-none"
     >
       <svg width="52" height="52" viewBox="0 0 52 52" className="-rotate-90" aria-hidden="true">
@@ -50,7 +51,7 @@ const RingDock = ({ done, total, expanded, onToggle }: RingDockProps) => {
       </span>
       {/* Redundant while the panel is open — its header already shows progress */}
       {!expanded && (
-        <span className="bg-primary text-primary-foreground absolute -top-1 -right-1 rounded-full px-1.5 py-px text-[9px] font-semibold tabular-nums">
+        <span className="bg-primary text-primary-foreground absolute -end-1 -top-1 rounded-full px-1.5 py-px text-[9px] font-semibold tabular-nums">
           {done}/{total}
         </span>
       )}

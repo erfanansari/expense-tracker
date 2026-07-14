@@ -2,6 +2,8 @@
 
 import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
+import { useLocale, useTranslations } from 'next-intl';
+
 import { X } from 'lucide-react';
 import { Drawer } from 'vaul';
 
@@ -12,12 +14,15 @@ interface FormDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  titleFa?: string;
   children: ReactNode;
   isDirty?: boolean;
 }
 
-const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerProps) => {
+const FormDrawer = ({ isOpen, onClose, title, children }: FormDrawerProps) => {
+  // Customs
+  const t = useTranslations('common');
+  const isRtl = useLocale() === 'fa';
+
   // References
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -87,13 +92,17 @@ const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerPro
     };
   }, [isOpen, handleClose]);
 
+  let drawerDirection: 'bottom' | 'right' | 'left' = 'left';
+  if (isMobile) drawerDirection = 'bottom';
+  else if (isRtl) drawerDirection = 'right';
+
   return (
     <Drawer.Root
       open={isOpen}
       onOpenChange={(open) => {
         if (!open) handleClose();
       }}
-      direction={isMobile ? 'bottom' : 'left'}
+      direction={drawerDirection}
       dismissible
       shouldScaleBackground={false}
       repositionInputs={false}
@@ -110,8 +119,8 @@ const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerPro
           }
           className={
             isMobile
-              ? 'bg-background fixed right-0 bottom-0 left-0 z-50 flex h-[85dvh] max-h-[85dvh] flex-col rounded-t-2xl shadow-2xl outline-none'
-              : 'bg-background fixed top-0 bottom-0 left-0 z-50 flex w-[520px] flex-col shadow-2xl outline-none'
+              ? 'bg-background fixed inset-x-0 bottom-0 z-50 flex h-[85dvh] max-h-[85dvh] flex-col rounded-t-2xl shadow-2xl outline-none'
+              : 'bg-background fixed start-0 top-0 bottom-0 z-50 flex w-[520px] flex-col shadow-2xl outline-none'
           }
         >
           {/* Accessibility: Title must be direct child for screen readers */}
@@ -132,17 +141,12 @@ const FormDrawer = ({ isOpen, onClose, title, titleFa, children }: FormDrawerPro
             >
               <div className="min-w-0 flex-1">
                 <h2 className="text-text-primary text-base font-semibold sm:text-lg">{title}</h2>
-                {titleFa && (
-                  <p className="text-text-muted mt-1 text-xs" dir="rtl">
-                    {titleFa}
-                  </p>
-                )}
               </div>
               <button
                 onClick={handleClose}
-                className="text-action-default hover:bg-action-cancel-bg-hover hover:text-action-cancel-text-hover ml-3 rounded-lg p-2 transition-all duration-200"
-                aria-label="Close drawer"
-                title="Close"
+                className="text-action-default hover:bg-action-cancel-bg-hover hover:text-action-cancel-text-hover ms-3 rounded-lg p-2 transition-all duration-200"
+                aria-label={t('closeDrawer')}
+                title={t('closeDrawer')}
               >
                 <X className="h-5 w-5" />
               </button>

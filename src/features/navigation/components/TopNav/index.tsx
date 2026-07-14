@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FC } from 'react';
 
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -15,19 +16,18 @@ import { useCommandPalette } from '@components/CommandPalette/CommandPaletteProv
 
 import { useAuth } from '@hooks/use-auth';
 
-import type { NavItem } from './@types';
-
-const navItems: NavItem[] = [
-  { href: '/overview', label: 'Overview' },
-  { href: '/expenses', label: 'Expenses' },
-  { href: '/income', label: 'Income' },
-  { href: '/reports', label: 'Reports' },
-  { href: '/assets', label: 'Assets' },
-  { href: '/settings', label: 'Settings' },
-];
+const NAV_ITEMS = [
+  { href: '/overview', key: 'overview' },
+  { href: '/expenses', key: 'expenses' },
+  { href: '/income', key: 'income' },
+  { href: '/reports', key: 'reports' },
+  { href: '/assets', key: 'assets' },
+  { href: '/settings', key: 'settings' },
+] as const;
 
 const TopNav: FC = () => {
   // Customs
+  const t = useTranslations();
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { toggle: toggleCommandPalette } = useCommandPalette();
@@ -59,7 +59,7 @@ const TopNav: FC = () => {
             <div className="bg-button-primary-bg rounded-md p-2">
               <Zap className="text-primary-foreground h-4 w-4" />
             </div>
-            <span className="text-text-primary text-base font-semibold">Kharji</span>
+            <span className="text-text-primary text-base font-semibold">{t('common.appName')}</span>
           </Link>
 
           {/* Right side - user menu */}
@@ -74,7 +74,7 @@ const TopNav: FC = () => {
                   <div className="bg-button-primary-bg text-primary-foreground flex h-7 w-7 items-center justify-center rounded-lg text-xs font-semibold">
                     {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
                   </div>
-                  <div className="bg-success border-background absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border-2" />
+                  <div className="bg-success border-background absolute -end-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border-2" />
                 </div>
                 <ChevronDown
                   className={twMerge(
@@ -86,10 +86,10 @@ const TopNav: FC = () => {
 
               {/* Dropdown Menu */}
               {isUserMenuOpen && (
-                <div className="border-border-subtle bg-background absolute top-full right-0 mt-2 w-56 overflow-hidden rounded-lg border shadow-lg">
+                <div className="border-border-subtle bg-background absolute end-0 top-full mt-2 w-56 overflow-hidden rounded-lg border shadow-lg">
                   <div className="border-border-subtle border-b p-3">
                     <p className="text-text-primary text-sm font-semibold">
-                      {user?.name || user?.email?.split('@')[0] || 'User'}
+                      {user?.name || user?.email?.split('@')[0] || t('common.user')}
                     </p>
                     <p className="text-text-muted truncate text-xs">{user?.email || ''}</p>
                   </div>
@@ -100,7 +100,7 @@ const TopNav: FC = () => {
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       <LayoutDashboard className="h-4 w-4" />
-                      Overview
+                      {t('nav.overview')}
                     </Link>
                     <Link
                       href="/settings"
@@ -108,7 +108,7 @@ const TopNav: FC = () => {
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       <Settings className="h-4 w-4" />
-                      Settings
+                      {t('nav.settings')}
                     </Link>
                     <button
                       onClick={() => {
@@ -119,7 +119,7 @@ const TopNav: FC = () => {
                     >
                       <div className="flex items-center gap-3">
                         <CommandIcon className="h-4 w-4" />
-                        Command Menu
+                        {t('nav.commandMenu')}
                       </div>
                       <kbd className="border-border-subtle text-text-muted rounded border px-1.5 py-0.5 font-mono text-xs">
                         ⌘ K
@@ -135,7 +135,7 @@ const TopNav: FC = () => {
                       }}
                     >
                       <LogOut className="h-4 w-4" />
-                      Log Out
+                      {t('nav.logout')}
                     </button>
                   </div>
                 </div>
@@ -146,7 +146,7 @@ const TopNav: FC = () => {
 
         {/* Navigation Tabs - scrollable on mobile */}
         <nav className="scrollbar-hide flex items-center gap-1 overflow-x-auto px-6">
-          {navItems.map((item) => {
+          {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
             return (
@@ -158,8 +158,8 @@ const TopNav: FC = () => {
                   isActive ? 'text-text-primary' : 'text-text-muted hover:text-text-primary'
                 )}
               >
-                {item.label}
-                {isActive && <div className="bg-primary absolute right-0 bottom-0 left-0 h-0.5" />}
+                {t(`nav.${item.key}`)}
+                {isActive && <div className="bg-primary absolute inset-x-0 bottom-0 h-0.5" />}
               </Link>
             );
           })}

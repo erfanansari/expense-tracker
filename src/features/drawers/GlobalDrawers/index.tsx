@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import AssetForm from '@features/assets/components/AssetForm';
 import ExpenseForm from '@features/expenses/components/ExpenseForm';
 import IncomeForm from '@features/income/components/IncomeForm';
@@ -12,6 +14,7 @@ import { useDrawerStore } from '@stores/drawer';
 
 /** Render-only host for the global expense/income/asset form drawers (state lives in the drawer store). */
 const GlobalDrawers = () => {
+  const t = useTranslations('forms');
   const { user } = useAuth();
   const expense = useDrawerStore((state) => state.expense);
   const income = useDrawerStore((state) => state.income);
@@ -32,7 +35,7 @@ const GlobalDrawers = () => {
       <FormDrawer
         isOpen={expense.open}
         onClose={closeExpenseDrawer}
-        title={expense.editing ? 'Edit Expense' : 'Add New Expense'}
+        title={expense.editing ? t('expense.editTitle') : t('expense.addTitle')}
         isDirty={expense.dirty}
       >
         <ExpenseForm
@@ -46,7 +49,7 @@ const GlobalDrawers = () => {
       <FormDrawer
         isOpen={income.open}
         onClose={closeIncomeDrawer}
-        title={income.editing ? 'Edit Income' : 'Add New Income'}
+        title={income.editing ? t('income.editTitle') : t('income.addTitle')}
         isDirty={income.dirty}
       >
         <IncomeForm
@@ -60,7 +63,7 @@ const GlobalDrawers = () => {
       <FormDrawer
         isOpen={asset.open}
         onClose={closeAssetDrawer}
-        title={asset.editing ? 'Edit Asset' : 'Add New Asset'}
+        title={asset.editing ? t('asset.editTitle') : t('asset.addTitle')}
         isDirty={asset.dirty}
       >
         <AssetForm

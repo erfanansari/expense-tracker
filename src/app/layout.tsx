@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from 'next';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale } from 'next-intl/server';
 import { Geist, Vazirmatn } from 'next/font/google';
 
 import { SerwistProvider } from '@serwist/next/react';
@@ -23,52 +25,72 @@ const geistSans = Geist({
 const persianFont = Vazirmatn({
   display: 'swap',
   variable: '--font-persian',
-  subsets: ['arabic'],
+  subsets: ['arabic', 'latin'],
   weight: ['300', '400', '500', '600', '700'],
 });
 
 const APP_URL = 'https://kharji.app';
 
-export const metadata: Metadata = {
-  metadataBase: new URL(APP_URL),
-  title: {
-    template: '%s | Kharji',
-    default: 'Kharji',
-  },
-  description: 'Track expenses, income, and assets — all in one place.',
-  manifest: '/manifest.webmanifest',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'Kharji',
-  },
-  icons: {
-    icon: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
-  },
-  openGraph: {
-    title: 'Kharji – Personal Finance Tracker',
+const LOCALIZED_META = {
+  en: {
+    brand: 'Kharji',
     description: 'Track expenses, income, and assets — all in one place.',
-    siteName: 'Kharji',
-    url: APP_URL,
-    locale: 'en_US',
-    type: 'website',
-    images: [
-      {
-        url: '/opengraph-image',
-        width: 1200,
-        height: 630,
-        alt: 'Kharji – Personal Finance Tracker',
-      },
-    ],
+    ogTitle: 'Kharji – Personal Finance Tracker',
+    ogLocale: 'en_US',
   },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Kharji – Personal Finance Tracker',
-    description: 'Track expenses, income, and assets — all in one place.',
-    images: ['/opengraph-image'],
+  fa: {
+    brand: 'خرجی',
+    description: 'هزینه‌ها، درآمد و دارایی‌ها را در یک جا پیگیری کنید.',
+    ogTitle: 'خرجی – مدیریت مالی شخصی',
+    ogLocale: 'fa_IR',
   },
-};
+} as const;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const m = LOCALIZED_META[locale as keyof typeof LOCALIZED_META] ?? LOCALIZED_META.en;
+
+  return {
+    metadataBase: new URL(APP_URL),
+    title: {
+      template: `%s | ${m.brand}`,
+      default: m.brand,
+    },
+    description: m.description,
+    manifest: '/manifest.webmanifest',
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: 'default',
+      title: m.brand,
+    },
+    icons: {
+      icon: '/favicon.ico',
+      apple: '/apple-touch-icon.png',
+    },
+    openGraph: {
+      title: m.ogTitle,
+      description: m.description,
+      siteName: m.brand,
+      url: APP_URL,
+      locale: m.ogLocale,
+      type: 'website',
+      images: [
+        {
+          url: '/opengraph-image',
+          width: 1200,
+          height: 630,
+          alt: m.ogTitle,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: m.ogTitle,
+      description: m.description,
+      images: ['/opengraph-image'],
+    },
+  };
+}
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -85,24 +107,28 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+
   return (
-    <html lang="en" className="bg-background" suppressHydrationWarning>
+    <html lang={locale} dir={locale === 'fa' ? 'rtl' : 'ltr'} className="bg-background" suppressHydrationWarning>
       <head>
         <AppleSplashScreens />
       </head>
       <body className={twMerge(geistSans.variable, persianFont.variable, 'bg-background antialiased')}>
-        <SerwistProvider swUrl="/sw.js" disable={process.env.NODE_ENV === 'development'}>
-          <Providers>
-            {children}
-            <UpdatePrompt />
-            <Analytics />
-          </Providers>
-        </SerwistProvider>
+        <NextIntlClientProvider>
+          <SerwistProvider swUrl="/sw.js" disable={process.env.NODE_ENV === 'development'}>
+            <Providers>
+              {children}
+              <UpdatePrompt />
+              <Analytics />
+            </Providers>
+          </SerwistProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

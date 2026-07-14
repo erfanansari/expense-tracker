@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { createCategoryKeyGenerator } from '@api/createCategoryMutation';
 import type { CreateCategoryRequestData } from '@api/createCategoryMutation';
 import { deleteCategoryKeyGenerator } from '@api/deleteCategoryMutation';
@@ -33,6 +35,7 @@ import { useToast } from '@stores/toast';
 import { ensureError } from '@utils';
 
 const CategoryManagementList = () => {
+  const t = useTranslations('settings.categories');
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
@@ -85,19 +88,19 @@ const CategoryManagementList = () => {
   const handleCreate = async () => {
     const trimmed = newName.trim();
     if (!trimmed) {
-      setCreateError('Category name is required');
+      setCreateError(t('nameRequired'));
       return;
     }
     const duplicate = categories.some((c) => c.name.toLowerCase() === trimmed.toLowerCase());
     if (duplicate) {
-      setCreateError(`Category "${trimmed}" already exists`);
+      setCreateError(t('duplicateName', { name: trimmed }));
       return;
     }
     setCreateError('');
     try {
       const created = await createCategory.mutateAsync({ name: trimmed, icon: newIcon, color: newColor });
       await invalidateCategoryData();
-      showToast(`Category "${created.name}" created.`, 'success');
+      showToast(t('created', { name: created.name }), 'success');
       resetCreateForm();
     } catch (err) {
       setCreateError(ensureError(err).message);
@@ -121,19 +124,19 @@ const CategoryManagementList = () => {
   const saveEdit = async (id: number) => {
     const trimmed = editName.trim();
     if (!trimmed) {
-      setEditError('Category name is required');
+      setEditError(t('nameRequired'));
       return;
     }
     const duplicate = categories.some((c) => c.id !== id && c.name.toLowerCase() === trimmed.toLowerCase());
     if (duplicate) {
-      setEditError(`Category "${trimmed}" already exists`);
+      setEditError(t('duplicateName', { name: trimmed }));
       return;
     }
     setEditError('');
     try {
       await updateCategory.mutateAsync({ id, name: trimmed, icon: editIcon, color: editColor });
       await invalidateCategoryData();
-      showToast('Category updated.', 'info');
+      showToast(t('updated'), 'info');
       cancelEdit();
     } catch (err) {
       setEditError(ensureError(err).message);
@@ -162,7 +165,7 @@ const CategoryManagementList = () => {
         queryClient.invalidateQueries({ queryKey: SUMMARY_SCOPE }),
       ]);
       setDeletingCategory(null);
-      showToast(`Category "${name}" deleted.`, 'info');
+      showToast(t('deleted', { name }), 'info');
     } catch (err) {
       showToast(ensureError(err).message, 'error');
     }
@@ -186,17 +189,17 @@ const CategoryManagementList = () => {
           className="border-border-subtle hover:bg-background-secondary text-text-secondary hover:text-text-primary flex w-full items-center justify-center gap-2 rounded-lg border border-dashed py-3 text-sm font-medium transition-all"
         >
           <Plus className="h-4 w-4" />
-          Add a new category
+          {t('addNew')}
         </button>
       ) : (
         <div className="border-border-subtle bg-background-secondary space-y-3 rounded-lg border p-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-text-primary text-sm font-semibold">New category</h3>
+            <h3 className="text-text-primary text-sm font-semibold">{t('newCategory')}</h3>
             <button
               type="button"
               onClick={resetCreateForm}
               className="text-text-muted hover:text-text-primary rounded p-1 transition-colors"
-              aria-label="Cancel"
+              aria-label={t('cancel')}
             >
               <X className="h-4 w-4" />
             </button>
@@ -204,9 +207,9 @@ const CategoryManagementList = () => {
 
           {/* Live preview */}
           <div className="flex items-center gap-2">
-            <span className="text-text-muted text-xs">Preview:</span>
+            <span className="text-text-muted text-xs">{t('preview')}</span>
             <CategoryBadge
-              category={{ name: newName.trim() || 'New category', icon: newIcon, color: newColor }}
+              category={{ name: newName.trim() || t('newCategory'), icon: newIcon, color: newColor }}
               size="md"
             />
           </div>
@@ -214,7 +217,7 @@ const CategoryManagementList = () => {
           {/* Name */}
           <div className="space-y-1.5">
             <label htmlFor="new-cat-name" className="text-text-secondary text-xs font-medium">
-              Name
+              {t('name')}
             </label>
             <input
               id="new-cat-name"
@@ -223,33 +226,37 @@ const CategoryManagementList = () => {
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={handleCreateKeyDown}
-              placeholder="e.g. Subscriptions"
+              placeholder={t('namePlaceholder')}
               className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border px-3 py-2 text-sm transition-all outline-none"
             />
           </div>
 
           {/* Color */}
           <div className="space-y-1.5">
-            <label className="text-text-secondary text-xs font-medium">Color</label>
+            <label className="text-text-secondary text-xs font-medium">{t('color')}</label>
             <ColorPicker value={newColor} onChange={setNewColor} />
           </div>
 
           {/* Icon */}
           <div className="space-y-1.5">
-            <label className="text-text-secondary text-xs font-medium">Icon</label>
+            <label className="text-text-secondary text-xs font-medium">{t('icon')}</label>
             <IconPicker value={newIcon} onChange={setNewIcon} highlightColor={newColor} />
           </div>
 
           {createError && <p className="text-danger text-xs">{createError}</p>}
 
-          <div className="flex justify-end gap-2 pt-1">
+          {/* Cancel sits on the physical right, Create/primary on the left, under
+              RTL. rtl:justify-start (not rtl:flex-row-reverse) keeps Cancel —
+              coded first — as the rightmost element while still anchoring the
+              pair to the row's own right edge (its LTR resting side). */}
+          <div className="flex justify-end gap-2 pt-1 rtl:justify-start">
             <button
               type="button"
               onClick={resetCreateForm}
               disabled={createCategory.isPending}
               className="text-text-secondary hover:text-text-primary rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="button"
@@ -258,7 +265,7 @@ const CategoryManagementList = () => {
               className="bg-primary hover:bg-button-primary-bg-hover text-primary-foreground flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50"
             >
               {createCategory.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-              {createCategory.isPending ? 'Creating...' : 'Create category'}
+              {createCategory.isPending ? t('creating') : t('createAction')}
             </button>
           </div>
         </div>
@@ -267,13 +274,13 @@ const CategoryManagementList = () => {
       {/* Search */}
       {categories.length > 0 && (
         <div className="relative">
-          <Search className="text-text-muted absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Search className="text-text-muted absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
           <input
             type="search"
-            placeholder="Search categories..."
+            placeholder={t('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border py-2.5 pr-4 pl-10 text-sm transition-all outline-none"
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border py-2.5 ps-10 pe-4 text-sm transition-all outline-none"
           />
         </div>
       )}
@@ -284,14 +291,12 @@ const CategoryManagementList = () => {
           <div className="bg-background-elevated mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
             <Folder className="text-text-muted h-6 w-6" />
           </div>
-          <p className="text-text-muted text-sm">No categories yet. Add one to start tracking expenses.</p>
+          <p className="text-text-muted text-sm">{t('empty')}</p>
         </div>
       ) : (
         <div className="space-y-2">
           {filteredCategories.length === 0 ? (
-            <p className="text-text-muted py-8 text-center text-sm">
-              No categories found matching &ldquo;{searchQuery}&rdquo;
-            </p>
+            <p className="text-text-muted py-8 text-center text-sm">{t('noMatch', { query: searchQuery })}</p>
           ) : (
             filteredCategories.map((category) => {
               const Icon = getCategoryIcon(category.icon);
@@ -305,7 +310,7 @@ const CategoryManagementList = () => {
                     className="border-blue/30 bg-background-secondary space-y-3 rounded-lg border p-4"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-text-muted text-xs">Preview:</span>
+                      <span className="text-text-muted text-xs">{t('preview')}</span>
                       <CategoryBadge
                         category={{
                           name: editName.trim() || category.name,
@@ -317,7 +322,7 @@ const CategoryManagementList = () => {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-text-secondary text-xs font-medium">Name</label>
+                      <label className="text-text-secondary text-xs font-medium">{t('name')}</label>
                       <input
                         type="text"
                         autoFocus
@@ -329,25 +334,28 @@ const CategoryManagementList = () => {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-text-secondary text-xs font-medium">Color</label>
+                      <label className="text-text-secondary text-xs font-medium">{t('color')}</label>
                       <ColorPicker value={editColor} onChange={setEditColor} />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-text-secondary text-xs font-medium">Icon</label>
+                      <label className="text-text-secondary text-xs font-medium">{t('icon')}</label>
                       <IconPicker value={editIcon} onChange={setEditIcon} highlightColor={editColor} />
                     </div>
 
                     {editError && <p className="text-danger text-xs">{editError}</p>}
 
-                    <div className="flex justify-end gap-2 pt-1">
+                    {/* Cancel sits on the physical right, Save/primary on the
+                        left, under RTL — see the create-form row above for why
+                        rtl:justify-start (not row-reverse) is correct here. */}
+                    <div className="flex justify-end gap-2 pt-1 rtl:justify-start">
                       <button
                         type="button"
                         onClick={cancelEdit}
                         disabled={updateCategory.isPending}
                         className="text-text-secondary hover:text-text-primary rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50"
                       >
-                        Cancel
+                        {t('cancel')}
                       </button>
                       <button
                         type="button"
@@ -360,7 +368,7 @@ const CategoryManagementList = () => {
                         ) : (
                           <Check className="h-4 w-4" />
                         )}
-                        Save changes
+                        {t('saveChanges')}
                       </button>
                     </div>
                   </div>
@@ -378,9 +386,7 @@ const CategoryManagementList = () => {
 
                   <div className="min-w-0 flex-1">
                     <p className="text-text-primary truncate text-sm font-medium">{category.name}</p>
-                    <p className="text-text-muted text-xs">
-                      Used in {category.usage_count} {category.usage_count === 1 ? 'expense' : 'expenses'}
-                    </p>
+                    <p className="text-text-muted text-xs">{t('usedIn', { count: category.usage_count })}</p>
                   </div>
 
                   <div className="flex shrink-0 items-center gap-2">
@@ -388,8 +394,8 @@ const CategoryManagementList = () => {
                       type="button"
                       onClick={() => startEdit(category)}
                       className="text-action-default hover:bg-action-edit-bg-hover hover:text-action-edit-text-hover rounded-lg p-2 transition-all duration-200"
-                      aria-label={`Edit category ${category.name}`}
-                      title="Edit"
+                      aria-label={t('editAria', { name: category.name })}
+                      title={t('editAction')}
                     >
                       <Edit2 className="h-4 w-4" />
                     </button>
@@ -397,8 +403,8 @@ const CategoryManagementList = () => {
                       type="button"
                       onClick={() => setDeletingCategory(category)}
                       className="text-action-default hover:bg-action-delete-bg-hover hover:text-action-delete-text-hover rounded-lg p-2 transition-all duration-200"
-                      aria-label={`Delete category ${category.name}`}
-                      title="Delete"
+                      aria-label={t('deleteAria', { name: category.name })}
+                      title={t('deleteAction')}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>

@@ -370,8 +370,10 @@
   --color-cat-slate: var(--color-cat-slate);
   --color-cat-gray: var(--color-cat-gray);
 
-  /* Font family */
-  --font-sans: var(--font-persian);
+  /* Font family — resolves to --app-font-sans, which flips per html[lang]
+     below. Indirected through its own variable (instead of aliasing
+     --font-sans directly) so this @theme reference is never self-referential. */
+  --font-sans: var(--app-font-sans);
 }
 
 /* Light theme */
@@ -380,18 +382,30 @@ html {
   background: var(--color-background);
   min-height: 100%;
   min-height: 100dvh;
+  /* en: Geist first (Latin), Vazirmatn covers any Persian glyphs.
+     fa: Vazirmatn first, Geist as a Latin fallback (codes, numbers). */
+  --app-font-sans: var(--font-geist-sans), var(--font-persian), ui-sans-serif, sans-serif;
+}
+
+html[lang='fa'] {
+  --app-font-sans: var(--font-persian), var(--font-geist-sans), ui-sans-serif, sans-serif;
 }
 
 body {
   background: var(--color-background);
   color: var(--color-text-primary);
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100%;
   min-height: 100dvh;
   /* Handle iOS safe areas */
   padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Geist ships these stylistic-set numerals/glyphs; Vazirmatn doesn't define
+   them, so scope the feature settings to the English (Geist-primary) UI. */
+html[lang='en'] body {
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 /* Fix min-h-screen for iOS */
@@ -437,7 +451,7 @@ input[type='number'],
 input[type='email'],
 input[type='password'],
 textarea {
-  font-family: var(--font-geist-sans), sans-serif !important;
+  font-family: var(--font-sans);
   transition: all 0.2s ease;
   /* inherit from <html> so native controls (spinners, autofill) follow the theme */
   color-scheme: inherit !important;
@@ -472,7 +486,7 @@ textarea:focus {
 }
 
 .react-datepicker {
-  font-family: var(--font-geist-sans), sans-serif !important;
+  font-family: var(--font-sans);
   border: 1px solid var(--color-border-subtle) !important;
   border-radius: 12px !important;
   background: var(--color-background) !important;
@@ -631,6 +645,16 @@ textarea:focus {
 .react-datepicker__close-icon:hover::after {
   background-color: transparent !important;
   color: var(--color-text-primary) !important;
+}
+
+/* react-datepicker hardcodes the clear button to the physical right (`right: 0`)
+   regardless of direction. Under RTL the input's text also starts from the
+   right (text-align: start), so the button sits directly on top of it —
+   flip the button to the physical left instead, matching where RTL text ends. */
+[dir='rtl'] .react-datepicker__close-icon {
+  right: auto !important;
+  left: 0 !important;
+  padding: 0 0 0 4px !important;
 }
 
 /* Scrollbar styling */
@@ -872,4 +896,15 @@ textarea:focus {
     transform: translateY(6px);
     opacity: 0;
   }
+}
+
+/* react-select's DummyInput (the invisible focus-holder used by non-searchable
+   Select instances) hardcodes `position: relative` + a grid-crossfade
+   `gridArea`, neither of which is exposed through the `styles` prop. Under
+   dir="rtl", that offset displaces the sibling singleValue text out of the
+   value container's clipped bounds while the control is focused, making the
+   selected value appear to vanish. See src/components/Select. */
+input[class*='dummyInput'] {
+  position: static !important;
+  grid-area: auto !important;
 }

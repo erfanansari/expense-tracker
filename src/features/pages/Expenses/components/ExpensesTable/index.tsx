@@ -2,6 +2,8 @@
 
 import { useMemo, useRef } from 'react';
 
+import { useLocale, useTranslations } from 'next-intl';
+
 import { getCategoryListKeyGenerator } from '@api/getCategoryListQuery';
 import { getTagListKeyGenerator } from '@api/getTagListQuery';
 import { useQuery } from '@tanstack/react-query';
@@ -14,8 +16,6 @@ import type { Category } from '@types';
 
 import { ApiError } from '@core/errors';
 
-import { onboardingCopy } from '@features/onboarding/copy';
-
 import Button from '@components/Button';
 import CategoryBadge from '@components/CategoryBadge';
 import DataTable from '@components/DataTable';
@@ -25,7 +25,12 @@ import ErrorState from '@components/ErrorState';
 import Select from '@components/Select';
 import Pulse from '@components/Skeleton';
 
+import { useLocalePreferences } from '@hooks/use-locale-preferences';
+
 import { useDrawerStore } from '@stores/drawer';
+
+import { formatChartAxisDate, resolveCalendar } from '@utils';
+import type { AppLocale } from '@utils';
 
 import type { Tag } from '@/@types/expense';
 
@@ -64,6 +69,7 @@ const tagSelectStyles: any = {
 };
 
 function TagFilterSelect({ value, onChange }: TagFilterSelectProps) {
+  const t = useTranslations('settings.tags');
   const { data: allTags = [] } = useQuery<Tag[]>({ queryKey: getTagListKeyGenerator() });
 
   const options: TagOption[] = allTags.map((t) => ({ value: t.id, label: t.name }));
@@ -81,7 +87,7 @@ function TagFilterSelect({ value, onChange }: TagFilterSelectProps) {
       value={selected}
       onChange={handleChange}
       options={options}
-      placeholder="Tags"
+      placeholder={t('title')}
       isSearchable
       closeMenuOnSelect={false}
       menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
@@ -112,7 +118,7 @@ function TagFilterSelect({ value, onChange }: TagFilterSelectProps) {
           'border-border-subtle bg-background-elevated text-text-secondary flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 text-xs font-medium',
         multiValueLabel: () => 'flex items-center gap-1',
         multiValueRemove: () =>
-          'text-text-muted hover:text-text-primary ml-0.5 rounded p-0.5 transition-colors cursor-pointer',
+          'text-text-muted hover:text-text-primary ms-0.5 rounded p-0.5 transition-colors cursor-pointer',
         noOptionsMessage: () => 'text-text-muted px-3 py-3 text-[13px]',
       }}
     />
@@ -121,10 +127,8 @@ function TagFilterSelect({ value, onChange }: TagFilterSelectProps) {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatChipDate(iso: string) {
-  const [, mm, dd] = iso.split('-');
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return `${months[parseInt(mm, 10) - 1]} ${parseInt(dd, 10)}`;
+function formatChipDate(iso: string, locale: AppLocale, calendar: ReturnType<typeof resolveCalendar>) {
+  return formatChartAxisDate(new Date(`${iso}T00:00:00`), 'day', locale, calendar);
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
@@ -190,6 +194,15 @@ const ExpensesTable = ({
   onLoadMore,
   onRetry,
 }: ExpensesTableProps) => {
+  // Customs
+  const tTables = useTranslations('tables');
+  const tOnboarding = useTranslations('onboarding.emptyStates');
+  const t = useTranslations('pages.expenses');
+  const tCommon = useTranslations('common');
+  const locale = useLocale() as AppLocale;
+  const { prefs: localePrefs } = useLocalePreferences();
+  const calendar = resolveCalendar(localePrefs.calendar, locale);
+
   // References
   const toPickerRef = useRef<ReactDatePickerType>(null);
 
@@ -221,8 +234,8 @@ const ExpensesTable = ({
 
   // Memos
   const expenseColumns = useMemo(
-    () => buildExpenseColumns(onEdit, onDelete, deletingId),
-    [onEdit, onDelete, deletingId]
+    () => buildExpenseColumns(tTables, onEdit, onDelete, deletingId),
+    [tTables, onEdit, onDelete, deletingId]
   );
 
   if (isLoading && expenses.length === 0) {
@@ -233,7 +246,7 @@ const ExpensesTable = ({
     if (error instanceof ApiError && error.status === 401) return null;
     return (
       <div className="border-border-subtle bg-background relative overflow-hidden rounded-xl border shadow-sm">
-        <ErrorState title="Couldn't load expenses" description={error.message} onRetry={onRetry} />
+        <ErrorState title={t('loadError')} description={error.message} onRetry={onRetry} />
       </div>
     );
   }
@@ -259,7 +272,7 @@ const ExpensesTable = ({
               <Search className="text-text-muted h-4 w-4 shrink-0" />
               <input
                 type="text"
-                placeholder="Search by description..."
+                placeholder={t('searchPlaceholder')}
                 value={descInput}
                 onChange={(e) => onDescInputChange(e.target.value)}
                 className="placeholder:text-text-muted w-full bg-transparent text-sm outline-none"
@@ -268,7 +281,7 @@ const ExpensesTable = ({
                 <button
                   onClick={() => onDescInputChange('')}
                   className="text-text-muted hover:text-text-primary rounded p-0.5 transition-colors"
-                  aria-label="Clear search"
+                  aria-label={t('clearSearchAria')}
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -283,10 +296,10 @@ const ExpensesTable = ({
               value={filters.categoryId ? String(filters.categoryId) : ''}
               onChange={(val) => onFiltersChange((f) => ({ ...f, categoryId: val ? Number(val) : undefined }))}
               options={[
-                { value: '', label: 'All categories' },
+                { value: '', label: t('allCategories') },
                 ...allCategories.map((c) => ({ value: String(c.id), label: c.name })),
               ]}
-              placeholder="All categories"
+              placeholder={t('allCategories')}
               className="min-w-[130px] flex-1"
             />
 
@@ -299,18 +312,28 @@ const ExpensesTable = ({
                   onFiltersChange((f) => ({ ...f, dateFrom: date || undefined }));
                   if (date) setTimeout(() => toPickerRef.current?.setOpen(true), 50);
                 }}
-                placeholder="From"
+                placeholder={t('dateFrom')}
                 isClearable
-                wrapperClassName="flex-1 min-w-[80px] [&_input]:border-0 [&_input]:!bg-transparent [&_input]:px-1 [&_input]:py-0 [&_input]:shadow-none [&_input]:rounded-none"
+                // min-w bumped from 80px: Jalali dates ("۲۵ اردیبهشت ۱۴۰۵") run
+                // noticeably wider than the Gregorian ISO strings this was
+                // originally sized for, and were colliding with the clear
+                // button at the field's minimum width. pe-5 reserves room for
+                // that button on its (locale-aware) side.
+                wrapperClassName="flex-1 min-w-[130px] [&_input]:border-0 [&_input]:!bg-transparent [&_input]:px-1 [&_input]:pe-5 [&_input]:py-0 [&_input]:shadow-none [&_input]:rounded-none"
               />
-              <span className="text-text-muted shrink-0 text-xs">→</span>
+              <span className="text-text-muted shrink-0 text-xs rtl:-scale-x-100">→</span>
               <DatePicker
                 ref={toPickerRef}
                 value={filters.dateTo ?? ''}
                 onChange={(date) => onFiltersChange((f) => ({ ...f, dateTo: date || undefined }))}
-                placeholder="To"
+                placeholder={t('dateTo')}
                 isClearable
-                wrapperClassName="flex-1 min-w-[80px] [&_input]:border-0 [&_input]:!bg-transparent [&_input]:px-1 [&_input]:py-0 [&_input]:shadow-none [&_input]:rounded-none"
+                // min-w bumped from 80px: Jalali dates ("۲۵ اردیبهشت ۱۴۰۵") run
+                // noticeably wider than the Gregorian ISO strings this was
+                // originally sized for, and were colliding with the clear
+                // button at the field's minimum width. pe-5 reserves room for
+                // that button on its (locale-aware) side.
+                wrapperClassName="flex-1 min-w-[130px] [&_input]:border-0 [&_input]:!bg-transparent [&_input]:px-1 [&_input]:pe-5 [&_input]:py-0 [&_input]:shadow-none [&_input]:rounded-none"
               />
             </div>
 
@@ -332,10 +355,10 @@ const ExpensesTable = ({
               <button
                 onClick={handleClearAll}
                 className="border-border-subtle text-text-secondary hover:bg-background-elevated flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-medium transition-colors"
-                title="Clear all filters"
+                title={t('clearFiltersTitle')}
               >
                 <X className="h-3.5 w-3.5" />
-                <span>Clear</span>
+                <span>{t('clear')}</span>
                 <span className="bg-background-elevated text-text-secondary rounded px-1 py-0.5 text-[10px] leading-none font-semibold">
                   {activeFilterCount}
                 </span>
@@ -353,8 +376,8 @@ const ExpensesTable = ({
                     <CategoryBadge category={selectedCategory} />
                     <button
                       onClick={() => onFiltersChange((f) => ({ ...f, categoryId: undefined }))}
-                      className="text-text-muted hover:text-text-primary ml-0.5 transition-colors"
-                      aria-label={`Remove category filter: ${selectedCategory.name}`}
+                      className="text-text-muted hover:text-text-primary ms-0.5 transition-colors"
+                      aria-label={t('removeCategoryFilterAria', { name: selectedCategory.name })}
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -364,13 +387,13 @@ const ExpensesTable = ({
                 {(filters.dateFrom || filters.dateTo) && (
                   <span className="border-border-subtle bg-background-secondary text-text-secondary flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs">
                     <Calendar className="h-3 w-3 shrink-0" />
-                    {filters.dateFrom ? formatChipDate(filters.dateFrom) : '…'}
+                    {filters.dateFrom ? formatChipDate(filters.dateFrom, locale, calendar) : '…'}
                     {' – '}
-                    {filters.dateTo ? formatChipDate(filters.dateTo) : '…'}
+                    {filters.dateTo ? formatChipDate(filters.dateTo, locale, calendar) : '…'}
                     <button
                       onClick={() => onFiltersChange((f) => ({ ...f, dateFrom: undefined, dateTo: undefined }))}
-                      className="text-text-muted hover:text-text-primary ml-0.5 transition-colors"
-                      aria-label="Remove date filter"
+                      className="text-text-muted hover:text-text-primary ms-0.5 transition-colors"
+                      aria-label={t('removeDateFilterAria')}
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -391,8 +414,8 @@ const ExpensesTable = ({
                           tagIds: f.tagIds?.filter((id) => id !== tag.id),
                         }))
                       }
-                      className="text-text-muted hover:text-text-primary ml-0.5 transition-colors"
-                      aria-label={`Remove tag filter: ${tag.name}`}
+                      className="text-text-muted hover:text-text-primary ms-0.5 transition-colors"
+                      aria-label={tTables('removeTagFilter', { name: tag.name })}
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -408,8 +431,8 @@ const ExpensesTable = ({
           {!isLoading && hasActiveFilter && (
             <EmptyState
               icon={SearchX}
-              title={onboardingCopy.emptyStates.noMatch.title}
-              description={onboardingCopy.emptyStates.noMatch.description}
+              title={tOnboarding('noMatch.title')}
+              description={tOnboarding('noMatch.description')}
               action={
                 <Button
                   variant="outline"
@@ -418,7 +441,7 @@ const ExpensesTable = ({
                     onFiltersChange(() => ({}));
                   }}
                 >
-                  {onboardingCopy.emptyStates.noMatch.clearFilters}
+                  {tOnboarding('noMatch.clearFilters')}
                 </Button>
               }
             />
@@ -426,11 +449,11 @@ const ExpensesTable = ({
           {!isLoading && !hasActiveFilter && (
             <EmptyState
               icon={FileText}
-              title={onboardingCopy.emptyStates.expensesTable.title}
-              description={onboardingCopy.emptyStates.expensesTable.description}
+              title={tOnboarding('expensesTable.title')}
+              description={tOnboarding('expensesTable.description')}
               action={
                 <Button variant="outline" onClick={() => openExpenseDrawer()}>
-                  {onboardingCopy.emptyStates.addExpense}
+                  {tOnboarding('addExpense')}
                 </Button>
               }
             />
@@ -445,10 +468,10 @@ const ExpensesTable = ({
                 {isFetchingNextPage ? (
                   <>
                     <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-                    <span>Loading...</span>
+                    <span>{tCommon('loading')}</span>
                   </>
                 ) : (
-                  'Load More'
+                  t('loadMore')
                 )}
               </Button>
             </div>
@@ -456,7 +479,7 @@ const ExpensesTable = ({
           {!hasNextPage && expenses.length > 0 && (
             <div className="text-text-muted mt-6 flex items-center justify-center gap-2 py-4">
               <div className="bg-border-subtle h-px w-12" />
-              <p className="text-sm">End of expenses</p>
+              <p className="text-sm">{t('endOfList')}</p>
               <div className="bg-border-subtle h-px w-12" />
             </div>
           )}

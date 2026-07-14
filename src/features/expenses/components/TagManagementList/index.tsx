@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { createTagKeyGenerator } from '@api/createTagMutation';
 import type { CreateTagRequestData } from '@api/createTagMutation';
 import { deleteTagKeyGenerator } from '@api/deleteTagMutation';
@@ -23,6 +25,7 @@ import { ensureError } from '@utils';
 
 const TagManagementList = () => {
   // Customs
+  const t = useTranslations('settings.tags');
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
@@ -66,7 +69,7 @@ const TagManagementList = () => {
 
   const saveEdit = async (tagId: number) => {
     if (!editingName.trim()) {
-      setEditError('Tag name is required');
+      setEditError(t('nameRequired'));
       return;
     }
 
@@ -75,7 +78,7 @@ const TagManagementList = () => {
     );
 
     if (isDuplicate) {
-      setEditError(`Tag "${editingName.trim()}" already exists`);
+      setEditError(t('duplicateName', { name: editingName.trim() }));
       return;
     }
 
@@ -86,7 +89,7 @@ const TagManagementList = () => {
       await invalidateTagData();
       setEditingTagId(null);
       setEditingName('');
-      showToast('Tag renamed.', 'info');
+      showToast(t('renamed'), 'info');
     } catch (error) {
       setEditError(ensureError(error).message);
     }
@@ -120,7 +123,7 @@ const TagManagementList = () => {
         queryClient.invalidateQueries({ queryKey: EXPENSES_SCOPE }),
       ]);
       setDeletingTag(null);
-      showToast(`Tag "${tagName}" deleted.`, 'info');
+      showToast(t('deleted', { name: tagName }), 'info');
     } catch (error) {
       showToast(ensureError(error).message, 'error');
     }
@@ -128,14 +131,14 @@ const TagManagementList = () => {
 
   const handleCreateTag = async () => {
     if (!newTagName.trim()) {
-      setCreateError('Tag name is required');
+      setCreateError(t('nameRequired'));
       return;
     }
 
     const isDuplicate = tags.some((tag) => tag.name.toLowerCase() === newTagName.trim().toLowerCase());
 
     if (isDuplicate) {
-      setCreateError(`Tag "${newTagName.trim()}" already exists`);
+      setCreateError(t('duplicateName', { name: newTagName.trim() }));
       return;
     }
 
@@ -146,7 +149,7 @@ const TagManagementList = () => {
       await invalidateTagData();
       setNewTagName('');
       setCreateError('');
-      showToast(`Tag "${created.name}" created.`, 'success');
+      showToast(t('created', { name: created.name }), 'success');
     } catch (error) {
       setCreateError(ensureError(error).message);
     }
@@ -179,15 +182,15 @@ const TagManagementList = () => {
       <div className="space-y-2">
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <TagIcon className="text-text-muted absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+            <TagIcon className="text-text-muted absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Create new tag..."
+              placeholder={t('createPlaceholder')}
               value={newTagName}
               onChange={(e) => setNewTagName(e.target.value)}
               onKeyDown={handleCreateKeyDown}
               disabled={isCreating}
-              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border py-2.5 pr-4 pl-10 text-sm transition-all outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border py-2.5 ps-10 pe-4 text-sm transition-all outline-none disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
           <button
@@ -196,7 +199,7 @@ const TagManagementList = () => {
             className="bg-primary hover:bg-button-primary-bg-hover text-primary-foreground flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            {isCreating ? 'Creating...' : 'Create'}
+            {isCreating ? t('creating') : t('createAction')}
           </button>
         </div>
         {createError && <p className="text-danger text-xs">{createError}</p>}
@@ -208,20 +211,20 @@ const TagManagementList = () => {
           <div className="bg-background-elevated mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
             <TagIcon className="text-text-muted h-6 w-6" />
           </div>
-          <p className="text-text-muted text-sm">No tags yet. Create your first tag above.</p>
+          <p className="text-text-muted text-sm">{t('empty')}</p>
         </div>
       )}
 
       {/* Search Input */}
       {tags.length > 0 && (
         <div className="relative">
-          <Search className="text-text-muted absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Search className="text-text-muted absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
           <input
             type="search"
-            placeholder="Search tags..."
+            placeholder={t('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border py-2.5 pr-4 pl-10 text-sm transition-all outline-none"
+            className="border-border-subtle bg-background text-text-primary placeholder:text-text-muted focus:border-blue w-full rounded-lg border py-2.5 ps-10 pe-4 text-sm transition-all outline-none"
           />
         </div>
       )}
@@ -229,7 +232,7 @@ const TagManagementList = () => {
       {/* Tags List */}
       <div className="space-y-2">
         {tags.length > 0 && filteredTags.length === 0 ? (
-          <p className="text-text-muted py-8 text-center text-sm">No tags found matching &ldquo;{searchQuery}&rdquo;</p>
+          <p className="text-text-muted py-8 text-center text-sm">{t('noMatch', { query: searchQuery })}</p>
         ) : (
           filteredTags.map((tag) => (
             <div
@@ -258,9 +261,7 @@ const TagManagementList = () => {
                 ) : (
                   <>
                     <p className="text-text-primary truncate text-sm font-medium">{tag.name}</p>
-                    <p className="text-text-muted text-xs">
-                      Used in {tag.usage_count} {tag.usage_count === 1 ? 'expense' : 'expenses'}
-                    </p>
+                    <p className="text-text-muted text-xs">{t('usedIn', { count: tag.usage_count })}</p>
                   </>
                 )}
               </div>
@@ -273,8 +274,8 @@ const TagManagementList = () => {
                       onClick={() => saveEdit(tag.id)}
                       disabled={isSaving}
                       className="text-text-muted hover:bg-success/10 hover:text-success rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
-                      aria-label="Save changes"
-                      title="Save"
+                      aria-label={t('saveAria')}
+                      title={t('saveAction')}
                     >
                       {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                     </button>
@@ -282,8 +283,8 @@ const TagManagementList = () => {
                       onClick={cancelEdit}
                       disabled={isSaving}
                       className="text-text-muted hover:bg-background-elevated hover:text-text-secondary rounded-lg p-2 transition-all duration-200 disabled:opacity-50"
-                      aria-label="Cancel editing"
-                      title="Cancel"
+                      aria-label={t('cancelEditAria')}
+                      title={t('cancelAction')}
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -293,16 +294,16 @@ const TagManagementList = () => {
                     <button
                       onClick={() => startEdit(tag)}
                       className="text-text-muted hover:bg-blue/10 hover:text-blue rounded-lg p-2 transition-all duration-200"
-                      aria-label={`Rename tag ${tag.name}`}
-                      title="Edit"
+                      aria-label={t('renameAria', { name: tag.name })}
+                      title={t('editAction')}
                     >
                       <Edit2 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => openDeleteModal(tag)}
                       className="text-text-muted hover:bg-danger/10 hover:text-danger rounded-lg p-2 transition-all duration-200"
-                      aria-label={`Delete tag ${tag.name}`}
-                      title="Delete"
+                      aria-label={t('deleteAria', { name: tag.name })}
+                      title={t('deleteAction')}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>

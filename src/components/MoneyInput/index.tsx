@@ -40,7 +40,7 @@ const MoneyInput: FC<MoneyInputProps> = ({
       required={required}
       disabled={disabled}
       readOnly={readOnly}
-      className="text-text-primary placeholder:text-text-muted min-w-0 flex-1 rounded-l-lg border-0 bg-transparent px-3 py-2 text-sm focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+      className="text-text-primary placeholder:text-text-muted min-w-0 flex-1 rounded-s-lg border-0 bg-transparent px-3 py-2 text-sm focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
     />
     <div className="bg-border-subtle my-1.5 w-px shrink-0" aria-hidden="true" />
     <CurrencySelect value={currency} onChange={onCurrencyChange} disabled={disabled} bare className="shrink-0" />

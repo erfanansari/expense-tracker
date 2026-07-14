@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import {
   type ColumnDef,
   type ColumnMeta,
@@ -23,7 +25,7 @@ declare module '@tanstack/react-table' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData extends RowData, TValue> {
     filter?: FilterConfig;
-    align?: 'left' | 'right' | 'center';
+    align?: 'start' | 'end' | 'center';
     widthClass?: string;
   }
 
@@ -216,6 +218,7 @@ const DataTable = <TData extends RowData>({
   filterBar,
   filterRow,
 }: DataTableProps<TData>) => {
+  const t = useTranslations('common');
   const [filterState, setFilterState] = useState<FilterState>({});
 
   const table = useReactTable({
@@ -258,7 +261,7 @@ const DataTable = <TData extends RowData>({
                 <tr key={headerGroup.id} className="bg-background-secondary">
                   {headerGroup.headers.map((hdr) => {
                     const meta = hdr.column.columnDef.meta as ColumnMeta<TData, unknown> | undefined;
-                    const align = meta?.align ?? 'left';
+                    const align = meta?.align ?? 'start';
                     const widthClass = meta?.widthClass ?? '';
                     return (
                       <th
@@ -277,7 +280,7 @@ const DataTable = <TData extends RowData>({
               {table.getRowModel().rows.length === 0 ? (
                 <tr>
                   <td colSpan={columns.length} className="px-6 py-6">
-                    {emptyState ?? <EmptyState icon={Inbox} title="No results" />}
+                    {emptyState ?? <EmptyState icon={Inbox} title={t('noResults')} />}
                   </td>
                 </tr>
               ) : (
@@ -289,7 +292,7 @@ const DataTable = <TData extends RowData>({
                   >
                     {row.getVisibleCells().map((cell) => {
                       const meta = cell.column.columnDef.meta as ColumnMeta<TData, unknown> | undefined;
-                      const align = meta?.align ?? 'left';
+                      const align = meta?.align ?? 'start';
                       return (
                         <td key={cell.id} className={`px-4 py-3 sm:px-6 sm:py-4 text-${align}`}>
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}

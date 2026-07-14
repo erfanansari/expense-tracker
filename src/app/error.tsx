@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 import { AlertTriangle } from 'lucide-react';
@@ -10,6 +11,7 @@ interface ErrorPageProps {
 }
 
 export default function ErrorPage({ reset }: ErrorPageProps) {
+  const t = useTranslations('errorPage');
   return (
     <main className="bg-background flex min-h-screen flex-col items-center justify-center px-4 sm:px-6">
       <div className="relative flex max-w-sm flex-col items-center gap-8 py-16 text-center">
@@ -31,10 +33,8 @@ export default function ErrorPage({ reset }: ErrorPageProps) {
 
         {/* Text */}
         <div className="flex flex-col items-center gap-3">
-          <p className="text-text-primary text-4xl font-bold tracking-tight">Something went wrong</p>
-          <p className="text-text-muted text-xs">
-            An unexpected error occurred. You can try again or return to the dashboard.
-          </p>
+          <p className="text-text-primary text-4xl font-bold tracking-tight">{t('title')}</p>
+          <p className="text-text-muted text-xs">{t('description')}</p>
         </div>
 
         {/* CTAs */}
@@ -43,13 +43,13 @@ export default function ErrorPage({ reset }: ErrorPageProps) {
             onClick={reset}
             className="bg-primary hover:bg-primary-hover text-primary-foreground rounded-full px-6 py-2.5 text-sm font-medium transition-colors"
           >
-            Try again
+            {t('tryAgain')}
           </button>
           <Link
             href="/overview"
             className="border-border-subtle text-text-secondary hover:bg-background-elevated rounded-full border px-6 py-2.5 text-sm font-medium transition-colors"
           >
-            Go to Dashboard
+            {t('goToDashboard')}
           </Link>
         </div>
       </div>

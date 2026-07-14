@@ -1,0 +1,1016 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "loading": "Loading...",
+    "comingSoon": "Coming Soon",
+    "close": "Close",
+    "closeModal": "Close modal",
+    "closeDrawer": "Close drawer",
+    "toggle": "Toggle",
+    "noResults": "No results",
+    "datePicker": {
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "yesterday": "Yesterday",
+      "today": "Today",
+      "tomorrow": "Tomorrow"
+    },
+    "hidePassword": "Hide password",
+    "showPassword": "Show password",
+    "updateReady": "Update ready",
+    "updateAvailable": "A new version of Kharji is available",
+    "reload": "Reload",
+    "dismiss": "Dismiss",
+    "dismissUpdate": "Dismiss update notification",
+    "actionUndone": "This action cannot be undone.",
+    "deleteConfirm": {
+      "titleWithItem": "{title} \"{itemName}\"?",
+      "titleOnly": "{title}?"
+    },
+    "appName": "Kharji",
+    "user": "User",
+    "addExpense": "Add Expense",
+    "addIncome": "Add Income",
+    "addAsset": "Add Asset",
+    "viewOnGithub": "View on GitHub",
+    "commandPalette": {
+      "placeholder": "Type a command or search...",
+      "navigate": "Navigate",
+      "select": "Select",
+      "close": "Close",
+      "noResults": "No commands found",
+      "sectionCreate": "Create",
+      "sectionNavigation": "Navigation",
+      "sectionSettings": "Settings",
+      "goTo": "Go to {name}",
+      "changeLanguage": "Change language / تغییر زبان"
+    }
+  },
+  "errors": {
+    "generic": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred while loading this data.",
+      "retry": "Try again"
+    }
+  },
+  "metaTitles": {
+    "landing": "Kharji - Personal Finance Tracker",
+    "landingDescription": "Track expenses, manage income, and grow your wealth with Kharji personal finance tracker.",
+    "overview": "Overview",
+    "expenses": "Expenses",
+    "income": "Income",
+    "reports": "Reports",
+    "assets": "Assets",
+    "settings": "Settings",
+    "welcome": "Welcome",
+    "signup": "Sign Up",
+    "verifyEmail": "Verify Email",
+    "forgotPassword": "Forgot Password",
+    "resetPassword": "Reset Password",
+    "login": "Login"
+  },
+  "zod": {
+    "expense": {
+      "dateRequired": "Date is required",
+      "categoryRequired": "Category is required",
+      "descriptionRequired": "Description is required",
+      "amountNonNegative": "Amount must be non-negative"
+    },
+    "income": {
+      "amountNonNegative": "Amount must be non-negative"
+    },
+    "asset": {
+      "nameRequired": "Name is required",
+      "quantityNonNegative": "Quantity must be non-negative",
+      "totalValueNonNegative": "Total value must be non-negative"
+    },
+    "auth": {
+      "emailInvalid": "Invalid email address",
+      "passwordRequired": "Password is required",
+      "nameRequired": "Name is required",
+      "nameTooLong": "Name is too long",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "passwordUppercase": "Password must contain at least one uppercase letter",
+      "passwordLowercase": "Password must contain at least one lowercase letter",
+      "passwordNumber": "Password must contain at least one number",
+      "passwordConfirmRequired": "Password confirmation is required",
+      "passwordsMismatch": "Passwords do not match",
+      "tokenRequired": "Token is required",
+      "currentPasswordRequired": "Current password is required"
+    }
+  },
+  "dateRange": {
+    "7d": "7 Days",
+    "30d": "30 Days",
+    "thisMonth": "This Month",
+    "lastMonth": "Last Month",
+    "ytd": "Year to Date",
+    "allTime": "All Time"
+  },
+  "nav": {
+    "overview": "Overview",
+    "expenses": "Expenses",
+    "income": "Income",
+    "reports": "Reports",
+    "assets": "Assets",
+    "settings": "Settings",
+    "logout": "Log Out",
+    "loggedOutToast": "Signed out. See you next time!",
+    "sessionExpiredToast": "You've been signed out.",
+    "commandMenu": "Command Menu"
+  },
+  "auth": {
+    "tagline": "Personal Finance Tracker",
+    "or": "OR",
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "fullName": "Full Name",
+      "confirmPassword": "Confirm Password"
+    },
+    "footer": {
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "alreadyHave": "Already have an account?",
+      "signIn": "Sign in",
+      "backToLogin": "Back to login"
+    },
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to your account to continue",
+      "emailPlaceholder": "test@example.com",
+      "passwordPlaceholder": "Enter your password",
+      "forgotPassword": "Forgot password?",
+      "signIn": "Sign In",
+      "signingIn": "Signing in...",
+      "demoButton": "Continue with Demo Account",
+      "welcomeToastNamed": "Welcome back, {name}!",
+      "welcomeToast": "Welcome back!",
+      "loginFailed": "Login failed",
+      "unverified": "Your email isn't verified yet. Check your inbox for the verification link, or <resend>resend it</resend>.",
+      "sending": "sending...",
+      "agreeNotice": "By continuing, you agree to our <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>."
+    },
+    "signup": {
+      "title": "Create Account",
+      "subtitle": "Start tracking your expenses today",
+      "namePlaceholder": "John Doe",
+      "emailPlaceholder": "you@example.com",
+      "passwordPlaceholder": "Create a strong password",
+      "confirmPlaceholder": "Confirm your password",
+      "agreeCheckbox": "I agree to the <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>",
+      "agreeGoogleNotice": "By continuing with Google, you agree to our <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
+      "creating": "Creating account...",
+      "create": "Create Account",
+      "signupFailed": "Signup failed",
+      "mustAgree": "Please agree to the Terms of Service and Privacy Policy"
+    },
+    "forgot": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email and we'll send you a link to reset your password.",
+      "emailPlaceholder": "you@example.com",
+      "success": "If that email exists, we sent a password reset link",
+      "requestFailed": "Request failed",
+      "send": "Send Reset Link",
+      "sending": "Sending..."
+    },
+    "reset": {
+      "invalidTitle": "Invalid reset link",
+      "invalidBody": "This password reset link is invalid or has expired. Please request a new one.",
+      "requestNew": "Request new reset link",
+      "title": "Reset your password",
+      "subtitle": "Create a new password below",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "Create a new password",
+      "passwordHint": "At least 8 characters, 1 uppercase, 1 lowercase, 1 number",
+      "confirmLabel": "Confirm password",
+      "confirmPlaceholder": "Confirm your new password",
+      "resetting": "Resetting...",
+      "resetAction": "Reset password",
+      "success": "Password reset successfully! Redirecting to login...",
+      "resetFailed": "Reset failed"
+    },
+    "verify": {
+      "title": "Check your inbox",
+      "bodyWithEmail": "We sent a verification link to {email}. Click it to activate your account — you can close this tab afterwards.",
+      "body": "We sent a verification link. Click it to activate your account — you can close this tab afterwards.",
+      "sent": "Verification email sent — check your inbox.",
+      "resendFailed": "Could not resend verification email",
+      "resend": "Resend verification email",
+      "sending": "Sending...",
+      "alreadyVerified": "Already verified?",
+      "signIn": "Sign in"
+    },
+    "demoBanner": "You're exploring a demo account — data may be reset at any time."
+  },
+  "notFound": {
+    "code": "404",
+    "title": "Page not found",
+    "description": "The page you are looking for doesn't exist or has been moved.",
+    "goToDashboard": "Go to Dashboard"
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. You can try again or return to the dashboard.",
+    "tryAgain": "Try again",
+    "goToDashboard": "Go to Dashboard"
+  },
+  "onboarding": {
+    "welcome": {
+      "titleNamed": "Welcome, {name}",
+      "titleAnonymous": "Welcome to Kharji",
+      "subtitle": "One quick thing before you start: pick the currencies you think in.",
+      "languageLabel": "Language",
+      "languageHint": "You can change this anytime in Settings.",
+      "primaryLabel": "Primary currency",
+      "primaryHint": "The dominant value shown everywhere.",
+      "secondaryLabel": "Secondary currency",
+      "secondaryHint": "Shown as a muted caption beneath the primary. Optional.",
+      "cta": "Start tracking",
+      "ctaBusy": "Setting up...",
+      "footnote": "You can change these anytime in Settings."
+    },
+    "checklist": {
+      "title": "Get started",
+      "subtitle": "Three quick steps to bring your dashboard to life.",
+      "progress": "{done} of {total}",
+      "dismiss": "Dismiss checklist",
+      "steps": {
+        "expense": { "label": "Add your first expense", "cta": "Add expense" },
+        "income": { "label": "Record your income", "cta": "Add income" },
+        "asset": { "label": "Add an asset you own", "cta": "Add asset" }
+      },
+      "importHint": "Have data elsewhere? Import a CSV in",
+      "importLink": "Settings",
+      "panelTitle": "Set up Kharji",
+      "stepSaved": {
+        "expense": "Expense saved!",
+        "income": "Income saved!",
+        "asset": "Asset saved!"
+      },
+      "suggestions": {
+        "expense": {
+          "title": "Start with your first expense?",
+          "body": "The quickest way to see Kharji working.",
+          "cta": "Add expense"
+        },
+        "income": {
+          "title": "Keep going — record your income?",
+          "body": "30 seconds. Your dashboard makes sense with both sides.",
+          "cta": "Add income"
+        },
+        "asset": {
+          "title": "One more — add an asset you own?",
+          "body": "Cash, gold, crypto, a car — your net worth appears instantly.",
+          "cta": "Add asset"
+        },
+        "later": "Later"
+      },
+      "completion": {
+        "title": "You're all set",
+        "body": "Expenses, income, and assets — your dashboard is alive. This helper retires now."
+      }
+    },
+    "zeroCaptions": {
+      "netWorth": "Add an asset to see your net worth",
+      "income": "No income recorded yet",
+      "expenses": "No expenses yet",
+      "incomeTotal": "No income recorded yet",
+      "incomeYtd": "Nothing recorded this year",
+      "incomeLastMonth": "Nothing recorded last month",
+      "incomeAverage": "Add income to see your monthly average",
+      "assetsNetWorth": "Add an asset to see your net worth",
+      "assetCategoryPlaceholder": "Nothing tracked yet",
+      "expensesTotal": "No expenses to show",
+      "expensesCount": "No expenses to show",
+      "expensesDailyAverage": "Add expenses to see your daily average"
+    },
+    "emptyStates": {
+      "addExpense": "Add expense",
+      "addIncome": "Add income",
+      "addAsset": "Add asset",
+      "recentExpenses": {
+        "title": "No expenses yet",
+        "description": "Record your first expense and it will show up here."
+      },
+      "reports": {
+        "title": "No expenses yet",
+        "description": "Add your first expense to unlock spending analytics."
+      },
+      "noMatch": {
+        "title": "No matching expenses",
+        "description": "Try adjusting your date range or filters.",
+        "clearFilters": "Clear filters"
+      },
+      "spendingTrend": {
+        "title": "No spending to show",
+        "description": "Add your first expense to start tracking your spending trend."
+      },
+      "expensesTable": {
+        "title": "No expenses yet",
+        "description": "Your expenses will appear here once you add them."
+      },
+      "incomeTable": {
+        "title": "No income recorded yet",
+        "description": "Track salary, freelance work, gifts, and more."
+      },
+      "assetsTable": {
+        "title": "No assets recorded yet",
+        "description": "Track cash, gold, crypto, vehicles — anything you own."
+      }
+    }
+  },
+  "constants": {
+    "assetCategories": {
+      "cash": "Cash",
+      "crypto": "Cryptocurrency",
+      "commodity": "Commodities",
+      "vehicle": "Vehicles",
+      "property": "Real Estate",
+      "bank": "Bank Accounts",
+      "investment": "Investments",
+      "other": "Other"
+    },
+    "incomeTypes": {
+      "salary": "Salary",
+      "freelance": "Freelance",
+      "investment": "Investment Returns",
+      "gift": "Gift",
+      "other": "Other"
+    },
+    "months": {
+      "1": "January",
+      "2": "February",
+      "3": "March",
+      "4": "April",
+      "5": "May",
+      "6": "June",
+      "7": "July",
+      "8": "August",
+      "9": "September",
+      "10": "October",
+      "11": "November",
+      "12": "December"
+    }
+  },
+  "forms": {
+    "shared": {
+      "category": "Category",
+      "date": "Date",
+      "description": "Description",
+      "amount": "Amount",
+      "saving": "Saving...",
+      "update": "Update",
+      "add": "Add",
+      "notes": "Notes (Optional)",
+      "notesPlaceholder": "Any additional notes..."
+    },
+    "expense": {
+      "addTitle": "Add New Expense",
+      "editTitle": "Edit Expense",
+      "selectCategoryPlaceholder": "Select category…",
+      "createCategoryOption": "Create category…",
+      "tagsPlaceholder": "Tags",
+      "createTagOption": "Create \"{label}\"",
+      "descriptionPlaceholder": "Enter expense details...",
+      "amountPlaceholder": "e.g. 60k, 1.5m",
+      "added": "Expense added successfully!",
+      "updated": "Expense updated successfully!"
+    },
+    "income": {
+      "addTitle": "Add New Income",
+      "editTitle": "Edit Income",
+      "type": "Type",
+      "month": "Month",
+      "year": "Year",
+      "source": "Source (Optional)",
+      "sourcePlaceholder": "e.g., Company Name, Client...",
+      "amountPlaceholder": "e.g. 390m, 4.5b",
+      "added": "Income added successfully!",
+      "updated": "Income updated successfully!"
+    },
+    "asset": {
+      "addTitle": "Add New Asset",
+      "editTitle": "Edit Asset",
+      "name": "Name",
+      "namePlaceholder": "e.g., BTC, Gold 18K, Bank Melli...",
+      "quantity": "Quantity",
+      "quantityPlaceholder": "e.g. 1, 2.5k",
+      "unit": "Unit (Optional)",
+      "unitPlaceholder": "e.g., BTC, gram, unit...",
+      "unitValue": "Unit Value ({currency})",
+      "unitValuePlaceholder": "e.g. 93k, 100",
+      "totalValue": "Total Value",
+      "totalValuePlaceholder": "e.g. 1k, 50m",
+      "added": "Asset added successfully!",
+      "updated": "Asset updated successfully!"
+    }
+  },
+  "tables": {
+    "actions": "Actions",
+    "edit": "Edit",
+    "delete": "Delete",
+    "updateValue": "Update Value",
+    "unit": "unit",
+    "removeTagFilter": "Remove tag filter: {name}",
+    "expenses": {
+      "description": "Description",
+      "category": "Category",
+      "date": "Date",
+      "amount": "Amount"
+    },
+    "income": {
+      "month": "Month",
+      "type": "Type",
+      "source": "Source",
+      "amount": "Amount"
+    },
+    "assets": {
+      "asset": "Asset",
+      "quantity": "Quantity",
+      "value": "Value"
+    }
+  },
+  "landing": {
+    "header": {
+      "homeAria": "Kharji home",
+      "signIn": "Sign in",
+      "getStarted": "Get started"
+    },
+    "hero": {
+      "badge": "Multi-currency · live exchange rates",
+      "titleLine1": "Your finances,",
+      "titleLine2": "finally clear.",
+      "subtitle": "A calm personal-finance app for people who think in more than one currency. Track expenses, manage income, and watch your assets grow.",
+      "getStarted": "Get started",
+      "tryDemo": "Try the demo"
+    },
+    "features": {
+      "title": "Everything you need, nothing you don't.",
+      "subtitle": "No budgets that guilt you. No subscriptions to forget. Just an honest picture of your money.",
+      "multiCurrency": {
+        "title": "Multi-currency",
+        "description": "Toman, dollars, euros, pounds, lira, dirham — pick your pair and see every amount in both."
+      },
+      "rates": {
+        "title": "Rates that remember",
+        "description": "Every record converts at the live exchange rate from its own date, not today's. History that stays true."
+      },
+      "assets": {
+        "title": "Assets & net worth",
+        "description": "Cash, crypto, gold, property, vehicles — with valuation history and a net-worth chart that follows."
+      },
+      "reports": {
+        "title": "Clear reports",
+        "description": "Spending by category, trends over time — daily, weekly, or monthly. Plus summaries in your inbox if you want them."
+      },
+      "tags": {
+        "title": "Tags & categories",
+        "description": "Organize spending your way with custom categories, and tags you create inline as you type."
+      },
+      "dataOwnership": {
+        "title": "Your data, yours",
+        "description": "Backed up automatically every day. Export everything to Excel — or import it back — anytime."
+      }
+    },
+    "statement": {
+      "eyebrow": "Why Kharji",
+      "titleMain": "Most finance apps assume your money lives in one stable currency.",
+      "titleEmphasis": "Kharji doesn't.",
+      "body": "It's built for paychecks in dollars, groceries in toman, savings in gold. Every amount is converted at the exchange rate of the day it happened — so when rates move, your history stays honest and your net worth stays real."
+    },
+    "cta": {
+      "title": "Start seeing your money clearly.",
+      "subtitle": "Set up in under a minute. Your full financial picture, always at hand.",
+      "getStarted": "Get started"
+    },
+    "footer": {
+      "copyright": "© {year} Kharji",
+      "privacy": "Privacy",
+      "terms": "Terms"
+    },
+    "legal": {
+      "lastUpdated": "Last updated:"
+    }
+  },
+  "legal": {
+    "privacy": {
+      "title": "Privacy Policy",
+      "metaDescription": "How Kharji collects, uses, and protects your data.",
+      "sections": {
+        "overview": {
+          "title": "Overview",
+          "body": "Kharji (\"we\", \"us\", or \"the Service\") is a personal finance tracker available at <a>kharji.app</a>. This policy explains what information we collect, how we use it, and the choices you have. We collect only what is needed to run the Service — nothing more."
+        },
+        "infoCollect": {
+          "title": "Information We Collect",
+          "account": "<b>Account information.</b> When you sign up we collect your email address, your name (optional), and a password. Passwords are never stored in plain text — they are hashed with an industry-standard key derivation function (PBKDF2) before being saved.",
+          "financial": "<b>Financial data you enter.</b> Expenses, income entries, assets, tags, categories, and related notes that you add to your account. This data exists solely so the Service can work for you. We never sell it, share it with advertisers, or use it for any purpose other than providing the Service to you.",
+          "analytics": "<b>Usage analytics.</b> We use Vercel Analytics to collect anonymous, aggregated page-view statistics. This does not use cookies and does not track you across sites."
+        },
+        "cookies": {
+          "title": "Cookies",
+          "body": "We use a single, essential session cookie to keep you signed in. We do not use advertising or tracking cookies."
+        },
+        "howWeUse": {
+          "title": "How We Use Your Information",
+          "item1": "To provide the Service: storing and displaying your financial data, calculating summaries and reports.",
+          "item2": "To authenticate you and keep your account secure.",
+          "item3": "To send transactional emails (such as a welcome email, password reset links, and periodic financial reports). You can unsubscribe from report emails at any time via the link in the email or from Settings.",
+          "item4": "To fetch exchange rates so amounts can be shown in your preferred currency."
+        },
+        "whereDataLives": {
+          "title": "Where Your Data Lives",
+          "body": "Your data is stored in a Turso (libSQL) database and the application is hosted on Vercel. Transactional emails are delivered through Resend. These providers process data on our behalf and are bound by their own privacy and security commitments."
+        },
+        "dataSharing": {
+          "title": "Data Sharing",
+          "body": "We do not sell, rent, or trade your personal information. We share data only with the infrastructure providers listed above, to the extent necessary to operate the Service, or if required by law."
+        },
+        "yourRights": {
+          "title": "Your Rights and Choices",
+          "export": "<b>Export.</b> You can export all of your data at any time from Settings.",
+          "delete": "<b>Delete.</b> You can permanently delete your account and all associated data from Settings. Deletion is immediate and irreversible.",
+          "correct": "<b>Correct.</b> You can edit or delete any entry you have created directly in the app."
+        },
+        "retention": {
+          "title": "Data Retention",
+          "body": "We keep your data for as long as your account exists. When you delete your account, all of your data — expenses, income, assets, tags, and account details — is permanently removed from our database."
+        },
+        "security": {
+          "title": "Security",
+          "body": "All traffic to the Service is encrypted over HTTPS. Passwords are hashed and salted. Access to your data requires authentication with your credentials. No method of transmission or storage is 100% secure, but we take reasonable measures to protect your information."
+        },
+        "children": {
+          "title": "Children's Privacy",
+          "body": "The Service is not directed at children under 13, and we do not knowingly collect personal information from them."
+        },
+        "changes": {
+          "title": "Changes to This Policy",
+          "body": "We may update this policy from time to time. If we make material changes, we will update the \"Last updated\" date above and, where appropriate, notify you by email."
+        },
+        "more": {
+          "title": "More",
+          "body": "See also our <link>Terms of Service</link>."
+        }
+      }
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "metaDescription": "The terms that govern your use of Kharji.",
+      "sections": {
+        "agreement": {
+          "title": "Agreement",
+          "body": "These Terms of Service (\"Terms\") govern your use of Kharji, the personal finance tracker available at <a>kharji.app</a> (\"the Service\"). By creating an account or using the Service, you agree to these Terms. If you do not agree, please do not use the Service."
+        },
+        "service": {
+          "title": "The Service",
+          "body": "Kharji lets you track expenses, income, and assets, view reports and summaries, and convert amounts between currencies using third-party exchange rates. The Service is provided as-is and may change over time as features are added, modified, or removed."
+        },
+        "account": {
+          "title": "Your Account",
+          "item1": "You must provide a valid email address to create an account.",
+          "item2": "You are responsible for keeping your password secure and for all activity under your account.",
+          "item3": "You must be at least 13 years old to use the Service.",
+          "item4": "One person may not maintain accounts for the purpose of abusing or disrupting the Service."
+        },
+        "yourData": {
+          "title": "Your Data",
+          "body": "You own the financial data you enter into Kharji. We claim no rights over it beyond what is needed to store and display it back to you. You can export your data or permanently delete your account (and all of its data) at any time from Settings. How we handle your data is described in our <link>Privacy Policy</link>."
+        },
+        "acceptableUse": {
+          "title": "Acceptable Use",
+          "intro": "You agree not to:",
+          "item1": "Use the Service for any unlawful purpose.",
+          "item2": "Attempt to gain unauthorized access to other users' accounts or data.",
+          "item3": "Interfere with or disrupt the Service, its servers, or its networks.",
+          "item4": "Scrape, resell, or redistribute the Service or its data without permission."
+        },
+        "notAdvice": {
+          "title": "Not Financial Advice",
+          "body": "Kharji is a record-keeping and visualization tool. Nothing in the Service — including summaries, reports, charts, or exchange-rate conversions — constitutes financial, investment, tax, or legal advice. Exchange rates are sourced from third parties and are provided for convenience; we do not guarantee their accuracy."
+        },
+        "availability": {
+          "title": "Availability and Warranty Disclaimer",
+          "body": "The Service is provided \"as is\" and \"as available\", without warranties of any kind, express or implied. We do not guarantee that the Service will be uninterrupted, error-free, or that data will never be lost. We recommend exporting your data periodically."
+        },
+        "liability": {
+          "title": "Limitation of Liability",
+          "body": "To the maximum extent permitted by law, Kharji and its operator shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits, data, or goodwill, arising from your use of (or inability to use) the Service."
+        },
+        "termination": {
+          "title": "Termination",
+          "body": "You may stop using the Service and delete your account at any time. We may suspend or terminate accounts that violate these Terms or that harm the Service or other users. Upon termination, your data is deleted as described in the Privacy Policy."
+        },
+        "changes": {
+          "title": "Changes to These Terms",
+          "body": "We may update these Terms from time to time. If we make material changes, we will update the \"Last updated\" date above and, where appropriate, notify you by email. Continued use of the Service after changes take effect constitutes acceptance of the revised Terms."
+        },
+        "more": {
+          "title": "More",
+          "body": "How we handle your data is described in our <link>Privacy Policy</link>."
+        }
+      }
+    }
+  },
+  "pages": {
+    "overview": {
+      "title": "Overview",
+      "subtitle": "Welcome back! Here's your financial overview",
+      "loadError": "Couldn't load your overview",
+      "stats": {
+        "netWorth": "Net Worth",
+        "totalIncome": "Total Income",
+        "totalExpenses": "Total Expenses"
+      },
+      "recentExpenses": {
+        "title": "Recent Expenses",
+        "viewAll": "View all"
+      },
+      "spendingTrend": {
+        "cardTitle": "Spending Trend",
+        "noDataInRange": "No spending recorded in this date range. Try a wider range."
+      },
+      "exchangeRate": {
+        "label": "Exchange Rate",
+        "addSecondary": "Add a secondary currency in Settings to see an exchange rate.",
+        "rateUnavailable": "rate unavailable",
+        "stable": "Stable",
+        "live": "Live"
+      }
+    },
+    "expenses": {
+      "title": "Expenses",
+      "subtitle": "Manage and track all your expenses",
+      "addExpense": "Add Expense",
+      "deleted": "Expense deleted.",
+      "deleteTitle": "Delete expense",
+      "deleteMessage": "Are you sure you want to delete this expense? All associated data will be removed.",
+      "loadError": "Couldn't load expenses",
+      "searchPlaceholder": "Search by description...",
+      "clearSearchAria": "Clear search",
+      "allCategories": "All categories",
+      "dateFrom": "From",
+      "dateTo": "To",
+      "clearFiltersTitle": "Clear all filters",
+      "clear": "Clear",
+      "removeCategoryFilterAria": "Remove category filter: {name}",
+      "removeDateFilterAria": "Remove date filter",
+      "loadMore": "Load More",
+      "endOfList": "End of expenses",
+      "stats": {
+        "total": "Total Expenses",
+        "count": "Expenses",
+        "dailyAverage": "Daily Average"
+      },
+      "details": {
+        "title": "Expense Details",
+        "date": "Date",
+        "enteredIn": "Entered in",
+        "exchangeRate": "Exchange rate",
+        "created": "Created"
+      }
+    },
+    "income": {
+      "title": "Income",
+      "subtitle": "Track your monthly earnings",
+      "addIncome": "Add Income",
+      "deleted": "Income entry deleted.",
+      "deleteTitle": "Delete income",
+      "deleteMessage": "Are you sure you want to delete this income entry?",
+      "deleteItemName": "{month} - {type}",
+      "deleteItemNameWithJalali": "{month} ({jalaliMonth}) - {type}",
+      "loadError": "Couldn't load income",
+      "stats": {
+        "totalIncome": "Total Income",
+        "ytdIncome": "YTD Income",
+        "lastMonth": "Last Month",
+        "monthlyAverage": "Monthly Average",
+        "allTime": "All time",
+        "overMonths": "over {count} {count, plural, one {month} other {months}}"
+      }
+    },
+    "assets": {
+      "title": "Assets",
+      "subtitle": "Track your wealth portfolio",
+      "deleted": "Asset deleted.",
+      "deleteTitle": "Delete asset",
+      "deleteMessage": "Are you sure you want to delete this asset? All valuation history will be removed.",
+      "loadError": "Couldn't load assets",
+      "stats": {
+        "netWorth": "Net Worth",
+        "assetCount": "{count} {count, plural, one {asset} other {assets}}"
+      },
+      "distribution": {
+        "title": "Asset Distribution",
+        "emptyTitle": "No assets to distribute",
+        "emptyDescription": "Add an asset to see how your wealth is split across categories."
+      },
+      "netWorthChart": {
+        "title": "Net Worth",
+        "emptyTitle": "No history yet",
+        "emptyDescription": "Add assets and update their values over time — each update records a snapshot on this chart.",
+        "loadError": "Couldn't load net worth history",
+        "range1M": "1 Month",
+        "range3M": "3 Months",
+        "range6M": "6 Months",
+        "range1Y": "1 Year",
+        "rangeAll": "All Time"
+      }
+    },
+    "reports": {
+      "title": "Reports",
+      "subtitle": "Analyze your spending patterns",
+      "filterButton": "Filter",
+      "exportCsv": "Export CSV",
+      "exportCsvTitle": "Download the expenses in this view as CSV",
+      "exportSuccess": "{count} {count, plural, one {expense} other {expenses}} exported as CSV",
+      "loadError": "Couldn't load reports",
+      "spendingAnalytics": "Spending Analytics",
+      "charts": {
+        "byCategory": "By Category",
+        "categoryComparison": "Category Comparison",
+        "dailyTrend": "Daily Spending Trend",
+        "weeklyTrend": "Weekly Spending Trend",
+        "monthlyTrend": "Monthly Spending Trend"
+      },
+      "filters": {
+        "tags": "Tags",
+        "categories": "Categories",
+        "allCategories": "All categories",
+        "noTagsYet": "No tags yet",
+        "reset": "Reset",
+        "apply": "Apply",
+        "applyWithCount": "Apply ({count})",
+        "title": "Filters",
+        "filterReportsAria": "Filter reports",
+        "closeFiltersAria": "Close filters"
+      }
+    }
+  },
+  "settings": {
+    "import": {
+      "title": "Import Expenses",
+      "instructions": "Upload a CSV file with columns: <c0>date</c0>, <c1>category</c1>, <c2>description</c2>, <c3>amount</c3>, <c4>currency</c4> (optional), <c5>tags</c5> (optional, separated by ;)",
+      "dropzone": "Drag & drop a CSV file here, or <browse>browse</browse>",
+      "csvOnly": "Only .csv files are supported",
+      "tip": "Tip: Export CSV on the Reports page gives you a valid CSV template. New categories and tags are created automatically.",
+      "dropCsvOnly": "Please drop a .csv file",
+      "missingColumns": "Missing required columns: {columns}",
+      "parseFailed": "Failed to parse CSV: {message}",
+      "invalidDate": "Invalid date (expected YYYY-MM-DD)",
+      "categoryRequired": "Category is required",
+      "descriptionRequired": "Description is required",
+      "amountInvalid": "amount must be a non-negative number",
+      "currencyInvalid": "currency must be one of {codes}",
+      "rowsReady": "<b>{count}</b> rows ready to import",
+      "rowsWithErrors": "({count} {count, plural, one {row} other {rows}} with errors will be skipped)",
+      "back": "Back",
+      "importRows": "Import {count} {count, plural, one {row} other {rows}}",
+      "importingProgress": "Importing row <p>{progress}</p> of <tot>{total}</tot>…",
+      "rowError": "Row {row}: {error}",
+      "importedSuccess": "Imported {count} {count, plural, one {expense} other {expenses}} successfully",
+      "importedPartial": "Imported {count} of {total} expenses ({failed} failed)",
+      "importFailed": "Import failed. No expenses were imported."
+    },
+    "title": "Settings",
+    "subtitle": "Manage your account and preferences",
+    "profile": {
+      "title": "Profile",
+      "subtitle": "Update your personal information",
+      "email": "Email",
+      "emailLoading": "Loading...",
+      "emailHint": "Your email cannot be changed",
+      "name": "Name",
+      "namePlaceholder": "Enter your name",
+      "editProfile": "Edit Profile",
+      "saveChanges": "Save Changes",
+      "saving": "Saving...",
+      "nameEmpty": "Name cannot be empty",
+      "updated": "Profile updated successfully!"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "subtitle": "Customize the look and feel",
+      "theme": "Theme",
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark",
+      "systemHint": "\"System\" follows your device's appearance settings."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "Manage your notification preferences",
+      "email": {
+        "title": "Email Notifications",
+        "description": "Receive reports and updates from Kharji by email.",
+        "on": "Email notifications on.",
+        "off": "You won't receive any more emails from Kharji."
+      },
+      "monthly": {
+        "title": "Monthly Report",
+        "description": "A summary of last month's finances, delivered on the 1st.",
+        "on": "Monthly reports on.",
+        "off": "Monthly reports turned off."
+      },
+      "yearly": {
+        "title": "Yearly Report",
+        "description": "Your year in review, delivered every January 1st.",
+        "on": "Yearly reports on.",
+        "off": "Yearly reports turned off."
+      },
+      "saveFailed": "Could not save"
+    },
+    "help": {
+      "title": "Help & Support",
+      "subtitle": "Get help or send feedback",
+      "documentation": "Documentation",
+      "contactSupport": "Contact Support"
+    },
+    "tags": {
+      "title": "Tags",
+      "subtitle": "Manage your expense tags",
+      "createPlaceholder": "Create new tag...",
+      "creating": "Creating...",
+      "createAction": "Create",
+      "empty": "No tags yet. Create your first tag above.",
+      "searchPlaceholder": "Search tags...",
+      "noMatch": "No tags found matching “{query}”",
+      "usedIn": "Used in {count} {count, plural, one {expense} other {expenses}}",
+      "saveAria": "Save changes",
+      "saveAction": "Save",
+      "cancelEditAria": "Cancel editing",
+      "cancelAction": "Cancel",
+      "renameAria": "Rename tag {name}",
+      "editAction": "Edit",
+      "deleteAria": "Delete tag {name}",
+      "deleteAction": "Delete",
+      "nameRequired": "Tag name is required",
+      "duplicateName": "Tag \"{name}\" already exists",
+      "renamed": "Tag renamed.",
+      "deleted": "Tag \"{name}\" deleted.",
+      "created": "Tag \"{name}\" created.",
+      "deleteConfirm": {
+        "title": "Delete tag \"{name}\"?",
+        "usedInN": "This tag is used in <b>{count}</b> {count, plural, one {expense} other {expenses}}.",
+        "willBeRemoved": "It will be removed from all of them.",
+        "notUsed": "This tag is not currently used in any expenses.",
+        "deleteAction": "Delete Tag"
+      }
+    },
+    "deleteCategory": {
+      "title": "Delete category \"{name}\"?",
+      "usedInReassign": "This category is used in <b>{count}</b> {count, plural, one {expense} other {expenses}}. Pick a category to move them into:",
+      "noOtherCategories": "No other categories exist — create one first before deleting this.",
+      "categoryUsage": "{count} {count, plural, one {expense} other {expenses}}",
+      "notUsed": "This category is not used by any expenses.",
+      "reassignAndDelete": "Reassign & Delete",
+      "delete": "Delete"
+    },
+    "categories": {
+      "title": "Categories",
+      "subtitle": "Manage your expense categories — pick names, icons, and colors",
+      "addNew": "Add a new category",
+      "newCategory": "New category",
+      "cancel": "Cancel",
+      "preview": "Preview:",
+      "name": "Name",
+      "namePlaceholder": "e.g. Subscriptions",
+      "color": "Color",
+      "icon": "Icon",
+      "creating": "Creating...",
+      "createAction": "Create category",
+      "chooseIcon": "Choose category icon",
+      "chooseColor": "Choose category color",
+      "saveChanges": "Save changes",
+      "searchPlaceholder": "Search categories...",
+      "empty": "No categories yet. Add one to start tracking expenses.",
+      "noMatch": "No categories found matching “{query}”",
+      "usedIn": "Used in {count} {count, plural, one {expense} other {expenses}}",
+      "editAction": "Edit",
+      "editAria": "Edit category {name}",
+      "deleteAction": "Delete",
+      "deleteAria": "Delete category {name}",
+      "nameRequired": "Category name is required",
+      "duplicateName": "Category \"{name}\" already exists",
+      "created": "Category \"{name}\" created.",
+      "updated": "Category updated.",
+      "deleted": "Category \"{name}\" deleted."
+    },
+    "security": {
+      "title": "Security",
+      "subtitle": "Manage your password, connected accounts, and active sessions",
+      "demoDisabled": "Security settings are disabled for the shared demo account. Sign up for your own account to manage a password, connected accounts, and sessions.",
+      "password": {
+        "title": "Password",
+        "changeHint": "Change the password you use to sign in. Changing it signs out your other devices.",
+        "setHint": "You signed up with Google. Set a password to also sign in with email and password.",
+        "changeAction": "Change Password",
+        "setAction": "Set Password",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmNewPassword": "Confirm New Password",
+        "confirmPassword": "Confirm Password",
+        "cancel": "Cancel",
+        "saving": "Saving...",
+        "changed": "Password changed. Other devices were signed out.",
+        "changeFailed": "Failed to change password",
+        "set": "Password set. You can now sign in with email and password.",
+        "setFailed": "Failed to set password"
+      },
+      "connected": {
+        "title": "Connected Accounts",
+        "subtitle": "Ways you can sign in to Kharji.",
+        "emailPassword": "Email & password",
+        "connected": "Connected",
+        "noPassword": "No password set",
+        "google": "Google",
+        "googleConnected": "Sign in with your Google account",
+        "notConnected": "Not connected",
+        "disconnect": "Disconnect",
+        "disconnectLockoutHint": "Set a password first so you don't lose access to your account",
+        "connect": "Connect",
+        "connecting": "Connecting...",
+        "linkFailed": "Failed to start Google linking",
+        "disconnectTitle": "Disconnect Google",
+        "disconnectMessage": "You'll no longer be able to sign in with Google. You can reconnect it at any time.",
+        "disconnected": "Google account disconnected.",
+        "disconnectFailed": "Failed to disconnect Google"
+      },
+      "sessions": {
+        "title": "Active Sessions",
+        "subtitle": "Devices currently signed in to your account.",
+        "signOutOthers": "Sign out other devices",
+        "signingOut": "Signing out...",
+        "loading": "Loading sessions...",
+        "thisDevice": "This device",
+        "signedIn": "Signed in {time}",
+        "revoke": "Revoke",
+        "revoked": "Session revoked.",
+        "revokeFailed": "Failed to revoke session",
+        "othersSignedOut": "All other devices were signed out.",
+        "othersSignOutFailed": "Failed to sign out other devices"
+      }
+    },
+    "currency": {
+      "title": "Currency",
+      "subtitle": "Choose your primary currency and an optional secondary shown beneath it.",
+      "primaryLabel": "Primary currency",
+      "primaryHint": "The dominant value shown everywhere.",
+      "secondaryLabel": "Secondary currency",
+      "secondaryHint": "A muted caption beneath the primary. Choose \"Disabled\" to hide it.",
+      "disabled": "Disabled",
+      "numberFormat": "Number format",
+      "numberFormatHint": "Auto abbreviates big numbers on cards & charts; tables stay full. Hover any value for the exact amount.",
+      "auto": "Auto (recommended)",
+      "compact": "Compact (10.69B)",
+      "full": "Full (10,694,654,000)"
+    },
+    "deleteAccount": {
+      "title": "Delete account?",
+      "erased": {
+        "account": "Your account and login",
+        "expenses": "All expenses and tags",
+        "income": "All income entries",
+        "assets": "All assets and valuation history",
+        "preferences": "Custom categories and preferences"
+      },
+      "willErase": "This will permanently erase:",
+      "cannotUndo": "This action cannot be undone.",
+      "exportTip": "Tip: export your data first from Data Management.",
+      "typeToConfirm": "Type <email>{email}</email> to confirm",
+      "cancel": "Cancel",
+      "deleting": "Deleting...",
+      "confirmAction": "Delete Account"
+    },
+    "dataManagement": {
+      "title": "Data Management",
+      "subtitle": "Export or import your financial data",
+      "preparing": "Preparing…",
+      "downloadBackup": "Download Backup",
+      "importExpenses": "Import Expenses",
+      "deleteAccount": "Delete Account",
+      "notAvailableDemo": "Not available on the demo account",
+      "hint": "Backup downloads one Excel file with everything — expenses, income, assets, and asset valuation history. For a CSV of specific expenses, use Export CSV on the Reports page. Deleting your account permanently erases the account and all of its data.",
+      "exportSuccess": "Data exported successfully",
+      "exportFailed": "Export failed. Please try again.",
+      "deleteFailed": "Failed to delete account. Please try again."
+    },
+    "language": {
+      "title": "Language & Region",
+      "subtitle": "Language, calendar, and date display",
+      "languageLabel": "Language",
+      "languageDescription": "Controls the app's language and layout direction.",
+      "calendarLabel": "Calendar",
+      "calendarDescription": "Which calendar system dates are shown in.",
+      "calendarAuto": "Auto (based on language)",
+      "calendarGregorian": "Gregorian",
+      "calendarJalali": "Jalali (Solar Hijri)",
+      "captionsLabel": "Secondary date captions",
+      "captionsDescription": "Show the other calendar as a muted caption beneath dates."
+    }
+  }
+}

@@ -1,4 +1,5 @@
-import { getIncomeTypeLabel, getMonthLabel } from '@constants/income';
+import type { useTranslations } from 'next-intl';
+
 import { type ColumnDef } from '@tanstack/react-table';
 
 import type { Income } from '@types';
@@ -6,7 +7,25 @@ import type { Income } from '@types';
 import ActionButtons from '@components/ActionButtons';
 import Money from '@components/Money';
 
-import { getJalaliMonthName } from '@utils';
+import { useMonthYearDisplay } from '@hooks/use-month-year-display';
+
+// Primary is the month+year in the resolved calendar (Jalali for fa, Gregorian
+// otherwise); the other calendar's equivalent is an optional secondary caption,
+// gated by the user's secondary-date-captions preference — see useMonthYearDisplay.
+function IncomeMonthCell({ month, year }: { month: number; year: number }) {
+  const monthYearDisplay = useMonthYearDisplay();
+  const { primary, secondary } = monthYearDisplay(month, year);
+  return (
+    <div className="flex flex-col">
+      <span className="text-text-primary text-sm font-medium whitespace-nowrap">{primary}</span>
+      {secondary && (
+        <span className="text-text-muted text-xs whitespace-nowrap" dir="rtl">
+          {secondary}
+        </span>
+      )}
+    </div>
+  );
+}
 
 // ─── Table layout config ──────────────────────────────────────────────────────
 // Centralized so column widths can be tuned in one place. Percentages must sum
@@ -26,6 +45,8 @@ export const INCOME_COLUMN_WIDTHS = {
 // ─── Column definitions ───────────────────────────────────────────────────────
 
 export function buildIncomeColumns(
+  t: ReturnType<typeof useTranslations<'tables'>>,
+  incomeTypeLabel: (value: string) => string,
   handleEdit: (income: Income) => void,
   openDeleteModal: (income: Income) => void,
   deletingId: number | null
@@ -34,36 +55,25 @@ export function buildIncomeColumns(
     {
       id: 'month',
       accessorKey: 'month',
-      header: 'Month',
+      header: t('income.month'),
       meta: { widthClass: INCOME_COLUMN_WIDTHS.month },
-      cell: ({ row }) => {
-        const income = row.original;
-        const monthLabels = getMonthLabel(income.month);
-        const jalaliMonth = getJalaliMonthName(income.month, income.year);
-        return (
-          <div className="flex flex-col">
-            <span className="text-text-primary text-sm font-medium whitespace-nowrap">{monthLabels.en}</span>
-            <span className="text-text-muted text-xs whitespace-nowrap" dir="rtl">
-              {jalaliMonth}
-            </span>
-          </div>
-        );
-      },
+      cell: ({ row }) => <IncomeMonthCell month={row.original.month} year={row.original.year} />,
     },
     {
       id: 'incomeType',
       accessorKey: 'incomeType',
-      header: 'Type',
+      header: t('income.type'),
       meta: { widthClass: INCOME_COLUMN_WIDTHS.type },
-      cell: ({ row }) => {
-        const typeLabels = getIncomeTypeLabel(row.original.incomeType);
-        return <span className="text-text-primary text-sm font-medium whitespace-nowrap">{typeLabels.en}</span>;
-      },
+      cell: ({ row }) => (
+        <span className="text-text-primary text-sm font-medium whitespace-nowrap">
+          {incomeTypeLabel(row.original.incomeType)}
+        </span>
+      ),
     },
     {
       id: 'source',
       accessorKey: 'source',
-      header: 'Source',
+      header: t('income.source'),
       meta: { widthClass: INCOME_COLUMN_WIDTHS.source },
       cell: ({ row }) => (
         <span className="text-text-secondary block truncate text-sm">{row.original.source || '-'}</span>
@@ -72,8 +82,8 @@ export function buildIncomeColumns(
     {
       id: 'amount',
       accessorKey: 'amount',
-      header: 'Amount',
-      meta: { widthClass: INCOME_COLUMN_WIDTHS.amount, align: 'right' as const },
+      header: t('income.amount'),
+      meta: { widthClass: INCOME_COLUMN_WIDTHS.amount, align: 'end' as const },
       cell: ({ row }) => {
         const income = row.original;
         return (
@@ -90,7 +100,7 @@ export function buildIncomeColumns(
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: t('actions'),
       meta: { widthClass: INCOME_COLUMN_WIDTHS.actions, align: 'center' as const },
       cell: ({ row }) => {
         const income = row.original;

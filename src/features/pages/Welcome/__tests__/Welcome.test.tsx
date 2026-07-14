@@ -41,7 +41,7 @@ describe('Welcome page', () => {
 
   it('greets the user by first name', () => {
     renderWelcome();
-    expect(screen.getByText('Welcome, Erfan 👋')).toBeInTheDocument();
+    expect(screen.getByText('Welcome, Erfan')).toBeInTheDocument();
   });
 
   it('redirects already-onboarded users to /overview', () => {

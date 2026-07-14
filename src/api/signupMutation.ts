@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { signupSchema } from '@schemas';
+import { createSignupSchema, fallbackT } from '@schemas';
 import type { SignupSchema } from '@schemas';
 
 import client from '@core/client';
@@ -18,7 +18,7 @@ const keyGenerator: MutationKeyGenerator = () => ['auth', 'signup'];
 client.registerEndpoint<RequestData, Response>(keyGenerator, {
   url: '/api/auth/sign-up/email',
   type: 'mutation',
-  requestDataSchema: signupSchema,
+  requestDataSchema: createSignupSchema(fallbackT),
   requestNormalizer: (data) => ({ name: data.name, email: data.email, password: data.password }),
   responseNormalizer: (response) => {
     const raw = response as unknown;

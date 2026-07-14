@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { createIncomeSchema } from '@schemas';
+import { createIncomeSchema, fallbackT } from '@schemas';
 import type { CreateIncomeSchema } from '@schemas';
 
 import client from '@core/client';
@@ -15,7 +15,7 @@ const keyGenerator: MutationKeyGenerator = () => ['incomes', 'create'];
 client.registerEndpoint<RequestData, Response>(keyGenerator, {
   url: '/api/incomes',
   type: 'mutation',
-  requestDataSchema: createIncomeSchema,
+  requestDataSchema: createIncomeSchema(fallbackT),
   responseSchema,
 });
 

@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { getSessionTokenKeyGenerator } from '@api/getSessionTokenQuery';
 import type { GetSessionTokenResponse } from '@api/getSessionTokenQuery';
 import { listSessionsKeyGenerator } from '@api/listSessionsQuery';
@@ -48,6 +50,7 @@ function formatRelativeTime(iso: string): string {
 
 const SessionsList = () => {
   // Customs
+  const t = useTranslations('settings.security.sessions');
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
@@ -61,19 +64,19 @@ const SessionsList = () => {
   const revokeMutation = useMutation<void, Error, RevokeSessionRequestData>({
     mutationKey: revokeSessionKeyGenerator(),
     onSuccess: () => {
-      showToast('Session revoked.', 'success');
+      showToast(t('revoked'), 'success');
       refreshSessions();
     },
-    onError: (err) => showToast(err.message || 'Failed to revoke session', 'error'),
+    onError: (err) => showToast(err.message || t('revokeFailed'), 'error'),
   });
 
   const revokeOthersMutation = useMutation<void, Error, void>({
     mutationKey: revokeOtherSessionsKeyGenerator(),
     onSuccess: () => {
-      showToast('All other devices were signed out.', 'success');
+      showToast(t('othersSignedOut'), 'success');
       refreshSessions();
     },
-    onError: (err) => showToast(err.message || 'Failed to sign out other devices', 'error'),
+    onError: (err) => showToast(err.message || t('othersSignOutFailed'), 'error'),
   });
 
   // Variables
@@ -84,8 +87,8 @@ const SessionsList = () => {
     <div className="max-w-2xl">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h3 className="text-text-primary text-sm font-semibold">Active Sessions</h3>
-          <p className="text-text-muted mt-1 text-xs">Devices currently signed in to your account.</p>
+          <h3 className="text-text-primary text-sm font-semibold">{t('title')}</h3>
+          <p className="text-text-muted mt-1 text-xs">{t('subtitle')}</p>
         </div>
         {otherSessionCount > 0 && (
           <Button
@@ -93,7 +96,7 @@ const SessionsList = () => {
             onClick={() => revokeOthersMutation.mutate()}
             disabled={revokeOthersMutation.isPending}
           >
-            {revokeOthersMutation.isPending ? 'Signing out...' : 'Sign out other devices'}
+            {revokeOthersMutation.isPending ? t('signingOut') : t('signOutOthers')}
           </Button>
         )}
       </div>
@@ -101,7 +104,7 @@ const SessionsList = () => {
       {isLoading ? (
         <div className="text-text-muted mt-4 flex items-center gap-2 text-sm">
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          Loading sessions...
+          {t('loading')}
         </div>
       ) : (
         <ul className="mt-4 space-y-3">
@@ -117,12 +120,12 @@ const SessionsList = () => {
                     <span className="text-text-primary text-sm font-medium">{parseUserAgent(session.userAgent)}</span>
                     {isCurrent && (
                       <span className="bg-success/10 text-success rounded px-2 py-0.5 text-xs font-medium">
-                        This device
+                        {t('thisDevice')}
                       </span>
                     )}
                   </div>
                   <div className="text-text-muted text-xs">
-                    Signed in {formatRelativeTime(session.createdAt)}
+                    {t('signedIn', { time: formatRelativeTime(session.createdAt) })}
                     {session.ipAddress ? ` · ${session.ipAddress}` : ''}
                   </div>
                 </div>
@@ -132,7 +135,7 @@ const SessionsList = () => {
                     onClick={() => revokeMutation.mutate({ token: session.token })}
                     disabled={revokeMutation.isPending}
                   >
-                    Revoke
+                    {t('revoke')}
                   </Button>
                 )}
               </li>

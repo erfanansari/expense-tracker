@@ -1,3 +1,5 @@
+import { useLocale, useTranslations } from 'next-intl';
+
 import { Coins, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
@@ -6,6 +8,10 @@ import { rateOn } from '@features/ExchangeRate/utils/currency';
 import AnimatedMoney from '@components/AnimatedMoney';
 
 import { useCurrency } from '@hooks/use-currency';
+import { useLocalePreferences } from '@hooks/use-locale-preferences';
+
+import { formatAppDate, resolveCalendar } from '@utils';
+import type { AppLocale } from '@utils';
 
 import { getCurrency } from '@/constants/currencies';
 
@@ -13,6 +19,11 @@ const cardWrapper =
   'border-border-subtle bg-background relative min-w-0 rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6';
 
 const ExchangeRateCard = () => {
+  const t = useTranslations('pages.overview.exchangeRate');
+  const tCommon = useTranslations('common');
+  const locale = useLocale() as AppLocale;
+  const { prefs } = useLocalePreferences();
+  const calendar = resolveCalendar(prefs.calendar, locale);
   const { secondaryCurrency, primaryCurrency, series, isLoading } = useCurrency();
 
   const today = new Date().toISOString().split('T')[0];
@@ -25,10 +36,10 @@ const ExchangeRateCard = () => {
             <Coins className="text-text-secondary h-5 w-5" />
           </div>
         </div>
-        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Exchange Rate</p>
+        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{t('label')}</p>
         <div className="flex items-center gap-2">
           <div className="border-border-subtle border-t-info h-5 w-5 animate-spin rounded-full border-2" />
-          <p className="text-text-muted text-sm">Loading...</p>
+          <p className="text-text-muted text-sm">{tCommon('loading')}</p>
         </div>
       </div>
     );
@@ -45,8 +56,8 @@ const ExchangeRateCard = () => {
             <Coins className="text-text-secondary h-5 w-5" />
           </div>
         </div>
-        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">Exchange Rate</p>
-        <p className="text-text-secondary text-sm">Add a secondary currency in Settings to see an exchange rate.</p>
+        <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">{t('label')}</p>
+        <p className="text-text-secondary text-sm">{t('addSecondary')}</p>
       </div>
     );
   }
@@ -92,7 +103,9 @@ const ExchangeRateCard = () => {
         </div>
         <p className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">1 {def.code} =</p>
         <p className="text-text-primary text-2xl font-semibold sm:text-3xl">—</p>
-        <p className="text-text-secondary mt-1.5 text-sm font-medium">{def.label} · rate unavailable</p>
+        <p className="text-text-secondary mt-1.5 text-sm font-medium">
+          {def.label} · {t('rateUnavailable')}
+        </p>
       </div>
     );
   }
@@ -122,7 +135,7 @@ const ExchangeRateCard = () => {
           {isZero ? (
             <>
               <Minus className="h-3 w-3" />
-              <span>Stable</span>
+              <span>{t('stable')}</span>
             </>
           ) : (
             <>
@@ -151,7 +164,7 @@ const ExchangeRateCard = () => {
                 : 'bg-warning-light text-warning border-warning/20'
             )}
           >
-            {isFresh ? 'Live' : latestDate}
+            {isFresh ? t('live') : formatAppDate(latestDate, { locale, calendar })}
           </span>
         </div>
       </div>

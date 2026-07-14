@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { changePasswordKeyGenerator } from '@api/changePasswordMutation';
 import type { ChangePasswordRequestData } from '@api/changePasswordMutation';
 import { listAccountsKeyGenerator } from '@api/listAccountsQuery';
@@ -14,7 +16,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
-import { changePasswordSchema, setPasswordSchema } from '@schemas';
+import { createChangePasswordSchema, createSetPasswordSchema } from '@schemas';
 
 import Button from '@components/Button';
 import Form from '@components/Form';
@@ -25,6 +27,8 @@ import { useToast } from '@stores/toast';
 
 const PasswordBlock = () => {
   // Customs
+  const t = useTranslations('settings.security.password');
+  const tZod = useTranslations();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
@@ -38,12 +42,12 @@ const PasswordBlock = () => {
 
   // Forms
   const changeMethods = useForm<ChangePasswordRequestData>({
-    resolver: zodResolver(changePasswordSchema),
+    resolver: zodResolver(createChangePasswordSchema(tZod)),
     defaultValues: { currentPassword: '', password: '', passwordConfirm: '' },
     mode: 'all',
   });
   const setMethods = useForm<SetPasswordRequestData>({
-    resolver: zodResolver(setPasswordSchema),
+    resolver: zodResolver(createSetPasswordSchema(tZod)),
     defaultValues: { password: '', passwordConfirm: '' },
     mode: 'all',
   });
@@ -60,20 +64,20 @@ const PasswordBlock = () => {
     mutationKey: changePasswordKeyGenerator(),
     onSuccess: () => {
       closeModal();
-      showToast('Password changed. Other devices were signed out.', 'success');
+      showToast(t('changed'), 'success');
       void queryClient.invalidateQueries({ queryKey: listSessionsKeyGenerator() });
     },
-    onError: (err) => setError(err.message || 'Failed to change password'),
+    onError: (err) => setError(err.message || t('changeFailed')),
   });
 
   const setPasswordMutation = useMutation<void, Error, SetPasswordRequestData>({
     mutationKey: setPasswordKeyGenerator(),
     onSuccess: () => {
       closeModal();
-      showToast('Password set. You can now sign in with email and password.', 'success');
+      showToast(t('set'), 'success');
       void queryClient.invalidateQueries({ queryKey: listAccountsKeyGenerator() });
     },
-    onError: (err) => setError(err.message || 'Failed to set password'),
+    onError: (err) => setError(err.message || t('setFailed')),
   });
 
   // Variables
@@ -81,22 +85,18 @@ const PasswordBlock = () => {
 
   return (
     <div className="max-w-2xl">
-      <h3 className="text-text-primary text-sm font-semibold">Password</h3>
-      <p className="text-text-muted mt-1 text-xs">
-        {hasCredential
-          ? 'Change the password you use to sign in. Changing it signs out your other devices.'
-          : 'You signed up with Google. Set a password to also sign in with email and password.'}
-      </p>
+      <h3 className="text-text-primary text-sm font-semibold">{t('title')}</h3>
+      <p className="text-text-muted mt-1 text-xs">{hasCredential ? t('changeHint') : t('setHint')}</p>
       <div className="mt-4">
         <Button variant="outline" onClick={() => setIsModalOpen(true)} disabled={isLoading}>
-          {hasCredential ? 'Change Password' : 'Set Password'}
+          {hasCredential ? t('changeAction') : t('setAction')}
         </Button>
       </div>
 
       <Modal
         isOpen={isModalOpen}
         onClose={submitting ? () => {} : closeModal}
-        title={hasCredential ? 'Change Password' : 'Set Password'}
+        title={hasCredential ? t('changeAction') : t('setAction')}
       >
         {error && (
           <div className="border-danger bg-danger-light text-danger mb-4 rounded-lg border p-2.5 text-xs sm:text-sm">
@@ -116,25 +116,25 @@ const PasswordBlock = () => {
             <FormInput
               name="currentPassword"
               type="password"
-              label="Current Password"
+              label={t('currentPassword')}
               autoComplete="current-password"
               disabled={submitting}
             />
             <FormInput
               name="password"
               type="password"
-              label="New Password"
+              label={t('newPassword')}
               autoComplete="new-password"
               disabled={submitting}
             />
             <FormInput
               name="passwordConfirm"
               type="password"
-              label="Confirm New Password"
+              label={t('confirmNewPassword')}
               autoComplete="new-password"
               disabled={submitting}
             />
-            <PasswordModalActions submitting={submitting} onCancel={closeModal} submitLabel="Change Password" />
+            <PasswordModalActions submitting={submitting} onCancel={closeModal} submitLabel={t('changeAction')} />
           </Form>
         ) : (
           <Form
@@ -148,18 +148,18 @@ const PasswordBlock = () => {
             <FormInput
               name="password"
               type="password"
-              label="New Password"
+              label={t('newPassword')}
               autoComplete="new-password"
               disabled={submitting}
             />
             <FormInput
               name="passwordConfirm"
               type="password"
-              label="Confirm Password"
+              label={t('confirmPassword')}
               autoComplete="new-password"
               disabled={submitting}
             />
-            <PasswordModalActions submitting={submitting} onCancel={closeModal} submitLabel="Set Password" />
+            <PasswordModalActions submitting={submitting} onCancel={closeModal} submitLabel={t('setAction')} />
           </Form>
         )}
       </Modal>
@@ -175,22 +175,29 @@ const PasswordModalActions = ({
   submitting: boolean;
   onCancel: () => void;
   submitLabel: string;
-}) => (
-  <div className="flex justify-end gap-3 pt-2">
-    <Button variant="outline" type="button" onClick={onCancel} disabled={submitting}>
-      Cancel
-    </Button>
-    <Button variant="primary" type="submit" disabled={submitting}>
-      {submitting ? (
-        <span className="flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          Saving...
-        </span>
-      ) : (
-        submitLabel
-      )}
-    </Button>
-  </div>
-);
+}) => {
+  const t = useTranslations('settings.security.password');
+  return (
+    // Cancel sits on the physical right, Save/primary on the left, under RTL.
+    // rtl:justify-start (not rtl:flex-row-reverse) keeps Cancel — coded first
+    // — as the rightmost element while still anchoring the pair to the row's
+    // own right edge (its LTR resting side).
+    <div className="flex justify-end gap-3 pt-2 rtl:justify-start">
+      <Button variant="outline" type="button" onClick={onCancel} disabled={submitting}>
+        {t('cancel')}
+      </Button>
+      <Button variant="primary" type="submit" disabled={submitting}>
+        {submitting ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            {t('saving')}
+          </span>
+        ) : (
+          submitLabel
+        )}
+      </Button>
+    </div>
+  );
+};
 
 export default PasswordBlock;

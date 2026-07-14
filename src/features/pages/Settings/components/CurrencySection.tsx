@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { Coins } from 'lucide-react';
 
 import Select from '@components/Select';
@@ -13,19 +15,20 @@ const SECONDARY_DISABLED = 'none';
 
 const CURRENCY_OPTIONS = CURRENCIES.map((c) => ({ value: c.code, label: `${c.code} (${c.label})` }));
 
-const NUMBER_FORMAT_OPTIONS = [
-  { value: 'auto', label: 'Auto (recommended)' },
-  { value: 'compact', label: 'Compact (10.69B)' },
-  { value: 'full', label: 'Full (10,694,654,000)' },
-];
-
 const CurrencySection = () => {
+  const t = useTranslations('settings.currency');
   const { prefs, isLoading, mutate, isMutating } = useCurrencyPreferences();
+
+  const NUMBER_FORMAT_OPTIONS = [
+    { value: 'auto', label: t('auto') },
+    { value: 'compact', label: t('compact') },
+    { value: 'full', label: t('full') },
+  ];
 
   // Secondary options exclude the current primary (no point showing it twice)
   // and add a "Disabled" choice.
   const secondaryOptions = [
-    { value: SECONDARY_DISABLED, label: 'Disabled' },
+    { value: SECONDARY_DISABLED, label: t('disabled') },
     ...CURRENCY_OPTIONS.filter((o) => o.value !== prefs.primaryCurrency),
   ];
 
@@ -51,50 +54,44 @@ const CurrencySection = () => {
             <Coins className="text-text-secondary h-5 w-5" />
           </div>
           <div className="flex-1">
-            <h2 className="text-text-primary text-lg font-semibold">Currency</h2>
-            <p className="text-text-muted text-sm">
-              Choose your primary currency and an optional secondary shown beneath it.
-            </p>
+            <h2 className="text-text-primary text-lg font-semibold">{t('title')}</h2>
+            <p className="text-text-muted text-sm">{t('subtitle')}</p>
           </div>
         </div>
       </div>
       <div className="p-6">
         <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
           <div>
-            <label className="text-text-secondary mb-1.5 block text-sm font-medium">Primary currency</label>
+            <label className="text-text-secondary mb-1.5 block text-sm font-medium">{t('primaryLabel')}</label>
             <Select
               value={prefs.primaryCurrency}
               onChange={handlePrimaryChange}
               options={CURRENCY_OPTIONS}
               disabled={isLoading || isMutating}
             />
-            <p className="text-text-muted mt-1.5 text-xs">The dominant value shown everywhere.</p>
+            <p className="text-text-muted mt-1.5 text-xs">{t('primaryHint')}</p>
           </div>
 
           <div>
-            <label className="text-text-secondary mb-1.5 block text-sm font-medium">Secondary currency</label>
+            <label className="text-text-secondary mb-1.5 block text-sm font-medium">{t('secondaryLabel')}</label>
             <Select
               value={prefs.secondaryCurrency ?? SECONDARY_DISABLED}
               onChange={handleSecondaryChange}
               options={secondaryOptions}
               disabled={isLoading || isMutating}
             />
-            <p className="text-text-muted mt-1.5 text-xs">
-              A muted caption beneath the primary. Choose “Disabled” to hide it.
-            </p>
+            <p className="text-text-muted mt-1.5 text-xs">{t('secondaryHint')}</p>
           </div>
 
           <div>
-            <label className="text-text-secondary mb-1.5 block text-sm font-medium">Number format</label>
+            <label className="text-text-secondary mb-1.5 block text-sm font-medium">{t('numberFormat')}</label>
             <Select
               value={prefs.numberFormat}
               onChange={handleNumberFormatChange}
               options={NUMBER_FORMAT_OPTIONS}
               disabled={isLoading || isMutating}
             />
-            <p className="text-text-muted mt-1.5 text-xs">
-              Auto abbreviates big numbers on cards & charts; tables stay full. Hover any value for the exact amount.
-            </p>
+            <p className="text-text-muted mt-1.5 text-xs">{t('numberFormatHint')}</p>
           </div>
         </div>
       </div>
