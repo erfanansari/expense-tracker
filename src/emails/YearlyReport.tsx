@@ -8,6 +8,7 @@ import CategoryRow from './components/CategoryRow';
 import Layout from './components/Layout';
 import MonthBar from './components/MonthBar';
 import StatCard, { formatSigned } from './components/StatCard';
+import { emailDir, type EmailLocale, REPORT_STRINGS } from './i18n';
 import type { EmailCurrencyContext, EmailMoney } from './types';
 import { isCompact } from './types';
 
@@ -30,6 +31,7 @@ export interface YearlyReportProps extends EmailCurrencyContext {
   }>;
   months: Array<{
     month: number; // 1..12
+    monthLabel: string; // 'Jan' or 'فروردین' — locale/calendar-resolved by the caller
     // Amounts in the user's primary currency — only used relatively, for bar heights.
     income: number;
     expenses: number;
@@ -41,9 +43,10 @@ export interface YearlyReportProps extends EmailCurrencyContext {
   unsubscribeUrl: string;
   webViewUrl: string;
   logoUrl: string;
+  locale?: EmailLocale;
 }
 
-const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH_LABELS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const YearlyReport = ({
   userName,
@@ -63,11 +66,18 @@ const YearlyReport = ({
   unsubscribeUrl,
   webViewUrl,
   logoUrl,
+  locale = 'en',
 }: YearlyReportProps) => {
+  const dir = emailDir(locale);
   const currency: EmailCurrencyContext = { primaryCurrency, secondaryCurrency, numberFormat };
+  const t = REPORT_STRINGS[locale];
   // Preview is a sentence — keep amounts full so they read naturally.
-  const preview = `Your ${periodLabel} year in review — ${formatMoney(totals.expenses.primary, primaryCurrency)} spent, ${formatMoney(totalSaved.primary, primaryCurrency)} saved.`;
-  const greeting = userName ? `Hi ${userName.split(' ')[0]},` : 'Hi there,';
+  const preview = t.yearly.preview(
+    periodLabel,
+    formatMoney(totals.expenses.primary, primaryCurrency, { locale }),
+    formatMoney(totalSaved.primary, primaryCurrency, { locale })
+  );
+  const greeting = t.greeting(userName ? userName.split(' ')[0] : null);
   let netTone: 'positive' | 'negative' | 'neutral' = 'neutral';
   if (totals.net.primary > 0) netTone = 'positive';
   else if (totals.net.primary < 0) netTone = 'negative';
@@ -76,51 +86,52 @@ const YearlyReport = ({
   const cardCompact = isCompact(numberFormat, true);
 
   return (
-    <Layout preview={preview} unsubscribeUrl={unsubscribeUrl} webViewUrl={webViewUrl} logoUrl={logoUrl}>
+    <Layout preview={preview} unsubscribeUrl={unsubscribeUrl} webViewUrl={webViewUrl} logoUrl={logoUrl} locale={locale}>
       <Text className="m-0 text-[14px] text-[#525252]">{greeting}</Text>
       <Heading
         as="h1"
         className="m-0 mt-2 text-[#171717]"
         style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.02em', lineHeight: '32px' }}
       >
-        Your {periodLabel} in review
+        {t.yearly.title(periodLabel)}
       </Heading>
-      <Text className="m-0 mt-2 text-[14px] leading-5 text-[#6b7280]">
-        Twelve months of expenses, income, and savings in one place.
-      </Text>
+      <Text className="m-0 mt-2 text-[14px] leading-5 text-[#6b7280]">{t.yearly.subtitle}</Text>
 
       {/* Headline stats */}
-      <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" style={{ marginTop: '24px' }}>
+      <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" dir={dir} style={{ marginTop: '24px' }}>
         <tr>
           <td style={{ paddingBottom: '12px' }}>
             <StatCard
-              label="Total spent"
+              label={t.totalSpent}
               value={totals.expenses}
               currency={currency}
               tone="negative"
-              delta={{ pct: deltaPct.expenses, label: `vs ${previousLabel}` }}
+              delta={{ pct: deltaPct.expenses, label: t.vsLabel(previousLabel) }}
+              locale={locale}
             />
           </td>
         </tr>
         <tr>
           <td style={{ paddingBottom: '12px' }}>
             <StatCard
-              label="Total income"
+              label={t.totalIncome}
               value={totals.income}
               currency={currency}
               tone="positive"
-              delta={{ pct: deltaPct.income, label: `vs ${previousLabel}` }}
+              delta={{ pct: deltaPct.income, label: t.vsLabel(previousLabel) }}
               deltaDirection="up-is-good"
+              locale={locale}
             />
           </td>
         </tr>
         <tr>
           <td>
             <StatCard
-              label={`Total saved · ${savingsRatePct.toFixed(1)}% savings rate`}
+              label={t.yearly.totalSaved(savingsRatePct.toFixed(1))}
               value={totalSaved}
               currency={currency}
               tone={netTone}
+              locale={locale}
             />
           </td>
         </tr>
@@ -129,7 +140,7 @@ const YearlyReport = ({
       {/* Monthly breakdown */}
       <Hr className="my-8 border-t border-[#e5e5e5]" />
       <Heading as="h2" className="m-0 text-[#171717]" style={{ fontSize: '16px', fontWeight: 600 }}>
-        Month by month
+        {t.yearly.monthByMonth}
       </Heading>
       <Text className="m-0 mt-1 text-[13px] text-[#a3a3a3]">
         <span
@@ -142,7 +153,7 @@ const YearlyReport = ({
             marginRight: 4,
           }}
         />
-        Income &nbsp;
+        {t.income} &nbsp;
         <span
           style={{
             display: 'inline-block',
@@ -153,15 +164,15 @@ const YearlyReport = ({
             marginRight: 4,
           }}
         />
-        Expenses
+        {t.expenses}
       </Text>
       <Section style={{ marginTop: '20px' }}>
-        <table role="presentation" cellPadding={0} cellSpacing={0} width="100%">
+        <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" dir={dir}>
           <tr>
             {months.map((m) => (
               <MonthBar
                 key={m.month}
-                month={MONTH_LABELS[m.month - 1]}
+                month={m.monthLabel || MONTH_LABELS_EN[m.month - 1]}
                 income={m.income}
                 expenses={m.expenses}
                 max={maxBar}
@@ -173,7 +184,7 @@ const YearlyReport = ({
 
       {/* Best / worst */}
       {(bestMonth || worstMonth) && (
-        <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" style={{ marginTop: '24px' }}>
+        <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" dir={dir} style={{ marginTop: '24px' }}>
           <tr>
             {bestMonth && (
               <td style={{ width: '50%', paddingRight: '8px', verticalAlign: 'top' }}>
@@ -184,12 +195,12 @@ const YearlyReport = ({
                     padding: '16px',
                   }}
                 >
-                  <Text className="m-0 text-[11px] tracking-wide text-[#a3a3a3] uppercase">Best month</Text>
+                  <Text className="m-0 text-[11px] tracking-wide text-[#a3a3a3] uppercase">{t.yearly.bestMonth}</Text>
                   <Text className="m-0 mt-1 text-[#171717]" style={{ fontSize: '16px', fontWeight: 600 }}>
                     {bestMonth.monthLabel}
                   </Text>
                   <Text className="m-0 mt-1 text-[13px] font-semibold text-[#10b981]">
-                    +{formatMoney(bestMonth.net.primary, primaryCurrency, { compact: cardCompact })}
+                    +{formatMoney(bestMonth.net.primary, primaryCurrency, { compact: cardCompact, locale })}
                   </Text>
                 </Section>
               </td>
@@ -203,13 +214,13 @@ const YearlyReport = ({
                     padding: '16px',
                   }}
                 >
-                  <Text className="m-0 text-[11px] tracking-wide text-[#a3a3a3] uppercase">Worst month</Text>
+                  <Text className="m-0 text-[11px] tracking-wide text-[#a3a3a3] uppercase">{t.yearly.worstMonth}</Text>
                   <Text className="m-0 mt-1 text-[#171717]" style={{ fontSize: '16px', fontWeight: 600 }}>
                     {worstMonth.monthLabel}
                   </Text>
                   <Text className="m-0 mt-1 text-[13px] font-semibold text-[#ea001d]">
                     {worstMonth.net.primary >= 0 ? '+' : ''}
-                    {formatSigned(worstMonth.net.primary, primaryCurrency, cardCompact)}
+                    {formatSigned(worstMonth.net.primary, primaryCurrency, cardCompact, locale)}
                   </Text>
                 </Section>
               </td>
@@ -223,9 +234,9 @@ const YearlyReport = ({
         <>
           <Hr className="my-8 border-t border-[#e5e5e5]" />
           <Heading as="h2" className="m-0 text-[#171717]" style={{ fontSize: '16px', fontWeight: 600 }}>
-            Top categories of {periodLabel}
+            {t.yearly.topCategoriesOf(periodLabel)}
           </Heading>
-          <Text className="m-0 mt-1 text-[13px] text-[#a3a3a3]">Where most of the year&apos;s money went.</Text>
+          <Text className="m-0 mt-1 text-[13px] text-[#a3a3a3]">{t.yearly.topCategoriesSubtitle}</Text>
           <Section style={{ marginTop: '20px' }}>
             {topCategories.map((c, i) => (
               <CategoryRow
@@ -236,6 +247,7 @@ const YearlyReport = ({
                 value={c.value}
                 currency={currency}
                 pct={c.pct}
+                locale={locale}
               />
             ))}
           </Section>
@@ -266,18 +278,18 @@ YearlyReport.PreviewProps = {
     { id: 5, name: 'Entertainment', color: 'pink', value: { primary: 130_800_000, secondary: 2_180 }, pct: 6.4 },
   ],
   months: [
-    { month: 1, income: 246_000_000, expenses: 160_800_000 },
-    { month: 2, income: 249_000_000, expenses: 162_600_000 },
-    { month: 3, income: 252_000_000, expenses: 173_400_000 },
-    { month: 4, income: 252_000_000, expenses: 186_000_000 },
-    { month: 5, income: 252_000_000, expenses: 170_400_000 },
-    { month: 6, income: 258_000_000, expenses: 177_000_000 },
-    { month: 7, income: 258_000_000, expenses: 192_000_000 },
-    { month: 8, income: 258_000_000, expenses: 172_800_000 },
-    { month: 9, income: 255_000_000, expenses: 163_800_000 },
-    { month: 10, income: 255_000_000, expenses: 168_600_000 },
-    { month: 11, income: 249_000_000, expenses: 158_400_000 },
-    { month: 12, income: 240_000_000, expenses: 159_000_000 },
+    { month: 1, monthLabel: 'Jan', income: 246_000_000, expenses: 160_800_000 },
+    { month: 2, monthLabel: 'Feb', income: 249_000_000, expenses: 162_600_000 },
+    { month: 3, monthLabel: 'Mar', income: 252_000_000, expenses: 173_400_000 },
+    { month: 4, monthLabel: 'Apr', income: 252_000_000, expenses: 186_000_000 },
+    { month: 5, monthLabel: 'May', income: 252_000_000, expenses: 170_400_000 },
+    { month: 6, monthLabel: 'Jun', income: 258_000_000, expenses: 177_000_000 },
+    { month: 7, monthLabel: 'Jul', income: 258_000_000, expenses: 192_000_000 },
+    { month: 8, monthLabel: 'Aug', income: 258_000_000, expenses: 172_800_000 },
+    { month: 9, monthLabel: 'Sep', income: 255_000_000, expenses: 163_800_000 },
+    { month: 10, monthLabel: 'Oct', income: 255_000_000, expenses: 168_600_000 },
+    { month: 11, monthLabel: 'Nov', income: 249_000_000, expenses: 158_400_000 },
+    { month: 12, monthLabel: 'Dec', income: 240_000_000, expenses: 159_000_000 },
   ],
   bestMonth: { monthLabel: 'November 2025', net: { primary: 90_600_000, secondary: 1510 } },
   worstMonth: { monthLabel: 'July 2025', net: { primary: 66_000_000, secondary: 1100 } },

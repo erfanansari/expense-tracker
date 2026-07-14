@@ -2,16 +2,24 @@ import React from 'react';
 
 import { render } from '@react-email/render';
 
+import { AUTH_EMAIL_STRINGS, type EmailLocale } from '@/emails/i18n';
 import WelcomeEmail from '@/emails/WelcomeEmail';
 
 import { APP_URL, FROM_ADDRESS, LOGO_URL, REPLY_TO, resend } from './client';
 
-export async function sendWelcomeEmail(user: { userId: number; email: string; name: string | null }): Promise<void> {
+export async function sendWelcomeEmail(user: {
+  userId: number;
+  email: string;
+  name: string | null;
+  locale?: EmailLocale;
+}): Promise<void> {
+  const locale = user.locale ?? 'en';
   const html = await render(
     React.createElement(WelcomeEmail, {
       userName: user.name,
       dashboardUrl: `${APP_URL}/overview`,
       logoUrl: LOGO_URL,
+      locale,
     })
   );
 
@@ -20,7 +28,7 @@ export async function sendWelcomeEmail(user: { userId: number; email: string; na
       from: FROM_ADDRESS,
       to: user.email,
       replyTo: REPLY_TO,
-      subject: 'Welcome to Kharji',
+      subject: AUTH_EMAIL_STRINGS[locale].welcome.subject,
       html,
     },
     { idempotencyKey: `welcome-${user.userId}` }

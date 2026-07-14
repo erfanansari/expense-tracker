@@ -12,6 +12,7 @@ import { seedDefaultCategoriesForUser } from '@core/database/categories';
 import { createDefaultNotificationPreferences } from '@core/database/notification-preferences';
 import { sendPasswordChangedEmail, sendResetPasswordEmail, sendVerificationEmail } from '@core/email/auth-emails';
 import { sendWelcomeEmail } from '@core/email/welcome';
+import { getUserLocale } from '@core/session/locale';
 
 const dialect = new LibsqlDialect({
   url: process.env.TURSO_DATABASE_URL || '',
@@ -57,11 +58,13 @@ export const auth = betterAuth({
       verify: ({ hash, password }) => verifyPassword(password, hash),
     },
     sendResetPassword: async ({ user, url }) => {
-      await sendResetPasswordEmail({ email: user.email, name: user.name ?? null }, url);
+      const locale = await getUserLocale();
+      await sendResetPasswordEmail({ email: user.email, name: user.name ?? null }, url, locale);
     },
     onPasswordReset: async ({ user }) => {
       // Security notification; never block the reset on email delivery
-      sendPasswordChangedEmail({ email: user.email, name: user.name ?? null }).catch((error) => {
+      const locale = await getUserLocale();
+      sendPasswordChangedEmail({ email: user.email, name: user.name ?? null }, locale).catch((error) => {
         console.error('Password-changed email failed:', error);
         Sentry.captureException(error);
       });
@@ -72,7 +75,10 @@ export const auth = betterAuth({
     autoSignInAfterVerification: true,
     expiresIn: 60 * 60, // 1 hour, matches email copy
     sendVerificationEmail: async ({ user, url }) => {
-      await sendVerificationEmail({ email: user.email, name: user.name ?? null }, url);
+      // No saved preference exists yet at signup — the request's locale
+      // cookie (same one the rest of the app reads) is the only signal.
+      const locale = await getUserLocale();
+      await sendVerificationEmail({ email: user.email, name: user.name ?? null }, url, locale);
     },
   },
   socialProviders: {
@@ -104,10 +110,13 @@ export const auth = betterAuth({
       if (ctx.path !== '/change-password') return;
       const session = await getSessionFromCtx(ctx);
       if (!session?.user?.email) return;
-      sendPasswordChangedEmail({ email: session.user.email, name: session.user.name ?? null }).catch((error) => {
-        console.error('Password-changed email failed:', error);
-        Sentry.captureException(error);
-      });
+      const locale = await getUserLocale();
+      sendPasswordChangedEmail({ email: session.user.email, name: session.user.name ?? null }, locale).catch(
+        (error) => {
+          console.error('Password-changed email failed:', error);
+          Sentry.captureException(error);
+        }
+      );
     }),
   },
   databaseHooks: {
@@ -122,8 +131,9 @@ export const auth = betterAuth({
             console.error('Post-signup seeding failed:', error);
             Sentry.captureException(error);
           }
+          const locale = await getUserLocale();
           // Fire-and-forget; never block or fail user creation on email delivery
-          sendWelcomeEmail({ userId, email: user.email, name: user.name ?? null }).catch((error) => {
+          sendWelcomeEmail({ userId, email: user.email, name: user.name ?? null, locale }).catch((error) => {
             console.error('Welcome email failed:', error);
             Sentry.captureException(error);
           });

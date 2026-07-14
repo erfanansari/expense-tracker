@@ -2,45 +2,53 @@ import * as React from 'react';
 
 import { Body, Button, Container, Head, Heading, Hr, Html, Preview, Section, Text } from '@react-email/components';
 
+import { AUTH_EMAIL_STRINGS, emailDir, type EmailLocale, FONT_STACKS, VAZIRMATN_FONT_LINK } from './i18n';
+
 export interface PasswordChangedEmailProps {
   userName: string | null;
   resetUrl: string;
+  locale?: EmailLocale;
 }
 
-const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-
-const PasswordChangedEmail = ({ userName, resetUrl }: PasswordChangedEmailProps) => {
+const PasswordChangedEmail = ({ userName, resetUrl, locale = 'en' }: PasswordChangedEmailProps) => {
   const firstName = userName ? userName.split(' ')[0] : null;
-  const greeting = firstName ? `Hi ${firstName},` : 'Hi there,';
+  const t = AUTH_EMAIL_STRINGS[locale].passwordChanged;
+  const greeting = AUTH_EMAIL_STRINGS[locale].greeting(firstName);
+  const dir = emailDir(locale);
+  const font = FONT_STACKS[locale];
 
   return (
-    <Html>
-      <Head />
-      <Preview>Your Kharji password was changed.</Preview>
-      <Body style={{ backgroundColor: '#f5f5f5', fontFamily: FONT, margin: 0, padding: '40px 0' }}>
+    <Html dir={dir} lang={locale}>
+      <Head>{locale === 'fa' && <link rel="stylesheet" href={VAZIRMATN_FONT_LINK} />}</Head>
+      <Preview>{t.preview}</Preview>
+      <Body style={{ backgroundColor: '#f5f5f5', fontFamily: font, margin: 0, padding: '40px 0' }}>
         <Container
+          dir={dir}
           style={{
             backgroundColor: '#ffffff',
             borderRadius: '12px',
             maxWidth: '560px',
             margin: '0 auto',
             overflow: 'hidden',
+            textAlign: dir === 'rtl' ? 'right' : 'left',
           }}
         >
           <Section style={{ padding: '32px 40px 24px' }}>
-            <Heading style={{ color: '#171717', fontSize: '22px', fontWeight: 700, margin: '0 0 8px' }}>
-              Your password was changed
+            <Heading
+              style={{ color: '#171717', fontSize: '22px', fontWeight: 700, margin: '0 0 8px', fontFamily: font }}
+            >
+              {t.heading}
             </Heading>
-            <Text style={{ color: '#525252', fontSize: '15px', lineHeight: '24px', margin: 0 }}>
-              {greeting} this is a confirmation that the password for your Kharji account was just changed. If this was
-              you, no action is needed.
+            <Text style={{ color: '#525252', fontSize: '15px', lineHeight: '24px', margin: 0, fontFamily: font }}>
+              {t.body(greeting)}
             </Text>
           </Section>
 
           <Section style={{ padding: '0 40px 8px' }}>
-            <Text style={{ color: '#525252', fontSize: '15px', lineHeight: '24px', margin: '0 0 16px' }}>
-              If you didn&apos;t make this change, reset your password immediately — someone else may have access to
-              your account.
+            <Text
+              style={{ color: '#525252', fontSize: '15px', lineHeight: '24px', margin: '0 0 16px', fontFamily: font }}
+            >
+              {t.warning}
             </Text>
             <Button
               href={resetUrl}
@@ -53,16 +61,17 @@ const PasswordChangedEmail = ({ userName, resetUrl }: PasswordChangedEmailProps)
                 fontWeight: 600,
                 padding: '12px 24px',
                 textDecoration: 'none',
+                fontFamily: font,
               }}
             >
-              Reset password
+              {t.cta}
             </Button>
           </Section>
 
           <Section style={{ padding: '16px 40px 32px' }}>
             <Hr style={{ borderColor: '#e5e5e5', margin: '0 0 16px' }} />
-            <Text style={{ color: '#a3a3a3', fontSize: '13px', lineHeight: '20px', margin: 0 }}>
-              For security, this change also signed out all other devices on your account.
+            <Text style={{ color: '#a3a3a3', fontSize: '13px', lineHeight: '20px', margin: 0, fontFamily: font }}>
+              {t.footer}
             </Text>
           </Section>
         </Container>

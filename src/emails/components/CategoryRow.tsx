@@ -4,6 +4,7 @@ import { Text } from '@react-email/components';
 
 import { formatMoney } from '@features/ExchangeRate/utils/currency';
 
+import { emailDir, type EmailLocale } from '../i18n';
 import type { EmailCurrencyContext, EmailMoney } from '../types';
 import { isCompact } from '../types';
 
@@ -14,6 +15,7 @@ interface CategoryRowProps {
   value: EmailMoney;
   currency: EmailCurrencyContext;
   pct: number; // 0..100
+  locale?: EmailLocale;
 }
 
 // Map our category color names to email-safe hex (subset of tailwind palette).
@@ -39,27 +41,32 @@ const COLOR_HEX: Record<string, string> = {
   fuchsia: '#d946ef',
 };
 
-export const CategoryRow = ({ rank, name, color, value, currency, pct }: CategoryRowProps) => {
+export const CategoryRow = ({ rank, name, color, value, currency, pct, locale = 'en' }: CategoryRowProps) => {
+  const dir = emailDir(locale);
+  const isRtl = dir === 'rtl';
   const swatch = COLOR_HEX[color] ?? '#6b7280';
   const widthPct = Math.max(2, Math.round(pct));
   // Rows are dense lists: 'auto' keeps them full-precision (compact is cards-only).
   const compact = isCompact(currency.numberFormat, false);
+  const farAlign: React.CSSProperties['textAlign'] = isRtl ? 'left' : 'right';
+  const farPad = isRtl ? { paddingRight: '12px' } : { paddingLeft: '12px' };
+  const nearPad = isRtl ? { paddingLeft: '12px' } : { paddingRight: '12px' };
 
   return (
-    <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" style={{ marginBottom: '14px' }}>
+    <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" dir={dir} style={{ marginBottom: '14px' }}>
       <tr>
-        <td style={{ paddingRight: '12px', verticalAlign: 'middle', width: '20px' }}>
+        <td style={{ ...nearPad, verticalAlign: 'middle', width: '20px' }}>
           <span style={{ color: '#a3a3a3', fontSize: '13px', fontWeight: 500 }}>{rank}</span>
         </td>
         <td style={{ verticalAlign: 'middle' }}>
-          <table role="presentation" cellPadding={0} cellSpacing={0} width="100%">
+          <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" dir={dir}>
             <tr>
               <td>
                 <Text className="m-0 text-[14px] font-medium text-[#171717]">{name}</Text>
               </td>
-              <td style={{ textAlign: 'right', whiteSpace: 'nowrap', paddingLeft: '12px' }}>
+              <td style={{ textAlign: farAlign, whiteSpace: 'nowrap', ...farPad }}>
                 <Text className="m-0 text-[14px] font-semibold text-[#171717]">
-                  {formatMoney(value.primary, currency.primaryCurrency, { compact })}
+                  {formatMoney(value.primary, currency.primaryCurrency, { compact, locale })}
                 </Text>
               </td>
             </tr>
@@ -80,6 +87,7 @@ export const CategoryRow = ({ rank, name, color, value, currency, pct }: Categor
                       width: `${widthPct}%`,
                       height: '100%',
                       backgroundColor: swatch,
+                      ...(isRtl ? { marginLeft: 'auto' } : {}),
                     }}
                   />
                 </div>
@@ -89,11 +97,11 @@ export const CategoryRow = ({ rank, name, color, value, currency, pct }: Categor
               <td style={{ paddingTop: '4px' }}>
                 {value.secondary !== null && currency.secondaryCurrency && (
                   <Text className="m-0 text-[12px] text-[#a3a3a3]">
-                    {formatMoney(value.secondary, currency.secondaryCurrency, { compact })}
+                    {formatMoney(value.secondary, currency.secondaryCurrency, { compact, locale })}
                   </Text>
                 )}
               </td>
-              <td style={{ textAlign: 'right', paddingTop: '4px' }}>
+              <td style={{ textAlign: farAlign, paddingTop: '4px' }}>
                 <Text className="m-0 text-[12px] text-[#a3a3a3]">{pct.toFixed(1)}%</Text>
               </td>
             </tr>

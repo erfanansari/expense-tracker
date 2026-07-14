@@ -4,6 +4,7 @@ import { Section, Text } from '@react-email/components';
 
 import { formatMoney } from '@features/ExchangeRate/utils/currency';
 
+import { emailDir, type EmailLocale } from '../i18n';
 import type { EmailCurrencyContext, EmailMoney } from '../types';
 import { isCompact } from '../types';
 
@@ -15,6 +16,7 @@ interface StatCardProps {
   delta?: { pct: number; label: string }; // e.g. { pct: -12.4, label: 'vs Apr 2026' }
   // Whether a positive delta is good or bad. Income up = good, expenses up = bad.
   deltaDirection?: 'up-is-good' | 'up-is-bad';
+  locale?: EmailLocale;
 }
 
 const TONE_COLOR: Record<NonNullable<StatCardProps['tone']>, string> = {
@@ -24,9 +26,9 @@ const TONE_COLOR: Record<NonNullable<StatCardProps['tone']>, string> = {
 };
 
 /** Format with an explicit leading minus so the sign never lands mid-string (e.g. -1,234 IRT). */
-export function formatSigned(n: number, currencyCode: string, compact: boolean): string {
+export function formatSigned(n: number, currencyCode: string, compact: boolean, locale: EmailLocale = 'en'): string {
   const sign = n < 0 ? '-' : '';
-  return `${sign}${formatMoney(Math.abs(n), currencyCode, { compact })}`;
+  return `${sign}${formatMoney(Math.abs(n), currencyCode, { compact, locale })}`;
 }
 
 function fmtDelta(pct: number, direction: 'up-is-good' | 'up-is-bad'): { value: string; color: string } {
@@ -44,17 +46,21 @@ export const StatCard = ({
   tone = 'neutral',
   delta,
   deltaDirection = 'up-is-bad',
+  locale = 'en',
 }: StatCardProps) => {
+  const dir = emailDir(locale);
   const valueColor = TONE_COLOR[tone];
   const deltaDisplay = delta ? fmtDelta(delta.pct, deltaDirection) : null;
   const compact = isCompact(currency.numberFormat, true);
   return (
     <Section
+      dir={dir}
       style={{
         border: '1px solid #e5e5e5',
         borderRadius: '12px',
         padding: '20px',
         backgroundColor: '#ffffff',
+        textAlign: dir === 'rtl' ? 'right' : 'left',
       }}
     >
       <Text className="m-0 text-[12px] font-medium tracking-wide text-[#a3a3a3] uppercase">{label}</Text>
@@ -68,11 +74,11 @@ export const StatCard = ({
           color: valueColor,
         }}
       >
-        {formatSigned(value.primary, currency.primaryCurrency, compact)}
+        {formatSigned(value.primary, currency.primaryCurrency, compact, locale)}
       </Text>
       {value.secondary !== null && currency.secondaryCurrency && (
         <Text className="m-0 mt-1 text-[13px] text-[#6b7280]">
-          {formatSigned(value.secondary, currency.secondaryCurrency, compact)}
+          {formatSigned(value.secondary, currency.secondaryCurrency, compact, locale)}
         </Text>
       )}
       {delta && deltaDisplay && (

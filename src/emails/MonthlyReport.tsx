@@ -7,6 +7,7 @@ import { formatMoney } from '@features/ExchangeRate/utils/currency';
 import CategoryRow from './components/CategoryRow';
 import Layout from './components/Layout';
 import StatCard from './components/StatCard';
+import { emailDir, type EmailLocale, REPORT_STRINGS } from './i18n';
 import type { EmailCurrencyContext, EmailMoney } from './types';
 
 export interface MonthlyReportProps extends EmailCurrencyContext {
@@ -29,6 +30,7 @@ export interface MonthlyReportProps extends EmailCurrencyContext {
   unsubscribeUrl: string;
   webViewUrl: string;
   logoUrl: string;
+  locale?: EmailLocale;
 }
 
 const MonthlyReport = ({
@@ -44,57 +46,64 @@ const MonthlyReport = ({
   unsubscribeUrl,
   webViewUrl,
   logoUrl,
+  locale = 'en',
 }: MonthlyReportProps) => {
+  const dir = emailDir(locale);
   const currency: EmailCurrencyContext = { primaryCurrency, secondaryCurrency, numberFormat };
+  const t = REPORT_STRINGS[locale];
   // Preview is a sentence — keep amounts full so they read naturally.
-  const preview = `Your ${periodLabel} report — ${formatMoney(totals.expenses.primary, primaryCurrency)} spent, ${formatMoney(totals.net.primary, primaryCurrency)} net.`;
-  const greeting = userName ? `Hi ${userName.split(' ')[0]},` : 'Hi there,';
+  const preview = t.monthly.preview(
+    periodLabel,
+    formatMoney(totals.expenses.primary, primaryCurrency, { locale }),
+    formatMoney(totals.net.primary, primaryCurrency, { locale })
+  );
+  const greeting = t.greeting(userName ? userName.split(' ')[0] : null);
   let netTone: 'positive' | 'negative' | 'neutral' = 'neutral';
   if (totals.net.primary > 0) netTone = 'positive';
   else if (totals.net.primary < 0) netTone = 'negative';
 
   return (
-    <Layout preview={preview} unsubscribeUrl={unsubscribeUrl} webViewUrl={webViewUrl} logoUrl={logoUrl}>
+    <Layout preview={preview} unsubscribeUrl={unsubscribeUrl} webViewUrl={webViewUrl} logoUrl={logoUrl} locale={locale}>
       <Text className="m-0 text-[14px] text-[#525252]">{greeting}</Text>
       <Heading
         as="h1"
         className="m-0 mt-2 text-[#171717]"
         style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.02em', lineHeight: '32px' }}
       >
-        Your {periodLabel} report
+        {t.monthly.title(periodLabel)}
       </Heading>
-      <Text className="m-0 mt-2 text-[14px] leading-5 text-[#6b7280]">
-        Here&apos;s a quick look at how the month went.
-      </Text>
+      <Text className="m-0 mt-2 text-[14px] leading-5 text-[#6b7280]">{t.monthly.subtitle}</Text>
 
       {/* Stats */}
-      <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" style={{ marginTop: '24px' }}>
+      <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" dir={dir} style={{ marginTop: '24px' }}>
         <tr>
           <td style={{ paddingBottom: '12px' }}>
             <StatCard
-              label="Total spent"
+              label={t.totalSpent}
               value={totals.expenses}
               currency={currency}
               tone="negative"
-              delta={{ pct: deltaPct.expenses, label: `vs ${previousLabel}` }}
+              delta={{ pct: deltaPct.expenses, label: t.vsLabel(previousLabel) }}
+              locale={locale}
             />
           </td>
         </tr>
         <tr>
           <td style={{ paddingBottom: '12px' }}>
             <StatCard
-              label="Total income"
+              label={t.totalIncome}
               value={totals.income}
               currency={currency}
               tone="positive"
-              delta={{ pct: deltaPct.income, label: `vs ${previousLabel}` }}
+              delta={{ pct: deltaPct.income, label: t.vsLabel(previousLabel) }}
               deltaDirection="up-is-good"
+              locale={locale}
             />
           </td>
         </tr>
         <tr>
           <td>
-            <StatCard label="Net (income − expenses)" value={totals.net} currency={currency} tone={netTone} />
+            <StatCard label={t.net} value={totals.net} currency={currency} tone={netTone} locale={locale} />
           </td>
         </tr>
       </table>
@@ -104,9 +113,9 @@ const MonthlyReport = ({
         <>
           <Hr className="my-8 border-t border-[#e5e5e5]" />
           <Heading as="h2" className="m-0 text-[#171717]" style={{ fontSize: '16px', fontWeight: 600 }}>
-            Top categories
+            {t.topCategories}
           </Heading>
-          <Text className="m-0 mt-1 text-[13px] text-[#a3a3a3]">Where your money went in {periodLabel}.</Text>
+          <Text className="m-0 mt-1 text-[13px] text-[#a3a3a3]">{t.monthly.topCategoriesSubtitle(periodLabel)}</Text>
           <Section style={{ marginTop: '20px' }}>
             {topCategories.map((c, i) => (
               <CategoryRow
@@ -117,6 +126,7 @@ const MonthlyReport = ({
                 value={c.value}
                 currency={currency}
                 pct={c.pct}
+                locale={locale}
               />
             ))}
           </Section>

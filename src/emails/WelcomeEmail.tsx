@@ -2,84 +2,66 @@ import * as React from 'react';
 
 import { Body, Button, Container, Head, Heading, Hr, Html, Preview, Section, Text } from '@react-email/components';
 
+import { AUTH_EMAIL_STRINGS, emailDir, type EmailLocale, FONT_STACKS, VAZIRMATN_FONT_LINK } from './i18n';
+
 export interface WelcomeEmailProps {
   userName: string | null;
   dashboardUrl: string;
   logoUrl: string;
+  locale?: EmailLocale;
 }
 
-const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+const BRAND_NAME: Record<EmailLocale, string> = { en: 'Kharji', fa: 'خرجی' };
 
-const FEATURES = [
-  {
-    color: '#10b981',
-    title: 'Expenses',
-    description: 'Log daily spending with categories, tags, and multi-currency amounts.',
-  },
-  {
-    color: '#0070f3',
-    title: 'Income',
-    description: 'Track monthly income by type — salary, freelance, investments, and more.',
-  },
-  {
-    color: '#8b5cf6',
-    title: 'Assets & Net Worth',
-    description: 'Monitor cash, crypto, gold, real estate, and investments in one place.',
-  },
-  {
-    color: '#f59e0b',
-    title: 'Reports & Insights',
-    description: 'Spending charts and trends, plus monthly and yearly summaries in your inbox.',
-  },
-  {
-    color: '#171717',
-    title: 'Your Data, Yours',
-    description: 'Download a full Excel backup anytime, or import expenses from CSV.',
-  },
-];
-
-const WelcomeEmail = ({ userName, dashboardUrl, logoUrl }: WelcomeEmailProps) => {
+const WelcomeEmail = ({ userName, dashboardUrl, logoUrl, locale = 'en' }: WelcomeEmailProps) => {
   const firstName = userName ? userName.split(' ')[0] : null;
-  const greeting = firstName ? `Hi ${firstName},` : 'Hi there,';
+  const t = AUTH_EMAIL_STRINGS[locale].welcome;
+  const greeting = AUTH_EMAIL_STRINGS[locale].greeting(firstName);
+  const dir = emailDir(locale);
+  const isRtl = dir === 'rtl';
+  const font = FONT_STACKS[locale];
+  const brand = BRAND_NAME[locale];
 
   return (
-    <Html>
-      <Head />
-      <Preview>Your finances, finally under control.</Preview>
-      <Body style={{ backgroundColor: '#f5f5f5', fontFamily: FONT, margin: 0, padding: '40px 0' }}>
+    <Html dir={dir} lang={locale}>
+      <Head>{locale === 'fa' && <link rel="stylesheet" href={VAZIRMATN_FONT_LINK} />}</Head>
+      <Preview>{t.preview}</Preview>
+      <Body style={{ backgroundColor: '#f5f5f5', fontFamily: font, margin: 0, padding: '40px 0' }}>
         <Container
+          dir={dir}
           style={{
             backgroundColor: '#ffffff',
             borderRadius: '12px',
             maxWidth: '560px',
             margin: '0 auto',
             overflow: 'hidden',
+            textAlign: isRtl ? 'right' : 'left',
           }}
         >
           {/* Header */}
           <Section style={{ padding: '32px 40px 24px' }}>
-            <table role="presentation" cellPadding={0} cellSpacing={0}>
+            <table role="presentation" cellPadding={0} cellSpacing={0} dir={dir}>
               <tr>
                 <td style={{ verticalAlign: 'middle' }}>
                   <img
                     src={logoUrl}
                     width="32"
                     height="32"
-                    alt="Kharji"
+                    alt={brand}
                     style={{ display: 'block', borderRadius: '8px', backgroundColor: '#171717' }}
                   />
                 </td>
-                <td style={{ paddingLeft: '10px', verticalAlign: 'middle' }}>
+                <td style={{ [isRtl ? 'paddingRight' : 'paddingLeft']: '10px', verticalAlign: 'middle' }}>
                   <span
                     style={{
                       color: '#171717',
                       fontSize: '18px',
                       fontWeight: 700,
                       letterSpacing: '-0.01em',
-                      fontFamily: FONT,
+                      fontFamily: font,
                     }}
                   >
-                    Kharji
+                    {brand}
                   </span>
                 </td>
               </tr>
@@ -88,7 +70,7 @@ const WelcomeEmail = ({ userName, dashboardUrl, logoUrl }: WelcomeEmailProps) =>
 
           {/* Body */}
           <Section style={{ padding: '0 40px 40px' }}>
-            <Text style={{ margin: '0 0 8px', fontSize: '15px', color: '#6b7280', fontFamily: FONT }}>{greeting}</Text>
+            <Text style={{ margin: '0 0 8px', fontSize: '15px', color: '#6b7280', fontFamily: font }}>{greeting}</Text>
             <Heading
               as="h1"
               style={{
@@ -98,20 +80,19 @@ const WelcomeEmail = ({ userName, dashboardUrl, logoUrl }: WelcomeEmailProps) =>
                 letterSpacing: '-0.03em',
                 lineHeight: '1.1',
                 color: '#171717',
-                fontFamily: FONT,
+                fontFamily: font,
               }}
             >
-              Welcome to Kharji
+              {t.heading}
             </Heading>
             <Text
-              style={{ margin: '0 0 32px', fontSize: '15px', lineHeight: '1.6', color: '#525252', fontFamily: FONT }}
+              style={{ margin: '0 0 32px', fontSize: '15px', lineHeight: '1.6', color: '#525252', fontFamily: font }}
             >
-              Kharji helps you track your finances across multiple currencies — expenses, income, assets, and net worth,
-              all in one place.
+              {t.body}
             </Text>
 
-            {/* CTA button — table wrapper keeps it left-aligned and auto-width */}
-            <table role="presentation" cellPadding={0} cellSpacing={0} style={{ marginBottom: '40px' }}>
+            {/* CTA button — table wrapper keeps it auto-width, anchored to reading-start */}
+            <table role="presentation" cellPadding={0} cellSpacing={0} dir={dir} style={{ marginBottom: '40px' }}>
               <tr>
                 <td>
                   <Button
@@ -125,10 +106,10 @@ const WelcomeEmail = ({ userName, dashboardUrl, logoUrl }: WelcomeEmailProps) =>
                       fontWeight: 600,
                       padding: '14px 28px',
                       textDecoration: 'none',
-                      fontFamily: FONT,
+                      fontFamily: font,
                     }}
                   >
-                    Go to dashboard →
+                    {t.cta}
                   </Button>
                 </td>
               </tr>
@@ -137,33 +118,34 @@ const WelcomeEmail = ({ userName, dashboardUrl, logoUrl }: WelcomeEmailProps) =>
             <Hr style={{ border: 'none', borderTop: '1px solid #e5e5e5', margin: '0 0 32px' }} />
 
             {/* Features */}
-            {FEATURES.map((f) => (
+            {t.features.map((f) => (
               <table
                 key={f.title}
                 role="presentation"
                 cellPadding={0}
                 cellSpacing={0}
                 width="100%"
+                dir={dir}
                 style={{ marginBottom: '20px' }}
               >
                 <tr>
                   <td style={{ verticalAlign: 'top', width: '10px', paddingTop: '6px' }}>
                     <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: f.color }} />
                   </td>
-                  <td style={{ verticalAlign: 'top', paddingLeft: '14px' }}>
+                  <td style={{ verticalAlign: 'top', [isRtl ? 'paddingRight' : 'paddingLeft']: '14px' }}>
                     <Text
                       style={{
                         margin: '0 0 3px',
                         fontSize: '14px',
                         fontWeight: 600,
                         color: '#171717',
-                        fontFamily: FONT,
+                        fontFamily: font,
                       }}
                     >
                       {f.title}
                     </Text>
                     <Text
-                      style={{ margin: 0, fontSize: '13px', lineHeight: '1.5', color: '#6b7280', fontFamily: FONT }}
+                      style={{ margin: 0, fontSize: '13px', lineHeight: '1.5', color: '#6b7280', fontFamily: font }}
                     >
                       {f.description}
                     </Text>
@@ -175,14 +157,10 @@ const WelcomeEmail = ({ userName, dashboardUrl, logoUrl }: WelcomeEmailProps) =>
 
           {/* Footer */}
           <Section style={{ borderTop: '1px solid #e5e5e5', padding: '24px 40px', backgroundColor: '#fafafa' }}>
-            <Text style={{ margin: '0 0 6px', fontSize: '12px', color: '#a3a3a3', fontFamily: FONT }}>
-              Questions or feedback? Just reply to this email.
-            </Text>
-            <Text style={{ margin: 0, fontSize: '12px', color: '#a3a3a3', fontFamily: FONT }}>
-              You&apos;re receiving this because you just created a Kharji account.
-            </Text>
-            <Text style={{ margin: '16px 0 0', fontSize: '11px', color: '#a3a3a3', fontFamily: FONT }}>
-              Kharji · Personal Finance Tracker
+            <Text style={{ margin: '0 0 6px', fontSize: '12px', color: '#a3a3a3', fontFamily: font }}>{t.footer1}</Text>
+            <Text style={{ margin: 0, fontSize: '12px', color: '#a3a3a3', fontFamily: font }}>{t.footer2}</Text>
+            <Text style={{ margin: '16px 0 0', fontSize: '11px', color: '#a3a3a3', fontFamily: font }}>
+              {AUTH_EMAIL_STRINGS[locale].brandFooter}
             </Text>
           </Section>
         </Container>
