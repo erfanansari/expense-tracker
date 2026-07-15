@@ -36,15 +36,16 @@ The entire codebase is public so you can read every line of code that touches yo
 - 💸 **Expense tracking** — log daily expenses with custom categories, tags, and full-text search
 - 💰 **Income management** — track monthly income by type (salary, freelance, investment, and more)
 - 🏦 **Asset portfolio** — track wealth across cash, crypto, commodities, vehicles, property, bank accounts, and investments, with full valuation history and a net-worth chart
-- 🌍 **Multi-currency** — six currencies (IRT, USD, EUR, GBP, AED, TRY) with live exchange rates and per-date historical conversion
+- 🌍 **Multi-currency** — ten currencies (IRT, USD, EUR, GBP, AED, TRY, CAD, AUD, SEK, CHF) with live exchange rates and per-date historical conversion
+- 🗣️ **Bilingual (English / فارسی)** — full RTL layout, Persian digits and typography, and an independent Gregorian/Jalali calendar preference
 - 📊 **Reports** — spending analytics with daily, weekly, and monthly granularity, category breakdowns, and trends
-- 🏷️ **Tags & categories** — create tags inline as you type, manage everything centrally in Settings
+- 🏷️ **Tags & categories** — create tags inline as you type, manage everything centrally in Settings, with locale-aware defaults for new accounts
 - 📤 **Excel export & import** — your data is never locked in
-- 📧 **Email reports** — optional monthly and yearly summaries delivered to your inbox
+- 📧 **Email reports** — optional monthly and yearly summaries delivered to your inbox, sent in your chosen language
 - 🌙 **Dark mode** — easy on the eyes, day or night
 - ⌨️ **Command palette** — jump anywhere with a keystroke
 - 📱 **Installable PWA** — add it to your home screen like a native app
-- 🔐 **Privacy-first auth** — custom JWT auth with HTTP-only cookies, PBKDF2-hashed passwords, no third-party auth provider
+- 🔐 **Privacy-first auth** — self-hosted via Better Auth (no hosted third-party auth SaaS), HTTP-only session cookies, PBKDF2-hashed passwords, optional Google sign-in
 - 💾 **Daily backups** — automated encrypted database dumps with 30-day retention
 
 ## Screenshots
@@ -59,18 +60,19 @@ The entire codebase is public so you can read every line of code that touches yo
 
 ## Tech Stack
 
-| Layer         | Choice                                                  |
-| ------------- | ------------------------------------------------------- |
-| Framework     | [Next.js 16](https://nextjs.org) (App Router, React 19) |
-| Language      | TypeScript (strict)                                     |
-| Database      | [Turso](https://turso.tech) (libSQL / SQLite)           |
-| Styling       | Tailwind CSS v4                                         |
-| Charts        | Recharts                                                |
-| Tables & data | TanStack Table v8 · TanStack Query v5                   |
-| Auth          | Custom-built (JWT, HTTP-only cookies)                   |
-| Email         | Resend + React Email                                    |
-| Validation    | Zod                                                     |
-| PWA           | Serwist                                                 |
+| Layer                | Choice                                                                       |
+| -------------------- | ---------------------------------------------------------------------------- |
+| Framework            | [Next.js 16](https://nextjs.org) (App Router, React 19)                      |
+| Language             | TypeScript (strict)                                                          |
+| Database             | [Turso](https://turso.tech) (libSQL / SQLite)                                |
+| Styling              | Tailwind CSS v4                                                              |
+| Charts               | Recharts                                                                     |
+| Tables & data        | TanStack Table v8 · TanStack Query v5                                        |
+| Auth                 | [Better Auth](https://www.better-auth.com) (self-hosted, session cookies)    |
+| Internationalization | [next-intl](https://next-intl.dev) — English + Persian, RTL, Jalali calendar |
+| Email                | Resend + React Email                                                         |
+| Validation           | Zod                                                                          |
+| PWA                  | Serwist                                                                      |
 
 ## Getting Started
 
@@ -89,7 +91,7 @@ cd kharji
 pnpm install
 
 # 2. Configure environment
-cp .env.example .env.local   # then fill in your values
+cp .env.local.example .env.local   # then fill in your values
 
 # 3. Run database migrations
 pnpm migrate
@@ -103,18 +105,21 @@ pnpm dev                     # http://localhost:3000
 
 ### Environment Variables
 
-Only four variables are required — everything else degrades gracefully when unset.
+Five variables are required — everything else degrades gracefully when unset. See `.env.local.example` for the full annotated list.
 
-| Variable                                                              | Required | Description                                                                        |
-| --------------------------------------------------------------------- | :------: | ---------------------------------------------------------------------------------- |
-| `TURSO_DATABASE_URL`                                                  |    ✅    | Turso database connection URL                                                      |
-| `TURSO_AUTH_TOKEN`                                                    |    ✅    | Turso authentication token                                                         |
-| `JWT_SECRET`                                                          |    ✅    | Long random string used to sign session tokens                                     |
-| `APP_URL`                                                             |    ✅    | Public URL of the app (e.g. `http://localhost:3000`)                               |
-| `NAVASAN_API_KEY`                                                     |    —     | Live exchange rates ([Navasan](https://navasan.tech)); falls back to the free tier |
-| `RESEND_API_KEY`                                                      |    —     | Transactional email ([Resend](https://resend.com)); emails are skipped if unset    |
-| `CRON_SECRET`                                                         |    —     | Authenticates scheduled jobs (reports, backups, rate refresh)                      |
-| `B2_KEY_ID` / `B2_APPLICATION_KEY` / `B2_BUCKET_NAME` / `B2_ENDPOINT` |    —     | Daily database backups to Backblaze B2                                             |
+| Variable                                                                         | Required | Description                                                                                                          |
+| -------------------------------------------------------------------------------- | :------: | -------------------------------------------------------------------------------------------------------------------- |
+| `TURSO_DATABASE_URL`                                                             |    ✅    | Turso database connection URL                                                                                        |
+| `TURSO_AUTH_TOKEN`                                                               |    ✅    | Turso authentication token                                                                                           |
+| `BETTER_AUTH_SECRET`                                                             |    ✅    | Long random string used to sign session cookies (`openssl rand -base64 32`)                                          |
+| `BETTER_AUTH_URL`                                                                |    ✅    | Base URL Better Auth runs on (e.g. `http://localhost:3000`)                                                          |
+| `APP_URL`                                                                        |    ✅    | Public URL of the app, used for absolute links in emails                                                             |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`                                      |    —     | Google sign-in ([Cloud Console](https://console.cloud.google.com/apis/credentials)); Google login is hidden if unset |
+| `NAVASAN_API_KEY`                                                                |    —     | Live exchange rates ([Navasan](https://navasan.tech)); falls back to the free tier                                   |
+| `RESEND_API_KEY`                                                                 |    —     | Transactional email ([Resend](https://resend.com)); emails are skipped if unset                                      |
+| `CRON_SECRET`                                                                    |    —     | Authenticates scheduled jobs (reports, backups, rate refresh)                                                        |
+| `NEXT_PUBLIC_SENTRY_DSN` / `SENTRY_AUTH_TOKEN` / `SENTRY_ORG` / `SENTRY_PROJECT` |    —     | Error monitoring ([Sentry](https://sentry.io)); provided automatically on Vercel                                     |
+| `B2_KEY_ID` / `B2_APPLICATION_KEY` / `B2_BUCKET_NAME` / `B2_ENDPOINT`            |    —     | Daily database backups to Backblaze B2                                                                               |
 
 ## Development
 
