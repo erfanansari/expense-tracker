@@ -19,6 +19,14 @@ export interface CurrencyDef {
   symbolFa: string;
   /** Symbol position relative to the number. */
   symbolPosition: 'prefix' | 'suffix';
+  /**
+   * Whether a prefix symbol gets a space before the number (`AED 50`).
+   * Native locale convention glues single-glyph symbols ($, €, £, ₺, C$, A$)
+   * directly to the number but spaces out plain multi-letter codes (AED,
+   * CHF) — true only for those. Unused for suffix currencies, which always
+   * get a space (`50 kr`) regardless.
+   */
+  spacedSymbol: boolean;
   /** Fraction digits used by Intl.NumberFormat when formatting. */
   decimals: number;
   /**
@@ -37,6 +45,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     symbol: 'IRT',
     symbolFa: 'تومان',
     symbolPosition: 'suffix',
+    spacedSymbol: false,
     decimals: 0,
     navasanItem: null,
   },
@@ -47,6 +56,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     symbol: '$',
     symbolFa: '$',
     symbolPosition: 'prefix',
+    spacedSymbol: false,
     decimals: 2,
     navasanItem: 'usd',
   },
@@ -57,6 +67,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     symbol: '€',
     symbolFa: '€',
     symbolPosition: 'prefix',
+    spacedSymbol: false,
     decimals: 2,
     navasanItem: 'eur',
   },
@@ -67,6 +78,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     symbol: '£',
     symbolFa: '£',
     symbolPosition: 'prefix',
+    spacedSymbol: false,
     decimals: 2,
     navasanItem: 'gbp',
   },
@@ -77,6 +89,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     symbol: 'AED',
     symbolFa: 'AED',
     symbolPosition: 'prefix',
+    spacedSymbol: true,
     decimals: 2,
     navasanItem: 'aed',
   },
@@ -87,6 +100,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     symbol: '₺',
     symbolFa: '₺',
     symbolPosition: 'prefix',
+    spacedSymbol: false,
     decimals: 2,
     navasanItem: 'try',
   },
@@ -97,6 +111,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     symbol: 'C$',
     symbolFa: 'C$',
     symbolPosition: 'prefix',
+    spacedSymbol: false,
     decimals: 2,
     navasanItem: 'cad',
   },
@@ -107,6 +122,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     symbol: 'A$',
     symbolFa: 'A$',
     symbolPosition: 'prefix',
+    spacedSymbol: false,
     decimals: 2,
     navasanItem: 'aud',
   },
@@ -117,6 +133,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     symbol: 'kr',
     symbolFa: 'kr',
     symbolPosition: 'suffix',
+    spacedSymbol: false,
     decimals: 2,
     navasanItem: 'sek',
   },
@@ -127,6 +144,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     symbol: 'CHF',
     symbolFa: 'CHF',
     symbolPosition: 'prefix',
+    spacedSymbol: true,
     decimals: 2,
     navasanItem: 'chf',
   },

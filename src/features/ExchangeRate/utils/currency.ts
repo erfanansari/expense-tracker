@@ -66,12 +66,13 @@ export function seriesFromLatest(latest: LatestRates, rateDate = ''): RatesSerie
 /**
  * Format an amount in a currency: localized number + symbol in the right place.
  * `compact` abbreviates large values (10.69B, $61.33K) for space-tight spots
- * like dashboard cards and charts; default is full precision with separators.
- * `locale` switches digits/grouping to Persian for the fa UI. Most currency
- * symbols (USD's $, EUR's €, standard international codes like AED/CHF) are
- * language-neutral and stay Latin either way — `symbolFa` only actually
- * differs from `symbol` for IRT, an app-invented code Farsi speakers call
- * تومان, not "IRT".
+ * like dashboard cards and charts, keeping up to 2 decimal digits of
+ * precision on the compact mantissa; default is full precision with
+ * separators. `locale` switches digits/grouping to Persian for the fa UI. Most
+ * currency symbols (USD's $, EUR's €, standard international codes like
+ * AED/CHF) are language-neutral and stay Latin either way — `symbolFa` only
+ * actually differs from `symbol` for IRT, an app-invented code Farsi speakers
+ * call تومان, not "IRT".
  */
 export function formatMoney(
   amount: number,
@@ -93,5 +94,14 @@ export function formatMoney(
         maximumFractionDigits: def.decimals,
       }).format(amount);
 
-  return def.symbolPosition === 'prefix' ? `${symbol}${number}` : `${number} ${symbol}`;
+  if (def.symbolPosition === 'suffix') return `${number} ${symbol}`;
+
+  // Prefix: native fa-IR currency formatting always isolates a Latin symbol
+  // from the following Persian digit run with an LRM (U+200E) — mirror that
+  // here for bidi-robustness (invisible; no effect on en). spacedSymbol adds
+  // a space for plain multi-letter codes (AED, CHF), matching native
+  // convention — single-glyph symbols ($, €, £, ₺, C$, A$) stay glued.
+  const bidiMark = isFa ? '\u200E' : '';
+  const gap = def.spacedSymbol ? ' ' : '';
+  return `${bidiMark}${symbol}${gap}${number}`;
 }
