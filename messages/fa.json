@@ -46,7 +46,9 @@
       "sectionNavigation": "ناوبری",
       "sectionSettings": "تنظیمات",
       "goTo": "رفتن به {name}",
-      "changeLanguage": "تغییر زبان / Change language"
+      "changeLanguage": "تغییر زبان / Change language",
+      "swapCurrencies": "جابجایی واحدهای پول",
+      "toggleTheme": "تغییر پوسته"
     }
   },
   "errors": {

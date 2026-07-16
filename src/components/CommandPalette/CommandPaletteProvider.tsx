@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 import type { MutableRefObject, ReactNode } from 'react';
 
 import { useLocale, useTranslations } from 'next-intl';
+import { useTheme } from 'next-themes';
 import { usePathname, useRouter } from 'next/navigation';
 
 import {
@@ -19,6 +20,7 @@ import {
   useRegisterActions,
 } from 'kbar';
 import {
+  ArrowLeftRight,
   DollarSign,
   Languages,
   LayoutDashboard,
@@ -27,10 +29,12 @@ import {
   Receipt,
   Search,
   Settings,
+  SunMoon,
   TrendingUp,
 } from 'lucide-react';
 
 import { useAuth } from '@hooks/use-auth';
+import { useCurrencyPreferences } from '@hooks/use-currency-preferences';
 import { useLocalePreferences } from '@hooks/use-locale-preferences';
 
 import { useDrawerStore } from '@stores/drawer';
@@ -82,6 +86,8 @@ function CommandPalette({ toggleRef }: { toggleRef: ToggleRef }) {
   const pathname = usePathname();
   const locale = useLocale() as AppLocale;
   const { mutate: mutateLocale } = useLocalePreferences();
+  const { resolvedTheme, setTheme } = useTheme();
+  const { prefs: currencyPrefs, mutate: mutateCurrency } = useCurrencyPreferences();
   const openExpenseDrawer = useDrawerStore((state) => state.openExpenseDrawer);
   const openIncomeDrawer = useDrawerStore((state) => state.openIncomeDrawer);
   const openAssetDrawer = useDrawerStore((state) => state.openAssetDrawer);
@@ -127,7 +133,10 @@ function CommandPalette({ toggleRef }: { toggleRef: ToggleRef }) {
         name: t('common.addExpense'),
         section: t('common.commandPalette.sectionCreate'),
         icon: <Plus className="h-4 w-4" />,
-        shortcut: ['e'],
+        // Bound by physical key (event.code), not the character it produces —
+        // works under any keyboard layout, including a Farsi one, where 'e'
+        // as a literal character would never match.
+        shortcut: ['KeyE'],
         keywords: 'add new expense spend افزودن هزینه خرج',
         perform: () => openExpenseDrawer(),
       },
@@ -136,7 +145,7 @@ function CommandPalette({ toggleRef }: { toggleRef: ToggleRef }) {
         name: t('common.addIncome'),
         section: t('common.commandPalette.sectionCreate'),
         icon: <Plus className="h-4 w-4" />,
-        shortcut: ['i'],
+        shortcut: ['KeyI'],
         keywords: 'add new income earn salary افزودن درآمد حقوق',
         perform: () => openIncomeDrawer(),
       },
@@ -145,12 +154,13 @@ function CommandPalette({ toggleRef }: { toggleRef: ToggleRef }) {
         name: t('common.addAsset'),
         section: t('common.commandPalette.sectionCreate'),
         icon: <Plus className="h-4 w-4" />,
-        shortcut: ['a'],
+        shortcut: ['KeyA'],
         keywords: 'add new asset wealth investment افزودن دارایی سرمایه',
         perform: () => openAssetDrawer(),
       },
     ];
 
+    const secondaryCurrency = currencyPrefs.secondaryCurrency;
     const settingsActions: Action[] = [
       {
         id: 'change-language',
@@ -163,10 +173,52 @@ function CommandPalette({ toggleRef }: { toggleRef: ToggleRef }) {
           mutateLocale({ locale: next }, { onSuccess: () => router.refresh() });
         },
       },
+      // Swapping into an empty secondary is meaningless, so this action only
+      // exists when one is actually set.
+      ...(secondaryCurrency
+        ? [
+            {
+              id: 'swap-currencies',
+              name: t('common.commandPalette.swapCurrencies'),
+              section: t('common.commandPalette.sectionSettings'),
+              icon: <ArrowLeftRight className="h-4 w-4" />,
+              keywords: 'swap flip switch currency primary secondary جابجایی ارز واحد پول',
+              perform: () => {
+                mutateCurrency({
+                  primaryCurrency: secondaryCurrency,
+                  secondaryCurrency: currencyPrefs.primaryCurrency,
+                });
+              },
+            },
+          ]
+        : []),
+      {
+        id: 'toggle-theme',
+        name: t('common.commandPalette.toggleTheme'),
+        section: t('common.commandPalette.sectionSettings'),
+        icon: <SunMoon className="h-4 w-4" />,
+        keywords: 'dark light theme mode appearance تاریک روشن پوسته تم',
+        // A quick toggle implies a binary flip; "system" stays a deliberate
+        // choice made in Settings, not something this cycles through.
+        perform: () => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark'),
+      },
     ];
 
     return [...createActions, ...navActions, ...settingsActions];
-  }, [t, pathname, router, locale, mutateLocale, openExpenseDrawer, openIncomeDrawer, openAssetDrawer]);
+  }, [
+    t,
+    pathname,
+    router,
+    locale,
+    mutateLocale,
+    resolvedTheme,
+    setTheme,
+    currencyPrefs,
+    mutateCurrency,
+    openExpenseDrawer,
+    openIncomeDrawer,
+    openAssetDrawer,
+  ]);
 
   return (
     // The palette must NOT lock body scroll — not kbar's lock, not ours.
@@ -179,7 +231,14 @@ function CommandPalette({ toggleRef }: { toggleRef: ToggleRef }) {
     //    when the palette lock releases.
     // A transient keyboard overlay doesn't need scroll-locking; the backdrop
     // already swallows pointer interaction.
-    <KBarProvider options={{ disableDocumentLock: true }}>
+    <KBarProvider
+      options={{
+        disableDocumentLock: true,
+        // Bound by physical key (event.code) rather than the produced
+        // character — 'k' would never fire under a Farsi keyboard layout.
+        toggleShortcut: '$mod+KeyK',
+      }}
+    >
       <KBarConnector toggleRef={toggleRef} actions={actions} />
       <CommandPaletteUI />
     </KBarProvider>
@@ -247,6 +306,11 @@ function CommandPaletteUI() {
   );
 }
 
+// Shortcuts are bound by physical key (e.g. 'KeyE') so they work under any
+// keyboard layout — strip the "Key" prefix for display so the hint still
+// reads "E", not "KeyE".
+const prettyShortcut = (keys: string[]) => keys.map((key) => key.replace(/^Key/, '')).join(' ');
+
 // Results renderer
 function RenderResults() {
   const t = useTranslations('common.commandPalette');
@@ -278,7 +342,7 @@ function RenderResults() {
                 </div>
                 {item.shortcut && item.shortcut.length > 0 && (
                   <kbd className="bg-background-secondary text-text-muted hidden rounded px-1.5 py-0.5 text-[11px] font-medium sm:inline-block">
-                    {item.shortcut.join(' ')}
+                    {prettyShortcut(item.shortcut)}
                   </kbd>
                 )}
               </div>

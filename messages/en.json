@@ -46,7 +46,9 @@
       "sectionNavigation": "Navigation",
       "sectionSettings": "Settings",
       "goTo": "Go to {name}",
-      "changeLanguage": "Change language / تغییر زبان"
+      "changeLanguage": "Change language / تغییر زبان",
+      "swapCurrencies": "Swap Currencies",
+      "toggleTheme": "Toggle Theme"
     }
   },
   "errors": {
