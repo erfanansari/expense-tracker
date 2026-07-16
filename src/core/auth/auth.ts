@@ -124,14 +124,14 @@ export const auth = betterAuth({
       create: {
         after: async (user) => {
           const userId = Number(user.id);
+          const locale = await getUserLocale();
           try {
-            await seedDefaultCategoriesForUser(userId);
+            await seedDefaultCategoriesForUser(userId, locale);
             await createDefaultNotificationPreferences(userId);
           } catch (error) {
             console.error('Post-signup seeding failed:', error);
             Sentry.captureException(error);
           }
-          const locale = await getUserLocale();
           // Fire-and-forget; never block or fail user creation on email delivery
           sendWelcomeEmail({ userId, email: user.email, name: user.name ?? null, locale }).catch((error) => {
             console.error('Welcome email failed:', error);
