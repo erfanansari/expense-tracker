@@ -126,6 +126,8 @@
   "auth": {
     "tagline": "Personal Finance Tracker",
     "or": "OR",
+    "continueWithGoogle": "Continue with Google",
+    "googleSignInFailed": "Google sign-in failed",
     "fields": {
       "email": "Email",
       "password": "Password",

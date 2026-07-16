@@ -8,6 +8,15 @@ export interface CurrencyDef {
   labelFa: string;
   /** Display symbol/code shown next to the amount. */
   symbol: string;
+  /**
+   * fa-locale display symbol. Equal to `symbol` for currencies with a
+   * universal glyph ($, €, £, ₺...) or a widely-recognized international code
+   * used as-is in Farsi financial contexts (AED, CHF). IRT is the one
+   * exception: it's an app-invented code, not a real ISO one, and Farsi
+   * speakers call it تومان in everyday use — so this is the one place that
+   * actually differs from `symbol`.
+   */
+  symbolFa: string;
   /** Symbol position relative to the number. */
   symbolPosition: 'prefix' | 'suffix';
   /** Fraction digits used by Intl.NumberFormat when formatting. */
@@ -26,6 +35,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     label: 'Iranian Toman',
     labelFa: 'تومان',
     symbol: 'IRT',
+    symbolFa: 'تومان',
     symbolPosition: 'suffix',
     decimals: 0,
     navasanItem: null,
@@ -35,6 +45,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     label: 'US Dollar',
     labelFa: 'دلار آمریکا',
     symbol: '$',
+    symbolFa: '$',
     symbolPosition: 'prefix',
     decimals: 2,
     navasanItem: 'usd',
@@ -44,6 +55,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     label: 'Euro',
     labelFa: 'یورو',
     symbol: '€',
+    symbolFa: '€',
     symbolPosition: 'prefix',
     decimals: 2,
     navasanItem: 'eur',
@@ -53,6 +65,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     label: 'British Pound',
     labelFa: 'پوند انگلیس',
     symbol: '£',
+    symbolFa: '£',
     symbolPosition: 'prefix',
     decimals: 2,
     navasanItem: 'gbp',
@@ -62,6 +75,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     label: 'UAE Dirham',
     labelFa: 'درهم امارات',
     symbol: 'AED',
+    symbolFa: 'AED',
     symbolPosition: 'prefix',
     decimals: 2,
     navasanItem: 'aed',
@@ -71,6 +85,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     label: 'Turkish Lira',
     labelFa: 'لیر ترکیه',
     symbol: '₺',
+    symbolFa: '₺',
     symbolPosition: 'prefix',
     decimals: 2,
     navasanItem: 'try',
@@ -80,6 +95,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     label: 'Canadian Dollar',
     labelFa: 'دلار کانادا',
     symbol: 'C$',
+    symbolFa: 'C$',
     symbolPosition: 'prefix',
     decimals: 2,
     navasanItem: 'cad',
@@ -89,6 +105,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     label: 'Australian Dollar',
     labelFa: 'دلار استرالیا',
     symbol: 'A$',
+    symbolFa: 'A$',
     symbolPosition: 'prefix',
     decimals: 2,
     navasanItem: 'aud',
@@ -98,6 +115,7 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     label: 'Swedish Krona',
     labelFa: 'کرون سوئد',
     symbol: 'kr',
+    symbolFa: 'kr',
     symbolPosition: 'suffix',
     decimals: 2,
     navasanItem: 'sek',
@@ -107,11 +125,17 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     label: 'Swiss Franc',
     labelFa: 'فرانک سوئیس',
     symbol: 'CHF',
+    symbolFa: 'CHF',
     symbolPosition: 'prefix',
     decimals: 2,
     navasanItem: 'chf',
   },
 ] as const;
+
+/** Localized "CODE (Name)" options for currency picker dropdowns. */
+export function getLocalizedCurrencyOptions(locale: 'en' | 'fa'): { value: string; label: string }[] {
+  return CURRENCIES.map((c) => ({ value: c.code, label: `${c.code} (${locale === 'fa' ? c.labelFa : c.label})` }));
+}
 
 /**
  * The pivot (base) currency. Every stored rate is expressed as

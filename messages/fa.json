@@ -126,6 +126,8 @@
   "auth": {
     "tagline": "مدیریت مالی شخصی",
     "or": "یا",
+    "continueWithGoogle": "ادامه با گوگل",
+    "googleSignInFailed": "ورود با گوگل ناموفق بود",
     "fields": {
       "email": "ایمیل",
       "password": "رمز عبور",

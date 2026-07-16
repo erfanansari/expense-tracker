@@ -1,6 +1,8 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
+
+import { useLocale, useTranslations } from 'next-intl';
 
 import { Coins } from 'lucide-react';
 
@@ -9,14 +11,14 @@ import Select from '@components/Select';
 import { useCurrencyPreferences } from '@hooks/use-currency-preferences';
 import type { NumberFormat } from '@hooks/use-currency-preferences';
 
-import { CURRENCIES } from '@/constants/currencies';
+import { getLocalizedCurrencyOptions } from '@/constants/currencies';
 
 const SECONDARY_DISABLED = 'none';
 
-const CURRENCY_OPTIONS = CURRENCIES.map((c) => ({ value: c.code, label: `${c.code} (${c.label})` }));
-
 const CurrencySection = () => {
   const t = useTranslations('settings.currency');
+  const locale = useLocale() as 'en' | 'fa';
+  const CURRENCY_OPTIONS = useMemo(() => getLocalizedCurrencyOptions(locale), [locale]);
   const { prefs, isLoading, mutate, isMutating } = useCurrencyPreferences();
 
   const NUMBER_FORMAT_OPTIONS = [

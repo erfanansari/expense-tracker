@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { googleSignInKeyGenerator } from '@api/googleSignInMutation';
 import type { GoogleSignInResponse } from '@api/googleSignInMutation';
 import { useMutation } from '@tanstack/react-query';
@@ -32,13 +34,14 @@ export const GoogleIcon = () => (
 );
 
 const GoogleSignInButton = ({ disabled, onError }: GoogleSignInButtonProps) => {
+  const t = useTranslations('auth');
   const googleMutation = useMutation<GoogleSignInResponse, Error, void>({
     mutationKey: googleSignInKeyGenerator(),
     onSuccess: ({ url }) => {
       window.location.href = url;
     },
     onError: (err) => {
-      onError?.(err.message || 'Google sign-in failed');
+      onError?.(err.message || t('googleSignInFailed'));
     },
   });
 
@@ -52,7 +55,7 @@ const GoogleSignInButton = ({ disabled, onError }: GoogleSignInButtonProps) => {
       className="border-border-subtle bg-background text-text-primary hover:bg-background-secondary flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 sm:py-3 sm:text-base"
     >
       {loading ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden="true" /> : <GoogleIcon />}
-      Continue with Google
+      {t('continueWithGoogle')}
     </button>
   );
 };

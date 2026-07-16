@@ -67,8 +67,11 @@ export function seriesFromLatest(latest: LatestRates, rateDate = ''): RatesSerie
  * Format an amount in a currency: localized number + symbol in the right place.
  * `compact` abbreviates large values (10.69B, $61.33K) for space-tight spots
  * like dashboard cards and charts; default is full precision with separators.
- * `locale` switches digits/grouping to Persian for the fa UI — the currency
- * code itself (USD, IRT, ...) always stays Latin.
+ * `locale` switches digits/grouping to Persian for the fa UI. Most currency
+ * symbols (USD's $, EUR's €, standard international codes like AED/CHF) are
+ * language-neutral and stay Latin either way — `symbolFa` only actually
+ * differs from `symbol` for IRT, an app-invented code Farsi speakers call
+ * تومان, not "IRT".
  */
 export function formatMoney(
   amount: number,
@@ -76,7 +79,9 @@ export function formatMoney(
   opts?: { compact?: boolean; locale?: 'en' | 'fa' }
 ): string {
   const def = getCurrency(currencyCode);
-  const intlLocale = opts?.locale === 'fa' ? 'fa-IR' : 'en-US';
+  const isFa = opts?.locale === 'fa';
+  const intlLocale = isFa ? 'fa-IR' : 'en-US';
+  const symbol = isFa ? def.symbolFa : def.symbol;
   const number = opts?.compact
     ? new Intl.NumberFormat(intlLocale, {
         notation: 'compact',
@@ -88,5 +93,5 @@ export function formatMoney(
         maximumFractionDigits: def.decimals,
       }).format(amount);
 
-  return def.symbolPosition === 'prefix' ? `${def.symbol}${number}` : `${number} ${def.symbol}`;
+  return def.symbolPosition === 'prefix' ? `${symbol}${number}` : `${number} ${symbol}`;
 }

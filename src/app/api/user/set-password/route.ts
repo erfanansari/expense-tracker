@@ -8,6 +8,7 @@ import { withAuth } from '@core/api/utils';
 import { auth } from '@core/auth/auth';
 import { validatePassword } from '@core/auth/validation';
 import { sendPasswordChangedEmail } from '@core/email/auth-emails';
+import { getUserLocale } from '@core/session/locale';
 
 // Lets OAuth-signed-up users (no credential account) add a password.
 // auth.api.setPassword is server-only, hence this custom route.
@@ -35,7 +36,8 @@ export const POST = withAuth(async (user, request) => {
   }
 
   // Security notification; fire-and-forget
-  sendPasswordChangedEmail({ email: user.email, name: null }).catch((error) => {
+  const locale = await getUserLocale();
+  sendPasswordChangedEmail({ email: user.email, name: null }, locale).catch((error) => {
     console.error('Password-changed email failed:', error);
   });
 

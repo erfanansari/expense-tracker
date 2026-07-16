@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
 import { updateOnboardingKeyGenerator } from '@api/updateOnboardingMutation';
@@ -19,11 +19,10 @@ import { useAuth } from '@hooks/use-auth';
 import { useCurrencyPreferences } from '@hooks/use-currency-preferences';
 import { useLocalePreferences } from '@hooks/use-locale-preferences';
 
-import { CURRENCIES } from '@/constants/currencies';
+import { getLocalizedCurrencyOptions } from '@/constants/currencies';
 import type { AppLocale } from '@/i18n/config';
 
 const SECONDARY_DISABLED = 'none';
-const CURRENCY_OPTIONS = CURRENCIES.map((c) => ({ value: c.code, label: `${c.code} (${c.label})` }));
 // Each language is shown in its own tongue, so the options never translate.
 const LANGUAGE_OPTIONS = [
   { value: 'en', label: 'English' },
@@ -34,7 +33,10 @@ const Welcome = () => {
   // Customs
   const t = useTranslations('onboarding.welcome');
   const tCurrency = useTranslations('settings.currency');
+  const tErrors = useTranslations('errors');
   const router = useRouter();
+  const locale = useLocale() as AppLocale;
+  const CURRENCY_OPTIONS = useMemo(() => getLocalizedCurrencyOptions(locale), [locale]);
   const { user, updateUser } = useAuth();
   const { prefs, isLoading, mutate: mutatePrefs, isMutating } = useCurrencyPreferences();
   const { prefs: localePrefs, mutate: mutateLocale, isMutating: isMutatingLocale } = useLocalePreferences();
@@ -51,7 +53,7 @@ const Welcome = () => {
       await refreshSessionCookie();
       router.replace('/overview');
     },
-    onError: (err) => setError(err.message || 'Something went wrong'),
+    onError: (err) => setError(err.message || tErrors('generic.title')),
   });
 
   // Already onboarded (or demo) — this page has nothing to offer
