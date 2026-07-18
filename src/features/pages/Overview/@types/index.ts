@@ -5,5 +5,5 @@ export interface OverviewStatsProps {
 }
 
 export interface SpendingTrendChartProps {
-  expenses: { date: string; amount: number; entryRate: number }[];
+  expenses: { date: string; amount: number; currency: string; entryRate: number }[];
 }

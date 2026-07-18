@@ -11,6 +11,10 @@ interface MoneyProps {
   currency: string;
   /** The record's date (YYYY-MM-DD) — used to pick the historical rate. */
   date?: string;
+  /** The record's frozen entryRate — makes the pivot-side value self-contained
+   * (exact, independent of the shared rate table). Pass it whenever rendering
+   * a stored record. */
+  entryRate?: number;
   /** Wrapper className (controls alignment/spacing in context). */
   className?: string;
   /** Override the dominant primary text styles. */
@@ -31,19 +35,21 @@ const Money: FC<MoneyProps> = ({
   amount,
   currency,
   date,
+  entryRate,
   className = '',
   primaryClassName = 'text-text-primary font-semibold',
   secondaryClassName = 'text-text-muted text-xs',
   inline = false,
 }) => {
-  const { display, convert, formatFull, primaryCurrency, secondaryCurrency } = useCurrency();
-  const { primary, secondary } = display(amount, currency, date);
+  const { displayItem, convertItem, formatFull, primaryCurrency, secondaryCurrency } = useCurrency();
+  const item = { amount, currency, date, entryRate };
+  const { primary, secondary } = displayItem(item);
 
   // Always expose the exact full value on hover, even when shown compact.
-  const pNum = convert(amount, currency, primaryCurrency, date);
+  const pNum = convertItem(item, primaryCurrency);
   const parts = pNum === null ? [] : [formatFull(pNum, primaryCurrency)];
   if (secondary && secondaryCurrency && secondaryCurrency !== primaryCurrency) {
-    const sNum = convert(amount, currency, secondaryCurrency, date);
+    const sNum = convertItem(item, secondaryCurrency);
     if (sNum !== null) parts.push(formatFull(sNum, secondaryCurrency));
   }
   const title = parts.join(' · ') || undefined;

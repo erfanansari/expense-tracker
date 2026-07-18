@@ -4,6 +4,9 @@ import { useTranslations } from 'next-intl';
 
 import Select from '@components/Select';
 
+import type { ResolvedCalendar } from '@utils';
+import { addJalaliMonths, gregorianToJalali, jalaliToGregorian } from '@utils';
+
 export type DateRange = '7D' | '30D' | 'THIS_MONTH' | 'LAST_MONTH' | 'YTD' | 'ALL_TIME';
 
 interface DateRangeSelectorProps {
@@ -26,12 +29,21 @@ const DateRangeSelector = ({ value, onChange }: DateRangeSelectorProps) => {
   return <Select value={value} onChange={(val) => onChange(val as DateRange)} options={options} />;
 };
 
-export function getDateRangeFilter(range: DateRange): { start: Date; end: Date } | null {
+/**
+ * Date window for a range preset. Month/year boundaries follow the resolved
+ * calendar: with 'jalali', THIS_MONTH/LAST_MONTH span Jalali months and YTD
+ * starts on 1 Farvardin. Relative windows (7D/30D) are calendar-independent.
+ */
+export function getDateRangeFilter(
+  range: DateRange,
+  calendar: ResolvedCalendar = 'gregorian'
+): { start: Date; end: Date } | null {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   const end = new Date(today);
   let start = new Date(today);
+  const jToday = calendar === 'jalali' ? gregorianToJalali(today) : null;
 
   switch (range) {
     case '7D':
@@ -41,14 +53,25 @@ export function getDateRangeFilter(range: DateRange): { start: Date; end: Date }
       start.setDate(today.getDate() - 29);
       break;
     case 'THIS_MONTH':
-      start = new Date(today.getFullYear(), today.getMonth(), 1);
+      start = jToday
+        ? jalaliToGregorian(jToday.year, jToday.month, 1)
+        : new Date(today.getFullYear(), today.getMonth(), 1);
       break;
     case 'LAST_MONTH':
-      start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-      end.setDate(0);
+      if (jToday) {
+        const prev = addJalaliMonths(jToday.year, jToday.month, 1, -1);
+        start = jalaliToGregorian(prev.year, prev.month, 1);
+        // Last day of the previous Jalali month = day before this month's 1st.
+        const thisMonthStart = jalaliToGregorian(jToday.year, jToday.month, 1);
+        end.setTime(thisMonthStart.getTime());
+        end.setDate(end.getDate() - 1);
+      } else {
+        start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        end.setDate(0);
+      }
       break;
     case 'YTD':
-      start = new Date(today.getFullYear(), 0, 1);
+      start = jToday ? jalaliToGregorian(jToday.year, 1, 1) : new Date(today.getFullYear(), 0, 1);
       break;
     case 'ALL_TIME':
       return null;
@@ -59,8 +82,12 @@ export function getDateRangeFilter(range: DateRange): { start: Date; end: Date }
   return { start, end };
 }
 
-export function filterExpensesByDateRange<T extends { date: string }>(expenses: T[], range: DateRange): T[] {
-  const filter = getDateRangeFilter(range);
+export function filterExpensesByDateRange<T extends { date: string }>(
+  expenses: T[],
+  range: DateRange,
+  calendar: ResolvedCalendar = 'gregorian'
+): T[] {
+  const filter = getDateRangeFilter(range, calendar);
 
   if (!filter) {
     return expenses;
@@ -75,8 +102,11 @@ export function filterExpensesByDateRange<T extends { date: string }>(expenses: 
   });
 }
 
-export function getChartGranularity(range: DateRange): 'daily' | 'weekly' | 'monthly' {
-  const filter = getDateRangeFilter(range);
+export function getChartGranularity(
+  range: DateRange,
+  calendar: ResolvedCalendar = 'gregorian'
+): 'daily' | 'weekly' | 'monthly' {
+  const filter = getDateRangeFilter(range, calendar);
 
   if (!filter) {
     return 'monthly';

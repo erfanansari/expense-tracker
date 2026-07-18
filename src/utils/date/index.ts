@@ -1,4 +1,6 @@
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, startOfWeek } from 'date-fns';
+
+import { gregorianToJalali, jalaliToGregorian } from './jalali-calendar';
 
 export * from './jalali-calendar';
 
@@ -41,35 +43,68 @@ export function formatAppDateTime(isoDateTime: string, { locale, calendar }: For
   }).format(date);
 }
 
-// Format a chart bucket key (yyyy-MM-dd or yyyy-MM) into a tooltip-friendly label
-// based on the chart's aggregation granularity. `calendar` defaults to gregorian
-// so existing (no-arg) call sites are unaffected; pass 'jalali' to show Jalali-first
-// dates for fa locale (per the app's calendar preference).
+/**
+ * Chart bucket key (yyyy-MM-dd) for the calendar month containing `date` — the
+ * Gregorian ISO date of that month's first day, so keys sort/parse like any
+ * other date. With the Jalali calendar, buckets align to Jalali months (e.g.
+ * 2026-02-28 = 9 Esfand buckets under 2026-02-20, the 1st of Esfand 1404).
+ */
+export function getMonthBucketKey(date: Date, calendar: ResolvedCalendar = 'gregorian'): string {
+  if (calendar === 'jalali') {
+    const j = gregorianToJalali(date);
+    return format(jalaliToGregorian(j.year, j.month, 1), 'yyyy-MM-dd');
+  }
+  return format(new Date(date.getFullYear(), date.getMonth(), 1), 'yyyy-MM-dd');
+}
+
+/**
+ * Chart bucket key (yyyy-MM-dd) for the week containing `date`. Persian weeks
+ * start on Saturday; Gregorian charts keep date-fns' Sunday default.
+ */
+export function getWeekBucketKey(date: Date, calendar: ResolvedCalendar = 'gregorian'): string {
+  return format(startOfWeek(date, { weekStartsOn: calendar === 'jalali' ? 6 : 0 }), 'yyyy-MM-dd');
+}
+
+// Format a chart bucket key (yyyy-MM-dd, or legacy yyyy-MM for monthly) into a
+// tooltip-friendly label based on the chart's aggregation granularity. `calendar`
+// defaults to gregorian so existing (no-arg) call sites are unaffected; pass
+// 'jalali' to label buckets with Jalali month names (per the app's calendar
+// preference) — monthly keys must then be Jalali-month starts (getMonthBucketKey).
 export function formatChartTooltipDate(
   label: string,
   granularity: 'daily' | 'weekly' | 'monthly',
   locale: AppLocale = 'en',
   calendar: ResolvedCalendar = 'gregorian'
 ): string {
+  const date = parseISO(granularity === 'monthly' && label.length === 7 ? `${label}-01` : label);
+  const ca = calendar === 'jalali' ? 'persian' : 'gregory';
+
   if (locale === 'fa') {
-    const ca = calendar === 'jalali' ? 'persian' : 'gregory';
     if (granularity === 'monthly') {
-      return new Intl.DateTimeFormat(`fa-IR-u-ca-${ca}`, { year: 'numeric', month: 'long' }).format(
-        parseISO(`${label}-01`)
-      );
+      return new Intl.DateTimeFormat(`fa-IR-u-ca-${ca}`, { year: 'numeric', month: 'long' }).format(date);
     }
     const formatted = new Intl.DateTimeFormat(`fa-IR-u-ca-${ca}`, {
       weekday: granularity === 'daily' ? 'short' : undefined,
       year: 'numeric',
       month: 'short',
       day: 'numeric',
-    }).format(parseISO(label));
+    }).format(date);
     return granularity === 'weekly' ? `هفتهٔ ${formatted}` : formatted;
   }
 
-  if (granularity === 'monthly') return format(parseISO(`${label}-01`), 'MMMM yyyy');
-  if (granularity === 'weekly') return `Week of ${format(parseISO(label), 'MMM d, yyyy')}`;
-  return format(parseISO(label), 'EEE, MMM d, yyyy');
+  // English UI with the Jalali calendar still needs Jalali month boundaries.
+  if (calendar === 'jalali') {
+    const opts: Intl.DateTimeFormatOptions =
+      granularity === 'monthly'
+        ? { year: 'numeric', month: 'long' }
+        : { weekday: granularity === 'daily' ? 'short' : undefined, year: 'numeric', month: 'short', day: 'numeric' };
+    const formatted = new Intl.DateTimeFormat('en-US-u-ca-persian', opts).format(date).replace(/ AP$/, '');
+    return granularity === 'weekly' ? `Week of ${formatted}` : formatted;
+  }
+
+  if (granularity === 'monthly') return format(date, 'MMMM yyyy');
+  if (granularity === 'weekly') return `Week of ${format(date, 'MMM d, yyyy')}`;
+  return format(date, 'EEE, MMM d, yyyy');
 }
 
 // Compact axis-tick label for a chart date. `style: 'day'` -> "Jul 13" / "۲۲ تیر";

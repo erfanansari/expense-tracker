@@ -40,6 +40,23 @@ describe('formatChartTooltipDate', () => {
     });
   });
 
+  describe('monthly full-date bucket keys (Jalali-month starts)', () => {
+    it('accepts a yyyy-MM-dd monthly key in gregorian mode', () => {
+      expect(formatChartTooltipDate('2026-02-01', 'monthly')).toBe('February 2026');
+    });
+
+    it('labels a Jalali monthly bucket with its Jalali month (fa)', () => {
+      // 2026-02-20 = 1 Esfand 1404
+      const label = formatChartTooltipDate('2026-02-20', 'monthly', 'fa', 'jalali');
+      expect(label).toContain('اسفند');
+      expect(label).toContain('۱۴۰۴');
+    });
+
+    it('labels a Jalali monthly bucket with its Jalali month (en)', () => {
+      expect(formatChartTooltipDate('2026-02-20', 'monthly', 'en', 'jalali')).toBe('Esfand 1404');
+    });
+  });
+
   describe('fa locale', () => {
     it('renders Persian digits and month names for a daily bucket', () => {
       expect(formatChartTooltipDate('2026-05-02', 'daily', 'fa')).toBe('شنبه ۲ مه ۲۰۲۶');

@@ -52,6 +52,34 @@ describe('getDateRangeFilter', () => {
   it('ALL_TIME returns null (no filter)', () => {
     expect(getDateRangeFilter('ALL_TIME')).toBeNull();
   });
+
+  // 2026-05-18 = 28 Ordibehesht 1405. Jalali month/year boundaries:
+  // 1 Ordibehesht 1405 = 2026-04-21, Farvardin 1405 = 2026-03-21..2026-04-20.
+  describe('jalali calendar', () => {
+    const expectJalaliRange = (range: Parameters<typeof getDateRangeFilter>[0], start: string, end: string) => {
+      const f = getDateRangeFilter(range, 'jalali');
+      if (!f) throw new Error(`expected non-null filter for ${range}`);
+      expect(ISO(f.start)).toBe(start);
+      expect(ISO(f.end)).toBe(end);
+    };
+
+    it('THIS_MONTH starts on the 1st of the current Jalali month', () => {
+      expectJalaliRange('THIS_MONTH', '2026-04-21', '2026-05-18');
+    });
+
+    it('LAST_MONTH spans the entire previous Jalali month', () => {
+      expectJalaliRange('LAST_MONTH', '2026-03-21', '2026-04-20');
+    });
+
+    it('YTD starts on 1 Farvardin', () => {
+      expectJalaliRange('YTD', '2026-03-21', '2026-05-18');
+    });
+
+    it('relative windows are calendar-independent', () => {
+      expectJalaliRange('7D', '2026-05-12', '2026-05-18');
+      expectJalaliRange('30D', '2026-04-19', '2026-05-18');
+    });
+  });
 });
 
 describe('filterExpensesByDateRange', () => {

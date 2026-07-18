@@ -65,6 +65,7 @@ function buildOverviewColumns(tTables: ReturnType<typeof useTranslations<'tables
             amount={expense.amount}
             currency={expense.currency}
             date={expense.date}
+            entryRate={expense.entryRate}
             className="items-end"
             primaryClassName="text-text-primary text-sm font-semibold whitespace-nowrap"
             secondaryClassName="text-text-muted text-xs whitespace-nowrap"

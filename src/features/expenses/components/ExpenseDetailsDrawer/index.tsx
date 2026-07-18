@@ -218,6 +218,7 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
                     amount={expense.amount}
                     currency={expense.currency}
                     date={expense.date}
+                    entryRate={expense.entryRate}
                     primaryClassName="text-text-primary text-3xl font-semibold tracking-tight tabular-nums sm:text-4xl"
                     secondaryClassName="text-text-secondary text-base font-medium tabular-nums"
                   />

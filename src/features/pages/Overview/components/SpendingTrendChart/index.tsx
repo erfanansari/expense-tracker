@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 
 import { useLocale, useTranslations } from 'next-intl';
 
-import { format, parseISO, startOfWeek } from 'date-fns';
+import { parseISO } from 'date-fns';
 import { TrendingUp } from 'lucide-react';
 import {
   Area,
@@ -25,18 +25,25 @@ import ChartTooltip from '@components/ChartTooltip';
 import EmptyState from '@components/EmptyState';
 
 import { useCurrency } from '@hooks/use-currency';
+import type { MoneyItem } from '@hooks/use-currency';
 import { useLocalePreferences } from '@hooks/use-locale-preferences';
 
 import { useDrawerStore } from '@stores/drawer';
 
-import { formatAxisNumber, formatChartAxisDate, formatChartTooltipDate, resolveCalendar } from '@utils';
-
-import { PIVOT_CURRENCY } from '@/constants/currencies';
+import {
+  formatAxisNumber,
+  formatChartAxisDate,
+  formatChartTooltipDate,
+  getMonthBucketKey,
+  getWeekBucketKey,
+  resolveCalendar,
+} from '@utils';
 
 import type { SpendingTrendChartProps } from '../../@types';
 
 // ─── Custom recharts tooltip ────────────────────────────────────────────────────
-// Chart values are in the pivot currency; the tooltip converts to primary/secondary.
+// Chart values are in the pivot currency; the tooltip sums the bucket's records
+// per-record at each record's own date (matches the summary cards).
 function SpendingTooltip({
   active,
   payload,
@@ -44,21 +51,16 @@ function SpendingTooltip({
   granularity,
 }: {
   active?: boolean;
-  payload?: ReadonlyArray<{ value?: number | string | ReadonlyArray<number | string>; payload?: { date?: string } }>;
+  payload?: ReadonlyArray<{ payload?: { date?: string; items?: MoneyItem[] } }>;
   label?: string | number;
   granularity: 'daily' | 'weekly' | 'monthly';
 }) {
   const locale = useLocale() as 'en' | 'fa';
   const { prefs } = useLocalePreferences();
   const calendar = resolveCalendar(prefs.calendar, locale);
-  const { display } = useCurrency();
+  const { sumDisplay } = useCurrency();
   if (!active || !payload?.length) return null;
-  const rawValue = payload[0].value;
-  const numericValue = typeof rawValue === 'number' ? rawValue : Number(rawValue) || 0;
-  // Convert at the bucket's own date (monthly keys are YYYY-MM → use mid-month).
-  const bucketDate = payload[0].payload?.date;
-  const convDate = bucketDate && bucketDate.length === 7 ? `${bucketDate}-15` : bucketDate;
-  const { primary, secondary } = display(numericValue, PIVOT_CURRENCY, convDate, { compact: true });
+  const { primary, secondary } = sumDisplay(payload[0].payload?.items ?? [], { compact: true });
   return (
     <ChartTooltip
       primary={primary}
@@ -70,15 +72,6 @@ function SpendingTooltip({
       }
     />
   );
-}
-
-// ─── Aggregation helpers ────────────────────────────────────────────────────────
-function getWeekKey(date: Date): string {
-  return format(startOfWeek(date), 'yyyy-MM-dd');
-}
-
-function getMonthKey(date: Date): string {
-  return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
 }
 
 const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
@@ -93,25 +86,29 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
   const [dateRange, setDateRange] = useState<DateRange>('30D');
 
   // Memos
-  const filteredExpenses = useMemo(() => filterExpensesByDateRange(expenses, dateRange), [expenses, dateRange]);
-  const granularity = useMemo(() => getChartGranularity(dateRange), [dateRange]);
+  const filteredExpenses = useMemo(
+    () => filterExpensesByDateRange(expenses, dateRange, calendar),
+    [expenses, dateRange, calendar]
+  );
+  const granularity = useMemo(() => getChartGranularity(dateRange, calendar), [dateRange, calendar]);
 
   const spendingTrend = useMemo(() => {
     if (filteredExpenses.length === 0) return [];
 
-    const aggregated = new Map<string, { amount: number }>();
+    const aggregated = new Map<string, { amount: number; items: MoneyItem[] }>();
 
     filteredExpenses.forEach((exp) => {
       const date = new Date(`${exp.date}T00:00:00`);
       const pivot = exp.amount * exp.entryRate;
+      const item: MoneyItem = { amount: exp.amount, currency: exp.currency, date: exp.date, entryRate: exp.entryRate };
       let key: string;
 
       switch (granularity) {
         case 'weekly':
-          key = getWeekKey(date);
+          key = getWeekBucketKey(date, calendar);
           break;
         case 'monthly':
-          key = getMonthKey(date);
+          key = getMonthBucketKey(date, calendar);
           break;
         case 'daily':
         default:
@@ -122,15 +119,16 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
       const existing = aggregated.get(key);
       if (existing) {
         existing.amount += pivot;
+        existing.items.push(item);
       } else {
-        aggregated.set(key, { amount: pivot });
+        aggregated.set(key, { amount: pivot, items: [item] });
       }
     });
 
     return Array.from(aggregated.entries())
       .map(([date, data]) => ({ date, ...data }))
       .sort((a, b) => a.date.localeCompare(b.date));
-  }, [filteredExpenses, granularity]);
+  }, [filteredExpenses, granularity, calendar]);
 
   return (
     <div className="border-border-subtle bg-background relative flex h-full flex-col rounded-xl border p-5 shadow-sm sm:p-6 lg:col-span-2">
@@ -186,10 +184,9 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
                 height={28}
                 minTickGap={40}
                 interval="preserveStartEnd"
-                tickFormatter={(value: string) => {
-                  const date = granularity === 'monthly' ? parseISO(`${value}-01`) : parseISO(value);
-                  return formatChartAxisDate(date, granularity === 'monthly' ? 'month' : 'day', locale, calendar);
-                }}
+                tickFormatter={(value: string) =>
+                  formatChartAxisDate(parseISO(value), granularity === 'monthly' ? 'month' : 'day', locale, calendar)
+                }
               />
               <YAxis
                 stroke="var(--color-border-subtle)"

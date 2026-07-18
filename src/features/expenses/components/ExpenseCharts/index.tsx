@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 
 import { getCategoryColor } from '@constants/categories';
-import { format, parseISO, startOfWeek } from 'date-fns';
+import { parseISO } from 'date-fns';
 import { BarChart3, PieChartIcon, TrendingUp } from 'lucide-react';
 import {
   Area,
@@ -26,10 +26,16 @@ import { useCurrency } from '@hooks/use-currency';
 import type { MoneyItem } from '@hooks/use-currency';
 import { useLocalePreferences } from '@hooks/use-locale-preferences';
 
-import { formatAxisNumber, formatChartAxisDate, formatChartTooltipDate, resolveCalendar } from '@utils';
+import {
+  formatAxisNumber,
+  formatChartAxisDate,
+  formatChartTooltipDate,
+  getMonthBucketKey,
+  getWeekBucketKey,
+  resolveCalendar,
+} from '@utils';
 
 import { type Expense } from '@/@types/expense';
-import { PIVOT_CURRENCY } from '@/constants/currencies';
 
 interface ExpenseChartsProps {
   expenses: Expense[];
@@ -56,7 +62,8 @@ const CategoryTooltip = ({
   );
 };
 
-// Tooltip for the time-series area chart (date-based)
+// Tooltip for the time-series area chart (date-based). Sums the bucket's
+// records per-record at each record's own date (matches the summary cards).
 const AreaTooltip = ({
   active,
   payload,
@@ -64,21 +71,16 @@ const AreaTooltip = ({
   granularity,
 }: {
   active?: boolean;
-  payload?: ReadonlyArray<{ value?: number | string | ReadonlyArray<number | string> }>;
+  payload?: ReadonlyArray<{ payload?: { items?: MoneyItem[] } }>;
   label?: string | number;
   granularity: 'daily' | 'weekly' | 'monthly';
 }) => {
   const locale = useLocale() as 'en' | 'fa';
   const { prefs } = useLocalePreferences();
   const calendar = resolveCalendar(prefs.calendar, locale);
-  const { display } = useCurrency();
+  const { sumDisplay } = useCurrency();
   if (!active || !payload?.length) return null;
-  const rawValue = payload[0].value;
-  const numericValue = typeof rawValue === 'number' ? rawValue : Number(rawValue) || 0;
-  // Convert at the bucket's own date (monthly keys are YYYY-MM → use mid-month).
-  const bucket = label != null ? String(label) : undefined;
-  const convDate = bucket && bucket.length === 7 ? `${bucket}-15` : bucket;
-  const { primary, secondary } = display(numericValue, PIVOT_CURRENCY, convDate, { compact: true });
+  const { primary, secondary } = sumDisplay(payload[0].payload?.items ?? [], { compact: true });
   return (
     <ChartTooltip
       primary={primary}
@@ -105,7 +107,7 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
   const catMap = new Map<number, { name: string; color: string; value: number; items: MoneyItem[] }>();
   expenses.forEach((exp) => {
     const pivot = exp.amount * exp.entryRate;
-    const item: MoneyItem = { amount: exp.amount, currency: exp.currency, date: exp.date };
+    const item: MoneyItem = { amount: exp.amount, currency: exp.currency, date: exp.date, entryRate: exp.entryRate };
     const ex = catMap.get(exp.category.id);
     if (ex) {
       ex.value += pivot;
@@ -135,30 +137,24 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
     }))
     .sort((a, b) => b.value - a.value);
 
-  // Helper functions for date formatting
-  const getWeekKey = (date: Date): string => format(startOfWeek(date), 'yyyy-MM-dd');
-
-  const getMonthKey = (date: Date): string => {
-    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-  };
-
   // Aggregate expenses based on granularity
   const aggregateExpenses = () => {
     if (expenses.length === 0) return [];
 
-    const aggregated = new Map<string, { amount: number }>();
+    const aggregated = new Map<string, { amount: number; items: MoneyItem[] }>();
 
     expenses.forEach((exp) => {
-      const date = new Date(exp.date);
+      const date = new Date(`${exp.date.slice(0, 10)}T00:00:00`);
       const pivot = exp.amount * exp.entryRate;
+      const item: MoneyItem = { amount: exp.amount, currency: exp.currency, date: exp.date, entryRate: exp.entryRate };
       let key: string;
 
       switch (granularity) {
         case 'weekly':
-          key = getWeekKey(date);
+          key = getWeekBucketKey(date, calendar);
           break;
         case 'monthly':
-          key = getMonthKey(date);
+          key = getMonthBucketKey(date, calendar);
           break;
         case 'daily':
         default:
@@ -169,8 +165,9 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
       const existing = aggregated.get(key);
       if (existing) {
         existing.amount += pivot;
+        existing.items.push(item);
       } else {
-        aggregated.set(key, { amount: pivot });
+        aggregated.set(key, { amount: pivot, items: [item] });
       }
     });
 
@@ -308,10 +305,9 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
                 tickLine={{ stroke: 'var(--color-border-subtle)' }}
                 minTickGap={40}
                 interval="preserveStartEnd"
-                tickFormatter={(value: string) => {
-                  const date = granularity === 'monthly' ? parseISO(`${value}-01`) : parseISO(value);
-                  return formatChartAxisDate(date, granularity === 'monthly' ? 'month' : 'day', locale, calendar);
-                }}
+                tickFormatter={(value: string) =>
+                  formatChartAxisDate(parseISO(value), granularity === 'monthly' ? 'month' : 'day', locale, calendar)
+                }
               />
               <YAxis
                 stroke="var(--color-border-subtle)"

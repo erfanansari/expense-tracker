@@ -83,6 +83,7 @@ export function buildAssetColumns(
             amount={asset.amount}
             currency={asset.currency}
             date={asset.lastValuedAt?.slice(0, 10)}
+            entryRate={asset.entryRate}
             className="items-end"
             primaryClassName="text-text-primary text-sm font-semibold whitespace-nowrap"
             secondaryClassName="text-text-muted text-xs whitespace-nowrap"

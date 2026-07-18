@@ -22,6 +22,7 @@ const toItem = (a: Asset): MoneyItem => ({
   amount: a.amount,
   currency: a.currency,
   date: a.lastValuedAt?.slice(0, 10),
+  entryRate: a.entryRate,
 });
 
 const AssetsSummary = ({ assetsByCategory }: AssetsSummaryProps) => {

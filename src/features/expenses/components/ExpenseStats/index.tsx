@@ -21,7 +21,7 @@ const ExpenseStats = ({ expenses }: ExpenseStatsProps) => {
   const { primaryCurrency, secondaryCurrency, sumTo, formatFull } = useCurrency();
 
   // Sum each expense converted at ITS OWN date — historically accurate & stable.
-  const items = expenses.map((e) => ({ amount: e.amount, currency: e.currency, date: e.date }));
+  const items = expenses.map((e) => ({ amount: e.amount, currency: e.currency, date: e.date, entryRate: e.entryRate }));
   const showSecondary = !!secondaryCurrency && secondaryCurrency !== primaryCurrency;
 
   const totalPrimary = sumTo(items, primaryCurrency);

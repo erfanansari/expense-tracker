@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { getAllExpensesKeyGenerator } from '@api/getAllExpensesQuery';
 import type { GetAllExpensesResponse } from '@api/getAllExpensesQuery';
@@ -23,7 +23,11 @@ import Button from '@components/Button';
 import ErrorState from '@components/ErrorState';
 import Pulse from '@components/Skeleton';
 
+import { useLocalePreferences } from '@hooks/use-locale-preferences';
+
 import { useToast } from '@stores/toast';
+
+import { resolveCalendar } from '@utils';
 
 import type { Tag } from '@/@types/expense';
 import { buildExportFilename, downloadFile, expensesToCsvString } from '@/utils/export';
@@ -66,6 +70,9 @@ function ReportsSkeleton() {
 
 const ReportsPage = () => {
   const t = useTranslations('pages.reports');
+  const locale = useLocale() as 'en' | 'fa';
+  const { prefs: localePrefs } = useLocalePreferences();
+  const calendar = resolveCalendar(localePrefs.calendar, locale);
   // States
   const [dateRange, setDateRange] = useState<DateRange>('ALL_TIME');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -91,7 +98,7 @@ const ReportsPage = () => {
 
   // Memos
   const filteredExpenses = useMemo(() => {
-    let result = filterExpensesByDateRange(expenses, dateRange);
+    let result = filterExpensesByDateRange(expenses, dateRange, calendar);
     if (filterCategoryIds.length > 0) {
       result = result.filter((e) => filterCategoryIds.includes(e.category.id));
     }
@@ -100,9 +107,9 @@ const ReportsPage = () => {
       result = result.filter((e) => e.tags?.some((t) => tagIds.has(t.id)));
     }
     return result;
-  }, [expenses, dateRange, filterCategoryIds, filterTags]);
+  }, [expenses, dateRange, calendar, filterCategoryIds, filterTags]);
 
-  const chartGranularity = useMemo(() => getChartGranularity(dateRange), [dateRange]);
+  const chartGranularity = useMemo(() => getChartGranularity(dateRange, calendar), [dateRange, calendar]);
 
   const handleResetFilters = () => {
     setFilterTags([]);

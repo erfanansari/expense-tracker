@@ -91,6 +91,7 @@ export function buildIncomeColumns(
             amount={income.amount}
             currency={income.currency}
             date={`${income.year}-${String(income.month).padStart(2, '0')}-01`}
+            entryRate={income.entryRate}
             className="items-end"
             primaryClassName="text-success text-sm font-semibold whitespace-nowrap"
             secondaryClassName="text-text-muted text-xs whitespace-nowrap"

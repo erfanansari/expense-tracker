@@ -22,6 +22,7 @@ const toItem = (inc: Income): MoneyItem => ({
   amount: inc.amount,
   currency: inc.currency,
   date: `${inc.year}-${String(inc.month).padStart(2, '0')}-01`,
+  entryRate: inc.entryRate,
 });
 
 const IncomeSummary = ({ incomes }: IncomeSummaryProps) => {

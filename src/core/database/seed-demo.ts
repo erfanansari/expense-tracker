@@ -83,7 +83,22 @@ function clampDay(year: number, month: number, day: number): number {
 const START_RATE = 25000; // ~Toman per USD at window start
 const ANNUAL_RATE_GROWTH = 1.23; // compounding devaluation (~25k → ~70k over 5y)
 
+// Real USD rate rows already in currencyRates (ascending by date), loaded at the
+// start of each seed run. Wherever this series reaches, demo entryRates use it so
+// demo records convert consistently with how the app displays them; the
+// fabricated curve below only covers periods older than all recorded data.
+let realUsdRates: { rateDate: string; rate: number }[] = [];
+
 function getExchangeRate(year: number, month: number): number {
+  // Carry-forward lookup at mid-period, same as the app's rateOn().
+  const midDate = `${year}-${pad2(month)}-15`;
+  let real: number | null = null;
+  for (const p of realUsdRates) {
+    if (p.rateDate <= midDate) real = p.rate;
+    else break;
+  }
+  if (real !== null) return real;
+
   const yearsFromStart = year - START_YEAR + (month - 1) / 12;
   const base = START_RATE * Math.pow(ANNUAL_RATE_GROWTH, yearsFromStart);
   const noise = 1 + (rand() - 0.5) * 0.1; // ±5%
@@ -281,6 +296,13 @@ export async function seedDemo() {
 
   try {
     console.log('🌱 Starting demo seed...\n');
+
+    // Load the recorded USD rate series so getExchangeRate prefers real rates
+    // over the fabricated curve (see its docs).
+    const ratesResult = await client.execute(
+      `SELECT rateDate, rate FROM currencyRates WHERE currency = 'USD' AND baseCurrency = 'IRT' ORDER BY rateDate ASC`
+    );
+    realUsdRates = ratesResult.rows.map((r) => ({ rateDate: r.rateDate as string, rate: r.rate as number }));
 
     // 1. Create or update demo user
     const existingUser = await client.execute({
@@ -626,26 +648,33 @@ export async function seedDemo() {
     await executeBatch(client, valuationStatements);
     console.log(`  Created ${valuationCount} asset valuations`);
 
-    // 9. Seed the USD→IRT rate time series so the demo's USD records convert for
-    //    display (one row per month, plus a current row for "latest" lookups).
+    // 9. Seed fabricated USD→IRT rows ONLY for periods older than all recorded
+    //    rate data. currencyRates is shared app-wide, so fabricated demo rates
+    //    must never land on dates real users' conversions could pick up
+    //    (that's how the migration-era chart corruption happened).
     console.log('Seeding currency rates...');
+    const firstRealRateDate = realUsdRates[0]?.rateDate ?? null;
     const rateStatements: InStatement[] = [];
     const nowIso = NOW.toISOString();
     for (const { year, month } of PERIODS) {
       const rateDate = `${year}-${pad2(month)}-01`;
+      if (firstRealRateDate !== null && rateDate >= firstRealRateDate) continue;
       rateStatements.push({
         sql: `INSERT OR IGNORE INTO currencyRates (currency, baseCurrency, rate, rateDate, fetchedAt)
               VALUES ('USD', 'IRT', ?, ?, ?)`,
         args: [getExchangeRate(year, month), rateDate, nowIso],
       });
     }
-    // A current-dated row so latest-rate lookups resolve.
-    rateStatements.push({
-      sql: `INSERT OR IGNORE INTO currencyRates (currency, baseCurrency, rate, rateDate, fetchedAt)
-            VALUES ('USD', 'IRT', ?, ?, ?)`,
-      args: [getExchangeRate(END_YEAR, END_MONTH), nowIso.slice(0, 10), nowIso],
-    });
-    await executeBatch(client, rateStatements);
+    // On an empty table (fresh dev DB) also add a current-dated row so
+    // latest-rate lookups resolve; with any real data the cron owns "today".
+    if (firstRealRateDate === null) {
+      rateStatements.push({
+        sql: `INSERT OR IGNORE INTO currencyRates (currency, baseCurrency, rate, rateDate, fetchedAt)
+              VALUES ('USD', 'IRT', ?, ?, ?)`,
+        args: [getExchangeRate(END_YEAR, END_MONTH), nowIso.slice(0, 10), nowIso],
+      });
+    }
+    if (rateStatements.length > 0) await executeBatch(client, rateStatements);
     console.log(`  Created ${rateStatements.length} currency rate rows`);
 
     // Summary
