@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { getSessionTokenKeyGenerator } from '@api/getSessionTokenQuery';
 import type { GetSessionTokenResponse } from '@api/getSessionTokenQuery';
@@ -36,11 +36,11 @@ export function parseUserAgent(userAgent: string | null): string {
   return os ? `${browser} · ${os}` : browser;
 }
 
-function formatRelativeTime(iso: string): string {
+function formatRelativeTime(iso: string, locale: string): string {
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return '';
   const diffSeconds = Math.round((then - Date.now()) / 1000);
-  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+  const rtf = new Intl.RelativeTimeFormat(locale === 'fa' ? 'fa-IR' : 'en-US', { numeric: 'auto' });
   const abs = Math.abs(diffSeconds);
   if (abs < 60) return rtf.format(diffSeconds, 'second');
   if (abs < 3600) return rtf.format(Math.round(diffSeconds / 60), 'minute');
@@ -51,6 +51,7 @@ function formatRelativeTime(iso: string): string {
 const SessionsList = () => {
   // Customs
   const t = useTranslations('settings.security.sessions');
+  const locale = useLocale();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
@@ -125,7 +126,7 @@ const SessionsList = () => {
                     )}
                   </div>
                   <div className="text-text-muted text-xs">
-                    {t('signedIn', { time: formatRelativeTime(session.createdAt) })}
+                    {t('signedIn', { time: formatRelativeTime(session.createdAt, locale) })}
                     {session.ipAddress ? ` · ${session.ipAddress}` : ''}
                   </div>
                 </div>
