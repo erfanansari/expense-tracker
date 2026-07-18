@@ -1,6 +1,9 @@
+import { getTranslations } from 'next-intl/server';
 import { NextResponse } from 'next/server';
 
-import { getSearchParams, withAuth } from '@core/api/utils';
+import { createCategorySchema } from '@schemas';
+
+import { getSearchParams, validateBody, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
 
 // GET /api/categories — list current user's categories, ordered for display.
@@ -46,15 +49,14 @@ export const GET = withAuth(async (user, request) => {
 // POST /api/categories — create a category. Returns the existing row if the
 // name already exists for this user (case-insensitive), mirroring tags.
 export const POST = withAuth(async (user, request) => {
-  const { name, icon, color } = await request.json();
+  const raw = await request.json();
+  const t = await getTranslations();
+  const parsed = validateBody(createCategorySchema(t), raw);
+  if (parsed instanceof NextResponse) return parsed;
 
-  if (!name || typeof name !== 'string' || name.trim().length === 0) {
-    return NextResponse.json({ error: 'Category name is required' }, { status: 400 });
-  }
-
-  const trimmedName = name.trim();
-  const finalIcon = typeof icon === 'string' && icon.trim() ? icon.trim() : 'Folder';
-  const finalColor = typeof color === 'string' && color.trim() ? color.trim() : 'gray';
+  const trimmedName = parsed.data.name;
+  const finalIcon = parsed.data.icon || 'Folder';
+  const finalColor = parsed.data.color || 'gray';
 
   const existing = await db.execute({
     sql: `

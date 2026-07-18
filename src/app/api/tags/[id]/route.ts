@@ -1,6 +1,9 @@
+import { getTranslations } from 'next-intl/server';
 import { NextResponse } from 'next/server';
 
-import { parseIdParam, verifyOwnership, withAuth } from '@core/api/utils';
+import { createTagSchema } from '@schemas';
+
+import { parseIdParam, validateBody, verifyOwnership, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
 
 // PUT /api/tags/[id] - Update tag name
@@ -11,13 +14,12 @@ export const PUT = withAuth(async (user, request, { params }) => {
   const existing = await verifyOwnership('tags', id, user.userId, 'user_id');
   if (existing instanceof NextResponse) return existing;
 
-  const { name } = await request.json();
+  const raw = await request.json();
+  const t = await getTranslations();
+  const parsed = validateBody(createTagSchema(t), raw);
+  if (parsed instanceof NextResponse) return parsed;
 
-  if (!name || typeof name !== 'string' || name.trim().length === 0) {
-    return NextResponse.json({ error: 'Tag name is required' }, { status: 400 });
-  }
-
-  const trimmedName = name.trim();
+  const trimmedName = parsed.data.name;
 
   // Check for duplicate name (excluding current tag)
   const duplicate = await db.execute({

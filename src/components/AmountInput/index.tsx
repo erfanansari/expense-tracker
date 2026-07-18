@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { parseShorthandNumber } from '@utils/format';
+import { isPlausibleAmountInput, parseShorthandNumber } from '@utils/format';
 
 interface AmountInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type' | 'value' | 'onChange'> {
   value: number;
@@ -34,6 +34,11 @@ const AmountInput = ({ value, onChange, onBlur, ...props }: AmountInputProps) =>
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
+
+    // Reject keystrokes that could never form a valid amount (e.g. letters)
+    // instead of accepting them and reverting on blur.
+    if (!isPlausibleAmountInput(raw)) return;
+
     setDisplayValue(raw);
 
     if (raw.trim() === '') {

@@ -9,6 +9,7 @@
     "close": "Close",
     "closeModal": "Close modal",
     "closeDrawer": "Close drawer",
+    "currencyLabel": "Currency",
     "toggle": "Toggle",
     "noResults": "No results",
     "datePicker": {
@@ -76,6 +77,31 @@
     "offline": "Offline"
   },
   "zod": {
+    "feedback": {
+      "messageRequired": "Message is required",
+      "messageTooLong": "Message is too long"
+    },
+    "tag": {
+      "nameRequired": "Tag name is required",
+      "nameTooLong": "Tag name is too long"
+    },
+    "category": {
+      "nameRequired": "Category name is required",
+      "nameTooLong": "Category name is too long",
+      "nothingToUpdate": "Nothing to update"
+    },
+    "user": {
+      "nameRequired": "Name cannot be empty",
+      "nameTooLong": "Name is too long (max 100 characters)"
+    },
+    "contact": {
+      "nameRequired": "Name is required",
+      "nameTooLong": "Name is too long",
+      "emailInvalid": "Invalid email address",
+      "subjectTooLong": "Subject is too long",
+      "messageRequired": "Message is required",
+      "messageTooLong": "Message is too long"
+    },
     "expense": {
       "dateRequired": "Date is required",
       "categoryRequired": "Category is required",
@@ -499,11 +525,26 @@
     "footer": {
       "copyright": "© {year} Kharji",
       "privacy": "Privacy",
-      "terms": "Terms"
+      "terms": "Terms",
+      "contact": "Contact"
     },
     "legal": {
       "lastUpdated": "Last updated:"
     }
+  },
+  "feedback": {
+    "title": "Send Feedback",
+    "menuItem": "Send feedback",
+    "typeLabel": "Type",
+    "typeBug": "Bug",
+    "typeIdea": "Idea",
+    "typeOther": "Other",
+    "messageLabel": "Message",
+    "messagePlaceholder": "What's working? What's broken? What's missing?",
+    "submit": "Send feedback",
+    "sending": "Sending...",
+    "success": "Thanks for the feedback!",
+    "error": "Couldn't send your feedback. Please try again."
   },
   "legal": {
     "privacy": {
@@ -623,6 +664,27 @@
           "body": "How we handle your data is described in our <link>Privacy Policy</link>."
         }
       }
+    },
+    "contact": {
+      "title": "Contact Us",
+      "metaDescription": "Get in touch with the Kharji team.",
+      "intro": "Have a question, ran into a problem, or want to share an idea? Fill out the form below — we read everything and usually reply within a day or two.",
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Your name",
+        "email": "Email",
+        "emailPlaceholder": "you@example.com",
+        "subject": "Subject",
+        "subjectPlaceholder": "What's it about?",
+        "message": "Message",
+        "messagePlaceholder": "How can we help?",
+        "send": "Send message",
+        "sending": "Sending...",
+        "success": "Thanks! Your message has been sent — we'll get back to you soon.",
+        "error": "Couldn't send your message. Please try again, or email us directly."
+      },
+      "direct": "Prefer email? Write to us at <email>support@kharji.app</email>.",
+      "inApp": "Signed in? You can also send feedback without leaving Kharji — look for \"Send feedback\" in the account menu."
     }
   },
   "pages": {

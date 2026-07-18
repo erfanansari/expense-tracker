@@ -173,7 +173,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
       {/* Row 1: Category and Name */}
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
         <div className="space-y-1">
-          <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+          <label htmlFor="category" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <Package className="text-text-muted h-4 w-4" />
             {t('shared.category')}
           </label>
@@ -184,11 +184,12 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
         </div>
 
         <div className="space-y-1">
-          <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+          <label htmlFor="name" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <FileText className="text-text-muted h-4 w-4" />
             {t('asset.name')}
           </label>
           <input
+            id="name"
             type="text"
             placeholder={t('asset.namePlaceholder')}
             {...methods.register('name')}
@@ -203,11 +204,12 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
       {/* Row 2: Quantity and Unit */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
         <div className="space-y-1">
-          <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+          <label htmlFor="quantity" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <Package className="text-text-muted h-4 w-4" />
             {t('asset.quantity')}
           </label>
           <AmountInput
+            id="quantity"
             placeholder={t('asset.quantityPlaceholder')}
             required
             value={quantity}
@@ -216,11 +218,12 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
           />
         </div>
         <div className="space-y-1">
-          <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+          <label htmlFor="unit" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <span className="text-text-muted">U</span>
             {t('asset.unit')}
           </label>
           <input
+            id="unit"
             type="text"
             placeholder={t('asset.unitPlaceholder')}
             {...methods.register('unit')}
@@ -231,11 +234,12 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
 
       {/* Unit Value (entry currency) */}
       <div className="space-y-1">
-        <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+        <label htmlFor="unitValue" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
           <Coins className="text-text-muted h-4 w-4" />
           {t('asset.unitValue', { currency })}
         </label>
         <AmountInput
+          id="unitValue"
           placeholder={t('asset.unitValuePlaceholder')}
           value={unitValue ?? 0}
           onChange={handleUnitValueChange}
@@ -245,7 +249,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
 
       {/* Total Value + Currency */}
       <div className="space-y-1">
-        <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+        <label htmlFor="amount" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
           <Coins className="text-text-muted h-4 w-4" />
           {t('asset.totalValue')}
         </label>
@@ -261,11 +265,12 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
 
       {/* Notes */}
       <div className="space-y-1">
-        <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+        <label htmlFor="notes" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
           <FileText className="text-text-muted h-4 w-4" />
           {t('shared.notes')}
         </label>
         <textarea
+          id="notes"
           placeholder={t('shared.notesPlaceholder')}
           rows={2}
           {...methods.register('notes')}

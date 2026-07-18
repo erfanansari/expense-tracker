@@ -25,6 +25,9 @@ interface DrawerState {
   openAssetDrawer: (asset?: Asset) => void;
   closeAssetDrawer: () => void;
   setAssetDirty: (dirty: boolean) => void;
+  feedbackOpen: boolean;
+  openFeedbackModal: () => void;
+  closeFeedbackModal: () => void;
 }
 
 const drawerStore = createStore<DrawerState>()(
@@ -32,6 +35,10 @@ const drawerStore = createStore<DrawerState>()(
     expense: { ...closedSlice },
     income: { ...closedSlice },
     asset: { ...closedSlice },
+    feedbackOpen: false,
+
+    openFeedbackModal: () => set({ feedbackOpen: true }, undefined, 'openFeedbackModal'),
+    closeFeedbackModal: () => set({ feedbackOpen: false }, undefined, 'closeFeedbackModal'),
 
     openExpenseDrawer: (expense) =>
       set({ expense: { open: true, dirty: false, editing: expense } }, undefined, 'openExpenseDrawer'),

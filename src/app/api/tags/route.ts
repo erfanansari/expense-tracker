@@ -1,6 +1,9 @@
+import { getTranslations } from 'next-intl/server';
 import { NextResponse } from 'next/server';
 
-import { getSearchParams, withAuth } from '@core/api/utils';
+import { createTagSchema } from '@schemas';
+
+import { getSearchParams, validateBody, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
 
 // GET /api/tags - Get all tags for current user with usage counts
@@ -40,13 +43,12 @@ export const GET = withAuth(async (user, request) => {
 
 // POST /api/tags - Create a new tag for current user
 export const POST = withAuth(async (user, request) => {
-  const { name } = await request.json();
+  const raw = await request.json();
+  const t = await getTranslations();
+  const parsed = validateBody(createTagSchema(t), raw);
+  if (parsed instanceof NextResponse) return parsed;
 
-  if (!name || typeof name !== 'string' || name.trim().length === 0) {
-    return NextResponse.json({ error: 'Tag name is required' }, { status: 400 });
-  }
-
-  const trimmedName = name.trim();
+  const trimmedName = parsed.data.name;
 
   // Check if tag already exists for this user
   const existing = await db.execute({

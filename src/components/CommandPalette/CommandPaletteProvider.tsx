@@ -24,6 +24,7 @@ import {
   DollarSign,
   Languages,
   LayoutDashboard,
+  MessageSquare,
   PieChart,
   Plus,
   Receipt,
@@ -91,6 +92,7 @@ function CommandPalette({ toggleRef }: { toggleRef: ToggleRef }) {
   const openExpenseDrawer = useDrawerStore((state) => state.openExpenseDrawer);
   const openIncomeDrawer = useDrawerStore((state) => state.openIncomeDrawer);
   const openAssetDrawer = useDrawerStore((state) => state.openAssetDrawer);
+  const openFeedbackModal = useDrawerStore((state) => state.openFeedbackModal);
 
   const actions = useMemo<Action[]>(() => {
     const goTo = (name: string) => t('common.commandPalette.goTo', { name });
@@ -202,6 +204,14 @@ function CommandPalette({ toggleRef }: { toggleRef: ToggleRef }) {
         // choice made in Settings, not something this cycles through.
         perform: () => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark'),
       },
+      {
+        id: 'send-feedback',
+        name: t('feedback.menuItem'),
+        section: t('common.commandPalette.sectionSettings'),
+        icon: <MessageSquare className="h-4 w-4" />,
+        keywords: 'feedback bug idea report suggestion بازخورد اشکال ایده پیشنهاد',
+        perform: () => openFeedbackModal(),
+      },
     ];
 
     return [...createActions, ...navActions, ...settingsActions];
@@ -218,6 +228,7 @@ function CommandPalette({ toggleRef }: { toggleRef: ToggleRef }) {
     openExpenseDrawer,
     openIncomeDrawer,
     openAssetDrawer,
+    openFeedbackModal,
   ]);
 
   return (

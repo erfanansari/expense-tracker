@@ -120,9 +120,9 @@ export const AUTH_EMAIL_STRINGS = {
       subject: 'رمز عبور خرجی شما تغییر کرد',
     },
     welcome: {
-      preview: 'مدیریت مالی شما، بالاخره تحت کنترل.',
+      preview: 'امور مالی شما، بالاخره مرتب و قابل‌دیدن.',
       heading: 'به خرجی خوش آمدید',
-      body: 'خرجی به شما کمک می‌کند مالی خود را در چند ارز مختلف پیگیری کنید — هزینه‌ها، درآمد، دارایی‌ها و ارزش خالص، همه در یک‌جا.',
+      body: 'خرجی کمک می‌کند امور مالی‌تان را در چند ارز مختلف دنبال کنید — هزینه‌ها، درآمد، دارایی‌ها و ارزش خالص، همه در یک‌جا.',
       cta: '→ رفتن به داشبورد',
       featuresTitle: null,
       features: [
@@ -218,14 +218,14 @@ export const REPORT_STRINGS = {
       monthByMonth: 'ماه به ماه',
       bestMonth: 'بهترین ماه',
       worstMonth: 'ضعیف‌ترین ماه',
-      topCategoriesOf: (periodLabel: string) => `پردسته‌ترین هزینه‌های ${periodLabel}`,
+      topCategoriesOf: (periodLabel: string) => `دسته‌های پرهزینهٔ ${periodLabel}`,
       topCategoriesSubtitle: 'بیشترین هزینه‌های سال کجا رفت.',
     },
     totalSpent: 'کل هزینه',
     totalIncome: 'کل درآمد',
     net: 'خالص (درآمد − هزینه)',
     vsLabel: (label: string) => `نسبت به ${label}`,
-    topCategories: 'پردسته‌ترین هزینه‌ها',
+    topCategories: 'دسته‌های پرهزینه',
     income: 'درآمد',
     expenses: 'هزینه',
     layout: {

@@ -1,26 +1,18 @@
+import { getTranslations } from 'next-intl/server';
 import { NextResponse } from 'next/server';
 
-import { withAuth } from '@core/api/utils';
+import { updateProfileSchema } from '@schemas';
+
+import { validateBody, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
 
 export const PUT = withAuth(async (user, request) => {
-  const body = await request.json();
-  const { name } = body;
+  const raw = await request.json();
+  const t = await getTranslations();
+  const parsed = validateBody(updateProfileSchema(t), raw);
+  if (parsed instanceof NextResponse) return parsed;
 
-  // Validate name
-  if (typeof name !== 'string') {
-    return NextResponse.json({ error: 'Name must be a string' }, { status: 400 });
-  }
-
-  const trimmedName = name.trim();
-
-  if (trimmedName.length === 0) {
-    return NextResponse.json({ error: 'Name cannot be empty' }, { status: 400 });
-  }
-
-  if (trimmedName.length > 100) {
-    return NextResponse.json({ error: 'Name is too long (max 100 characters)' }, { status: 400 });
-  }
+  const trimmedName = parsed.data.name;
 
   // Update user's name in database
   await db.execute({

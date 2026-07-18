@@ -134,9 +134,11 @@ interface CategorySelectProps {
   onChange: (categoryId: number | null) => void;
   disabled?: boolean;
   placeholder?: string;
+  /** Id for react-select's focusable input so an external <label htmlFor> can target it. */
+  inputId?: string;
 }
 
-const CategorySelect = ({ value, onChange, disabled, placeholder }: CategorySelectProps) => {
+const CategorySelect = ({ value, onChange, disabled, placeholder, inputId }: CategorySelectProps) => {
   const t = useTranslations('forms.expense');
   const { data: categories = [] } = useQuery<Category[]>({ queryKey: getCategoryListKeyGenerator() });
   const [quickCreateOpen, setQuickCreateOpen] = useState(false);
@@ -169,6 +171,7 @@ const CategorySelect = ({ value, onChange, disabled, placeholder }: CategorySele
         placeholder={placeholder ?? t('selectCategoryPlaceholder')}
         isDisabled={disabled}
         isSearchable={false}
+        inputId={inputId}
         menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
         menuPosition="fixed"
         menuPlacement="auto"

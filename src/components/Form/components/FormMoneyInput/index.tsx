@@ -34,6 +34,7 @@ const FormMoneyInput = ({
   return (
     <div className={className}>
       <MoneyInput
+        amountId={amountName}
         amount={amountField.value ?? 0}
         currency={currencyField.value ?? ''}
         onAmountChange={onAmountChange ?? amountField.onChange}

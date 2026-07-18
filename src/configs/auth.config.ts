@@ -14,6 +14,7 @@ export const authConfig = {
       '/offline',
       '/privacy',
       '/terms',
+      '/contact',
       '/verify-email',
     ],
     auth: ['/login', '/signup', '/forgot-password', '/reset-password'],

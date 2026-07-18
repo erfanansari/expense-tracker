@@ -25,6 +25,7 @@ const FormSelect = ({ name, options, valueAsNumber, placeholder, disabled, class
         options={options}
         placeholder={placeholder}
         disabled={disabled}
+        inputId={name}
       />
       {fieldState.error?.message && <p className="text-danger mt-1 text-xs">{fieldState.error.message}</p>}
     </div>

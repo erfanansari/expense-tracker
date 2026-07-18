@@ -47,9 +47,9 @@ const FormInput = ({ name, label, type = 'text', placeholder, disabled, autoComp
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="text-text-muted hover:text-text-secondary absolute end-2.5 top-1/2 -translate-y-1/2 sm:end-3"
-            tabIndex={-1}
+            className="text-text-muted hover:text-text-secondary focus-visible:ring-blue/30 absolute end-2.5 top-1/2 -translate-y-1/2 rounded-md focus-visible:ring-2 focus-visible:outline-none sm:end-3"
             aria-label={showPassword ? t('hidePassword') : t('showPassword')}
+            aria-pressed={showPassword}
           >
             {showPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
           </button>

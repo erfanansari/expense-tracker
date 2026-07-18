@@ -22,6 +22,9 @@ const LandingFooter = () => {
           <Link href="/terms" className="text-text-muted hover:text-text-primary text-xs transition-colors">
             {t('terms')}
           </Link>
+          <Link href="/contact" className="text-text-muted hover:text-text-primary text-xs transition-colors">
+            {t('contact')}
+          </Link>
           <LocaleToggle />
         </div>
 

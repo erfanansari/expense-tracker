@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
 import { HelpCircle } from 'lucide-react';
 
@@ -32,14 +33,9 @@ const HelpSection = () => {
           >
             {t('documentation')}
           </a>
-          <a
-            href="https://github.com/erfanansari/kharji/issues"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={LINK_CLASSES}
-          >
+          <Link href="/contact" className={LINK_CLASSES}>
             {t('contactSupport')}
-          </a>
+          </Link>
         </div>
       </div>
     </div>

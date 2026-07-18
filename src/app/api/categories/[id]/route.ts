@@ -1,6 +1,9 @@
+import { getTranslations } from 'next-intl/server';
 import { NextResponse } from 'next/server';
 
-import { getSearchParams, parseIdParam, verifyOwnership, withAuth } from '@core/api/utils';
+import { updateCategorySchema } from '@schemas';
+
+import { getSearchParams, parseIdParam, validateBody, verifyOwnership, withAuth } from '@core/api/utils';
 import { reassignExpensesCategory } from '@core/database/categories';
 import { db } from '@core/database/client';
 
@@ -14,25 +17,16 @@ export const PUT = withAuth(async (user, request, { params }) => {
   if (existing instanceof NextResponse) return existing;
 
   const body = await request.json();
-  const { name, icon, color, sort_order } = body ?? {};
+  // Clients may send explicit nulls for "not provided" — normalize to undefined
+  // so the schema's optional fields treat them the same.
+  const raw = Object.fromEntries(Object.entries((body ?? {}) as Record<string, unknown>).filter(([, v]) => v != null));
+  const t = await getTranslations();
+  const parsed = validateBody(updateCategorySchema(t), raw);
+  if (parsed instanceof NextResponse) return parsed;
 
-  if (
-    (name === undefined || name === null) &&
-    (icon === undefined || icon === null) &&
-    (color === undefined || color === null) &&
-    (sort_order === undefined || sort_order === null)
-  ) {
-    return NextResponse.json({ error: 'Nothing to update' }, { status: 400 });
-  }
+  const { name: nextName, icon, color, sort_order } = parsed.data;
 
-  // Validate name when provided
-  let nextName: string | undefined;
-  if (name !== undefined && name !== null) {
-    if (typeof name !== 'string' || name.trim().length === 0) {
-      return NextResponse.json({ error: 'Category name is required' }, { status: 400 });
-    }
-    nextName = name.trim();
-
+  if (nextName !== undefined) {
     const duplicate = await db.execute({
       sql: 'SELECT id FROM categories WHERE LOWER(name) = LOWER(?) AND user_id = ? AND id != ?',
       args: [nextName, user.userId, id],
@@ -49,17 +43,21 @@ export const PUT = withAuth(async (user, request, { params }) => {
     fields.push('name = ?');
     args.push(nextName);
   }
-  if (typeof icon === 'string' && icon.trim()) {
+  if (icon) {
     fields.push('icon = ?');
-    args.push(icon.trim());
+    args.push(icon);
   }
-  if (typeof color === 'string' && color.trim()) {
+  if (color) {
     fields.push('color = ?');
-    args.push(color.trim());
+    args.push(color);
   }
-  if (typeof sort_order === 'number' && Number.isFinite(sort_order)) {
+  if (sort_order !== undefined) {
     fields.push('sort_order = ?');
     args.push(sort_order);
+  }
+  // e.g. only empty-string icon/color were sent — nothing survived filtering.
+  if (fields.length === 0) {
+    return NextResponse.json({ error: t('zod.category.nothingToUpdate') }, { status: 400 });
   }
   args.push(id, user.userId);
 

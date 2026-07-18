@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { ChevronDown, CommandIcon, LayoutDashboard, LogOut, Settings, Zap } from 'lucide-react';
+import { ChevronDown, CommandIcon, LayoutDashboard, LogOut, MessageSquare, Settings, Zap } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
 import { ROUTES } from '@constants';
@@ -15,6 +15,8 @@ import { ROUTES } from '@constants';
 import { useCommandPalette } from '@components/CommandPalette/CommandPaletteProvider';
 
 import { useAuth } from '@hooks/use-auth';
+
+import { useDrawerStore } from '@stores/drawer';
 
 const NAV_ITEMS = [
   { href: '/overview', key: 'overview' },
@@ -31,12 +33,14 @@ const TopNav: FC = () => {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { toggle: toggleCommandPalette } = useCommandPalette();
+  const openFeedbackModal = useDrawerStore((state) => state.openFeedbackModal);
 
   // States
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   // References
   const menuRef = useRef<HTMLDivElement>(null);
+  const avatarButtonRef = useRef<HTMLButtonElement>(null);
 
   // Effects
   useEffect(() => {
@@ -67,6 +71,7 @@ const TopNav: FC = () => {
             {/* User Menu */}
             <div ref={menuRef} className="relative z-50">
               <button
+                ref={avatarButtonRef}
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 className="border-border-subtle hover:bg-background-elevated flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors"
               >
@@ -110,6 +115,20 @@ const TopNav: FC = () => {
                       <Settings className="h-4 w-4" />
                       {t('nav.settings')}
                     </Link>
+                    <button
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
+                        // Park focus on the (persistent) avatar button before the
+                        // menu item unmounts, so the modal's focus-restore has a
+                        // still-connected element to return to on close.
+                        avatarButtonRef.current?.focus();
+                        openFeedbackModal();
+                      }}
+                      className="text-text-secondary hover:bg-background-elevated hover:text-text-primary flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors"
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      {t('feedback.menuItem')}
+                    </button>
                     <button
                       onClick={() => {
                         setIsUserMenuOpen(false);

@@ -17,6 +17,7 @@ const FormDatePicker = ({ name, placeholder, isClearable, className }: FormDateP
   return (
     <div className={className}>
       <DatePicker
+        id={name}
         value={field.value ?? ''}
         onChange={field.onChange}
         placeholder={placeholder}

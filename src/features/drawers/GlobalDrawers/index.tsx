@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import AssetForm from '@features/assets/components/AssetForm';
 import ExpenseForm from '@features/expenses/components/ExpenseForm';
+import FeedbackModal from '@features/feedback/components/FeedbackModal';
 import IncomeForm from '@features/income/components/IncomeForm';
 
 import FormDrawer from '@components/FormDrawer';
@@ -73,6 +74,8 @@ const GlobalDrawers = () => {
           setIsDirty={setAssetDirty}
         />
       </FormDrawer>
+
+      <FeedbackModal />
     </>
   );
 };

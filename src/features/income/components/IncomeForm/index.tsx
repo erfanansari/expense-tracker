@@ -196,7 +196,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
       {/* Row 1: Income Type, Month, Year */}
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <div className="space-y-1">
-          <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+          <label htmlFor="incomeType" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <Briefcase className="text-text-muted h-4 w-4" />
             {t('income.type')}
           </label>
@@ -207,12 +207,16 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
         </div>
 
         <div className="space-y-1">
-          <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+          <label
+            htmlFor={jalaliSelection ? 'jalaliMonth' : 'month'}
+            className="text-text-secondary flex items-center gap-2 text-sm font-medium"
+          >
             <Calendar className="text-text-muted h-4 w-4" />
             {t('income.month')}
           </label>
           {jalaliSelection ? (
             <Select
+              inputId="jalaliMonth"
               value={String(jalaliSelection.month)}
               onChange={(value) => handleJalaliMonthChange(Number(value))}
               options={JALALI_MONTH_NAMES.map((name, i) => ({ value: String(i + 1), label: name }))}
@@ -227,12 +231,16 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
         </div>
 
         <div className="space-y-1">
-          <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+          <label
+            htmlFor={jalaliSelection ? 'jalaliYear' : 'year'}
+            className="text-text-secondary flex items-center gap-2 text-sm font-medium"
+          >
             <Calendar className="text-text-muted h-4 w-4" />
             {t('income.year')}
           </label>
           {jalaliSelection ? (
             <Select
+              inputId="jalaliYear"
               value={String(jalaliSelection.year)}
               onChange={(value) => handleJalaliYearChange(Number(value))}
               options={yearOptions.map((y) => ({ value: String(y), label: formatJalaliDigits(y) }))}
@@ -249,11 +257,12 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
 
       {/* Source */}
       <div className="space-y-1">
-        <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+        <label htmlFor="source" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
           <Briefcase className="text-text-muted h-4 w-4" />
           {t('income.source')}
         </label>
         <input
+          id="source"
           type="text"
           placeholder={t('income.sourcePlaceholder')}
           {...methods.register('source')}
@@ -263,11 +272,12 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
 
       {/* Notes */}
       <div className="space-y-1">
-        <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+        <label htmlFor="notes" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
           <FileText className="text-text-muted h-4 w-4" />
           {t('shared.notes')}
         </label>
         <textarea
+          id="notes"
           placeholder={t('shared.notesPlaceholder')}
           rows={2}
           {...methods.register('notes')}
@@ -277,7 +287,7 @@ const IncomeForm = ({ onIncomeAdded, editingIncome, onCancelEdit, setIsDirty }: 
 
       {/* Amount + Currency */}
       <div className="space-y-1">
-        <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+        <label htmlFor="amount" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
           <Coins className="text-text-muted h-4 w-4" />
           {t('shared.amount')}
         </label>

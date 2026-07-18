@@ -133,6 +133,7 @@ const TagInput = ({ selectedTags, onTagsChange }: TagInputProps) => {
       onCreateOption={handleCreate}
       isLoading={createTag.isPending}
       placeholder={t('tagsPlaceholder')}
+      aria-label={t('tagsPlaceholder')}
       isSearchable
       closeMenuOnSelect={false}
       createOptionPosition="last"

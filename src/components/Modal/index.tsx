@@ -31,6 +31,31 @@ const Modal = ({ isOpen, onClose, title, children, className, showCloseButton = 
     (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         onClose();
+        return;
+      }
+
+      // Focus trap: keep Tab / Shift+Tab cycling inside the dialog.
+      if (event.key === 'Tab' && modalRef.current) {
+        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) {
+          event.preventDefault();
+          return;
+        }
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        const active = document.activeElement;
+
+        if (event.shiftKey) {
+          if (active === first || !modalRef.current.contains(active)) {
+            event.preventDefault();
+            last.focus();
+          }
+        } else if (active === last || !modalRef.current.contains(active)) {
+          event.preventDefault();
+          first.focus();
+        }
       }
     },
     [onClose]
@@ -55,10 +80,12 @@ const Modal = ({ isOpen, onClose, title, children, className, showCloseButton = 
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, handleKeyDown]);
 
+  // Focus the dialog on open; restore focus to the opener on close.
   useEffect(() => {
-    if (isOpen && modalRef.current) {
-      modalRef.current.focus();
-    }
+    if (!isOpen) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    modalRef.current?.focus();
+    return () => previouslyFocused?.focus?.();
   }, [isOpen]);
 
   if (!isOpen) {

@@ -36,6 +36,12 @@ interface SelectProps {
    *  when the control sits near the right viewport edge (e.g. CurrencySelect
    *  inside MoneyInput) so a wide menu grows leftward instead of off-screen. */
   menuAlign?: 'left' | 'right';
+  /** Id for react-select's focusable input so an external <label htmlFor> can
+   *  target this control. */
+  inputId?: string;
+  /** Accessible name for controls with no visible <label> (e.g. the compact
+   *  currency picker inside MoneyInput). */
+  ariaLabel?: string;
 }
 
 const MenuList = (props: MenuListProps<SelectOption, false>) => (
@@ -79,6 +85,8 @@ const Select = ({
   formatOptionLabel,
   bare,
   menuAlign,
+  inputId,
+  ariaLabel,
 }: SelectProps) => {
   const selectedOption = options.find((o) => o.value === value) ?? null;
 
@@ -119,6 +127,8 @@ const Select = ({
       placeholder={placeholder ?? 'Select...'}
       isDisabled={disabled}
       isSearchable={false}
+      inputId={inputId}
+      aria-label={ariaLabel}
       formatOptionLabel={formatOptionLabel}
       menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
       menuPosition="fixed"
@@ -133,6 +143,10 @@ const Select = ({
             ? twMerge(
                 'flex w-full items-center gap-1 px-3 py-2 text-sm cursor-pointer transition-colors duration-150',
                 'text-text-primary hover:bg-background-secondary rounded-lg',
+                // Bare controls sit inside a shared input group whose border owns
+                // the group ring — highlight this control itself on keyboard focus
+                // so users can tell which half of the group is active.
+                (state.isFocused || state.menuIsOpen) && 'bg-background-secondary',
                 isDisabled && 'text-text-muted cursor-not-allowed opacity-60'
               )
             : twMerge(

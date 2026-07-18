@@ -7,7 +7,7 @@ import Header from '@components/LandingPage/Header';
 
 interface LegalPageLayoutProps {
   title: string;
-  lastUpdated: string;
+  lastUpdated?: string;
   children: ReactNode;
 }
 
@@ -19,9 +19,11 @@ const LegalPageLayout = ({ title, lastUpdated, children }: LegalPageLayoutProps)
       <main className="flex-1">
         <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
           <h1 className="text-text-primary text-3xl font-bold sm:text-4xl">{title}</h1>
-          <p className="text-text-muted mt-2 text-sm">
-            {t('lastUpdated')} <time dateTime={lastUpdated}>{lastUpdated}</time>
-          </p>
+          {lastUpdated && (
+            <p className="text-text-muted mt-2 text-sm">
+              {t('lastUpdated')} <time dateTime={lastUpdated}>{lastUpdated}</time>
+            </p>
+          )}
           <div className="mt-8 flex flex-col gap-8">{children}</div>
         </div>
       </main>

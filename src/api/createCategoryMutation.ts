@@ -1,17 +1,15 @@
-import { z } from 'zod';
+import type { z } from 'zod';
 
 import type { Category } from '@types';
+
+import { createCategorySchema, fallbackT } from '@schemas';
 
 import client from '@core/client';
 import type { MutationKeyGenerator } from '@core/client/@types';
 
 import { categorySchema } from './getExpenseListQuery';
 
-const requestDataSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  icon: z.string().optional(),
-  color: z.string().optional(),
-});
+const requestDataSchema = createCategorySchema(fallbackT);
 
 type RequestData = z.infer<typeof requestDataSchema>;
 type Response = Category;

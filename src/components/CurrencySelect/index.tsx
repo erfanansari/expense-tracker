@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import type { FC } from 'react';
 
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import Select from '@components/Select';
 
@@ -21,6 +21,7 @@ interface CurrencySelectProps {
 /** Currency picker over the supported set, using the app's custom Select. */
 const CurrencySelect: FC<CurrencySelectProps> = ({ value, onChange, disabled, className = '', bare }) => {
   const locale = useLocale() as 'en' | 'fa';
+  const t = useTranslations('common');
   // Compact value (just the code) in the control; full "CODE (Name)" in the menu.
   const options = useMemo(() => getLocalizedCurrencyOptions(locale), [locale]);
 
@@ -35,6 +36,7 @@ const CurrencySelect: FC<CurrencySelectProps> = ({ value, onChange, disabled, cl
       options={options}
       disabled={disabled}
       bare={bare}
+      ariaLabel={t('currencyLabel')}
       menuAlign={locale === 'fa' ? 'left' : 'right'}
       className={className}
       formatOptionLabel={(option, { context }) => (context === 'value' ? option.value : option.label)}

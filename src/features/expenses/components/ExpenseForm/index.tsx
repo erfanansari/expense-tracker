@@ -158,7 +158,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
       {/* Row 1: Category and Date */}
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
         <div className="space-y-1">
-          <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+          <label htmlFor="categoryId" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <Layers className="text-text-muted h-4 w-4" />
             {t('shared.category')}
           </label>
@@ -167,7 +167,11 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
             control={methods.control}
             render={({ field, fieldState }) => (
               <>
-                <CategorySelect value={field.value || null} onChange={(id) => field.onChange(id ?? 0)} />
+                <CategorySelect
+                  inputId="categoryId"
+                  value={field.value || null}
+                  onChange={(id) => field.onChange(id ?? 0)}
+                />
                 {fieldState.error?.message && <p className="text-danger mt-1 text-xs">{fieldState.error.message}</p>}
               </>
             )}
@@ -175,7 +179,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
         </div>
 
         <div className="space-y-1">
-          <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+          <label htmlFor="date" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
             <Calendar className="text-text-muted h-4 w-4" />
             {t('shared.date')}
           </label>
@@ -185,11 +189,12 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
 
       {/* Description */}
       <div className="space-y-1">
-        <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+        <label htmlFor="description" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
           <FileText className="text-text-muted h-4 w-4" />
           {t('shared.description')}
         </label>
         <textarea
+          id="description"
           placeholder={t('expense.descriptionPlaceholder')}
           rows={2}
           {...methods.register('description')}
@@ -215,7 +220,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
 
       {/* Amount + Currency */}
       <div className="space-y-1">
-        <label className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+        <label htmlFor="amount" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
           <Coins className="text-text-muted h-4 w-4" />
           {t('shared.amount')}
         </label>

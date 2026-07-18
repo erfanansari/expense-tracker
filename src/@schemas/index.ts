@@ -2,6 +2,11 @@ export { fallbackT, type Translator } from './fallback-translator';
 export { createExpenseSchema, type CreateExpenseSchema } from './expense';
 export { createIncomeSchema, type CreateIncomeSchema } from './income';
 export { createAssetSchema, type CreateAssetSchema } from './asset';
+export { createContactSchema, type ContactSchema } from './contact';
+export { createFeedbackSchema, FEEDBACK_TYPES, type FeedbackSchema, type FeedbackType } from './feedback';
+export { createTagSchema, type TagSchema } from './tag';
+export { createCategorySchema, updateCategorySchema, type CategorySchema, type UpdateCategorySchema } from './category';
+export { updateProfileSchema, type UpdateProfileSchema } from './user';
 export {
   createLoginSchema,
   createSignupSchema,
