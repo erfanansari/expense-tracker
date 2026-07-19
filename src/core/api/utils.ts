@@ -34,7 +34,13 @@ type AuthHandler<P = any> = (user: Session, request: Request, context: { params:
 export function withAuth<P = any>(handler: AuthHandler<P>, label?: string) {
   return async (request: Request, context: { params: Promise<P> }) => {
     try {
-      const session = await auth.api.getSession({ headers: request.headers });
+      // disableCookieCache: the signed cookie copy skips the DB round-trip but
+      // honors revoked sessions only after it expires (up to 5 min) — data
+      // routes must check the DB so "sign out other devices" cuts off instantly.
+      const session = await auth.api.getSession({
+        headers: request.headers,
+        query: { disableCookieCache: true },
+      });
       if (!session) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
