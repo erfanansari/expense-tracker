@@ -142,7 +142,7 @@ const Select = ({
           bare
             ? twMerge(
                 'flex w-full items-center gap-1 px-3 py-2 text-sm cursor-pointer transition-colors duration-150',
-                'text-text-primary hover:bg-background-secondary rounded-lg',
+                'text-text-primary hover:bg-background-secondary rounded-e-lg',
                 // Bare controls sit inside a shared input group whose border owns
                 // the group ring — highlight this control itself on keyboard focus
                 // so users can tell which half of the group is active.

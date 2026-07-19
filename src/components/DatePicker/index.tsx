@@ -152,6 +152,10 @@ const DatePicker = forwardRef<ReactDatePickerType, DatePickerProps>(
         event.preventDefault();
         onChangeRef.current(formatDateString(jalaliToGregorian(viewedJalali.year, viewedJalali.month, day)));
         closeRef.current();
+        // Return focus to the input, matching react-datepicker's own
+        // keyboard-selection behavior — otherwise it falls to the nearest
+        // focusable ancestor (e.g. the drawer container).
+        pickerRef.current?.setFocus();
         return;
       }
       // In RTL the "next day" sits visually to the left.
@@ -301,6 +305,7 @@ const DatePicker = forwardRef<ReactDatePickerType, DatePickerProps>(
                             formatDateString(jalaliToGregorian(cellDate.year, cellDate.month, cellDate.day))
                           );
                           closeRef.current();
+                          pickerRef.current?.setFocus();
                         }}
                         className={twMerge(
                           'flex h-8 w-8 items-center justify-center rounded-lg text-sm transition-colors',
@@ -341,6 +346,19 @@ const DatePicker = forwardRef<ReactDatePickerType, DatePickerProps>(
           selected={selected}
           onChange={handleChange}
           dateFormat="yyyy-MM-dd"
+          // Don't auto-open the calendar when the input gains focus via Tab —
+          // the popup's internal tab loop would otherwise trap keyboard users
+          // who just want to pass through the field.
+          preventOpenOnFocus
+          // preventOpenOnFocus also disables react-datepicker's own keyboard
+          // opening, so reinstate it: Enter/ArrowDown on the closed input
+          // opens the calendar (when open, react-datepicker handles both).
+          onKeyDown={(event) => {
+            if ((event.key === 'Enter' || event.key === 'ArrowDown') && !pickerRef.current?.isCalendarOpen()) {
+              event.preventDefault();
+              pickerRef.current?.setOpen(true);
+            }
+          }}
           required={required}
           placeholderText={placeholder}
           isClearable={isClearable}

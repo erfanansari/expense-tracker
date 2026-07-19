@@ -71,6 +71,36 @@ const FormDrawer = ({ isOpen, onClose, title, children }: FormDrawerProps) => {
     onClose();
   }, [onClose]);
 
+  // Handle Tab ourselves instead of leaving it to native sequential focus.
+  // During a native Tab transition focus sits on <body> for a moment; if the
+  // element being left unmounts DOM on blur (react-select removes its aria-live
+  // region), Radix FocusScope's MutationObserver sees "nodes removed while
+  // body is focused" and yanks focus back to the dialog container, hijacking
+  // the move. An explicit .focus() commits synchronously, so that window never
+  // exists and the cycle also stays trapped inside the drawer.
+  const handleTabKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Tab' || event.defaultPrevented) return;
+    const container = event.currentTarget;
+    const focusable = Array.from(
+      container.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+      // tabIndex >= 0 also drops roving-tabindex members (e.g. calendar day
+      // buttons marked tabindex="-1") that the tag selectors still match.
+    ).filter((el) => el.offsetParent !== null && el.tabIndex >= 0);
+    if (focusable.length === 0) return;
+
+    const index = focusable.indexOf(document.activeElement as HTMLElement);
+    let next: HTMLElement;
+    if (index === -1) {
+      next = event.shiftKey ? focusable[focusable.length - 1] : focusable[0];
+    } else {
+      next = focusable[(index + (event.shiftKey ? -1 : 1) + focusable.length) % focusable.length];
+    }
+    event.preventDefault();
+    next.focus();
+  }, []);
+
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -103,6 +133,10 @@ const FormDrawer = ({ isOpen, onClose, title, children }: FormDrawerProps) => {
         if (!open) handleClose();
       }}
       direction={drawerDirection}
+      // Move focus into the dialog on open — without this, focus stays on the
+      // opener behind the overlay and Radix's focus trap never engages, so Tab
+      // walks the obscured background page instead of the form.
+      autoFocus
       dismissible
       shouldScaleBackground={false}
       repositionInputs={false}
@@ -112,6 +146,7 @@ const FormDrawer = ({ isOpen, onClose, title, children }: FormDrawerProps) => {
         <Drawer.Overlay className="fixed inset-0 z-50 bg-black/20 backdrop-blur-[2px]" />
         <Drawer.Content
           aria-describedby={undefined}
+          onKeyDown={handleTabKeyDown}
           style={
             isMobile && keyboard.inset > 0
               ? { top: keyboard.offsetTop, bottom: 'auto', height: keyboard.height, maxHeight: keyboard.height }
