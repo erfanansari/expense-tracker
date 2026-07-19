@@ -1,9 +1,9 @@
 export const ASSET_CATEGORIES = [
-  { value: 'cash', label: 'Cash', labelFa: 'نقدی', icon: 'banknote' },
+  { value: 'cash', label: 'Cash', labelFa: 'پول نقد', icon: 'banknote' },
   { value: 'crypto', label: 'Cryptocurrency', labelFa: 'ارز دیجیتال', icon: 'bitcoin' },
-  { value: 'commodity', label: 'Commodities', labelFa: 'کالا', icon: 'gem' },
+  { value: 'commodity', label: 'Commodities', labelFa: 'طلا و کالا', icon: 'gem' },
   { value: 'vehicle', label: 'Vehicles', labelFa: 'خودرو', icon: 'car' },
-  { value: 'property', label: 'Real Estate', labelFa: 'املاک', icon: 'building' },
+  { value: 'property', label: 'Real Estate', labelFa: 'ملک', icon: 'building' },
   { value: 'bank', label: 'Bank Accounts', labelFa: 'حساب بانکی', icon: 'landmark' },
   { value: 'investment', label: 'Investments', labelFa: 'سرمایه‌گذاری', icon: 'trending-up' },
 ] as const;

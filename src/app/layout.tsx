@@ -40,7 +40,7 @@ const LOCALIZED_META = {
   },
   fa: {
     brand: 'خرجی',
-    description: 'هزینه‌ها، درآمد و دارایی‌ها را در یک جا پیگیری کنید.',
+    description: 'هزینه‌ها، درآمد و دارایی‌هات، همه یک‌جا.',
     ogTitle: 'خرجی – مدیریت مالی شخصی',
     ogLocale: 'fa_IR',
   },
