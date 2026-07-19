@@ -58,7 +58,7 @@ The entire codebase is public so you can read every line of code that touches yo
 |                    **Light Mode**                     |              **Landing Page**               |
 | ![Light Mode](.github/screenshots/overview-light.png) | ![Landing](.github/screenshots/landing.png) |
 
-### فارسی، همان‌قدر خانه (Farsi, first-class)
+### فارسی ‌(Farsi, first-class)
 
 Kharji isn't translated — it's written in Farsi. Full RTL layout, Persian digits, the Jalali calendar, and copy in everyday conversational Persian.
 
