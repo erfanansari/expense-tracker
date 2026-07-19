@@ -36,6 +36,30 @@ export function parseUserAgent(userAgent: string | null): string {
   return os ? `${browser} · ${os}` : browser;
 }
 
+// Better Auth stores IPv6 fully expanded and masked to /64 (e.g. localhost
+// "::1" becomes all zeros), so raw values are both unreadable and sometimes
+// meaningless. Returns a compact display form, or null to hide the IP.
+export function formatIpForDisplay(ip: string | null): string | null {
+  if (!ip) return null;
+  if (ip === '127.0.0.1' || ip === '::1') return null;
+  if (!ip.includes(':')) return ip;
+  const groups = ip.split(':').map((g) => g.replace(/^0+(?=.)/, '') || '0');
+  if (groups.every((g) => g === '0')) return null;
+  // Compress the longest run of zero groups into "::" (standard notation)
+  let best = { start: -1, len: 0 };
+  for (let i = 0; i < groups.length; i++) {
+    if (groups[i] !== '0') continue;
+    let j = i;
+    while (j < groups.length && groups[j] === '0') j++;
+    if (j - i > best.len) best = { start: i, len: j - i };
+    i = j;
+  }
+  if (best.len < 2) return groups.join(':');
+  const left = groups.slice(0, best.start).join(':');
+  const right = groups.slice(best.start + best.len).join(':');
+  return `${left}::${right}`;
+}
+
 function formatRelativeTime(iso: string, locale: string): string {
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return '';
@@ -81,7 +105,12 @@ const SessionsList = () => {
   });
 
   // Variables
-  const sessionList = sessions ?? [];
+  // Current device first, then newest sign-ins on top
+  const sessionList = [...(sessions ?? [])].sort((a, b) => {
+    if (a.token === currentToken) return -1;
+    if (b.token === currentToken) return 1;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
   const otherSessionCount = sessionList.filter((session) => session.token !== currentToken).length;
 
   return (
@@ -111,6 +140,7 @@ const SessionsList = () => {
         <ul className="mt-4 space-y-3">
           {sessionList.map((session) => {
             const isCurrent = session.token === currentToken;
+            const displayIp = formatIpForDisplay(session.ipAddress);
             return (
               <li key={session.token} className="border-border-subtle flex items-center gap-3 rounded-lg border p-3">
                 <div className="border-border-subtle bg-background-secondary flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
@@ -125,14 +155,15 @@ const SessionsList = () => {
                       </span>
                     )}
                   </div>
-                  <div className="text-text-muted text-xs">
+                  <div className="text-text-muted text-xs break-all">
                     {t('signedIn', { time: formatRelativeTime(session.createdAt, locale) })}
-                    {session.ipAddress ? ` · ${session.ipAddress}` : ''}
+                    {displayIp ? ` · ${displayIp}` : ''}
                   </div>
                 </div>
                 {!isCurrent && (
                   <Button
                     variant="danger"
+                    className="shrink-0"
                     onClick={() => revokeMutation.mutate({ token: session.token })}
                     disabled={revokeMutation.isPending}
                   >
