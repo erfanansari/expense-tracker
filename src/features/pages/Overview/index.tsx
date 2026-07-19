@@ -1,7 +1,6 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 
 import { getAllExpensesKeyGenerator } from '@api/getAllExpensesQuery';
 import type { GetAllExpensesResponse } from '@api/getAllExpensesQuery';
@@ -17,6 +16,8 @@ import { ApiError } from '@core/errors';
 import { getButtonClasses } from '@components/Button';
 import ErrorState from '@components/ErrorState';
 import Pulse from '@components/Skeleton';
+
+import { useDrawerStore } from '@stores/drawer';
 
 import ExchangeRateCard from './components/ExchangeRateCard';
 import OverviewStats from './components/OverviewStats';
@@ -138,6 +139,7 @@ function OverviewSkeleton() {
 const Dashboard = () => {
   const t = useTranslations('pages.overview');
   const tCommon = useTranslations('common');
+  const openExpenseDrawer = useDrawerStore((state) => state.openExpenseDrawer);
   // Queries
   const {
     data: summary,
@@ -171,10 +173,15 @@ const Dashboard = () => {
             <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">{t('title')}</h1>
             <p className="text-text-muted mt-1 text-xs sm:text-sm">{t('subtitle')}</p>
           </div>
-          <Link href="/expenses" className={getButtonClasses('primary', 'shrink-0')}>
+          <button
+            type="button"
+            onClick={() => openExpenseDrawer()}
+            className={getButtonClasses('primary', 'shrink-0')}
+            aria-label={tCommon('addExpense')}
+          >
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">{tCommon('addExpense')}</span>
-          </Link>
+          </button>
         </div>
 
         {isLoading && <OverviewSkeleton />}

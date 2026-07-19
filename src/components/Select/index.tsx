@@ -100,7 +100,11 @@ const Select = ({
         width: 'max-content',
         minWidth: '100%',
         maxWidth: 'calc(100vw - 16px)',
-        ...(menuAlign === 'right' ? { right: 0, left: 'auto' } : {}),
+        // react-select's menu base sets no `left` and relies on static
+        // position, which under dir="rtl" anchors to the RIGHT edge — a
+        // max-content menu then grows leftward off-screen. Pin both edges
+        // explicitly so alignment follows the prop, not the writing direction.
+        ...(menuAlign === 'right' ? { right: 0, left: 'auto' } : { left: 0, right: 'auto' }),
       }),
       // react-select's default single-value crossfade uses `display: grid` +
       // `gridArea: 1/1/2/3` on the value container, which can collapse to

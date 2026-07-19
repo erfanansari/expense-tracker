@@ -7,7 +7,7 @@
 **Your finances, finally clear.**
 
 A calm personal-finance app for people who think in more than one currency.
-Track expenses, manage income, and watch your assets grow.
+Track expenses, manage income, and always know where you stand.
 
 [**Live App**](https://kharji.app) · [Try the Demo](https://kharji.app/login) · [Report a Bug](https://github.com/erfanansari/kharji/issues)
 
@@ -45,7 +45,7 @@ The entire codebase is public so you can read every line of code that touches yo
 - 🌙 **Dark mode** — easy on the eyes, day or night
 - ⌨️ **Command palette** — jump anywhere with a keystroke
 - 📱 **Installable PWA** — add it to your home screen like a native app
-- 🔐 **Privacy-first auth** — self-hosted via Better Auth (no hosted third-party auth SaaS), HTTP-only session cookies, PBKDF2-hashed passwords, optional Google sign-in
+- 🔐 **Privacy-first auth** — self-hosted via Better Auth (no hosted third-party auth SaaS), HTTP-only session cookies, PBKDF2-hashed passwords, optional Google sign-in, and an active-device list with instant revocation
 - 💾 **Daily backups** — automated encrypted database dumps with 30-day retention
 
 ## Screenshots
@@ -57,6 +57,16 @@ The entire codebase is public so you can read every line of code that touches yo
 |       ![Assets](.github/screenshots/assets.png)       |  ![Income](.github/screenshots/income.png)  |
 |                    **Light Mode**                     |              **Landing Page**               |
 | ![Light Mode](.github/screenshots/overview-light.png) | ![Landing](.github/screenshots/landing.png) |
+
+### فارسی، همان‌قدر خانه (Farsi, first-class)
+
+Kharji isn't translated — it's written in Farsi. Full RTL layout, Persian digits, the Jalali calendar, and copy in everyday conversational Persian.
+
+|                     داشبورد                     |                     هزینه‌ها                      |
+| :---------------------------------------------: | :-----------------------------------------------: |
+| ![داشبورد](.github/screenshots/overview-fa.png) | ![هزینه‌ها](.github/screenshots/expenses-fa.png)  |
+|                  **گزارش‌ها**                   |                  **صفحهٔ اصلی**                   |
+| ![گزارش‌ها](.github/screenshots/reports-fa.png) | ![صفحهٔ اصلی](.github/screenshots/landing-fa.png) |
 
 ## Tech Stack
 
