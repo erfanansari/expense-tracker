@@ -1,11 +1,17 @@
 'use client';
 
+import { useState } from 'react';
+
 import { useTranslations } from 'next-intl';
 
 import { googleSignInKeyGenerator } from '@api/googleSignInMutation';
 import type { GoogleSignInResponse } from '@api/googleSignInMutation';
 import { useMutation } from '@tanstack/react-query';
-import { Loader2 } from 'lucide-react';
+import { Check, ExternalLink, Link2, Loader2 } from 'lucide-react';
+
+import { useInAppBrowser } from '@hooks/use-in-app-browser';
+
+import { buildAndroidBrowserIntentUrl } from '@utils';
 
 interface GoogleSignInButtonProps {
   disabled?: boolean;
@@ -35,6 +41,9 @@ export const GoogleIcon = () => (
 
 const GoogleSignInButton = ({ disabled, onError }: GoogleSignInButtonProps) => {
   const t = useTranslations('auth');
+  const inAppBrowser = useInAppBrowser();
+  const [copied, setCopied] = useState(false);
+
   const googleMutation = useMutation<GoogleSignInResponse, Error, void>({
     mutationKey: googleSignInKeyGenerator(),
     onSuccess: ({ url }) => {
@@ -46,6 +55,51 @@ const GoogleSignInButton = ({ disabled, onError }: GoogleSignInButtonProps) => {
   });
 
   const loading = googleMutation.isPending;
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 3000);
+    } catch {
+      onError?.(t('inAppBrowser.copyFailed'));
+    }
+  };
+
+  // Google refuses OAuth started inside an app's embedded browser and answers
+  // with "403 disallowed_useragent", so don't send the user down that dead end:
+  // offer a way into a real browser instead.
+  if (inAppBrowser) {
+    const androidIntentUrl =
+      inAppBrowser.platform === 'android' ? buildAndroidBrowserIntentUrl(window.location.href) : null;
+    const actionClassName =
+      'border-border-subtle bg-background text-text-primary hover:bg-background-secondary flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors sm:text-sm';
+
+    return (
+      <div className="border-warning bg-warning/10 rounded-lg border p-3">
+        <p className="text-text-primary text-xs font-medium sm:text-sm">{t('inAppBrowser.title')}</p>
+        <p className="text-text-secondary mt-1 text-xs sm:text-sm">
+          {t('inAppBrowser.body', { app: inAppBrowser.name || t('inAppBrowser.genericApp') })}
+        </p>
+        <div className="mt-2.5 flex flex-wrap gap-2">
+          {androidIntentUrl && (
+            <a href={androidIntentUrl} className={actionClassName}>
+              <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              {t('inAppBrowser.openInBrowser')}
+            </a>
+          )}
+          <button type="button" onClick={handleCopyLink} className={actionClassName}>
+            {copied ? (
+              <Check className="text-success h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            ) : (
+              <Link2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            )}
+            {copied ? t('inAppBrowser.copied') : t('inAppBrowser.copyLink')}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <button

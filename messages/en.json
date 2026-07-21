@@ -156,6 +156,15 @@
     "or": "OR",
     "continueWithGoogle": "Continue with Google",
     "googleSignInFailed": "Google sign-in failed",
+    "inAppBrowser": {
+      "title": "Google sign-in doesn't work here",
+      "body": "Google blocks sign-in inside {app}'s built-in browser. Open Kharji in Safari or Chrome, or sign in with your email and password below.",
+      "genericApp": "this app",
+      "openInBrowser": "Open in browser",
+      "copyLink": "Copy link",
+      "copied": "Link copied",
+      "copyFailed": "Couldn't copy the link"
+    },
     "fields": {
       "email": "Email",
       "password": "Password",
