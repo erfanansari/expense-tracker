@@ -24,20 +24,23 @@ interface SummaryResponse {
 const num = (v: unknown): number => (typeof v === 'number' ? v : 0);
 
 /**
- * SQL expression summing each row's pivot value (amount*entryRate) converted to
- * `currency` at the row's own date. For the pivot currency it's just the sum;
- * otherwise divide by the currency's rate on that date (carry-forward, with a
- * fallback to the earliest known rate). `currency` is validated against the
+ * SQL expression summing each row's value converted to `currency` at the row's
+ * own date. A row already denominated in `currency` contributes its amount
+ * as-is — conversion into a record's own currency must be a no-op, never a
+ * pivot round-trip, or rate-table gaps/drift corrupt the total (this mirrors
+ * convertItem in use-currency.ts). Other rows convert their pivot value
+ * (amount*entryRate) by the currency's rate on that date (carry-forward, with
+ * a fallback to the earliest known rate). `currency` is validated against the
  * supported set before inlining.
  */
 function sumInCurrency(currency: string, dateExpr: string): string {
   const pivot = 'amount * entryRate';
   if (currency === PIVOT_CURRENCY) return `COALESCE(SUM(${pivot}), 0)`;
   if (!SUPPORTED_CURRENCY_CODES.includes(currency)) return '0';
-  return `COALESCE(SUM( (${pivot}) / NULLIF(COALESCE(
+  return `COALESCE(SUM(CASE WHEN currency = '${currency}' THEN amount ELSE (${pivot}) / NULLIF(COALESCE(
     (SELECT cr.rate FROM currencyRates cr WHERE cr.currency='${currency}' AND cr.rateDate <= ${dateExpr} ORDER BY cr.rateDate DESC LIMIT 1),
     (SELECT cr.rate FROM currencyRates cr WHERE cr.currency='${currency}' ORDER BY cr.rateDate ASC LIMIT 1)
-  ), 0) ), 0)`;
+  ), 0) END), 0)`;
 }
 
 export const GET = withAuth(async (user) => {
