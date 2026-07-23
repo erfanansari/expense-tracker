@@ -45,8 +45,8 @@ export const POST = withAuth(async (user, request) => {
 
   // Insert the asset
   const assetResult = await db.execute({
-    sql: `INSERT INTO assets (userId, category, name, quantity, unit, unitValue, amount, currency, entryRate, notes, lastValuedAt)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
+    sql: `INSERT INTO assets (userId, category, name, quantity, unit, unitValue, amount, currency, entryRate, linkedItem, notes, lastValuedAt)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
     args: [
       user.userId,
       body.category,
@@ -57,6 +57,7 @@ export const POST = withAuth(async (user, request) => {
       body.amount,
       body.currency,
       entryRate,
+      body.linkedItem || null,
       body.notes || null,
       lastValuedAt,
     ],

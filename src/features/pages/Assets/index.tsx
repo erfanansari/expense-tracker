@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import { useTranslations } from 'next-intl';
 
 import { deleteAssetKeyGenerator } from '@api/deleteAssetMutation';
@@ -9,7 +11,7 @@ import type { GetAssetListResponse } from '@api/getAssetListQuery';
 import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
 import { ASSET_CATEGORY_COLORS } from '@constants/assets';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus } from 'lucide-react';
+import { Plus, RefreshCw } from 'lucide-react';
 
 import type { Asset, AssetCategory } from '@types';
 
@@ -30,6 +32,7 @@ import AssetsDistribution from './components/AssetsDistribution';
 import AssetsSummary from './components/AssetsSummary';
 import AssetsTable from './components/AssetsTable';
 import NetWorthChart from './components/NetWorthChart';
+import RevalueModal from './components/RevalueModal';
 
 const CATEGORY_COLORS = ASSET_CATEGORY_COLORS as Record<AssetCategory, string>;
 
@@ -70,6 +73,7 @@ const AssetsPage = () => {
   });
 
   const openAssetDrawer = useDrawerStore((state) => state.openAssetDrawer);
+  const [isRevalueOpen, setIsRevalueOpen] = useState(false);
   const {
     itemToDelete: assetToDelete,
     isModalOpen: isDeleteModalOpen,
@@ -122,10 +126,20 @@ const AssetsPage = () => {
             <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">{t('title')}</h1>
             <p className="text-text-muted mt-1 text-xs sm:text-sm">{t('subtitle')}</p>
           </div>
-          <Button variant="primary" onClick={() => openAssetDrawer()} className="shrink-0">
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">{tCommon('addAsset')}</span>
-          </Button>
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setIsRevalueOpen(true)}
+              disabled={showingSkeleton || assets.length === 0}
+            >
+              <RefreshCw className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('revalue.button')}</span>
+            </Button>
+            <Button variant="primary" onClick={() => openAssetDrawer()}>
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">{tCommon('addAsset')}</span>
+            </Button>
+          </div>
         </div>
 
         {/* On a failed fetch with no cached data, the table below shows the error —
@@ -162,6 +176,9 @@ const AssetsPage = () => {
             </div>
           </>
         )}
+
+        {/* Revalue at current rates */}
+        <RevalueModal isOpen={isRevalueOpen} onClose={() => setIsRevalueOpen(false)} />
 
         {/* Delete Confirmation Modal */}
         <DeleteConfirmModal

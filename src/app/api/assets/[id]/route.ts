@@ -94,6 +94,11 @@ export const PUT = withAuth(async (user, request, { params }) => {
     valuationChanged = true;
   }
 
+  if (body.linkedItem !== undefined) {
+    updates.push('linkedItem = ?');
+    args.push(body.linkedItem || null);
+  }
+
   if (body.notes !== undefined) {
     updates.push('notes = ?');
     args.push(body.notes || null);

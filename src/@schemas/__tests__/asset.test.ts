@@ -40,4 +40,20 @@ describe('createAssetSchema', () => {
     const result = schema.safeParse({ ...validAsset, quantity: -1 });
     expect(result.success).toBe(false);
   });
+
+  it('accepts a known tracked item as linkedItem', () => {
+    const result = schema.safeParse({ ...validAsset, linkedItem: 'GOLD_SEKKEH' });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts empty/null linkedItem (manual)', () => {
+    expect(schema.safeParse({ ...validAsset, linkedItem: '' }).success).toBe(true);
+    expect(schema.safeParse({ ...validAsset, linkedItem: null }).success).toBe(true);
+    expect(schema.safeParse(validAsset).success).toBe(true);
+  });
+
+  it('rejects an unknown linkedItem code', () => {
+    const result = schema.safeParse({ ...validAsset, linkedItem: 'NOT_A_THING' });
+    expect(result.success).toBe(false);
+  });
 });

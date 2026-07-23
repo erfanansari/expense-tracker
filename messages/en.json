@@ -449,6 +449,9 @@
       "unitValuePlaceholder": "e.g. 93k, 100",
       "totalValue": "Total Value",
       "totalValuePlaceholder": "e.g. 1k, 50m",
+      "autoPrice": "Auto-price (Optional)",
+      "autoPriceManual": "Manual",
+      "autoPriceSuggest": "Link to {item} price?",
       "added": "Asset added successfully!",
       "updated": "Asset updated successfully!"
     }
@@ -799,6 +802,27 @@
         "range6M": "6 Months",
         "range1Y": "1 Year",
         "rangeAll": "All Time"
+      },
+      "revalue": {
+        "button": "Update Values",
+        "title": "Update asset values",
+        "previewLoading": "Fetching today's rates...",
+        "previewError": "Couldn't fetch today's rates.",
+        "retry": "Try Again",
+        "empty": "Everything is already valued at today's rates.",
+        "emptyManualNote": "{count} manually-valued {count, plural, one {asset doesn't} other {assets don't}} auto-update — edit them to change their value.",
+        "ok": "Got it",
+        "description": "{count} {count, plural, one {asset} other {assets}} will be revalued at today's rates:",
+        "skippedTitle": "Not updated",
+        "unchangedCount": "{count} {count, plural, one {asset is} other {assets are}} already current",
+        "reasonManual": "manually valued",
+        "reasonNoRate": "no rate for its currency",
+        "reasonNoPrice": "no price available",
+        "reasonNoQuantity": "no quantity set",
+        "reasonUnchanged": "already current",
+        "apply": "Update All",
+        "applying": "Updating...",
+        "done": "{count} {count, plural, one {asset} other {assets}} updated!"
       }
     },
     "reports": {

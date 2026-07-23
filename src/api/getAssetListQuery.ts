@@ -18,6 +18,7 @@ export const assetSchema: z.ZodType<Asset> = z.object({
   amount: z.number(),
   currency: z.string(),
   entryRate: z.number(),
+  linkedItem: z.string().nullable(),
   notes: z.string().nullable(),
   lastValuedAt: z.string(),
   createdAt: z.string(),

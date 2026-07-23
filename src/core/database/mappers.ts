@@ -34,6 +34,7 @@ export function mapRowToAsset(row: DbRow): Asset {
     amount: row.amount as number,
     currency: row.currency as string,
     entryRate: row.entryRate as number,
+    linkedItem: (row.linkedItem as string | null) ?? null,
     notes: row.notes as string | null,
     lastValuedAt: row.lastValuedAt as string,
     createdAt: row.createdAt as string,

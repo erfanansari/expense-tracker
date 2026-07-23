@@ -1,9 +1,18 @@
 import { z } from 'zod';
 
+import { isTrackedItemCode } from '@/constants/tracked-items';
+
 import { currencyCodeSchema } from './expense';
 import type { Translator } from './fallback-translator';
 
 const assetCategoryEnum = z.enum(['cash', 'crypto', 'commodity', 'vehicle', 'property', 'bank', 'investment']);
+
+// '' (form "manual" option) and null both mean "not linked"; the API stores null.
+const linkedItemSchema = z
+  .string()
+  .nullable()
+  .optional()
+  .refine((v) => v == null || v === '' || isTrackedItemCode(v), { message: 'Unknown tracked item' });
 
 export function createAssetSchema(t: Translator) {
   return z.object({
@@ -14,6 +23,7 @@ export function createAssetSchema(t: Translator) {
     unitValue: z.number().min(0).optional(),
     amount: z.number().min(0, t('zod.asset.totalValueNonNegative')),
     currency: currencyCodeSchema,
+    linkedItem: linkedItemSchema,
     notes: z.string().optional(),
     lastValuedAt: z.string().optional(),
   });

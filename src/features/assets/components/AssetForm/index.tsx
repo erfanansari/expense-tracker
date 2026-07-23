@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { createAssetKeyGenerator } from '@api/createAssetMutation';
 import { ASSETS_SCOPE } from '@api/getAssetListQuery';
@@ -11,11 +11,12 @@ import { updateAssetKeyGenerator } from '@api/updateAssetMutation';
 import type { UpdateAssetRequestData } from '@api/updateAssetMutation';
 import { ASSET_CATEGORIES } from '@constants/assets';
 import { PIVOT_CURRENCY } from '@constants/currencies';
+import { getTrackedItem, suggestTrackedItem, TRACKED_ITEMS } from '@constants/tracked-items';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { numberToWords } from '@persian-tools/persian-tools';
 import type { QueryClient } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Coins, FileText, Loader2, Package, Plus } from 'lucide-react';
+import { Coins, FileText, Link2, Loader2, Package, Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
 import type { Asset } from '@types';
@@ -30,8 +31,10 @@ import FormMoneyInput from '@components/Form/components/FormMoneyInput';
 import FormSelect from '@components/Form/components/FormSelect';
 import Tooltip from '@components/Tooltip';
 
+import { useAuth } from '@hooks/use-auth';
 import { useAssetCategoryLabel } from '@hooks/use-constant-labels';
 import { useCurrency } from '@hooks/use-currency';
+import { useRates } from '@hooks/use-rates';
 
 import { useToast } from '@stores/toast';
 
@@ -53,6 +56,7 @@ const buildFormData = (asset: Asset): CreateAssetSchema => ({
   unitValue: asset.unitValue || 0,
   amount: asset.amount,
   currency: asset.currency,
+  linkedItem: asset.linkedItem || '',
   notes: asset.notes || '',
 });
 
@@ -61,10 +65,13 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
   const t = useTranslations('forms');
   const tCommon = useTranslations('common');
   const tZod = useTranslations();
+  const locale = useLocale() as 'en' | 'fa';
   const categoryLabel = useAssetCategoryLabel();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const { primaryCurrency } = useCurrency();
+  const { user } = useAuth();
+  const { data: ratesData } = useRates(!!user);
 
   // Variables
   const defaultFormData: CreateAssetSchema = useMemo(
@@ -76,6 +83,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
       unitValue: 0,
       amount: 0,
       currency: primaryCurrency || PIVOT_CURRENCY,
+      linkedItem: '',
       notes: '',
     }),
     [primaryCurrency]
@@ -94,6 +102,7 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
   const amount = watch('amount');
   const currency = watch('currency');
   const name = watch('name');
+  const linkedItem = watch('linkedItem');
 
   // Mutations
   const createMutation = useMutation<unknown, Error, CreateAssetSchema>({
@@ -140,6 +149,46 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
       shouldValidate: true,
     });
   };
+
+  // Today's price of a tracked item in the current entry currency (null when
+  // rates aren't loaded / no rate for the currency).
+  const trackedItemPrice = (code: string): number | null => {
+    const priceToman = ratesData?.latest?.[code];
+    if (!priceToman) return null;
+    if (currency === PIVOT_CURRENCY) return Math.round(priceToman);
+    const rate = ratesData?.latest?.[currency];
+    return rate ? Math.round((priceToman / rate) * 100) / 100 : null;
+  };
+
+  // The suggestion chip only sets the field — the effect below does the prefill.
+  const applyLinkedItem = (code: string) => {
+    setValue('linkedItem', code, { shouldDirty: true, shouldValidate: true });
+  };
+
+  // Prefill unit + today's price when the user picks a link (select or chip). The ref
+  // guards against firing on mount/reset (editing an already-linked asset must
+  // not overwrite its stored values with today's price).
+  const prevLinkedItemRef = useRef(linkedItem);
+  useEffect(() => {
+    const prev = prevLinkedItemRef.current;
+    prevLinkedItemRef.current = linkedItem;
+    if (!linkedItem || linkedItem === prev) return;
+    if (!formState.dirtyFields.linkedItem) return;
+    const item = getTrackedItem(linkedItem);
+    if (!item) return;
+    if (!watch('unit')) {
+      setValue('unit', locale === 'fa' ? item.defaultUnitFa : item.defaultUnit, { shouldDirty: true });
+    }
+    const price = trackedItemPrice(linkedItem);
+    if (price != null) handleUnitValueChange(price);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [linkedItem]);
+
+  // Name-based suggestion — a hint chip the user confirms, never silent linking.
+  const suggestion = useMemo(() => {
+    if (linkedItem || !name) return null;
+    return suggestTrackedItem(name);
+  }, [name, linkedItem]);
 
   const handleSubmit = async (data: CreateAssetSchema) => {
     const dataToSubmit = { ...data, lastValuedAt: new Date().toISOString() };
@@ -198,7 +247,35 @@ const AssetForm = ({ onAssetAdded, editingAsset, onCancelEdit, setIsDirty }: Ass
           {formState.errors.name?.message && (
             <p className="text-danger mt-1 text-xs">{formState.errors.name.message}</p>
           )}
+          {suggestion && (
+            <button
+              type="button"
+              onClick={() => applyLinkedItem(suggestion.code)}
+              className="border-border-subtle bg-background-secondary text-text-secondary hover:border-blue hover:text-blue mt-1 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-all"
+            >
+              <Link2 className="h-3 w-3" aria-hidden="true" />
+              {t('asset.autoPriceSuggest', { item: locale === 'fa' ? suggestion.labelFa : suggestion.label })}
+            </button>
+          )}
         </div>
+      </div>
+
+      {/* Auto-price link (optional) — ties the asset to a live Navasan price */}
+      <div className="space-y-1">
+        <label htmlFor="linkedItem" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+          <Link2 className="text-text-muted h-4 w-4" />
+          {t('asset.autoPrice')}
+        </label>
+        <FormSelect
+          name="linkedItem"
+          options={[
+            { value: '', label: t('asset.autoPriceManual') },
+            ...TRACKED_ITEMS.map((item) => ({
+              value: item.code,
+              label: locale === 'fa' ? item.labelFa : item.label,
+            })),
+          ]}
+        />
       </div>
 
       {/* Row 2: Quantity and Unit */}

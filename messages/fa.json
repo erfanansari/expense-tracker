@@ -449,6 +449,9 @@
       "unitValuePlaceholder": "مثلاً 93k یا 100",
       "totalValue": "ارزش کل",
       "totalValuePlaceholder": "مثلاً 1k یا 50m",
+      "autoPrice": "قیمت خودکار (اختیاری)",
+      "autoPriceManual": "دستی",
+      "autoPriceSuggest": "به قیمت {item} وصلش کنیم؟",
       "added": "دارایی ثبت شد!",
       "updated": "دارایی به‌روز شد!"
     }
@@ -799,6 +802,27 @@
         "range6M": "۶ ماه",
         "range1Y": "۱ سال",
         "rangeAll": "از اول"
+      },
+      "revalue": {
+        "button": "بروزرسانی ارزش‌ها",
+        "title": "بروزرسانی ارزش دارایی‌ها",
+        "previewLoading": "داریم نرخ‌های امروز رو می‌گیریم...",
+        "previewError": "نشد نرخ‌های امروز رو بگیریم.",
+        "retry": "دوباره امتحان کن",
+        "empty": "همه‌چیز با نرخ امروز بروزه، چیزی برای آپدیت نیست.",
+        "emptyManualNote": "{count} دارایی دستی هم داری که آپدیت خودکار نداره — برای تغییر ارزشش ویرایشش کن.",
+        "ok": "باشه",
+        "description": "{count} دارایی با نرخ امروز آپدیت می‌شه:",
+        "skippedTitle": "آپدیت نمی‌شن",
+        "unchangedCount": "{count} دارایی همین الان بروزه",
+        "reasonManual": "ارزشش رو دستی ثبت کردی",
+        "reasonNoRate": "نرخی برای ارز این دارایی نداریم",
+        "reasonNoPrice": "قیمتی براش نداریم",
+        "reasonNoQuantity": "مقدارش ثبت نشده",
+        "reasonUnchanged": "همین الان بروزه",
+        "apply": "بروزرسانی همه",
+        "applying": "در حال بروزرسانی...",
+        "done": "{count} دارایی آپدیت شد!"
       }
     },
     "reports": {

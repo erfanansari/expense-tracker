@@ -6,6 +6,16 @@ import { db } from '@core/database/client';
 import type { LatestRates, RatePoint, RatesSeries } from '@features/ExchangeRate/utils/currency';
 
 import { PIVOT_CURRENCY, RATE_CURRENCIES } from '@/constants/currencies';
+import { TRACKED_ITEMS } from '@/constants/tracked-items';
+
+// Everything we store a daily Toman price series for: real currencies plus
+// tracked commodity items (gold coins). One Navasan /latest/ call covers all
+// of them, so tracking items costs zero extra API budget. `scale` converts the
+// raw Navasan value to Toman (coins are quoted in thousand-Toman).
+const RATE_SERIES_ENTRIES: readonly { code: string; navasanItem: string; scale: number }[] = [
+  ...RATE_CURRENCIES.map((c) => ({ code: c.code, navasanItem: c.navasanItem as string, scale: 1 })),
+  ...TRACKED_ITEMS.map((i) => ({ code: i.code, navasanItem: i.navasanItem, scale: i.scale })),
+];
 
 const NAVASAN_API_BASE = 'https://api.navasan.tech';
 // Free-tier budget. We never call Navasan more than once per day (see
@@ -97,8 +107,8 @@ export async function refreshRates(apiKey: string | undefined): Promise<RefreshR
   const now = new Date().toISOString();
   const inserted: string[] = [];
 
-  for (const def of RATE_CURRENCIES) {
-    const item = def.navasanItem ? data[def.navasanItem] : undefined;
+  for (const def of RATE_SERIES_ENTRIES) {
+    const item = data[def.navasanItem];
     const value = item ? parseFloat(item.value) : NaN;
     if (!item || !Number.isFinite(value) || value <= 0) continue;
 
@@ -108,7 +118,15 @@ export async function refreshRates(apiKey: string | undefined): Promise<RefreshR
             ON CONFLICT(currency, baseCurrency, rateDate)
             DO UPDATE SET rate = excluded.rate, changeValue = excluded.changeValue,
                           navasanTimestamp = excluded.navasanTimestamp, fetchedAt = excluded.fetchedAt`,
-      args: [def.code, PIVOT_CURRENCY, value, date, item.change ?? 0, item.timestamp ?? null, now],
+      args: [
+        def.code,
+        PIVOT_CURRENCY,
+        value * def.scale,
+        date,
+        (item.change ?? 0) * def.scale,
+        item.timestamp ?? null,
+        now,
+      ],
     });
     inserted.push(def.code);
   }
@@ -131,9 +149,9 @@ export async function getEntryRate(currency: string): Promise<number | null> {
   return latest[currency] ?? null;
 }
 
-/** Count of distinct rate currencies that already have a row for `date`. */
+/** Count of distinct rate codes (currencies + tracked items) with a row for `date`. */
 async function rateCurrenciesPresentOn(date: string): Promise<number> {
-  const codes = RATE_CURRENCIES.map((c) => c.code);
+  const codes = RATE_SERIES_ENTRIES.map((c) => c.code);
   const placeholders = codes.map(() => '?').join(',');
   const res = await db.execute({
     sql: `SELECT COUNT(DISTINCT currency) as n FROM currencyRates WHERE rateDate = ? AND currency IN (${placeholders})`,
@@ -166,7 +184,7 @@ async function markAttempt(marker: string): Promise<void> {
  * already ran today.
  */
 async function hasUnseededRateCurrency(): Promise<boolean> {
-  const codes = RATE_CURRENCIES.map((c) => c.code);
+  const codes = RATE_SERIES_ENTRIES.map((c) => c.code);
   const placeholders = codes.map(() => '?').join(',');
   const res = await db.execute({
     sql: `SELECT COUNT(DISTINCT currency) as n FROM currencyRates WHERE currency IN (${placeholders})`,
@@ -191,8 +209,8 @@ export async function ensureFreshRates(apiKey: string | undefined): Promise<void
   if (!apiKey) return;
   const today = new Date().toISOString().split('T')[0];
 
-  // All rate currencies already have today's row → nothing to do.
-  if ((await rateCurrenciesPresentOn(today)) >= RATE_CURRENCIES.length) return;
+  // All rate codes already have today's row → nothing to do.
+  if ((await rateCurrenciesPresentOn(today)) >= RATE_SERIES_ENTRIES.length) return;
 
   // Normal path: one multi-currency fetch per day.
   if ((await getLastAttemptDate('navasan_rates')) !== today) {

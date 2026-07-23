@@ -15,6 +15,8 @@ export interface Asset {
   currency: string;
   /** Rate to the pivot at entry time (frozen snapshot). */
   entryRate: number;
+  /** Tracked price item code (src/constants/tracked-items.ts); null = manual. */
+  linkedItem: string | null;
   notes: string | null;
   lastValuedAt: string;
   createdAt: string;
@@ -29,6 +31,7 @@ export interface CreateAssetInput {
   unitValue?: number;
   amount: number;
   currency: string;
+  linkedItem?: string | null;
   notes?: string;
   lastValuedAt?: string;
 }
