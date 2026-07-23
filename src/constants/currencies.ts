@@ -148,6 +148,19 @@ export const CURRENCIES: readonly CurrencyDef[] = [
     decimals: 2,
     navasanItem: 'chf',
   },
+  {
+    code: 'AMD',
+    label: 'Armenian Dram',
+    labelFa: 'درام ارمنستان',
+    // Use the code (not the ֏ dram glyph) so it renders in the app font, like
+    // AED/CHF — spaced multi-letter prefix per native convention.
+    symbol: 'AMD',
+    symbolFa: 'AMD',
+    symbolPosition: 'prefix',
+    spacedSymbol: true,
+    decimals: 2,
+    navasanItem: 'amd',
+  },
 ] as const;
 
 /** Localized "CODE (Name)" options for currency picker dropdowns. */
