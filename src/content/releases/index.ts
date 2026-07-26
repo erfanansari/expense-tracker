@@ -1,0 +1,15 @@
+import type { Release } from '@types';
+
+import v1_0_0 from './1.0.0.json';
+
+/**
+ * User-facing release notes, newest first.
+ *
+ * Each release is a JSON file in this directory, imported explicitly below. The
+ * imports are deliberate rather than a directory read: `fs.readdirSync` is not
+ * statically analysable, so Next would not trace the JSON files into the
+ * serverless bundle and the changelog page would render empty in production.
+ *
+ * When cutting a release, add the file and one import line here. See RELEASING.md.
+ */
+export const RELEASES: Release[] = [v1_0_0 as Release];

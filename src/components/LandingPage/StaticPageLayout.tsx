@@ -5,13 +5,15 @@ import { useTranslations } from 'next-intl';
 import Footer from '@components/LandingPage/Footer';
 import Header from '@components/LandingPage/Header';
 
-interface LegalPageLayoutProps {
+interface StaticPageLayoutProps {
   title: string;
+  /** ISO date rendered as a "Last updated" line. Mutually exclusive with `subtitle` in practice. */
   lastUpdated?: string;
+  subtitle?: string;
   children: ReactNode;
 }
 
-const LegalPageLayout = ({ title, lastUpdated, children }: LegalPageLayoutProps) => {
+const StaticPageLayout = ({ title, lastUpdated, subtitle, children }: StaticPageLayoutProps) => {
   const t = useTranslations('landing.legal');
   return (
     <div className="bg-background flex min-h-screen flex-col">
@@ -24,6 +26,7 @@ const LegalPageLayout = ({ title, lastUpdated, children }: LegalPageLayoutProps)
               {t('lastUpdated')} <time dateTime={lastUpdated}>{lastUpdated}</time>
             </p>
           )}
+          {subtitle && <p className="text-text-secondary mt-3 text-sm sm:text-base">{subtitle}</p>}
           <div className="mt-8 flex flex-col gap-8">{children}</div>
         </div>
       </main>
@@ -32,11 +35,11 @@ const LegalPageLayout = ({ title, lastUpdated, children }: LegalPageLayoutProps)
   );
 };
 
-export const LegalSection = ({ title, children }: { title: string; children: ReactNode }) => (
+export const StaticSection = ({ title, children }: { title: string; children: ReactNode }) => (
   <section className="flex flex-col gap-3">
     <h2 className="text-text-primary text-xl font-semibold">{title}</h2>
     <div className="text-text-secondary flex flex-col gap-3 text-sm leading-relaxed sm:text-base">{children}</div>
   </section>
 );
 
-export default LegalPageLayout;
+export default StaticPageLayout;

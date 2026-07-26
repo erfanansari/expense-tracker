@@ -1,6 +1,8 @@
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
+import { ROUTES } from '@constants';
+
 import LocaleToggle from '@components/LocaleToggle';
 
 import pkg from '../../../package.json';
@@ -25,12 +27,19 @@ const LandingFooter = () => {
           <Link href="/contact" className="text-text-muted hover:text-text-primary text-xs transition-colors">
             {t('contact')}
           </Link>
+          <Link href={ROUTES.CHANGELOG} className="text-text-muted hover:text-text-primary text-xs transition-colors">
+            {t('changelog')}
+          </Link>
           <LocaleToggle />
         </div>
 
-        <span className="text-text-muted font-mono text-xs">
+        <Link
+          href={ROUTES.CHANGELOG}
+          className="text-text-muted hover:text-text-primary font-mono text-xs transition-colors"
+          dir="ltr"
+        >
           v{pkg.version} · {commitSha}
-        </span>
+        </Link>
       </div>
     </footer>
   );

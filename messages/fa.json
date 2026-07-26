@@ -62,6 +62,8 @@
   "metaTitles": {
     "landing": "خرجی - مدیریت مالی شخصی",
     "landingDescription": "هزینه‌ها، درآمد و دارایی‌هات رو یک‌جا ببین و همیشه بدون کجای کاری. خرجی، اپ مالی شخصی برای زندگی‌ای که قیمت‌هاش با چند ارز حساب می‌شه.",
+    "changelog": "تازه‌ها",
+    "changelogDescription": "همهٔ تغییرهای خرجی — ویژگی‌های جدید، بهبودها و رفع اشکال‌ها.",
     "overview": "داشبورد",
     "expenses": "هزینه‌ها",
     "income": "درآمد",
@@ -283,9 +285,18 @@
       "progress": "{done} از {total}",
       "dismiss": "بستن چک‌لیست",
       "steps": {
-        "expense": { "label": "اولین هزینه‌ت رو ثبت کن", "cta": "ثبت هزینه" },
-        "income": { "label": "درآمدت رو ثبت کن", "cta": "ثبت درآمد" },
-        "asset": { "label": "یه دارایی اضافه کن", "cta": "ثبت دارایی" }
+        "expense": {
+          "label": "اولین هزینه‌ت رو ثبت کن",
+          "cta": "ثبت هزینه"
+        },
+        "income": {
+          "label": "درآمدت رو ثبت کن",
+          "cta": "ثبت درآمد"
+        },
+        "asset": {
+          "label": "یه دارایی اضافه کن",
+          "cta": "ثبت دارایی"
+        }
       },
       "importHint": "داده‌هات جای دیگه‌ست؟ فایل CSV رو وارد کن از",
       "importLink": "تنظیمات",
@@ -538,7 +549,8 @@
       "copyright": "© {year} خرجی",
       "privacy": "حریم خصوصی",
       "terms": "شرایط استفاده",
-      "contact": "تماس با ما"
+      "contact": "تماس با ما",
+      "changelog": "تازه‌ها"
     },
     "legal": {
       "lastUpdated": "آخرین به‌روزرسانی:"
@@ -853,6 +865,23 @@
         "filterReportsAria": "فیلتر گزارش‌ها",
         "closeFiltersAria": "بستن فیلترها"
       }
+    },
+    "changelog": {
+      "title": "تازه‌ها",
+      "subtitle": "همهٔ تغییرهای خرجی، از جدیدترین.",
+      "latestBadge": "جدیدترین",
+      "empty": "هنوز نسخه‌ای منتشر نشده.",
+      "highlightTypes": {
+        "feature": "ویژگی جدید",
+        "improvement": "بهبود",
+        "fix": "رفع اشکال"
+      },
+      "pagination": {
+        "navigationLabel": "صفحه‌های تازه‌ها",
+        "previous": "قبلی",
+        "next": "بعدی",
+        "pageLabel": "صفحهٔ {page}"
+      }
     }
   },
   "settings": {
@@ -931,6 +960,7 @@
     "help": {
       "title": "راهنما و پشتیبانی",
       "subtitle": "سؤالی داری یا نظری؟ ما اینجاییم",
+      "whatsNew": "تازه‌ها",
       "documentation": "مستندات",
       "contactSupport": "تماس با پشتیبانی"
     },

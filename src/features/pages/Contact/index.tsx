@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 
-import LegalPageLayout from '@components/LandingPage/LegalPageLayout';
+import StaticPageLayout from '@components/LandingPage/StaticPageLayout';
 
 import ContactForm from './components/ContactForm';
 
@@ -16,7 +16,7 @@ const Contact = () => {
   const t = useTranslations('legal.contact');
 
   return (
-    <LegalPageLayout title={t('title')}>
+    <StaticPageLayout title={t('title')}>
       <p className="text-text-secondary text-sm leading-relaxed sm:text-base">{t('intro')}</p>
 
       <ContactForm />
@@ -25,7 +25,7 @@ const Contact = () => {
         <p>{t.rich('direct', emailTag)}</p>
         <p>{t('inApp')}</p>
       </div>
-    </LegalPageLayout>
+    </StaticPageLayout>
   );
 };
 

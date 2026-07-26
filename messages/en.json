@@ -62,6 +62,8 @@
   "metaTitles": {
     "landing": "Kharji - Personal Finance Tracker",
     "landingDescription": "Track expenses, manage income, and grow your wealth with Kharji personal finance tracker.",
+    "changelog": "Changelog",
+    "changelogDescription": "Every update to Kharji — new features, improvements and fixes.",
     "overview": "Overview",
     "expenses": "Expenses",
     "income": "Income",
@@ -283,9 +285,18 @@
       "progress": "{done} of {total}",
       "dismiss": "Dismiss checklist",
       "steps": {
-        "expense": { "label": "Add your first expense", "cta": "Add expense" },
-        "income": { "label": "Record your income", "cta": "Add income" },
-        "asset": { "label": "Add an asset you own", "cta": "Add asset" }
+        "expense": {
+          "label": "Add your first expense",
+          "cta": "Add expense"
+        },
+        "income": {
+          "label": "Record your income",
+          "cta": "Add income"
+        },
+        "asset": {
+          "label": "Add an asset you own",
+          "cta": "Add asset"
+        }
       },
       "importHint": "Have data elsewhere? Import a CSV in",
       "importLink": "Settings",
@@ -538,7 +549,8 @@
       "copyright": "© {year} Kharji",
       "privacy": "Privacy",
       "terms": "Terms",
-      "contact": "Contact"
+      "contact": "Contact",
+      "changelog": "Changelog"
     },
     "legal": {
       "lastUpdated": "Last updated:"
@@ -853,6 +865,23 @@
         "filterReportsAria": "Filter reports",
         "closeFiltersAria": "Close filters"
       }
+    },
+    "changelog": {
+      "title": "Changelog",
+      "subtitle": "Every update to Kharji, newest first.",
+      "latestBadge": "Latest",
+      "empty": "No releases yet.",
+      "highlightTypes": {
+        "feature": "New feature",
+        "improvement": "Improvement",
+        "fix": "Fix"
+      },
+      "pagination": {
+        "navigationLabel": "Changelog pages",
+        "previous": "Previous",
+        "next": "Next",
+        "pageLabel": "Page {page}"
+      }
     }
   },
   "settings": {
@@ -931,6 +960,7 @@
     "help": {
       "title": "Help & Support",
       "subtitle": "Get help or send feedback",
+      "whatsNew": "What's New",
       "documentation": "Documentation",
       "contactSupport": "Contact Support"
     },

@@ -1,0 +1,54 @@
+{
+  "version": "1.0.0",
+  "date": "2026-07-26",
+  "title": {
+    "en": "Kharji is live",
+    "fa": "خرجی رسماً اومد"
+  },
+  "summary": {
+    "en": "The first public release. Everything below is available today, on the web and as an installable app.",
+    "fa": "اولین نسخهٔ عمومی. هر چی پایین می‌بینی از همین امروز فعاله — هم روی وب، هم به‌عنوان اپ نصب‌شدنی."
+  },
+  "highlights": [
+    {
+      "type": "feature",
+      "en": "Track expenses and income in six currencies — toman, dollars, euros, pounds, lira, dirham — and see every amount in your chosen pair.",
+      "fa": "خرج و درآمدت رو با شش ارز ثبت کن — تومان، دلار، یورو، پوند، لیر، درهم — و هر مبلغ رو با جفت‌ارز خودت ببین."
+    },
+    {
+      "type": "feature",
+      "en": "Every record converts at the exchange rate from its own date, so your history stays true instead of shifting with today's rate.",
+      "fa": "هر تراکنش با نرخ ارز همون روز خودش تبدیل می‌شه، پس تاریخچه‌ات با نرخ امروز جابه‌جا نمی‌شه و درست می‌مونه."
+    },
+    {
+      "type": "feature",
+      "en": "Track your assets — cash, crypto, gold, property, vehicles, bank accounts and investments — with valuation history and a net-worth chart.",
+      "fa": "دارایی‌هات رو ثبت کن — نقد، رمزارز، طلا، ملک، ماشین، حساب بانکی و سرمایه‌گذاری — با تاریخچهٔ ارزش‌گذاری و نمودار دارایی خالص."
+    },
+    {
+      "type": "feature",
+      "en": "Reports that show spending by category and trends over time, daily, weekly or monthly — plus email summaries if you want them.",
+      "fa": "گزارش‌هایی که خرجت رو به تفکیک دسته‌بندی و روندش در طول زمان نشون می‌دن — روزانه، هفتگی یا ماهانه. خلاصهٔ ایمیلی هم اگه بخوای هست."
+    },
+    {
+      "type": "feature",
+      "en": "Organize spending your way with custom categories and tags you create inline as you type.",
+      "fa": "هزینه‌هات رو مدل خودت مرتب کن؛ با دسته‌بندی‌های دلخواه و برچسب‌هایی که همون لحظه و وسط تایپ می‌سازی."
+    },
+    {
+      "type": "feature",
+      "en": "Full English and Persian support, including a right-to-left layout and the Persian calendar.",
+      "fa": "پشتیبانی کامل از فارسی و انگلیسی، همراه با چیدمان راست‌به‌چپ و تقویم شمسی."
+    },
+    {
+      "type": "feature",
+      "en": "Your data is backed up automatically every day, and you can export everything to Excel — or import it back — whenever you like.",
+      "fa": "هر روز خودکار از داده‌هات نسخهٔ پشتیبان گرفته می‌شه، و هر وقت خواستی می‌تونی همه‌چیز رو اکسل بگیری یا دوباره واردش کنی."
+    },
+    {
+      "type": "feature",
+      "en": "Installable as an app on your phone or desktop, and it keeps working when you go offline.",
+      "fa": "می‌تونی روی موبایل یا کامپیوترت به‌عنوان اپ نصبش کنی، و آفلاین هم کار می‌کنه."
+    }
+  ]
+}

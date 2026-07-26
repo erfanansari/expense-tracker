@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
-import LegalPageLayout, { LegalSection } from '@components/LandingPage/LegalPageLayout';
+import StaticPageLayout, { StaticSection } from '@components/LandingPage/StaticPageLayout';
 
 const richTags = {
   a: (chunks: React.ReactNode) => (
@@ -24,66 +24,66 @@ const Privacy = () => {
   const t = useTranslations('legal.privacy');
 
   return (
-    <LegalPageLayout title={t('title')} lastUpdated="2026-07-08">
-      <LegalSection title={t('sections.overview.title')}>
+    <StaticPageLayout title={t('title')} lastUpdated="2026-07-08">
+      <StaticSection title={t('sections.overview.title')}>
         <p>{t.rich('sections.overview.body', richTags)}</p>
-      </LegalSection>
+      </StaticSection>
 
-      <LegalSection title={t('sections.infoCollect.title')}>
+      <StaticSection title={t('sections.infoCollect.title')}>
         <p>{t.rich('sections.infoCollect.account', richTags)}</p>
         <p>{t.rich('sections.infoCollect.financial', richTags)}</p>
         <p>{t.rich('sections.infoCollect.analytics', richTags)}</p>
-      </LegalSection>
+      </StaticSection>
 
-      <LegalSection title={t('sections.cookies.title')}>
+      <StaticSection title={t('sections.cookies.title')}>
         <p>{t('sections.cookies.body')}</p>
-      </LegalSection>
+      </StaticSection>
 
-      <LegalSection title={t('sections.howWeUse.title')}>
+      <StaticSection title={t('sections.howWeUse.title')}>
         <ul className="list-disc space-y-2 ps-5">
           <li>{t('sections.howWeUse.item1')}</li>
           <li>{t('sections.howWeUse.item2')}</li>
           <li>{t('sections.howWeUse.item3')}</li>
           <li>{t('sections.howWeUse.item4')}</li>
         </ul>
-      </LegalSection>
+      </StaticSection>
 
-      <LegalSection title={t('sections.whereDataLives.title')}>
+      <StaticSection title={t('sections.whereDataLives.title')}>
         <p>{t('sections.whereDataLives.body')}</p>
-      </LegalSection>
+      </StaticSection>
 
-      <LegalSection title={t('sections.dataSharing.title')}>
+      <StaticSection title={t('sections.dataSharing.title')}>
         <p>{t('sections.dataSharing.body')}</p>
-      </LegalSection>
+      </StaticSection>
 
-      <LegalSection title={t('sections.yourRights.title')}>
+      <StaticSection title={t('sections.yourRights.title')}>
         <ul className="list-disc space-y-2 ps-5">
           <li>{t.rich('sections.yourRights.export', richTags)}</li>
           <li>{t.rich('sections.yourRights.delete', richTags)}</li>
           <li>{t.rich('sections.yourRights.correct', richTags)}</li>
         </ul>
-      </LegalSection>
+      </StaticSection>
 
-      <LegalSection title={t('sections.retention.title')}>
+      <StaticSection title={t('sections.retention.title')}>
         <p>{t('sections.retention.body')}</p>
-      </LegalSection>
+      </StaticSection>
 
-      <LegalSection title={t('sections.security.title')}>
+      <StaticSection title={t('sections.security.title')}>
         <p>{t('sections.security.body')}</p>
-      </LegalSection>
+      </StaticSection>
 
-      <LegalSection title={t('sections.children.title')}>
+      <StaticSection title={t('sections.children.title')}>
         <p>{t('sections.children.body')}</p>
-      </LegalSection>
+      </StaticSection>
 
-      <LegalSection title={t('sections.changes.title')}>
+      <StaticSection title={t('sections.changes.title')}>
         <p>{t('sections.changes.body')}</p>
-      </LegalSection>
+      </StaticSection>
 
-      <LegalSection title={t('sections.more.title')}>
+      <StaticSection title={t('sections.more.title')}>
         <p>{t.rich('sections.more.body', linkTag)}</p>
-      </LegalSection>
-    </LegalPageLayout>
+      </StaticSection>
+    </StaticPageLayout>
   );
 };
 

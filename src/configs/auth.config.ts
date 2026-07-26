@@ -12,6 +12,7 @@ export const authConfig = {
       '/reset-password',
       '/opengraph-image',
       '/offline',
+      '/changelog',
       '/privacy',
       '/terms',
       '/contact',

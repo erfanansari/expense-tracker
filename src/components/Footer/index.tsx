@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import { Zap } from 'lucide-react';
 
-import { NAV_ITEMS } from '@constants';
+import { NAV_ITEMS, ROUTES } from '@constants';
 
 import GithubIcon from '@components/Icons/GithubIcon';
 
@@ -39,9 +39,13 @@ const Footer = () => {
 
         {/* Right: Version + GitHub */}
         <div className="flex items-center gap-5">
-          <span className="text-text-muted font-mono text-xs" dir="ltr">
+          <Link
+            href={ROUTES.CHANGELOG}
+            className="text-text-muted hover:text-text-primary font-mono text-xs transition-colors"
+            dir="ltr"
+          >
             v{pkg.version} · {commitSha}
-          </span>
+          </Link>
           <a
             href="https://github.com/erfanansari/kharji"
             target="_blank"

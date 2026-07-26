@@ -759,6 +759,35 @@ Environment variables in `.env.local`:
 - Reuse constants from `src/constants/` - never hardcode categories/types
 - Tables use `table-fixed` with percentage widths for alignment
 - Bilingual support: English labels with Persian (Farsi) translations
+- Commits follow Conventional Commits (enforced by commitlint) - see Releases below
+
+## Releases
+
+Kharji follows SemVer. **[RELEASING.md](RELEASING.md) is the full process** - read it before
+cutting a release. The essentials:
+
+- Commit messages are Conventional Commits, enforced by commitlint via `.husky/commit-msg`.
+  `fix:` → patch, `feat:` → minor, `feat!:`/`BREAKING CHANGE:` → major.
+- **Two changelogs, two audiences.** Never conflate them:
+  - `CHANGELOG.md` is **generated** by `release-it` from commit subjects. Never hand-edit it.
+  - `src/content/releases/*.json` is **hand-written**, bilingual (en + fa), user-facing, and is
+    what the `/changelog` page renders. It never reads `CHANGELOG.md`.
+- Cutting a release, in this order (the notes must be committed first - `release-it` requires a
+  clean working directory):
+
+  ```bash
+  # 1. add src/content/releases/<version>.json (both `en` and `fa` required)
+  # 2. register it in src/content/releases/index.ts, newest first
+  pnpm test                   # validates notes: semver, dates, no missing `fa`
+  git commit -m "docs: add v<version> release notes"
+  pnpm release:dry            # preview
+  pnpm release                # bump + CHANGELOG.md + commit + tag
+  git push --follow-tags      # triggers .github/workflows/release.yml
+  ```
+
+- `package.json` version must equal the newest entry in `src/content/releases/` - a test enforces
+  this.
+- Adding a release requires **no** database work; release notes are static files.
 
 ## Component Patterns
 

@@ -157,9 +157,15 @@ src/
 └── utils/         Pure utility functions + tests
 ```
 
+## Releases
+
+Kharji follows [Semantic Versioning](https://semver.org/). See [CHANGELOG.md](CHANGELOG.md) for the full history, [kharji.app/changelog](https://kharji.app/changelog) for the user-facing version, and [RELEASING.md](RELEASING.md) for the release process.
+
 ## Contributing
 
 Bug reports and pull requests are welcome. For larger changes, please open an issue first to discuss what you'd like to change, and make sure `pnpm check && pnpm test` passes before submitting.
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, …), enforced by commitlint on commit. This is what drives version bumps and the changelog — see [RELEASING.md](RELEASING.md).
 
 ## License
 
