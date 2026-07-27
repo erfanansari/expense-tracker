@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.1](https://github.com/erfanansari/kharji/compare/v1.0.0...v1.0.1) (2026-07-27)
+
+### Bug Fixes
+
+- **emails:** show the logo and use the app's Persian font in mail clients ([f6148a5](https://github.com/erfanansari/kharji/commit/f6148a55569d77bf96f6581b6b71f0478a3e55dd))
+
 All notable changes to Kharji. This file is the developer record and is generated from
 [Conventional Commits](https://www.conventionalcommits.org/) by `release-it` from v1.0.1 onward.
 
