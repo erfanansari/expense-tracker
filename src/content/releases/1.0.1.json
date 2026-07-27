@@ -1,0 +1,25 @@
+{
+  "version": "1.0.1",
+  "date": "2026-07-27",
+  "title": {
+    "en": "Emails that look right",
+    "fa": "ایمیل‌ها درست‌وحسابی شدن"
+  },
+  "highlights": [
+    {
+      "type": "fix",
+      "en": "The Kharji logo now shows up in every email instead of a broken image.",
+      "fa": "لوگوی خرجی حالا توی همهٔ ایمیل‌ها درست میاد و دیگه عکس شکسته نمی‌بینی."
+    },
+    {
+      "type": "improvement",
+      "en": "Persian emails now use the same font as the app, and pick a proper Persian typeface in mail apps that don't allow custom fonts.",
+      "fa": "ایمیل‌های فارسی حالا با همون فونت خود اپ میان، و توی ایمیل‌خون‌هایی که فونت دلخواه رو قبول نمی‌کنن هم یه فونت فارسی درست‌وحسابی انتخاب می‌شه."
+    },
+    {
+      "type": "improvement",
+      "en": "Verification, password reset and password change emails now carry the same Kharji header as the rest.",
+      "fa": "ایمیل‌های تأیید حساب، بازیابی رمز و تغییر رمز هم مثل بقیه هدر خرجی رو دارن."
+    }
+  ]
+}
