@@ -1,19 +1,22 @@
 export type EmailLocale = 'en' | 'fa';
 
-/** Cross-client Farsi-safe stack — Tahoma has solid Farsi glyph coverage in
- * Outlook/Gmail where the Google Font link may be stripped. */
 export const FONT_STACKS: Record<EmailLocale, string> = {
   en: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-  fa: '"Vazirmatn", Tahoma, "Segoe UI", Arial, sans-serif',
+  // Vazirmatn — the app's Persian face — wherever the client honours our
+  // @font-face (see fonts.ts). Gmail strips webfonts entirely, so the rest of
+  // the chain carries the weight there:
+  //   1. Persian families a Persian-speaking reader is likely to have installed
+  //      locally. Vazir first: it's Vazirmatn's predecessor by the same
+  //      designer, so the shapes barely differ.
+  //   2. Platform Arabic faces (SF Arabic on Apple, Segoe UI on Windows).
+  //   3. Tahoma — present everywhere, but the least like the app, so it sits
+  //      near the end rather than at the front.
+  fa: '"Vazirmatn", "Vazir", "Shabnam", "Sahel", "IRANSans", "IRANYekanX", "IRANYekan", "Noto Sans Arabic", "SF Arabic", -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Arial, sans-serif',
 };
 
 export function emailDir(locale: EmailLocale): 'rtl' | 'ltr' {
   return locale === 'fa' ? 'rtl' : 'ltr';
 }
-
-/** <link> tag markup for the Vazirmatn webfont — best-effort, clients that
- * strip <link> fall back to FONT_STACKS.fa's Tahoma stack. */
-export const VAZIRMATN_FONT_LINK = 'https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap';
 
 export const AUTH_EMAIL_STRINGS = {
   en: {

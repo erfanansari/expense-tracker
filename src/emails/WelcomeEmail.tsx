@@ -2,16 +2,16 @@ import * as React from 'react';
 
 import { Body, Button, Container, Head, Heading, Hr, Html, Preview, Section, Text } from '@react-email/components';
 
-import { AUTH_EMAIL_STRINGS, emailDir, type EmailLocale, FONT_STACKS, VAZIRMATN_FONT_LINK } from './i18n';
+import BrandHeader from './components/BrandHeader';
+import FontStyles from './components/FontStyles';
+import { AUTH_EMAIL_STRINGS, emailDir, type EmailLocale, FONT_STACKS } from './i18n';
 
 export interface WelcomeEmailProps {
   userName: string | null;
   dashboardUrl: string;
-  logoUrl: string;
+  logoUrl?: string;
   locale?: EmailLocale;
 }
-
-const BRAND_NAME: Record<EmailLocale, string> = { en: 'Kharji', fa: 'خرجی' };
 
 const WelcomeEmail = ({ userName, dashboardUrl, logoUrl, locale = 'en' }: WelcomeEmailProps) => {
   const firstName = userName ? userName.split(' ')[0] : null;
@@ -20,11 +20,12 @@ const WelcomeEmail = ({ userName, dashboardUrl, logoUrl, locale = 'en' }: Welcom
   const dir = emailDir(locale);
   const isRtl = dir === 'rtl';
   const font = FONT_STACKS[locale];
-  const brand = BRAND_NAME[locale];
 
   return (
     <Html dir={dir} lang={locale}>
-      <Head>{locale === 'fa' && <link rel="stylesheet" href={VAZIRMATN_FONT_LINK} />}</Head>
+      <Head>
+        <FontStyles locale={locale} />
+      </Head>
       <Preview>{t.preview}</Preview>
       <Body style={{ backgroundColor: '#f5f5f5', fontFamily: font, margin: 0, padding: '40px 0' }}>
         <Container
@@ -40,32 +41,7 @@ const WelcomeEmail = ({ userName, dashboardUrl, logoUrl, locale = 'en' }: Welcom
         >
           {/* Header */}
           <Section style={{ padding: '32px 40px 24px' }}>
-            <table role="presentation" cellPadding={0} cellSpacing={0} dir={dir}>
-              <tr>
-                <td style={{ verticalAlign: 'middle' }}>
-                  <img
-                    src={logoUrl}
-                    width="32"
-                    height="32"
-                    alt={brand}
-                    style={{ display: 'block', borderRadius: '8px', backgroundColor: '#171717' }}
-                  />
-                </td>
-                <td style={{ [isRtl ? 'paddingRight' : 'paddingLeft']: '10px', verticalAlign: 'middle' }}>
-                  <span
-                    style={{
-                      color: '#171717',
-                      fontSize: '18px',
-                      fontWeight: 700,
-                      letterSpacing: '-0.01em',
-                      fontFamily: font,
-                    }}
-                  >
-                    {brand}
-                  </span>
-                </td>
-              </tr>
-            </table>
+            <BrandHeader locale={locale} logoUrl={logoUrl} />
           </Section>
 
           {/* Body */}

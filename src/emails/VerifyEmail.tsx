@@ -2,7 +2,9 @@ import * as React from 'react';
 
 import { Body, Button, Container, Head, Heading, Hr, Html, Preview, Section, Text } from '@react-email/components';
 
-import { AUTH_EMAIL_STRINGS, emailDir, type EmailLocale, FONT_STACKS, VAZIRMATN_FONT_LINK } from './i18n';
+import BrandHeader from './components/BrandHeader';
+import FontStyles from './components/FontStyles';
+import { AUTH_EMAIL_STRINGS, emailDir, type EmailLocale, FONT_STACKS } from './i18n';
 
 export interface VerifyEmailProps {
   userName: string | null;
@@ -19,7 +21,9 @@ const VerifyEmail = ({ userName, verifyUrl, locale = 'en' }: VerifyEmailProps) =
 
   return (
     <Html dir={dir} lang={locale}>
-      <Head>{locale === 'fa' && <link rel="stylesheet" href={VAZIRMATN_FONT_LINK} />}</Head>
+      <Head>
+        <FontStyles locale={locale} />
+      </Head>
       <Preview>{t.preview}</Preview>
       <Body style={{ backgroundColor: '#f5f5f5', fontFamily: font, margin: 0, padding: '40px 0' }}>
         <Container
@@ -34,8 +38,9 @@ const VerifyEmail = ({ userName, verifyUrl, locale = 'en' }: VerifyEmailProps) =
           }}
         >
           <Section style={{ padding: '32px 40px 24px' }}>
+            <BrandHeader locale={locale} />
             <Heading
-              style={{ color: '#171717', fontSize: '22px', fontWeight: 700, margin: '0 0 8px', fontFamily: font }}
+              style={{ color: '#171717', fontSize: '22px', fontWeight: 700, margin: '24px 0 8px', fontFamily: font }}
             >
               {t.heading}
             </Heading>

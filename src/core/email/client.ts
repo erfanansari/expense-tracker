@@ -1,5 +1,7 @@
 import { Resend } from 'resend';
 
+import { EMAIL_LOGO_URL } from '@/emails/brand';
+
 if (!process.env.RESEND_API_KEY) {
   // Don't throw at module load — local dev shouldn't crash without a key.
   // Sends will fail loudly at call time instead.
@@ -15,10 +17,10 @@ export const REPLY_TO = 'dev.erfanansari@gmail.com';
 
 export const APP_URL = process.env.APP_URL ?? 'http://localhost:3000';
 
-// Kharji logo — the hosted PWA icon (black rounded square + white Zap). Must be
-// a real URL: Gmail and most clients block data: URIs, which renders as a
-// broken image. APP_URL is the production domain wherever real sends happen.
-export const LOGO_URL = `${APP_URL}/icons/icon-192.png`;
+// Kharji logo. Deliberately NOT derived from APP_URL: a send from local dev
+// would otherwise point the recipient's mail client at localhost and render a
+// broken image. See src/emails/brand.ts.
+export const LOGO_URL = EMAIL_LOGO_URL;
 
 export function unsubscribeUrl(token: string): string {
   return `${APP_URL}/api/unsubscribe/${token}`;
