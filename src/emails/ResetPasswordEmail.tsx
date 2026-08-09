@@ -12,7 +12,7 @@ export interface ResetPasswordEmailProps {
   locale?: EmailLocale;
 }
 
-const ResetPasswordEmail = ({ userName, resetUrl, locale = 'en' }: ResetPasswordEmailProps) => {
+const ResetPasswordEmail = ({ userName, resetUrl, locale = 'fa' }: ResetPasswordEmailProps) => {
   const firstName = userName ? userName.split(' ')[0] : null;
   const t = AUTH_EMAIL_STRINGS[locale].reset;
   const greeting = AUTH_EMAIL_STRINGS[locale].greeting(firstName);

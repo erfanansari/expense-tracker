@@ -66,7 +66,7 @@ const YearlyReport = ({
   unsubscribeUrl,
   webViewUrl,
   logoUrl,
-  locale = 'en',
+  locale = 'fa',
 }: YearlyReportProps) => {
   const dir = emailDir(locale);
   const currency: EmailCurrencyContext = { primaryCurrency, secondaryCurrency, numberFormat };

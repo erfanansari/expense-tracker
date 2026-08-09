@@ -1,7 +1,7 @@
 import type { Client, InValue } from '@libsql/client';
 
 import type { Category } from '@/@types/expense';
-import type { AppLocale } from '@/i18n/config';
+import { type AppLocale, DEFAULT_LOCALE } from '@/i18n/config';
 
 import { db } from './client';
 
@@ -58,14 +58,14 @@ function categorySeedFor(locale: AppLocale): CategorySeed {
  * language's set rather than renaming existing rows).
  *
  * @param userId   The user receiving the defaults.
- * @param locale   Locale to seed names in. Defaults to 'en'.
+ * @param locale   Locale to seed names in. Defaults to the app default (Farsi).
  * @param executor Optional client to use. Defaults to the shared `db`. The seed
  *                 scripts pass their own libSQL client (built after dotenv
  *                 loads .env.local).
  */
 export async function seedDefaultCategoriesForUser(
   userId: number,
-  locale: AppLocale = 'en',
+  locale: AppLocale = DEFAULT_LOCALE,
   executor: Executor = db
 ): Promise<void> {
   const seed = categorySeedFor(locale);

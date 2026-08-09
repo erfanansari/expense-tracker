@@ -17,7 +17,7 @@ interface AuthEmailUser {
 export async function sendVerificationEmail(
   user: AuthEmailUser,
   url: string,
-  locale: EmailLocale = 'en'
+  locale: EmailLocale = 'fa'
 ): Promise<void> {
   const html = await render(React.createElement(VerifyEmail, { userName: user.name, verifyUrl: url, locale }));
 
@@ -37,7 +37,7 @@ export async function sendVerificationEmail(
 export async function sendResetPasswordEmail(
   user: AuthEmailUser,
   url: string,
-  locale: EmailLocale = 'en'
+  locale: EmailLocale = 'fa'
 ): Promise<void> {
   const html = await render(React.createElement(ResetPasswordEmail, { userName: user.name, resetUrl: url, locale }));
 
@@ -54,7 +54,7 @@ export async function sendResetPasswordEmail(
   }
 }
 
-export async function sendPasswordChangedEmail(user: AuthEmailUser, locale: EmailLocale = 'en'): Promise<void> {
+export async function sendPasswordChangedEmail(user: AuthEmailUser, locale: EmailLocale = 'fa'): Promise<void> {
   const html = await render(
     React.createElement(PasswordChangedEmail, {
       userName: user.name,

@@ -12,7 +12,7 @@ export interface PasswordChangedEmailProps {
   locale?: EmailLocale;
 }
 
-const PasswordChangedEmail = ({ userName, resetUrl, locale = 'en' }: PasswordChangedEmailProps) => {
+const PasswordChangedEmail = ({ userName, resetUrl, locale = 'fa' }: PasswordChangedEmailProps) => {
   const firstName = userName ? userName.split(' ')[0] : null;
   const t = AUTH_EMAIL_STRINGS[locale].passwordChanged;
   const greeting = AUTH_EMAIL_STRINGS[locale].greeting(firstName);

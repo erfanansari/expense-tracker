@@ -12,7 +12,7 @@ export interface VerifyEmailProps {
   locale?: EmailLocale;
 }
 
-const VerifyEmail = ({ userName, verifyUrl, locale = 'en' }: VerifyEmailProps) => {
+const VerifyEmail = ({ userName, verifyUrl, locale = 'fa' }: VerifyEmailProps) => {
   const firstName = userName ? userName.split(' ')[0] : null;
   const t = AUTH_EMAIL_STRINGS[locale].verify;
   const greeting = AUTH_EMAIL_STRINGS[locale].greeting(firstName);

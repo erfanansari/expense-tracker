@@ -11,6 +11,7 @@ import Providers from '@features/Providers';
 
 import UpdatePrompt from '@components/UpdatePrompt';
 
+import { DEFAULT_LOCALE } from '@/i18n/config';
 import '@/styles/globals.css';
 
 import AppleSplashScreens from './AppleSplashScreens';
@@ -48,7 +49,7 @@ const LOCALIZED_META = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
-  const m = LOCALIZED_META[locale as keyof typeof LOCALIZED_META] ?? LOCALIZED_META.en;
+  const m = LOCALIZED_META[locale as keyof typeof LOCALIZED_META] ?? LOCALIZED_META[DEFAULT_LOCALE];
 
   return {
     metadataBase: new URL(APP_URL),

@@ -23,7 +23,7 @@ export const Layout = ({
   webViewUrl,
   logoUrl,
   footerText,
-  locale = 'en',
+  locale = 'fa',
   children,
 }: LayoutProps) => {
   const dir = emailDir(locale);

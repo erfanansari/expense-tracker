@@ -10,7 +10,7 @@ import { type AppLocale, DEFAULT_LOCALE, isAppLocale, LOCALE_COOKIE } from '@/i1
 /**
  * Resolve the UI locale for the current request.
  * Cookie first (steady state: zero DB reads), then the DB preference for
- * signed-in users on a fresh device, then English.
+ * signed-in users on a fresh device, then Farsi.
  */
 export const getUserLocale = cache(async (): Promise<AppLocale> => {
   const store = await cookies();

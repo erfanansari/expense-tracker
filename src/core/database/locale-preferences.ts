@@ -1,6 +1,6 @@
 import type { Client } from '@libsql/client';
 
-import type { AppLocale } from '@/i18n/config';
+import { type AppLocale, DEFAULT_LOCALE, isAppLocale } from '@/i18n/config';
 
 import { db } from './client';
 
@@ -17,13 +17,13 @@ export interface LocalePreferences {
 }
 
 const DEFAULTS: LocalePreferences = {
-  locale: 'en',
+  locale: DEFAULT_LOCALE,
   calendar: 'auto',
   secondaryDateCaptions: true,
 };
 
 /** Insert default locale preferences for a new user (idempotent). `locale`
- * defaults to 'en' but callers with a signal for the user's actual locale
+ * defaults to Farsi but callers with a signal for the user's actual locale
  * (e.g. the request's locale cookie) should pass it so the row doesn't start
  * out of sync with what the user already sees. */
 export async function createDefaultLocalePreferences(
@@ -40,8 +40,8 @@ export async function createDefaultLocalePreferences(
 
 /** Fetch a user's locale preferences, lazy-creating the row if missing.
  * `fallbackLocale` seeds a first-time row (e.g. from the request's locale
- * cookie) instead of silently defaulting to English for users who were
- * already browsing in Farsi before this row existed. */
+ * cookie) instead of silently defaulting for users who were already browsing
+ * in the other language before this row existed. */
 export async function getLocalePreferences(
   userId: number,
   fallbackLocale: AppLocale = DEFAULTS.locale
@@ -58,7 +58,7 @@ export async function getLocalePreferences(
 
   const row = existing.rows[0];
   return {
-    locale: (row.locale === 'fa' ? 'fa' : 'en') as AppLocale,
+    locale: isAppLocale(row.locale) ? row.locale : DEFAULTS.locale,
     calendar: ((row.calendar as string | null) ?? DEFAULTS.calendar) as CalendarPreference,
     secondaryDateCaptions: Number(row.secondaryDateCaptions) === 1,
   };

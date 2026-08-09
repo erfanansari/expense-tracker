@@ -6,10 +6,12 @@ import { updateLocalePreferencesKeyGenerator } from '@api/updateLocalePreference
 import type { UpdateLocalePreferencesRequestData } from '@api/updateLocalePreferencesMutation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { DEFAULT_LOCALE } from '@/i18n/config';
+
 export type { LocalePreferencesPayload };
 
 const DEFAULTS: LocalePreferencesPayload = {
-  locale: 'en',
+  locale: DEFAULT_LOCALE,
   calendar: 'auto',
   secondaryDateCaptions: true,
 };

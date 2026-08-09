@@ -41,7 +41,7 @@ const COLOR_HEX: Record<string, string> = {
   fuchsia: '#d946ef',
 };
 
-export const CategoryRow = ({ rank, name, color, value, currency, pct, locale = 'en' }: CategoryRowProps) => {
+export const CategoryRow = ({ rank, name, color, value, currency, pct, locale = 'fa' }: CategoryRowProps) => {
   const dir = emailDir(locale);
   const isRtl = dir === 'rtl';
   const swatch = COLOR_HEX[color] ?? '#6b7280';

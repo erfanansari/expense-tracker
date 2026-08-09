@@ -9,6 +9,8 @@ import { DEMO_EMAIL } from '@constants';
 
 import { hashPassword, verifyPassword } from '@core/auth/password';
 import { seedDefaultCategoriesForUser } from '@core/database/categories';
+import { db } from '@core/database/client';
+import { createDefaultLocalePreferences } from '@core/database/locale-preferences';
 import { createDefaultNotificationPreferences } from '@core/database/notification-preferences';
 import { sendPasswordChangedEmail, sendResetPasswordEmail, sendVerificationEmail } from '@core/email/auth-emails';
 import { sendWelcomeEmail } from '@core/email/welcome';
@@ -127,6 +129,9 @@ export const auth = betterAuth({
           const locale = await getUserLocale();
           try {
             await seedDefaultCategoriesForUser(userId, locale);
+            // Persist the locale they signed up in, so a fresh device doesn't
+            // fall back to the app default instead of their actual choice.
+            await createDefaultLocalePreferences(userId, db, locale);
             await createDefaultNotificationPreferences(userId);
           } catch (error) {
             console.error('Post-signup seeding failed:', error);

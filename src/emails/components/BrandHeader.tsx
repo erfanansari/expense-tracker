@@ -18,7 +18,7 @@ interface BrandHeaderProps {
  * or slow image degrades into a black tile with the brand name — not the grey
  * broken-image glyph.
  */
-export const BrandHeader = ({ locale = 'en', logoUrl = EMAIL_LOGO_URL }: BrandHeaderProps) => {
+export const BrandHeader = ({ locale = 'fa', logoUrl = EMAIL_LOGO_URL }: BrandHeaderProps) => {
   const dir = emailDir(locale);
   const isRtl = dir === 'rtl';
   const font = FONT_STACKS[locale];

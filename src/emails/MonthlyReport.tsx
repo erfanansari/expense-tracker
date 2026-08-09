@@ -46,7 +46,7 @@ const MonthlyReport = ({
   unsubscribeUrl,
   webViewUrl,
   logoUrl,
-  locale = 'en',
+  locale = 'fa',
 }: MonthlyReportProps) => {
   const dir = emailDir(locale);
   const currency: EmailCurrencyContext = { primaryCurrency, secondaryCurrency, numberFormat };

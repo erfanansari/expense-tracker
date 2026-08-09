@@ -13,7 +13,7 @@ export interface WelcomeEmailProps {
   locale?: EmailLocale;
 }
 
-const WelcomeEmail = ({ userName, dashboardUrl, logoUrl, locale = 'en' }: WelcomeEmailProps) => {
+const WelcomeEmail = ({ userName, dashboardUrl, logoUrl, locale = 'fa' }: WelcomeEmailProps) => {
   const firstName = userName ? userName.split(' ')[0] : null;
   const t = AUTH_EMAIL_STRINGS[locale].welcome;
   const greeting = AUTH_EMAIL_STRINGS[locale].greeting(firstName);

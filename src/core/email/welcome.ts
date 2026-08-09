@@ -13,7 +13,7 @@ export async function sendWelcomeEmail(user: {
   name: string | null;
   locale?: EmailLocale;
 }): Promise<void> {
-  const locale = user.locale ?? 'en';
+  const locale = user.locale ?? 'fa';
   const html = await render(
     React.createElement(WelcomeEmail, {
       userName: user.name,

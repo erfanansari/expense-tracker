@@ -26,7 +26,7 @@ const TONE_COLOR: Record<NonNullable<StatCardProps['tone']>, string> = {
 };
 
 /** Format with an explicit leading minus so the sign never lands mid-string (e.g. -1,234 IRT). */
-export function formatSigned(n: number, currencyCode: string, compact: boolean, locale: EmailLocale = 'en'): string {
+export function formatSigned(n: number, currencyCode: string, compact: boolean, locale: EmailLocale = 'fa'): string {
   const sign = n < 0 ? '-' : '';
   return `${sign}${formatMoney(Math.abs(n), currencyCode, { compact, locale })}`;
 }
@@ -46,7 +46,7 @@ export const StatCard = ({
   tone = 'neutral',
   delta,
   deltaDirection = 'up-is-bad',
-  locale = 'en',
+  locale = 'fa',
 }: StatCardProps) => {
   const dir = emailDir(locale);
   const valueColor = TONE_COLOR[tone];
