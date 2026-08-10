@@ -10,22 +10,23 @@ config({ path: '.env.local' });
 const DEFAULT_USER_EMAIL = 'dev.erfanansari@gmail.com';
 const DEFAULT_PASSWORD = 'ChangeMe123!'; // User should change this after first login
 
-// Mirrors DEFAULT_CATEGORY_SEED in src/core/database/categories.ts — kept
+// Mirrors DEFAULT_CATEGORY_SEED_FA in src/core/database/categories.ts (the app
+// is Farsi-first, so the default locale's set is what gets seeded) — kept
 // inline here so the script does not pull in the shared `db` client at import
 // time (env vars are loaded after imports).
 const DEFAULT_CATEGORIES: ReadonlyArray<{ name: string; icon: string; color: string }> = [
-  { name: 'Rent', icon: 'Home', color: 'blue' },
-  { name: 'Utilities', icon: 'Zap', color: 'amber' },
-  { name: 'Groceries', icon: 'ShoppingCart', color: 'green' },
-  { name: 'Coffee', icon: 'Coffee', color: 'orange' },
-  { name: 'Transport', icon: 'Car', color: 'sky' },
-  { name: 'Healthcare', icon: 'Heart', color: 'rose' },
-  { name: 'Clothing', icon: 'Shirt', color: 'violet' },
-  { name: 'Entertainment', icon: 'Film', color: 'pink' },
-  { name: 'Travel', icon: 'Plane', color: 'cyan' },
-  { name: 'Investment', icon: 'TrendingUp', color: 'emerald' },
-  { name: 'Work', icon: 'Briefcase', color: 'slate' },
-  { name: 'Other', icon: 'Folder', color: 'gray' },
+  { name: 'اجاره', icon: 'Home', color: 'blue' },
+  { name: 'قبوض', icon: 'Zap', color: 'amber' },
+  { name: 'خواربار', icon: 'ShoppingCart', color: 'green' },
+  { name: 'قهوه', icon: 'Coffee', color: 'orange' },
+  { name: 'حمل و نقل', icon: 'Car', color: 'sky' },
+  { name: 'سلامت و درمان', icon: 'Heart', color: 'rose' },
+  { name: 'پوشاک', icon: 'Shirt', color: 'violet' },
+  { name: 'سرگرمی', icon: 'Film', color: 'pink' },
+  { name: 'سفر', icon: 'Plane', color: 'cyan' },
+  { name: 'سرمایه‌گذاری', icon: 'TrendingUp', color: 'emerald' },
+  { name: 'کار', icon: 'Briefcase', color: 'slate' },
+  { name: 'سایر', icon: 'Folder', color: 'gray' },
 ];
 
 async function seedUser() {

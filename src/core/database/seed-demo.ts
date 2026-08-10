@@ -8,7 +8,10 @@ import { DEMO_EMAIL, DEMO_PASSWORD } from '@constants';
 
 import { hashPassword } from '@core/auth/password';
 
-const DEMO_NAME = 'Demo User';
+// The demo is a single shared account and its content lives in the DB as literal
+// strings, so it can't switch language at render time — Kharji is Farsi-first,
+// so the whole dataset is authored in Farsi.
+const DEMO_NAME = 'کاربر دمو';
 
 // ─── Deterministic PRNG (mulberry32) ────────────────────────────────────────
 function mulberry32(seed: number) {
@@ -107,16 +110,16 @@ function getExchangeRate(year: number, month: number): number {
 
 // ─── Tags ───────────────────────────────────────────────────────────────────
 // A small, everyday set — enough to make filtering meaningful without clutter.
-const TAG_NAMES = ['essential', 'recurring', 'planned', 'impulse', 'social', 'fun', 'cash', 'online'];
+const TAG_NAMES = ['ضروری', 'هرماهه', 'برنامه‌ریزی‌شده', 'هوسی', 'دورهمی', 'تفریح', 'نقدی', 'آنلاین'];
 
 // Category to tag affinity mapping (keys must match EXPENSE_CATEGORIES names).
 const CATEGORY_TAG_AFFINITY: Record<string, string[]> = {
-  Groceries: ['essential', 'recurring', 'planned', 'cash'],
-  'Coffee & Dining': ['social', 'fun', 'impulse', 'cash'],
-  Transport: ['essential', 'recurring', 'cash'],
-  Rent: ['essential', 'recurring', 'planned'],
-  Utilities: ['essential', 'recurring', 'planned', 'online'],
-  Entertainment: ['social', 'fun', 'impulse', 'online'],
+  خواربار: ['ضروری', 'هرماهه', 'برنامه‌ریزی‌شده', 'نقدی'],
+  'کافه و رستوران': ['دورهمی', 'تفریح', 'هوسی', 'نقدی'],
+  'حمل و نقل': ['ضروری', 'هرماهه', 'نقدی'],
+  اجاره: ['ضروری', 'هرماهه', 'برنامه‌ریزی‌شده'],
+  قبوض: ['ضروری', 'هرماهه', 'برنامه‌ریزی‌شده', 'آنلاین'],
+  سرگرمی: ['دورهمی', 'تفریح', 'هوسی', 'آنلاین'],
 };
 
 // ─── Expense categories with frequency and price ranges ─────────────────────
@@ -135,79 +138,64 @@ interface ExpenseCategory {
 // USD amounts are intentionally down-to-earth (rent ~$450, groceries ~$10-55).
 const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   {
-    name: 'Groceries',
+    name: 'خواربار',
     icon: 'ShoppingCart',
     color: 'green',
     minPerMonth: 4,
     maxPerMonth: 7,
     minUsd: 8,
     maxUsd: 55,
-    descriptions: [
-      'Weekly groceries',
-      'Fresh produce',
-      'Bread and dairy',
-      'Fruit and vegetables',
-      'Pantry basics',
-      'Snacks and tea',
-    ],
+    descriptions: ['خرید هفتگی', 'میوه و تره‌بار', 'نان و لبنیات', 'میوه و سبزیجات', 'خرید خونه', 'تنقلات و چای'],
   },
   {
-    name: 'Coffee & Dining',
+    name: 'کافه و رستوران',
     icon: 'Coffee',
     color: 'orange',
     minPerMonth: 4,
     maxPerMonth: 8,
     minUsd: 3,
     maxUsd: 30,
-    descriptions: [
-      'Coffee shop',
-      'Lunch out',
-      'Dinner with friends',
-      'Kebab',
-      'Cafe with a friend',
-      'Bakery',
-      'Fast food',
-    ],
+    descriptions: ['کافه', 'ناهار بیرون', 'شام با دوستا', 'کباب', 'کافه با رفیق', 'شیرینی‌فروشی', 'فست‌فود'],
   },
   {
-    name: 'Transport',
+    name: 'حمل و نقل',
     icon: 'Car',
     color: 'sky',
     minPerMonth: 3,
     maxPerMonth: 6,
     minUsd: 2,
     maxUsd: 25,
-    descriptions: ['Gas fill-up', 'Snapp ride', 'Metro credit', 'Taxi', 'Parking', 'Bus fare'],
+    descriptions: ['بنزین', 'اسنپ', 'شارژ کارت مترو', 'تاکسی', 'پارکینگ', 'اتوبوس'],
   },
   {
-    name: 'Rent',
+    name: 'اجاره',
     icon: 'Home',
     color: 'blue',
     minPerMonth: 1,
     maxPerMonth: 1,
     minUsd: 400,
     maxUsd: 500,
-    descriptions: ['Monthly rent'],
+    descriptions: ['اجاره ماهانه'],
   },
   {
-    name: 'Utilities',
+    name: 'قبوض',
     icon: 'Zap',
     color: 'amber',
     minPerMonth: 1,
     maxPerMonth: 1,
     minUsd: 20,
     maxUsd: 70,
-    descriptions: ['Electricity bill', 'Water bill', 'Gas bill', 'Internet bill', 'Phone bill'],
+    descriptions: ['قبض برق', 'قبض آب', 'قبض گاز', 'قبض اینترنت', 'قبض موبایل'],
   },
   {
-    name: 'Entertainment',
+    name: 'سرگرمی',
     icon: 'Film',
     color: 'red',
     minPerMonth: 1,
     maxPerMonth: 3,
     minUsd: 5,
     maxUsd: 40,
-    descriptions: ['Movie night', 'Streaming subscription', 'Video game', 'Concert', 'Book', 'Day trip'],
+    descriptions: ['سینما', 'اشتراک فیلم', 'بازی', 'کنسرت', 'کتاب', 'سفر یک‌روزه'],
   },
 ];
 
@@ -227,7 +215,7 @@ interface AssetDef {
 const ASSET_DEFS: AssetDef[] = [
   {
     category: 'cash',
-    name: 'US Dollar (cash)',
+    name: 'دلار نقدی',
     quantity: 2800,
     unit: 'USD',
     baseUnitValueUsd: 1,
@@ -235,7 +223,7 @@ const ASSET_DEFS: AssetDef[] = [
   },
   {
     category: 'bank',
-    name: 'Savings Account',
+    name: 'حساب پس‌انداز',
     quantity: 1,
     unit: null,
     baseUnitValueUsd: 3000,
@@ -243,23 +231,23 @@ const ASSET_DEFS: AssetDef[] = [
   },
   {
     category: 'commodity',
-    name: 'Gold',
+    name: 'طلا',
     quantity: 15,
-    unit: 'grams',
+    unit: 'گرم',
     baseUnitValueUsd: 50,
     growth: 1.08,
   },
   {
     category: 'commodity',
-    name: 'Emami Gold Coin',
+    name: 'سکه امامی',
     quantity: 2,
-    unit: 'coins',
+    unit: 'عدد',
     baseUnitValueUsd: 500,
     growth: 1.08,
   },
   {
     category: 'crypto',
-    name: 'Bitcoin',
+    name: 'بیت‌کوین',
     quantity: 0.04,
     unit: 'BTC',
     baseUnitValueUsd: 30000,
@@ -267,7 +255,7 @@ const ASSET_DEFS: AssetDef[] = [
   },
   {
     category: 'vehicle',
-    name: 'Peugeot 207',
+    name: 'پژو ۲۰۷',
     quantity: 1,
     unit: null,
     baseUnitValueUsd: 12000,
@@ -347,6 +335,17 @@ export async function seedDemo() {
         args: [String(userId), userId, passwordHash],
       });
     }
+
+    // 1b. Pin the demo account's stored preference to Farsi so the UI matches
+    // the Farsi content below. A visitor who explicitly picked English still
+    // wins (getUserLocale reads the cookie first) — this only covers the
+    // no-cookie case, which is the default one.
+    await client.execute({
+      sql: `INSERT INTO userLocalePreferences (userId, locale, calendar, secondaryDateCaptions)
+            VALUES (?, 'fa', 'auto', 1)
+            ON CONFLICT(userId) DO UPDATE SET locale = 'fa', updatedAt = CURRENT_TIMESTAMP`,
+      args: [userId],
+    });
 
     // 2. Clear existing data (idempotent). Expenses must go before categories
     // because expenses.category_id has ON DELETE RESTRICT.
@@ -509,8 +508,8 @@ export async function seedDemo() {
           month,
           year,
           'salary',
-          'Employer Inc.',
-          'Monthly salary',
+          'شرکت محل کار',
+          'حقوق ماهانه',
           salaryDate,
           salaryDate,
         ],
@@ -532,8 +531,8 @@ export async function seedDemo() {
             month,
             year,
             'freelance',
-            pick(['Web project', 'Consulting', 'Design work', 'Code review', 'Tech writing']),
-            'Freelance work',
+            pick(['پروژه وب‌سایت', 'مشاوره', 'کار طراحی', 'ریویو کد', 'مقاله فنی']),
+            'کار فریلنسی',
             freelanceDate,
             freelanceDate,
           ],
@@ -556,8 +555,8 @@ export async function seedDemo() {
             month,
             year,
             'gift',
-            'Family',
-            month === 3 ? 'Nowruz eidi' : 'Year-end gift',
+            'خانواده',
+            month === 3 ? 'عیدی نوروز' : 'هدیه آخر سال',
             giftDate,
             giftDate,
           ],
