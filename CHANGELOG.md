@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/erfanansari/kharji/compare/v1.0.1...v1.1.0) (2026-08-10)
+
+### Features
+
+- seed demo in farsi ([9195add](https://github.com/erfanansari/kharji/commit/9195add44d37129cd253e3dbe14dd96b8420ba1c))
+- set default lang to fa ([f7dfe9e](https://github.com/erfanansari/kharji/commit/f7dfe9e7ca4b3c2438545c711b827761151edc03))
+
 ## [1.0.1](https://github.com/erfanansari/kharji/compare/v1.0.0...v1.0.1) (2026-07-27)
 
 ### Bug Fixes
