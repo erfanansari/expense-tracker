@@ -5,6 +5,18 @@ export const alt = 'Kharji – Personal Finance Tracker';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
+// Cobalt palette literals — Satori can't read CSS custom properties, so these
+// mirror the `.dark` block in src/styles/globals.css by hand.
+const CANVAS = '#121214';
+const TILE_TOP = '#3b7bee';
+const TILE_BOTTOM = '#1a4fc4';
+const HEADING = '#ececee';
+const MUTED = '#a6a6aa';
+const BORDER = '#313134';
+const PILL_TEXT = '#949498';
+
+const TILE = 112;
+
 export default function OGImage() {
   return new ImageResponse(
     <div
@@ -15,7 +27,7 @@ export default function OGImage() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#171717',
+        backgroundColor: CANVAS,
         fontFamily: 'sans-serif',
       }}
     >
@@ -25,67 +37,58 @@ export default function OGImage() {
           position: 'absolute',
           inset: 0,
           backgroundImage:
-            'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)',
+            'linear-gradient(rgba(236,236,238,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(236,236,238,0.03) 1px, transparent 1px)',
           backgroundSize: '60px 60px',
         }}
       />
 
-      {/* Glow */}
+      {/* Cobalt glow behind the mark */}
       <div
         style={{
           position: 'absolute',
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '600px',
-          height: '400px',
-          background: 'radial-gradient(ellipse, rgba(255,255,255,0.06) 0%, transparent 70%)',
+          width: '760px',
+          height: '460px',
+          background: 'radial-gradient(ellipse, rgba(91,155,248,0.18) 0%, transparent 70%)',
         }}
       />
 
       {/* Logo + name */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '32px' }}>
-        {/* Zap icon box */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '34px' }}>
         <div
           style={{
-            width: '80px',
-            height: '80px',
-            borderRadius: '20px',
-            backgroundColor: '#ffffff',
+            width: `${TILE}px`,
+            height: `${TILE}px`,
+            borderRadius: `${Math.round(TILE * 0.2237)}px`,
+            backgroundImage: `linear-gradient(180deg, ${TILE_TOP} 0%, ${TILE_BOTTOM} 100%)`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            position: 'relative',
           }}
         >
-          {/* SVG Zap */}
+          {/* Same stroked Zap path as src/components/Logo/ZapBolt.tsx */}
           <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="44"
-            height="44"
+            width={Math.round(TILE * 0.54)}
+            height={Math.round(TILE * 0.54)}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#171717"
-            strokeWidth="2.5"
-            strokeLinecap="round"
+            stroke="#ffffff"
+            strokeWidth="2"
             strokeLinejoin="round"
+            strokeLinecap="round"
           >
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
           </svg>
         </div>
 
-        <span style={{ fontSize: '72px', fontWeight: '700', color: '#ffffff', letterSpacing: '-2px' }}>Kharji</span>
+        <span style={{ fontSize: '78px', fontWeight: 700, color: HEADING, letterSpacing: '-2px' }}>Kharji</span>
       </div>
 
       {/* Subtitle */}
-      <p
-        style={{
-          fontSize: '28px',
-          fontWeight: '400',
-          color: '#a3a3a3',
-          margin: 0,
-          letterSpacing: '0.5px',
-        }}
-      >
+      <p style={{ fontSize: '28px', fontWeight: 400, color: MUTED, margin: 0, letterSpacing: '0.5px' }}>
         Personal Finance Tracker
       </p>
 
@@ -95,7 +98,7 @@ export default function OGImage() {
           marginTop: '48px',
           width: '120px',
           height: '2px',
-          backgroundColor: '#404040',
+          backgroundColor: TILE_TOP,
           borderRadius: '2px',
         }}
       />
@@ -111,10 +114,10 @@ export default function OGImage() {
               paddingLeft: '20px',
               paddingRight: '20px',
               borderRadius: '100px',
-              border: '1px solid #404040',
-              color: '#737373',
+              border: `1px solid ${BORDER}`,
+              color: PILL_TEXT,
               fontSize: '18px',
-              fontWeight: '500',
+              fontWeight: 500,
             }}
           >
             {label}

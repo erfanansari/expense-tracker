@@ -10,21 +10,21 @@ const SUCCESS_HTML = `<!doctype html>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Unsubscribed · Kharji</title>
     <style>
-      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; background:#fafafa; margin:0; padding:48px 24px; color:#171717; }
-      .card { max-width: 480px; margin: 0 auto; background:#fff; border:1px solid #e5e5e5; border-radius: 16px; padding: 32px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; background:#f3f6fa; margin:0; padding:48px 24px; color:#0f1b2d; }
+      .card { max-width: 480px; margin: 0 auto; background:#ffffff; border:1px solid #e2e8f1; border-radius: 20px; padding: 32px; box-shadow: 0 1px 2px rgba(15,27,45,0.04); }
       h1 { margin: 0 0 8px 0; font-size: 22px; letter-spacing: -0.01em; }
-      p { margin: 0; color:#525252; line-height: 1.5; font-size: 14px; }
+      p { margin: 0; color:#46586e; line-height: 1.5; font-size: 14px; }
       .logo { display:inline-flex; align-items:center; gap:10px; margin-bottom: 24px; }
-      .logo .box { background:#171717; color:#fff; width:32px; height:32px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; }
+      .logo .box { background:#1a56db; color:#ffffff; width:32px; height:32px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; }
       .logo .brand { font-weight: 700; font-size: 18px; }
-      a { color:#171717; }
+      a { color:#1a56db; }
     </style>
   </head>
   <body>
     <div class="card">
       <div class="logo">
         <span class="box">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ffffff" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
         </span>
         <span class="brand">Kharji</span>
       </div>
@@ -39,7 +39,7 @@ const FAILURE_HTML = `<!doctype html>
   <head>
     <meta charset="utf-8" />
     <title>Link expired · Kharji</title>
-    <style>body { font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif; padding: 48px 24px; color:#171717; }</style>
+    <style>body { font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif; padding: 48px 24px; color:#0f1b2d; background:#f3f6fa; } a { color:#1a56db; }</style>
   </head>
   <body>
     <h1>This unsubscribe link is no longer valid.</h1>
