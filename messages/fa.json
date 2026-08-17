@@ -911,6 +911,14 @@
     },
     "title": "تنظیمات",
     "subtitle": "حساب و تنظیماتت رو مدیریت کن",
+    "navLabel": "بخش‌های تنظیمات",
+    "backToSettings": "همهٔ تنظیمات",
+    "groups": {
+      "account": "حساب",
+      "preferences": "ترجیحات",
+      "organize": "سازمان‌دهی",
+      "advanced": "پیشرفته"
+    },
     "profile": {
       "title": "پروفایل",
       "subtitle": "اطلاعات شخصیت رو به‌روز کن",

@@ -911,6 +911,14 @@
     },
     "title": "Settings",
     "subtitle": "Manage your account and preferences",
+    "navLabel": "Settings sections",
+    "backToSettings": "All settings",
+    "groups": {
+      "account": "Account",
+      "preferences": "Preferences",
+      "organize": "Organise",
+      "advanced": "Advanced"
+    },
     "profile": {
       "title": "Profile",
       "subtitle": "Update your personal information",
