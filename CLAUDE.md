@@ -214,35 +214,39 @@ Tables MUST use fixed layout with percentage widths for proper column alignment:
 
 Auth pages (login, signup, forgot-password) follow a consistent design:
 
-- **Logo**: Zap icon in black box (`bg-[#171717]`) with "Kharji" text side by side
-- **Subtitle**: "Personal Finance Tracker" in muted gray
-- **Card**: White background with subtle border and shadow
-- **Inputs**: Rounded corners, `border-[#e5e5e5]`, focus state `border-[#171717]`
+- **Logo**: always the shared `<Logo />` component — never re-create the lockup
+- **Subtitle**: "Personal Finance Tracker" in `text-text-tertiary`
+- **Card**: `bg-background` with `border-border-subtle` and a subtle shadow
+- **Inputs**: Rounded corners, `border-input-border`, focus state `border-input-border-focus`
 - **Password fields**: Include eye icon toggle for show/hide
-- **Primary buttons**: Black background (`bg-[#171717]`), white text
-- **Secondary buttons**: White with border (outlined style)
-- **Links**: Use `text-[#171717]` with `font-semibold` for dark links, `text-[#6b7280]` for muted text
+- **Primary buttons**: `bg-button-primary-bg` (cobalt), `text-button-primary-text`, pill-shaped
+- **Secondary buttons**: outlined style over `bg-background`
+- **Links**: `text-text-primary` with `font-semibold` for strong links, `text-text-tertiary` for muted text
 - **Footer links**: Placed outside the card (e.g., "Don't have an account? Sign up")
 
 ```tsx
-// Logo pattern
-<div className="flex items-center gap-2">
-  <div className="rounded-md bg-[#171717] p-2">
-    <Zap className="h-5 w-5 text-white" />
-  </div>
-  <span className="text-xl font-bold text-[#171717]">Kharji</span>
-</div>
+import Logo from '@components/Logo';
 
-// Black button
-<button className="w-full rounded-lg bg-[#171717] px-4 py-3 font-medium text-white hover:bg-[#404040]">
+// Logo lockup — sizes: sm (nav/footer), md (auth), lg (404), xl (splash)
+<Logo size="md" wordmark={t('common.appName')} />
+
+// Primary button
+<button className="bg-button-primary-bg hover:bg-button-primary-bg-hover text-button-primary-text w-full rounded-full px-4 py-3 font-medium">
   Sign In
 </button>
 
 // Outlined button
-<button className="w-full rounded-lg border border-[#e5e5e5] bg-white px-4 py-3 font-medium text-[#171717] hover:bg-[#fafafa]">
+<button className="border-button-outline-border bg-background hover:bg-button-outline-bg-hover text-button-outline-text w-full rounded-full border px-4 py-3 font-medium">
   Continue with Demo
 </button>
 ```
+
+**The logo mark** is an **outlined** lightning bolt (Zap) on a cobalt tile, in
+`src/components/Logo/ZapBolt.tsx`. It is stroked, not filled — the hollow
+interior is the mark's signature. Its path is mirrored by
+`scripts/generate-brand-assets.mjs`, which rasterises the favicon, PWA icons and
+iOS splash screens. Change the glyph in both places, then re-run
+`node scripts/generate-brand-assets.mjs`.
 
 ### UI/UX - Modal Component
 
@@ -263,7 +267,7 @@ import Modal from '@/components/Modal';
 
 **Modal features:**
 
-- Light theme with white background, `#fafafa` header
+- `bg-card-bg` surface with a `bg-card-header-bg` header
 - ESC key to close
 - Click outside (backdrop) to close
 - Focus management (auto-focuses modal on open)
@@ -275,23 +279,23 @@ import Modal from '@/components/Modal';
 - Use a `DetailRow` pattern for consistent item layout
 - Icon box on left with border and subtle background
 - Label (English + Farsi) above the value
-- Use dividers (`border-t border-[#e5e5e5]`) to group related items
+- Use dividers (`border-t border-border-subtle`) to group related items
 - Handle long text with `break-words`
 
 ```tsx
 // DetailRow pattern
 <div className="flex items-start gap-3 sm:gap-4">
-  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#e5e5e5] bg-[#fafafa]">
-    <Icon className="h-4 w-4 text-[#525252]" />
+  <div className="border-icon-box-border bg-icon-box-bg flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
+    <Icon className="text-text-secondary h-4 w-4" />
   </div>
   <div className="min-w-0 flex-1">
     <div className="flex items-center gap-2">
-      <span className="text-xs font-medium text-[#a3a3a3]">Label</span>
-      <span className="text-xs text-[#a3a3a3]" dir="rtl">
+      <span className="text-text-muted text-xs font-medium">Label</span>
+      <span className="text-text-muted text-xs" dir="rtl">
         برچسب
       </span>
     </div>
-    <div className="mt-1 text-sm font-medium text-[#171717]">{value}</div>
+    <div className="text-text-primary mt-1 text-sm font-medium">{value}</div>
   </div>
 </div>
 ```
@@ -303,7 +307,7 @@ Follow these accessibility patterns:
 - **Modals**: Use `role="dialog"`, `aria-modal="true"`, `aria-labelledby` for title
 - **Decorative icons**: Add `aria-hidden="true"` to icons that don't convey meaning
 - **Close buttons**: Include `aria-label="Close modal"`
-- **Focus states**: Use visible focus rings (`focus:ring-2 focus:ring-[#171717] focus:ring-offset-2 focus:outline-none`)
+- **Focus states**: Use visible focus rings (`focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:outline-none`)
 - **Semantic HTML**: Use `<time>` with `dateTime` attribute, `role="separator"` for dividers
 - **Keyboard navigation**: Support ESC to close modals, Tab for focus navigation
 
@@ -330,36 +334,58 @@ Use responsive Tailwind classes for mobile-first design:
 
 #### Theme Token Usage
 
-The app uses a centralized theming system with semantic color tokens. Always use these Tailwind classes:
+The app uses the **Cobalt** design system: trust-blue as the single chromatic
+action colour, over blue-grey neutrals in light mode and **neutral charcoal** in
+dark mode.
+
+**Light and dark are tinted differently on purpose.** Light-mode neutrals carry a
+cool blue-grey cast; dark-mode surfaces are near-neutral charcoal (channel spread
+≤ 4). Tinting the dark surfaces with the brand hue was tried and rejected — it
+makes the whole app read blue instead of letting cobalt act as an accent. In dark
+mode cobalt appears only on buttons, links, focus rings, active nav and the chart
+line. Do not "unify" the two themes by giving dark surfaces a blue tint. Every token is defined once in
+`src/styles/globals.css` (`:root` for light, `.dark` for dark) and exposed to
+Tailwind through `@theme inline`. There are **no `dark:` variants anywhere in
+`src/`** — dark mode works purely by re-declaring token values, so components
+never need to know which theme is active.
+
+Hex values below are the light theme; each has a dark counterpart in `.dark`.
 
 **Background Colors:**
 
-- `bg-background` - Main page background (#ffffff)
-- `bg-background-secondary` - Headers, secondary backgrounds (#fafafa)
-- `bg-background-elevated` - Hover states, elevated surfaces (#f5f5f5)
-- `bg-background-hover` - Subtle hover states (#f0f0f0)
+- `bg-background` - Cards and raised surfaces (#ffffff)
+- `bg-background-content` - Page canvas behind cards (#f3f6fa)
+- `bg-background-secondary` - Headers, secondary backgrounds (#f3f6fa)
+- `bg-background-elevated` - Hover states, elevated surfaces (#e9eff7)
+- `bg-background-hover` - Subtle hover states (#e3ebf5)
 
 **Border Colors:**
 
-- `border-border-subtle` - Default borders (#e5e5e5)
-- `border-border-default` - Medium borders (#d4d4d4)
-- `border-border-strong` - Strong borders (#a3a3a3)
+- `border-border-subtle` - Default borders (#e2e8f1)
+- `border-border-default` - Medium borders (#cfd9e6)
+- `border-border-strong` - Strong borders, meets 3:1 (#6f8199)
 
 **Text Colors:**
 
-- `text-text-primary` - Primary text, headings (#171717)
-- `text-text-secondary` - Secondary text (#525252)
-- `text-text-tertiary` - Tertiary text (#6b7280)
-- `text-text-muted` - Muted/subtle text, labels (#a3a3a3)
+- `text-text-primary` - Primary text, headings (#0f1b2d)
+- `text-text-secondary` - Secondary text (#46586e)
+- `text-text-tertiary` - Tertiary text (#556783)
+- `text-text-muted` - Muted/subtle text, labels (#6f8199)
 
 **Semantic Colors:**
 
-- `bg-primary` / `text-primary` - Primary black color (#171717)
-- `bg-blue` / `text-blue` - Links, primary actions (#0070f3)
-- `bg-success` / `text-success` - Success states (#10b981)
-- `bg-danger` / `text-danger` - Error/danger states (#ea001d)
-- `bg-warning` / `text-warning` - Warning states (#f59e0b)
-- `bg-info` / `text-info` - Info states (#8b5cf6)
+- `bg-primary` / `text-primary` - Brand cobalt (#1a56db)
+- `bg-accent` / `text-accent` - Links, focus, edit affordances (#1a56db). `blue` is a
+  back-compat alias for the same value; prefer `accent` in new code
+- `bg-success` / `text-success` - Money in, success states (#0e7a3e)
+- `bg-danger` / `text-danger` - Error/danger states (#c81e1e)
+- `bg-warning` / `text-warning` - Amber warning states (#8a5a06)
+- `bg-info` / `text-info` - Info states (#7028cc)
+
+Each semantic colour also has a `-light` tint (for filled callouts) and a
+`-foreground` (the readable colour to place **on** the filled colour, e.g.
+`bg-warning text-warning-foreground`). Never pair a semantic fill with
+`text-white` — it fails contrast in dark mode where the fills are bright.
 
 **Component-Specific Tokens:**
 
@@ -368,12 +394,25 @@ The app uses a centralized theming system with semantic color tokens. Always use
 - Inputs: `bg-input-bg`, `border-input-border`, `focus:border-input-border-focus`
 - Tags: `bg-tag-bg`, `text-tag-text`, `border-tag-border`
 - Cards: `bg-card-bg`, `bg-card-header-bg`, `border-card-border`
+- Categories: `--color-cat-*` (16 hues). The **keys are persisted per user in the
+  database** — hues may be retuned, but never rename or remove one without a migration.
+
+**Shape language:**
+
+- Radius scale is declared unlayered in `:root`, deliberately overriding Tailwind's
+  own `--radius-*` defaults: `rounded-sm` 8px → `rounded-lg` 14px → `rounded-2xl` 20px
+- Buttons, badges and chips are **pill-shaped** (`rounded-full`)
+- Hierarchy comes from 1px borders and surface tints; shadows stay near-flat
 
 **Rules:**
 
 1. **NEVER use hardcoded colors** like `bg-[#171717]` or `text-[#ea001d]`
 2. **Always use theme tokens** for all color values
 3. **To add a new color:** Add it to `src/styles/globals.css` first, expose it in `@theme inline`, then use it
+4. **Verify contrast** for any new pair: body text 4.5:1, UI boundaries 3:1, in **both** themes
+5. The only legitimate hex literals live where CSS variables cannot reach:
+   `src/emails/colors.ts`, `src/app/opengraph-image.tsx`, `src/app/global-error.tsx`,
+   `src/app/manifest.ts`, `layout.tsx`'s `themeColor`, and canvas particle colours
 
 ### UI/UX - Icon Consistency
 
@@ -437,7 +476,7 @@ All action buttons (edit, delete, save, cancel) MUST use this standardized clean
 
 - NO borders (borderless design for cleaner look)
 - Use `p-2` padding (not fixed width/height like `h-9 w-9`)
-- Start with `text-[#a3a3a3]` (gray/muted state)
+- Start with `text-action-default` (muted state)
 - Hover shows colored background (10% opacity) + colored icon
 - Always include `title` attribute for accessibility
 - Always include `aria-label` for screen readers
@@ -528,7 +567,7 @@ import DeleteTagModal from '@/components/DeleteTagModal';
 **Guidelines:**
 
 - Always show clear consequences of deletion in the message
-- Use `#ea001d` color for delete buttons
+- Use `text-danger` / `bg-button-danger-bg` for delete buttons
 - Disable modal close during deletion (prevents accidental dismissal)
 - Show loading state in confirmation button during deletion
 - Only use browser `alert()` for error messages, never for confirmations
@@ -563,14 +602,14 @@ const saveEdit = async (id: number) => {
   onChange={(e) => setEditingName(e.target.value)}
   onKeyDown={(e) => (e.key === 'Enter' ? saveEdit(id) : e.key === 'Escape' && cancelEdit())}
   autoFocus
-  className="rounded border border-[#0070f3] px-2 py-1 text-sm outline-none"
+  className="border-accent rounded border px-2 py-1 text-sm outline-none"
 />;
 {
-  editError && <p className="text-xs text-[#ea001d]">{editError}</p>;
+  editError && <p className="text-danger text-xs">{editError}</p>;
 }
 ```
 
-**Guidelines:** Enter/Escape keys, auto-focus, blue border, case-insensitive duplicate check, trim values
+**Guidelines:** Enter/Escape keys, auto-focus, accent border, case-insensitive duplicate check, trim values
 
 ## API Routes
 
@@ -838,7 +877,7 @@ The `DeleteConfirmModal` component (`src/components/DeleteConfirmModal/`) provid
 
 **Features:**
 
-- Warning icon with danger color (`#ea001d`)
+- Warning icon in `text-danger`
 - Dynamic title with optional item name
 - Clear consequences message
 - "This action cannot be undone" warning
@@ -871,21 +910,21 @@ import Button from '@/components/Button';
 
 **Button Variant Styles:**
 
-- **primary**: `bg-[#000000] hover:bg-[#171717] text-white`
-- **outline**: `bg-white hover:bg-[#f5f5f5] border border-[#e5e5e5] text-[#525252] hover:text-[#171717]`
-- **danger**: `bg-white hover:bg-[#ea001d]/10 border border-[#e5e5e5] hover:border-[#ea001d] text-[#525252] hover:text-[#ea001d]`
+- **primary**: `bg-button-primary-bg hover:bg-button-primary-bg-hover text-button-primary-text` (pill)
+- **outline**: `bg-background hover:bg-button-outline-bg-hover border border-button-outline-border text-button-outline-text hover:text-button-outline-text-hover`
+- **danger**: `bg-background hover:bg-danger/10 border border-button-outline-border hover:border-danger text-button-outline-text hover:text-danger`
 
 **Note:** For solid red/danger buttons (like delete confirmations), override with custom classes:
 
 ```tsx
-<Button variant="primary" className="bg-[#ea001d] hover:bg-[#AE292E]">
+<Button variant="primary" className="bg-button-danger-bg hover:bg-button-danger-bg-hover">
   Delete Tag
 </Button>
 ```
 
 ### Toast Component
 
-The `Toast` component (`src/components/Toast/`) provides a Vercel-inspired notification system for displaying success, error, warning, and info messages to users.
+The `Toast` component (`src/components/Toast/`) provides the notification system for displaying success, error, warning, and info messages to users.
 
 **Usage:**
 
@@ -910,10 +949,10 @@ function MyComponent() {
 
 **Toast Types:**
 
-- `success` - Green toast with CheckCircle icon
+- `success` - Success-green toast with CheckCircle icon
 - `error` - Red toast with XCircle icon
-- `warning` - Orange toast with AlertTriangle icon
-- `info` - Blue toast with Info icon
+- `warning` - Amber toast with AlertTriangle icon
+- `info` - Cobalt accent toast with Info icon
 
 **Features:**
 
