@@ -9,7 +9,7 @@ import type { DeleteAssetRequestData } from '@api/deleteAssetMutation';
 import { ASSETS_SCOPE, getAssetListKeyGenerator } from '@api/getAssetListQuery';
 import type { GetAssetListResponse } from '@api/getAssetListQuery';
 import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
-import { ASSET_CATEGORY_COLORS } from '@constants/assets';
+import { ASSET_CATEGORY_COLOR_FALLBACK, ASSET_CATEGORY_COLORS } from '@constants/assets';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, RefreshCw } from 'lucide-react';
 
@@ -112,7 +112,7 @@ const AssetsPage = () => {
   const chartData: ChartEntry[] = Object.entries(assetsByCategory).map(([category, data]) => ({
     name: categoryLabel(category),
     value: data.total,
-    color: CATEGORY_COLORS[category as AssetCategory] || '#525252',
+    color: CATEGORY_COLORS[category as AssetCategory] || ASSET_CATEGORY_COLOR_FALLBACK,
   }));
 
   const showingSkeleton = isLoading && assets.length === 0;

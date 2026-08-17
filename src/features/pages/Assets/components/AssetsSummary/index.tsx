@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 
-import { ASSET_CATEGORIES, ASSET_CATEGORY_COLORS } from '@constants/assets';
+import { ASSET_CATEGORIES, ASSET_CATEGORY_COLOR_FALLBACK, ASSET_CATEGORY_COLORS } from '@constants/assets';
 import { TrendingUp, Wallet } from 'lucide-react';
 
 import type { Asset, AssetCategory } from '@types';
@@ -83,7 +83,7 @@ const AssetsSummary = ({ assetsByCategory }: AssetsSummaryProps) => {
       {totalAssetCount === 0 &&
         ASSET_CATEGORIES.slice(0, 3).map((category) => {
           const Icon = CATEGORY_ICONS[category.value] || Wallet;
-          const color = CATEGORY_COLORS[category.value] || '#525252';
+          const color = CATEGORY_COLORS[category.value] || ASSET_CATEGORY_COLOR_FALLBACK;
           return (
             <div
               key={category.value}
@@ -107,7 +107,7 @@ const AssetsSummary = ({ assetsByCategory }: AssetsSummaryProps) => {
         .sort(([, a], [, b]) => b.total - a.total)
         .map(([category, data]) => {
           const Icon = CATEGORY_ICONS[category as AssetCategory] || Wallet;
-          const color = CATEGORY_COLORS[category as AssetCategory] || '#525252';
+          const color = CATEGORY_COLORS[category as AssetCategory] || ASSET_CATEGORY_COLOR_FALLBACK;
           const cat = pair(data.assets);
 
           return (

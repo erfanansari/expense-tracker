@@ -8,15 +8,19 @@ export const ASSET_CATEGORIES = [
   { value: 'investment', label: 'Investments', labelFa: 'سرمایه‌گذاری', icon: 'trending-up' },
 ] as const;
 
+/** Points at the shared `--color-cat-*` accents so asset swatches and the
+ *  portfolio pie retint with the theme instead of staying light-mode hexes. */
 export const ASSET_CATEGORY_COLORS: Record<string, string> = {
-  cash: '#10b981',
-  crypto: '#f59e0b',
-  commodity: '#eab308',
-  vehicle: '#6366f1',
-  property: '#0070f3',
-  bank: '#8b5cf6',
-  investment: '#ec4899',
+  cash: 'var(--color-cat-green)',
+  crypto: 'var(--color-cat-amber)',
+  commodity: 'var(--color-cat-orange)',
+  vehicle: 'var(--color-cat-indigo)',
+  property: 'var(--color-cat-blue)',
+  bank: 'var(--color-cat-violet)',
+  investment: 'var(--color-cat-pink)',
 };
+
+export const ASSET_CATEGORY_COLOR_FALLBACK = 'var(--color-text-secondary)';
 
 export function getAssetCategoryLabel(category: string): { en: string; fa: string; icon: string } {
   const found = ASSET_CATEGORIES.find((c) => c.value === category);

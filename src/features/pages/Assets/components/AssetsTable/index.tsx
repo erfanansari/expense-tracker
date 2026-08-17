@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import { useTranslations } from 'next-intl';
 
-import { ASSET_CATEGORY_COLORS } from '@constants/assets';
+import { ASSET_CATEGORY_COLOR_FALLBACK, ASSET_CATEGORY_COLORS } from '@constants/assets';
 import { Wallet } from 'lucide-react';
 
 import type { AssetCategory } from '@types';
@@ -109,7 +109,7 @@ const AssetsTable = ({
         .sort(([, a], [, b]) => b.total - a.total)
         .map(([category, data]) => {
           const Icon = CATEGORY_ICONS[category as AssetCategory] || Wallet;
-          const color = CATEGORY_COLORS[category as AssetCategory] || '#525252';
+          const color = CATEGORY_COLORS[category as AssetCategory] || ASSET_CATEGORY_COLOR_FALLBACK;
 
           return (
             <div key={category}>
