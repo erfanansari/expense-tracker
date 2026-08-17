@@ -12,7 +12,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const baseStyles =
-  'px-3 sm:px-5 py-2.5 rounded-lg text-sm font-semibold transition-[background-color,border-color,color] duration-200 flex items-center justify-center gap-2 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer';
+  'px-3 sm:px-5 py-2.5 rounded-full text-sm font-semibold transition-[background-color,border-color,color] duration-200 flex items-center justify-center gap-2 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer';
 
 const variantStyles = {
   primary: 'bg-button-primary-bg enabled:hover:bg-button-primary-bg-hover text-button-primary-text',

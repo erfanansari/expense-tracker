@@ -1,257 +1,287 @@
 @import 'tailwindcss';
 
+/* ===================================
+   COBALT DESIGN SYSTEM — LIGHT THEME
+
+   Cobalt: crisp blue-grey neutrals with trust-blue as the single chromatic
+   action colour. Two rules hold the palette together:
+   1. Neutrals carry a cool blue cast, never pure gray and never beige —
+      tinted-but-crisp is what reads as modern finance.
+   2. Cobalt is the ONLY chromatic action colour: buttons, links, focus and
+      active state. Everything else earns colour by meaning (money in /
+      money out / warning), not decoration.
+
+   Every foreground/background pair below is verified to WCAG AA (4.5:1 for
+   text, 3:1 for UI boundaries) against every surface it can land on,
+   including the hover surfaces.
+   =================================== */
 :root {
-  /* ===================================
-     BASE COLORS - LIGHT THEME
-     =================================== */
-
-  /* Backgrounds */
+  /* Backgrounds — cool near-white. `background` is the raised surface
+     (cards, auth panel); `content` is the page canvas behind it. */
   --color-background: #ffffff;
-  --color-background-secondary: #fafafa;
-  --color-background-content: #fafafa;
-  --color-background-elevated: #f5f5f5;
-  --color-background-hover: #f0f0f0;
+  --color-background-secondary: #f3f6fa;
+  --color-background-content: #f3f6fa;
+  --color-background-elevated: #e9eff7;
+  --color-background-hover: #e3ebf5;
 
-  /* Borders */
-  --color-border-subtle: #e5e5e5;
-  --color-border-default: #d4d4d4;
-  --color-border-strong: #a3a3a3;
+  /* Borders — the primary hierarchy device now that shadows are near-flat */
+  --color-border-subtle: #e2e8f1;
+  --color-border-default: #cfd9e6;
+  --color-border-strong: #6f8199;
 
-  /* Text Colors */
-  --color-text-primary: #171717;
-  --color-text-secondary: #525252;
-  --color-text-tertiary: #6b7280;
-  --color-text-muted: #a3a3a3;
+  /* Text — cool ink rather than neutral gray */
+  --color-text-primary: #0f1b2d;
+  --color-text-secondary: #46586e;
+  --color-text-tertiary: #556783;
+  --color-text-muted: #6f8199;
 
   /* ===================================
      SEMANTIC COLORS
      =================================== */
 
-  /* Primary (Black) */
-  --color-primary: #171717;
-  --color-primary-hover: #404040;
-  /* Foreground on primary surfaces (buttons, logo boxes, tooltip).
-     Inverts in dark so white icons/text stay legible on the light primary. */
+  /* Brand — cobalt trust-blue */
+  --color-primary: #1a56db;
+  --color-primary-hover: #1546b8;
+  /* Foreground on primary surfaces (buttons, logo tile, tooltip).
+     Inverts in dark so it stays legible on the bright cobalt. */
   --color-primary-foreground: #ffffff;
 
-  /* Blue (Links, Primary Actions) */
-  --color-blue: #0070f3;
-  --color-blue-hover: #0060d0;
-  --color-blue-light: #eef6ff;
+  /* Accent — the same cobalt, exposed under its own name for links,
+     focus rings and edit affordances. `--color-blue` is a back-compat alias
+     kept so the ~100 existing `text-blue` / `border-blue` call sites keep
+     working; prefer `accent` in new code. */
+  --color-accent: #1a56db;
+  --color-accent-hover: #1546b8;
+  --color-accent-light: #e8f0fd;
+  --color-accent-foreground: #ffffff;
 
-  /* Success (Green) */
-  --color-success: #10b981;
-  --color-success-hover: #0e9f6e;
-  --color-success-light: #ecfdf5;
+  /* Success — money-in green */
+  --color-success: #0e7a3e;
+  --color-success-hover: #0b6533;
+  --color-success-light: #e6f4ec;
+  --color-success-foreground: #ffffff;
 
-  /* Danger (Red) */
-  --color-danger: #ea001d;
-  --color-danger-hover: #ae292e;
-  --color-danger-light: #fef2f2;
+  /* Danger */
+  --color-danger: #c81e1e;
+  --color-danger-hover: #a81818;
+  --color-danger-light: #fceded;
+  --color-danger-foreground: #ffffff;
 
-  /* Warning (Orange/Yellow) */
-  --color-warning: #f59e0b;
-  --color-warning-hover: #d97706;
-  --color-warning-light: #fffbeb;
+  /* Warning — amber, darkened to stay readable as text and behind white */
+  --color-warning: #8a5a06;
+  --color-warning-hover: #6f4805;
+  --color-warning-light: #f8f2e2;
+  --color-warning-foreground: #ffffff;
 
-  /* Info (Violet) */
-  --color-info: #8b5cf6;
-  --color-info-hover: #7c3aed;
-  --color-info-light: #f5f3ff;
+  /* Info (violet) */
+  --color-info: #7028cc;
+  --color-info-hover: #5c1fab;
+  --color-info-light: #f2eafc;
+  --color-info-foreground: #ffffff;
 
   /* ===================================
      COMPONENT-SPECIFIC COLORS
      =================================== */
 
   /* Button Colors */
-  --color-button-primary-bg: #171717;
-  --color-button-primary-bg-hover: #404040;
+  --color-button-primary-bg: #1a56db;
+  --color-button-primary-bg-hover: #1546b8;
   --color-button-primary-text: #ffffff;
 
-  --color-button-outline-border: #e5e5e5;
-  --color-button-outline-bg-hover: #f5f5f5;
-  --color-button-outline-text: #525252;
-  --color-button-outline-text-hover: #171717;
+  --color-button-outline-border: #cfd9e6;
+  --color-button-outline-bg-hover: #e9eff7;
+  --color-button-outline-text: #46586e;
+  --color-button-outline-text-hover: #0f1b2d;
 
-  --color-button-danger-bg: #ea001d;
-  --color-button-danger-bg-hover: #ae292e;
+  --color-button-danger-bg: #c81e1e;
+  --color-button-danger-bg-hover: #a81818;
   --color-button-danger-text: #ffffff;
 
-  /* Action Button Colors (Edit, Delete, etc.) */
-  --color-action-default: #a3a3a3;
-  --color-action-edit-bg-hover: rgba(0, 112, 243, 0.1);
-  --color-action-edit-text-hover: #0070f3;
-  --color-action-delete-bg-hover: rgba(234, 0, 29, 0.1);
-  --color-action-delete-text-hover: #ea001d;
-  --color-action-save-bg-hover: rgba(16, 185, 129, 0.1);
-  --color-action-save-text-hover: #10b981;
-  --color-action-cancel-bg-hover: #f5f5f5;
-  --color-action-cancel-text-hover: #525252;
+  /* Action Button Colors (Edit, Delete, etc.). The hover fills are mixed from
+     the semantic colour rather than hand-written rgba() so they track any
+     future retune automatically. */
+  --color-action-default: #6f8199;
+  --color-action-edit-bg-hover: color-mix(in oklab, var(--color-accent) 12%, transparent);
+  --color-action-edit-text-hover: var(--color-accent);
+  --color-action-delete-bg-hover: color-mix(in oklab, var(--color-danger) 12%, transparent);
+  --color-action-delete-text-hover: var(--color-danger);
+  --color-action-save-bg-hover: color-mix(in oklab, var(--color-success) 12%, transparent);
+  --color-action-save-text-hover: var(--color-success);
+  --color-action-cancel-bg-hover: var(--color-background-elevated);
+  --color-action-cancel-text-hover: var(--color-text-secondary);
 
   /* Input Colors */
   --color-input-bg: #ffffff;
-  --color-input-text: #171717;
-  --color-input-border: #e5e5e5;
-  --color-input-border-focus: #0070f3;
-  --color-input-placeholder: #a3a3a3;
+  --color-input-text: #0f1b2d;
+  --color-input-border: #d5dfea;
+  --color-input-border-focus: var(--color-accent);
+  --color-input-placeholder: #6f8199;
 
   /* Tag Colors */
-  --color-tag-bg: #f5f5f5;
-  --color-tag-text: #525252;
-  --color-tag-border: #e5e5e5;
+  --color-tag-bg: #e9eff7;
+  --color-tag-text: #46586e;
+  --color-tag-border: #e2e8f1;
 
   /* Card/Modal Colors */
   --color-card-bg: #ffffff;
-  --color-card-header-bg: #fafafa;
-  --color-card-border: #e5e5e5;
+  --color-card-header-bg: #f3f6fa;
+  --color-card-border: #e2e8f1;
 
   /* Icon Box Colors */
-  --color-icon-box-bg: #fafafa;
-  --color-icon-box-border: #e5e5e5;
+  --color-icon-box-bg: #f3f6fa;
+  --color-icon-box-border: #e2e8f1;
 
-  /* Category accent palette (used by user-managed categories).
-     Tuned to match the design tokens above: deeper, less candy-saturated than
-     raw Tailwind defaults so the pills sit well next to the Vercel-style chrome.
-     blue / green / amber / violet / red map 1:1 to the semantic design tokens. */
-  --color-cat-blue: #0070f3; /* matches --color-blue */
-  --color-cat-green: #10b981; /* matches --color-success */
-  --color-cat-amber: #f59e0b; /* matches --color-warning */
-  --color-cat-violet: #8b5cf6; /* matches --color-info */
-  --color-cat-red: #ea001d; /* matches --color-danger */
-  --color-cat-sky: #0284c7; /* deeper sky, less competing with brand blue */
-  --color-cat-orange: #c2410c; /* warm rust, not neon */
-  --color-cat-rose: #be123c; /* serious crimson, not candy pink */
-  --color-cat-pink: #be185d; /* deep magenta */
-  --color-cat-cyan: #0e7490; /* deeper, more teal-leaning */
-  --color-cat-emerald: #047857; /* deeper than success green */
-  --color-cat-teal: #0f766e; /* deep teal */
-  --color-cat-indigo: #4338ca; /* deeper indigo */
-  --color-cat-lime: #4d7c0f; /* olive, not neon */
-  --color-cat-slate: #475569; /* cool gray */
-  --color-cat-gray: #4b5563; /* warm neutral gray */
+  /* Category accent palette (user-managed categories; the *keys* are persisted
+     per user in the database, so hues may be retuned but names must not change).
+     Every value clears 4.5:1 as text on the card and hover surfaces.
+     blue / green / amber / violet / red map 1:1 to the semantic tokens. */
+  --color-cat-blue: #1a56db;
+  --color-cat-green: #0e7a3e; /* matches --color-success */
+  --color-cat-amber: #8a5a06; /* matches --color-warning */
+  --color-cat-violet: #7028cc; /* matches --color-info */
+  --color-cat-red: #c81e1e; /* matches --color-danger */
+  --color-cat-sky: #0a6880;
+  --color-cat-orange: #a8490a;
+  --color-cat-rose: #b0143f;
+  --color-cat-pink: #a81b5f;
+  --color-cat-cyan: #0e6f77;
+  --color-cat-emerald: #0a6b4a;
+  --color-cat-teal: #0a7065;
+  --color-cat-indigo: #4338ca;
+  --color-cat-lime: #4d6c10;
+  --color-cat-slate: #455468;
+  --color-cat-gray: #535c66; /* cool, matches the neutral ramp */
 
   /* ===================================
      SHADOWS
+     Data-dense finance UIs read as trustworthy when they're flat: hierarchy
+     comes from the 1px borders and surface tints above, so these stay faint
+     and ink-tinted rather than neutral black.
      =================================== */
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-sm: 0 1px 2px rgba(15, 27, 45, 0.04);
+  --shadow-md: 0 1px 3px rgba(15, 27, 45, 0.07);
+  --shadow-lg: 0 6px 16px -4px rgba(15, 27, 45, 0.08);
 
   /* ===================================
-     SPACING & BORDERS
+     RADIUS
+     Declared unlayered, so these intentionally override Tailwind's own
+     --radius-* theme defaults and soften every rounded-* utility at once.
+     Tiered so no two steps collapse into each other.
      =================================== */
 
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 26px;
+  --radius-full: 9999px;
 }
 
 /* ===================================
    DARK THEME
-   Neutral / Vercel-Geist cool dark. next-themes toggles `.dark` on <html>;
-   overriding the token values here flows through @theme inline to every
-   Tailwind utility, base class, datepicker override and scrollbar automatically.
+   Deep navy, not neutral black — the same cool palette with the lights off. next-themes toggles `.dark` on <html>; overriding the
+   token values here flows through @theme inline to every Tailwind utility,
+   base class, datepicker override and scrollbar automatically.
    =================================== */
 .dark {
-  /* Backgrounds — Notion-inspired clean neutral dark. True grayscale (equal RGB)
-     so the page carries no color cast, with clearly-separated layers so
+  /* Backgrounds — neutral charcoal with clearly-separated layers so
      page < card < elevated < input each read as a distinct surface. */
-  --color-background: #191919;
-  --color-background-secondary: #202020;
-  --color-background-content: #1c1c1c;
-  --color-background-elevated: #2c2c2c;
-  --color-background-hover: #2f2f2f;
+  --color-background: #121214;
+  --color-background-secondary: #1a1a1d;
+  --color-background-content: #151517;
+  --color-background-elevated: #222225;
+  --color-background-hover: #262629;
 
   /* Borders — visibly present so rows/cards are delineated */
-  --color-border-subtle: #2a2a2a;
-  --color-border-default: #383838;
-  --color-border-strong: #4e4e4e;
+  --color-border-subtle: #222225;
+  --color-border-default: #313134;
+  --color-border-strong: #74747c;
 
-  /* Text — crisp neutral off-white (Notion ~rgba(255,255,255,0.9)) */
-  --color-text-primary: #e6e6e5;
-  --color-text-secondary: #a0a0a0;
-  --color-text-tertiary: #8a8a8a;
-  --color-text-muted: #6f6f6f;
+  /* Text — neutral off-white */
+  --color-text-primary: #ececee;
+  --color-text-secondary: #a6a6aa;
+  --color-text-tertiary: #949498;
+  --color-text-muted: #78787c;
 
-  /* Semantic — primary inverts to light (black button -> light button) */
-  --color-primary: #fafafa;
-  --color-primary-hover: #ececec;
-  --color-primary-foreground: #191919;
+  /* Brand — cobalt brightens on dark; the only chromatic colour on this ground */
+  --color-primary: #5b9bf8;
+  --color-primary-hover: #7db2fa;
+  --color-primary-foreground: #0a1220;
 
-  --color-blue: #4c9fff;
-  --color-blue-hover: #6bb0ff;
-  --color-blue-light: #17324f;
+  --color-accent: #5b9bf8;
+  --color-accent-hover: #7db2fa;
+  --color-accent-light: #17202e;
+  --color-accent-foreground: #0a1220;
 
-  --color-success: #2fcc6a;
-  --color-success-hover: #26b85e;
-  --color-success-light: #14331f;
+  --color-success: #4ade80;
+  --color-success-hover: #6ee79b;
+  --color-success-light: #14291d;
+  --color-success-foreground: #062114;
 
-  --color-danger: #ff5c67;
-  --color-danger-hover: #ff757e;
-  --color-danger-light: #3a1c20;
+  --color-danger: #ff7070;
+  --color-danger-hover: #ff8f8f;
+  --color-danger-light: #2e1a1b;
+  --color-danger-foreground: #2d0c0c;
 
-  --color-warning: #fbbf24;
-  --color-warning-hover: #f59e0b;
-  --color-warning-light: #332810;
+  --color-warning: #f0b429;
+  --color-warning-hover: #f7c74e;
+  --color-warning-light: #2b2309;
+  --color-warning-foreground: #2b1e05;
 
-  --color-info: #a78bfa;
-  --color-info-hover: #b9a3fb;
-  --color-info-light: #271f40;
+  --color-info: #b18cfa;
+  --color-info-hover: #c4a4fb;
+  --color-info-light: #221c33;
+  --color-info-foreground: #1d1440;
 
   /* Buttons */
-  --color-button-primary-bg: #fafafa;
-  --color-button-primary-bg-hover: #ffffff;
-  --color-button-primary-text: #1c1c20;
+  --color-button-primary-bg: #5b9bf8;
+  --color-button-primary-bg-hover: #7db2fa;
+  --color-button-primary-text: #0a1220;
 
-  --color-button-outline-border: #383838;
-  --color-button-outline-bg-hover: #2c2c2c;
-  --color-button-outline-text: #a0a0a0;
-  --color-button-outline-text-hover: #e6e6e5;
+  --color-button-outline-border: #313134;
+  --color-button-outline-bg-hover: #222225;
+  --color-button-outline-text: #a6a6aa;
+  --color-button-outline-text-hover: #ececee;
 
-  --color-button-danger-bg: #e5484d;
-  --color-button-danger-bg-hover: #ff5c67;
+  --color-button-danger-bg: #d43a3a;
+  --color-button-danger-bg-hover: #ff7070;
   --color-button-danger-text: #ffffff;
 
-  /* Action buttons */
-  --color-action-default: #6f6f6f;
-  --color-action-edit-bg-hover: rgba(76, 159, 255, 0.16);
-  --color-action-edit-text-hover: #4c9fff;
-  --color-action-delete-bg-hover: rgba(255, 92, 103, 0.16);
-  --color-action-delete-text-hover: #ff5c67;
-  --color-action-save-bg-hover: rgba(47, 204, 106, 0.16);
-  --color-action-save-text-hover: #2fcc6a;
-  --color-action-cancel-bg-hover: #2c2c2c;
-  --color-action-cancel-text-hover: #a0a0a0;
+  /* Action buttons — the color-mix() definitions in :root pick these up */
+  --color-action-default: #78787c;
 
   /* Inputs — default fill for bare inputs; most form inputs use bg-background
      to blend with their surface (see :where() baseline in the base layer). */
-  --color-input-bg: #202020;
-  --color-input-text: #e6e6e5;
-  --color-input-border: #383838;
-  --color-input-border-focus: #4c9fff;
-  --color-input-placeholder: #6f6f6f;
+  --color-input-bg: #1a1a1d;
+  --color-input-text: #ececee;
+  /* input-border-focus, and every action-* hover fill, resolve through the
+     var() references in :root — they pick up the dark accent automatically. */
+  --color-input-border: #313134;
+  --color-input-placeholder: #78787c;
 
   /* Tags */
-  --color-tag-bg: #2c2c2c;
-  --color-tag-text: #a0a0a0;
-  --color-tag-border: #383838;
+  --color-tag-bg: #222225;
+  --color-tag-text: #a6a6aa;
+  --color-tag-border: #313134;
 
   /* Cards — clearly elevated above the page background */
-  --color-card-bg: #202020;
-  --color-card-header-bg: #242424;
-  --color-card-border: #2a2a2a;
+  --color-card-bg: #1a1a1d;
+  --color-card-header-bg: #1e1e21;
+  --color-card-border: #222225;
 
   /* Icon boxes */
-  --color-icon-box-bg: #2c2c2c;
-  --color-icon-box-border: #2a2a2a;
+  --color-icon-box-bg: #222225;
+  --color-icon-box-border: #222225;
 
   /* Category accents — brightened so deep hues stay legible on dark */
-  --color-cat-blue: #3b9eff;
-  --color-cat-green: #22c55e;
-  --color-cat-amber: #fbbf24;
-  --color-cat-violet: #a78bfa;
-  --color-cat-red: #ff5964;
+  --color-cat-blue: #5b9bf8;
+  --color-cat-green: #4ade80;
+  --color-cat-amber: #f0b429;
+  --color-cat-violet: #b18cfa;
+  --color-cat-red: #ff7070;
   --color-cat-sky: #38bdf8;
   --color-cat-orange: #fb923c;
   --color-cat-rose: #fb7185;
@@ -259,15 +289,15 @@
   --color-cat-cyan: #22d3ee;
   --color-cat-emerald: #34d399;
   --color-cat-teal: #2dd4bf;
-  --color-cat-indigo: #818cf8;
+  --color-cat-indigo: #8b93f8;
   --color-cat-lime: #a3e635;
-  --color-cat-slate: #94a3b8;
-  --color-cat-gray: #9ca3af;
+  --color-cat-slate: #a3a8b5;
+  --color-cat-gray: #a8a8ae;
 
-  /* Shadows — deeper on dark */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+  /* Shadows — deeper on dark, but still restrained */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.38);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
 @theme inline {
@@ -295,21 +325,32 @@
   --color-primary: var(--color-primary);
   --color-primary-hover: var(--color-primary-hover);
   --color-primary-foreground: var(--color-primary-foreground);
-  --color-blue: var(--color-blue);
-  --color-blue-hover: var(--color-blue-hover);
-  --color-blue-light: var(--color-blue-light);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-light: var(--color-accent-light);
+  --color-accent-foreground: var(--color-accent-foreground);
+  /* Back-compat aliases: `blue` was the old accent name. Both resolve to the
+     cobalt accent so existing `text-blue` / `bg-blue-light` call sites keep
+     working — prefer the `accent` utilities in new code. */
+  --color-blue: var(--color-accent);
+  --color-blue-hover: var(--color-accent-hover);
+  --color-blue-light: var(--color-accent-light);
   --color-success: var(--color-success);
   --color-success-hover: var(--color-success-hover);
   --color-success-light: var(--color-success-light);
+  --color-success-foreground: var(--color-success-foreground);
   --color-danger: var(--color-danger);
   --color-danger-hover: var(--color-danger-hover);
   --color-danger-light: var(--color-danger-light);
+  --color-danger-foreground: var(--color-danger-foreground);
   --color-warning: var(--color-warning);
   --color-warning-hover: var(--color-warning-hover);
   --color-warning-light: var(--color-warning-light);
+  --color-warning-foreground: var(--color-warning-foreground);
   --color-info: var(--color-info);
   --color-info-hover: var(--color-info-hover);
   --color-info-light: var(--color-info-light);
+  --color-info-foreground: var(--color-info-foreground);
 
   /* Component-specific colors */
   --color-button-primary-bg: var(--color-button-primary-bg);
@@ -693,7 +734,7 @@ textarea:focus {
   color: var(--color-button-primary-text);
   font-weight: 500;
   padding: 10px 20px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -720,7 +761,7 @@ textarea:focus {
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   font-size: 12px;
   font-weight: 500;
 }

@@ -9,6 +9,8 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: '/',
     display: 'standalone',
     orientation: 'portrait',
+    // Matches the light --color-background; the splash screens in
+    // public/splash are generated on the same paper tone.
     background_color: '#ffffff',
     theme_color: '#ffffff',
     categories: ['finance', 'productivity'],

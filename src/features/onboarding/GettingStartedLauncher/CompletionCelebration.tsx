@@ -9,7 +9,9 @@ import { CheckCircle2 } from 'lucide-react';
 // One honest celebration: a small hand-rolled particle burst (~1s), no deps.
 const PARTICLE_COUNT = 22;
 const BURST_MS = 900;
-const COLORS = ['#10b981', '#171717', '#0070f3', '#f59e0b'];
+// Canvas can't read CSS variables, so these are the Cobalt accents as
+// literals — all light enough to stay visible on the dark theme too.
+const COLORS = ['#1a56db', '#5b9bf8', '#22a35c', '#f0b429'];
 
 function playBurst(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d');

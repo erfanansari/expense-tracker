@@ -102,9 +102,11 @@ export const viewport: Viewport = {
   // dvh-sized drawers resize natively. iOS ignores this hint (handled by
   // useKeyboardInset instead).
   interactiveWidget: 'resizes-content',
+  // Must track --color-background in src/styles/globals.css, or the mobile
+  // browser chrome shows a visible seam against the top of the page.
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+    { media: '(prefers-color-scheme: dark)', color: '#121214' },
   ],
 };
 

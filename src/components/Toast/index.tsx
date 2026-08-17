@@ -38,10 +38,10 @@ const ToastItem = ({ toast, onClose }: ToastItemProps) => {
   };
 
   const styles = {
-    success: 'bg-success text-white',
-    error: 'bg-danger text-white',
-    warning: 'bg-warning text-white',
-    info: 'bg-blue text-white',
+    success: 'bg-success text-success-foreground',
+    error: 'bg-danger text-danger-foreground',
+    warning: 'bg-warning text-warning-foreground',
+    info: 'bg-accent text-accent-foreground',
   };
 
   return (
