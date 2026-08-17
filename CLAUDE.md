@@ -248,6 +248,44 @@ interior is the mark's signature. Its path is mirrored by
 iOS splash screens. Change the glyph in both places, then re-run
 `node scripts/generate-brand-assets.mjs`.
 
+### UI/UX - Page and section primitives
+
+Two shared primitives own the page chrome. Use them instead of re-creating the
+markup — that duplication is exactly how padding and font weights drifted apart
+before.
+
+- **`src/components/PageHeader`** — the title block every dashboard page opens
+  with. One `<h1>` per page lives here, so the outline is always page `<h1>` then
+  section `<h2>`s. Pass `action` for a button, filter row or date range; the
+  component supplies the `shrink-0` flex wrapper, so don't add your own.
+- **`src/components/SectionCard`** — a titled card: icon box, `<h2>`, optional
+  subtitle, then your body. Supply the body's own padding (`p-6` for forms,
+  nothing for full-bleed tables).
+
+```tsx
+<PageHeader title={t('title')} subtitle={t('subtitle')} action={<Button>…</Button>} />
+
+<SectionCard icon={Coins} title={t('title')} subtitle={t('subtitle')}>
+  <div className="p-6">…</div>
+</SectionCard>
+```
+
+### UI/UX - Content width
+
+Every page sits in `mx-auto max-w-[1600px] px-6`, which keeps headers aligned with
+the top nav. What varies is the **inner** cap:
+
+- **Forms and preferences** get a reading-width cap — settings panes use
+  `max-w-3xl`. Without it a three-toggle card stretches its controls across
+  1,300px of empty space, which is what made the old settings page feel sparse.
+- **Data and dashboards** stay full width. Tables, charts and stat grids need the
+  room, and a nav rail would be the wrong pattern on them.
+
+Card recipe is `border-border-subtle bg-background rounded-xl border shadow-sm`
+with `p-5` padding — via `SectionCard` where there's a heading. Uppercase
+tracked labels are `text-xs font-medium tracking-wider uppercase` (the
+`font-semibold` variant is reserved for `DataTable` column headers).
+
 ### UI/UX - Modal Component
 
 Use the reusable Modal component (`src/components/Modal/`) for dialogs and popups:
