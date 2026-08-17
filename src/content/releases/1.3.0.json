@@ -1,0 +1,49 @@
+{
+  "version": "1.3.0",
+  "date": "2026-08-17",
+  "title": {
+    "en": "Settings you can actually navigate",
+    "fa": "تنظیماتی که می‌تونی توش بگردی"
+  },
+  "summary": {
+    "en": "Settings was one long page of ten stacked cards. Now every section has its own place — and its own link.",
+    "fa": "تنظیمات یه صفحهٔ بلند با ده کارت روی هم بود. حالا هر بخش جای خودش رو داره — و لینک خودش رو."
+  },
+  "highlights": [
+    {
+      "type": "feature",
+      "en": "Settings is organised into Account, Preferences, Organise and Advanced, with a sidebar you can jump around in. Finding your password no longer means scrolling past six unrelated sections.",
+      "fa": "تنظیمات به چهار گروه تقسیم شد — حساب، ترجیحات، سازمان‌دهی و پیشرفته — با یه منوی کنار که می‌تونی هر جا خواستی بپری. برای پیدا کردن رمز عبورت دیگه لازم نیست از شش بخش بی‌ربط رد بشی."
+    },
+    {
+      "type": "feature",
+      "en": "Every section now has its own address, so you can bookmark the one you use most or open it straight from a link.",
+      "fa": "هر بخش حالا آدرس خودش رو داره، پس می‌تونی اونی که بیشتر استفاده می‌کنی رو بوکمارک کنی یا مستقیم با لینک بازش کنی."
+    },
+    {
+      "type": "improvement",
+      "en": "On your phone, Settings opens as a simple list with a short description under each row — tap one to go in, and there's a way back.",
+      "fa": "روی گوشی، تنظیمات به شکل یه فهرست ساده باز می‌شه که زیر هر ردیف یه توضیح کوتاه داره — بزن روش تا بری داخل، و راه برگشت هم هست."
+    },
+    {
+      "type": "improvement",
+      "en": "Each section is about one screen tall instead of buried in a four-screen scroll, and the controls sit close to their labels rather than stretched across an empty card.",
+      "fa": "هر بخش حالا حدوداً یه صفحه‌ست، نه گم‌شده توی یه اسکرول چهارصفحه‌ای، و دکمه‌ها و کلیدها کنار عنوان خودشونن نه پخش‌شده توی یه کارت خالی."
+    },
+    {
+      "type": "improvement",
+      "en": "Page titles and section cards now come from one shared design, so spacing and headings match everywhere in the app.",
+      "fa": "عنوان صفحه‌ها و کارت‌های بخش‌ها حالا از یه طرح مشترک می‌آن، پس فاصله‌ها و تیترها همه‌جای اپ یکسانه."
+    },
+    {
+      "type": "improvement",
+      "en": "On a phone, page titles no longer get squeezed next to their buttons — the buttons drop to their own line.",
+      "fa": "روی گوشی، عنوان صفحه دیگه کنار دکمه‌هاش فشرده نمی‌شه — دکمه‌ها می‌رن خط پایین."
+    },
+    {
+      "type": "fix",
+      "en": "Arrow keys now move the right way through tabbed controls when you're using Kharji in Persian.",
+      "fa": "کلیدهای جهت‌دار حالا وقتی خرجی رو فارسی استفاده می‌کنی، درست حرکت می‌کنن."
+    }
+  ]
+}
