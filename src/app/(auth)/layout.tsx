@@ -6,11 +6,10 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { Zap } from 'lucide-react';
-
 import GuestGuard from '@features/guards/GuestGuard';
 
 import LocaleToggle from '@components/LocaleToggle';
+import Logo from '@components/Logo';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -29,12 +28,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         <div className="w-full max-w-md">
           {/* Branding */}
           <div className="mb-4 flex flex-col items-center">
-            <div className="mb-1 flex items-center gap-2">
-              <div className="bg-primary rounded-md p-2">
-                <Zap className="text-primary-foreground h-5 w-5" />
-              </div>
-              <span className="text-text-primary text-xl font-bold">{t('common.appName')}</span>
-            </div>
+            <Logo size="md" wordmark={t('common.appName')} className="mb-1" />
             <p className="text-text-tertiary">{t('auth.tagline')}</p>
           </div>
 

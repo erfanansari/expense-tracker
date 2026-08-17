@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
-import { Zap } from 'lucide-react';
+import Logo from '@components/Logo';
 
 export default async function NotFound() {
   const t = await getTranslations('notFound');
@@ -19,9 +19,7 @@ export default async function NotFound() {
           {/* Outer dashed rotated square */}
           <div className="border-border-subtle absolute inset-0 rotate-12 rounded-xl border-2 border-dashed" />
           {/* Inner brand icon */}
-          <div className="bg-primary relative z-10 translate-x-2 translate-y-2 rounded-lg p-3">
-            <Zap className="text-primary-foreground h-6 w-6" aria-hidden="true" />
-          </div>
+          <Logo size="lg" className="relative z-10 translate-x-2 translate-y-2" />
         </div>
 
         {/* Text */}

@@ -5,7 +5,9 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { useSerwist } from '@serwist/next/react';
-import { RefreshCw, X, Zap } from 'lucide-react';
+import { RefreshCw, X } from 'lucide-react';
+
+import Logo from '@components/Logo';
 
 /**
  * Floating "update ready" pill shown when a new service worker takes control
@@ -48,9 +50,7 @@ const UpdatePrompt = () => {
       <div className="animate-slide-up border-border-subtle bg-background flex items-center gap-3 rounded-2xl border py-3 ps-3 pe-2 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.18),0_4px_8px_-4px_rgba(0,0,0,0.08)]">
         {/* Brand mark with a "fresh" pulse dot */}
         <div className="relative shrink-0">
-          <div className="bg-primary flex h-9 w-9 items-center justify-center rounded-xl">
-            <Zap className="text-primary-foreground h-4 w-4" aria-hidden="true" />
-          </div>
+          <Logo size="md" />
           <span className="absolute -end-0.5 -top-0.5 flex h-2.5 w-2.5" aria-hidden="true">
             <span className="bg-success absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
             <span className="bg-success relative inline-flex h-2.5 w-2.5 rounded-full" />

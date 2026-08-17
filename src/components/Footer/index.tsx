@@ -1,11 +1,10 @@
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
-import { Zap } from 'lucide-react';
-
 import { NAV_ITEMS, ROUTES } from '@constants';
 
 import GithubIcon from '@components/Icons/GithubIcon';
+import Logo from '@components/Logo';
 
 import pkg from '../../../package.json';
 
@@ -19,9 +18,7 @@ const Footer = () => {
         {/* Left: Logo + Nav */}
         <div className="flex flex-col items-center gap-5 sm:flex-row sm:gap-6">
           <Link href="/" className="transition-opacity hover:opacity-80" aria-label={t('landing.header.homeAria')}>
-            <div className="bg-primary rounded-md p-2">
-              <Zap className="text-primary-foreground h-4 w-4" aria-hidden="true" />
-            </div>
+            <Logo size="sm" />
           </Link>
 
           <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:gap-x-6">

@@ -7,12 +7,13 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { ChevronDown, CommandIcon, LayoutDashboard, LogOut, MessageSquare, Settings, Zap } from 'lucide-react';
+import { ChevronDown, CommandIcon, LayoutDashboard, LogOut, MessageSquare, Settings } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
 import { ROUTES } from '@constants';
 
 import { useCommandPalette } from '@components/CommandPalette/CommandPaletteProvider';
+import Logo from '@components/Logo';
 
 import { useAuth } from '@hooks/use-auth';
 
@@ -59,11 +60,8 @@ const TopNav: FC = () => {
         {/* Top row - Logo and actions */}
         <div className="flex items-center justify-between px-6 py-3">
           {/* Logo */}
-          <Link href={ROUTES.OVERVIEW} className="flex items-center gap-2.5">
-            <div className="bg-button-primary-bg rounded-md p-2">
-              <Zap className="text-primary-foreground h-4 w-4" />
-            </div>
-            <span className="text-text-primary text-base font-semibold">{t('common.appName')}</span>
+          <Link href={ROUTES.OVERVIEW}>
+            <Logo size="sm" wordmark={t('common.appName')} className="gap-2.5" />
           </Link>
 
           {/* Right side - user menu */}
