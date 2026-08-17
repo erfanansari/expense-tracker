@@ -38,10 +38,10 @@ export const Layout = ({
       </Head>
       <Preview>{preview}</Preview>
       <Tailwind>
-        <Body className="bg-[#fafafa]" style={{ fontFamily: font }}>
+        <Body className="bg-[#f3f6fa]" style={{ fontFamily: font }}>
           <Container
             dir={dir}
-            className="mx-auto my-0 max-w-[560px] bg-white px-0 py-0"
+            className="mx-auto my-0 max-w-[560px] bg-[#ffffff] px-0 py-0"
             style={{ textAlign: isRtl ? 'right' : 'left' }}
           >
             {/* Header */}
@@ -55,29 +55,29 @@ export const Layout = ({
             </Section>
 
             {/* Footer */}
-            <Hr className="mx-8 my-0 border-t border-[#e5e5e5]" />
+            <Hr className="mx-8 my-0 border-t border-[#e2e8f1]" />
             <Section className="px-8 py-6">
-              <Text className="m-0 text-[12px] leading-5 text-[#a3a3a3]" style={{ fontFamily: font }}>
+              <Text className="m-0 text-[12px] leading-5 text-[#6f8199]" style={{ fontFamily: font }}>
                 {footerText ?? t.defaultFooter}
               </Text>
               {(webViewUrl || unsubscribeUrl) && (
-                <Text className="m-0 mt-2 text-[12px] leading-5 text-[#a3a3a3]" style={{ fontFamily: font }}>
+                <Text className="m-0 mt-2 text-[12px] leading-5 text-[#6f8199]" style={{ fontFamily: font }}>
                   {webViewUrl && (
                     <>
-                      <Link href={webViewUrl} className="text-[#525252] underline">
+                      <Link href={webViewUrl} className="text-[#46586e] underline">
                         {t.viewDashboard}
                       </Link>{' '}
                       &middot;{' '}
                     </>
                   )}
                   {unsubscribeUrl && (
-                    <Link href={unsubscribeUrl} className="text-[#525252] underline">
+                    <Link href={unsubscribeUrl} className="text-[#46586e] underline">
                       {t.unsubscribe}
                     </Link>
                   )}
                 </Text>
               )}
-              <Text className="m-0 mt-4 text-[11px] text-[#a3a3a3]" style={{ fontFamily: font }}>
+              <Text className="m-0 mt-4 text-[11px] text-[#6f8199]" style={{ fontFamily: font }}>
                 {REPORT_STRINGS[locale].brandFooter}
               </Text>
             </Section>

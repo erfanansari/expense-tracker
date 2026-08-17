@@ -4,6 +4,7 @@ import { Heading, Hr, Section, Text } from '@react-email/components';
 
 import { formatMoney } from '@features/ExchangeRate/utils/currency';
 
+import { EMAIL_COLORS } from './colors';
 import CategoryRow from './components/CategoryRow';
 import Layout from './components/Layout';
 import MonthBar from './components/MonthBar';
@@ -87,15 +88,15 @@ const YearlyReport = ({
 
   return (
     <Layout preview={preview} unsubscribeUrl={unsubscribeUrl} webViewUrl={webViewUrl} logoUrl={logoUrl} locale={locale}>
-      <Text className="m-0 text-[14px] text-[#525252]">{greeting}</Text>
+      <Text className="m-0 text-[14px] text-[#46586e]">{greeting}</Text>
       <Heading
         as="h1"
-        className="m-0 mt-2 text-[#171717]"
+        className="m-0 mt-2 text-[#0f1b2d]"
         style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.02em', lineHeight: '32px' }}
       >
         {t.yearly.title(periodLabel)}
       </Heading>
-      <Text className="m-0 mt-2 text-[14px] leading-5 text-[#6b7280]">{t.yearly.subtitle}</Text>
+      <Text className="m-0 mt-2 text-[14px] leading-5 text-[#616579]">{t.yearly.subtitle}</Text>
 
       {/* Headline stats */}
       <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" dir={dir} style={{ marginTop: '24px' }}>
@@ -138,17 +139,17 @@ const YearlyReport = ({
       </table>
 
       {/* Monthly breakdown */}
-      <Hr className="my-8 border-t border-[#e5e5e5]" />
-      <Heading as="h2" className="m-0 text-[#171717]" style={{ fontSize: '16px', fontWeight: 600 }}>
+      <Hr className="my-8 border-t border-[#e2e8f1]" />
+      <Heading as="h2" className="m-0 text-[#0f1b2d]" style={{ fontSize: '16px', fontWeight: 600 }}>
         {t.yearly.monthByMonth}
       </Heading>
-      <Text className="m-0 mt-1 text-[13px] text-[#a3a3a3]">
+      <Text className="m-0 mt-1 text-[13px] text-[#6f8199]">
         <span
           style={{
             display: 'inline-block',
             width: 8,
             height: 8,
-            backgroundColor: '#10b981',
+            backgroundColor: EMAIL_COLORS.success,
             borderRadius: 2,
             marginRight: 4,
           }}
@@ -159,7 +160,7 @@ const YearlyReport = ({
             display: 'inline-block',
             width: 8,
             height: 8,
-            backgroundColor: '#171717',
+            backgroundColor: EMAIL_COLORS.textPrimary,
             borderRadius: 2,
             marginRight: 4,
           }}
@@ -190,16 +191,16 @@ const YearlyReport = ({
               <td style={{ width: '50%', paddingRight: '8px', verticalAlign: 'top' }}>
                 <Section
                   style={{
-                    border: '1px solid #e5e5e5',
+                    border: '1px solid #e2e8f1',
                     borderRadius: '12px',
                     padding: '16px',
                   }}
                 >
-                  <Text className="m-0 text-[11px] tracking-wide text-[#a3a3a3] uppercase">{t.yearly.bestMonth}</Text>
-                  <Text className="m-0 mt-1 text-[#171717]" style={{ fontSize: '16px', fontWeight: 600 }}>
+                  <Text className="m-0 text-[11px] tracking-wide text-[#6f8199] uppercase">{t.yearly.bestMonth}</Text>
+                  <Text className="m-0 mt-1 text-[#0f1b2d]" style={{ fontSize: '16px', fontWeight: 600 }}>
                     {bestMonth.monthLabel}
                   </Text>
-                  <Text className="m-0 mt-1 text-[13px] font-semibold text-[#10b981]">
+                  <Text className="m-0 mt-1 text-[13px] font-semibold text-[#0e7a3e]">
                     +{formatMoney(bestMonth.net.primary, primaryCurrency, { compact: cardCompact, locale })}
                   </Text>
                 </Section>
@@ -209,16 +210,16 @@ const YearlyReport = ({
               <td style={{ width: '50%', paddingLeft: '8px', verticalAlign: 'top' }}>
                 <Section
                   style={{
-                    border: '1px solid #e5e5e5',
+                    border: '1px solid #e2e8f1',
                     borderRadius: '12px',
                     padding: '16px',
                   }}
                 >
-                  <Text className="m-0 text-[11px] tracking-wide text-[#a3a3a3] uppercase">{t.yearly.worstMonth}</Text>
-                  <Text className="m-0 mt-1 text-[#171717]" style={{ fontSize: '16px', fontWeight: 600 }}>
+                  <Text className="m-0 text-[11px] tracking-wide text-[#6f8199] uppercase">{t.yearly.worstMonth}</Text>
+                  <Text className="m-0 mt-1 text-[#0f1b2d]" style={{ fontSize: '16px', fontWeight: 600 }}>
                     {worstMonth.monthLabel}
                   </Text>
-                  <Text className="m-0 mt-1 text-[13px] font-semibold text-[#ea001d]">
+                  <Text className="m-0 mt-1 text-[13px] font-semibold text-[#c81e1e]">
                     {worstMonth.net.primary >= 0 ? '+' : ''}
                     {formatSigned(worstMonth.net.primary, primaryCurrency, cardCompact, locale)}
                   </Text>
@@ -232,11 +233,11 @@ const YearlyReport = ({
       {/* Top categories */}
       {topCategories.length > 0 && (
         <>
-          <Hr className="my-8 border-t border-[#e5e5e5]" />
-          <Heading as="h2" className="m-0 text-[#171717]" style={{ fontSize: '16px', fontWeight: 600 }}>
+          <Hr className="my-8 border-t border-[#e2e8f1]" />
+          <Heading as="h2" className="m-0 text-[#0f1b2d]" style={{ fontSize: '16px', fontWeight: 600 }}>
             {t.yearly.topCategoriesOf(periodLabel)}
           </Heading>
-          <Text className="m-0 mt-1 text-[13px] text-[#a3a3a3]">{t.yearly.topCategoriesSubtitle}</Text>
+          <Text className="m-0 mt-1 text-[13px] text-[#6f8199]">{t.yearly.topCategoriesSubtitle}</Text>
           <Section style={{ marginTop: '20px' }}>
             {topCategories.map((c, i) => (
               <CategoryRow

@@ -4,6 +4,7 @@ import { Section, Text } from '@react-email/components';
 
 import { formatMoney } from '@features/ExchangeRate/utils/currency';
 
+import { EMAIL_COLORS } from '../colors';
 import { emailDir, type EmailLocale } from '../i18n';
 import type { EmailCurrencyContext, EmailMoney } from '../types';
 import { isCompact } from '../types';
@@ -20,9 +21,9 @@ interface StatCardProps {
 }
 
 const TONE_COLOR: Record<NonNullable<StatCardProps['tone']>, string> = {
-  neutral: '#171717',
-  positive: '#10b981',
-  negative: '#ea001d',
+  neutral: EMAIL_COLORS.textPrimary,
+  positive: EMAIL_COLORS.success,
+  negative: EMAIL_COLORS.danger,
 };
 
 /** Format with an explicit leading minus so the sign never lands mid-string (e.g. -1,234 IRT). */
@@ -32,10 +33,10 @@ export function formatSigned(n: number, currencyCode: string, compact: boolean, 
 }
 
 function fmtDelta(pct: number, direction: 'up-is-good' | 'up-is-bad'): { value: string; color: string } {
-  if (pct === 0) return { value: '0%', color: '#a3a3a3' };
+  if (pct === 0) return { value: '0%', color: EMAIL_COLORS.textMuted };
   const arrow = pct > 0 ? '↑' : '↓';
   const isGood = direction === 'up-is-good' ? pct > 0 : pct < 0;
-  const color = isGood ? '#10b981' : '#ea001d';
+  const color = isGood ? EMAIL_COLORS.success : EMAIL_COLORS.danger;
   return { value: `${arrow} ${Math.abs(pct).toFixed(1)}%`, color };
 }
 
@@ -56,14 +57,14 @@ export const StatCard = ({
     <Section
       dir={dir}
       style={{
-        border: '1px solid #e5e5e5',
+        border: `1px solid ${EMAIL_COLORS.border}`,
         borderRadius: '12px',
         padding: '20px',
-        backgroundColor: '#ffffff',
+        backgroundColor: EMAIL_COLORS.surface,
         textAlign: dir === 'rtl' ? 'right' : 'left',
       }}
     >
-      <Text className="m-0 text-[12px] font-medium tracking-wide text-[#a3a3a3] uppercase">{label}</Text>
+      <Text className="m-0 text-[12px] font-medium tracking-wide text-[#6f8199] uppercase">{label}</Text>
       <Text
         style={{
           margin: '8px 0 0 0',
@@ -77,14 +78,14 @@ export const StatCard = ({
         {formatSigned(value.primary, currency.primaryCurrency, compact, locale)}
       </Text>
       {value.secondary !== null && currency.secondaryCurrency && (
-        <Text className="m-0 mt-1 text-[13px] text-[#6b7280]">
+        <Text className="m-0 mt-1 text-[13px] text-[#616579]">
           {formatSigned(value.secondary, currency.secondaryCurrency, compact, locale)}
         </Text>
       )}
       {delta && deltaDisplay && (
         <Text className="m-0 mt-3 text-[12px]" style={{ color: deltaDisplay.color }}>
           <span style={{ fontWeight: 600 }}>{deltaDisplay.value}</span>
-          <span style={{ color: '#a3a3a3', fontWeight: 400 }}> {delta.label}</span>
+          <span style={{ color: EMAIL_COLORS.textMuted, fontWeight: 400 }}> {delta.label}</span>
         </Text>
       )}
     </Section>

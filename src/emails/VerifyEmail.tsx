@@ -25,7 +25,7 @@ const VerifyEmail = ({ userName, verifyUrl, locale = 'fa' }: VerifyEmailProps) =
         <FontStyles locale={locale} />
       </Head>
       <Preview>{t.preview}</Preview>
-      <Body style={{ backgroundColor: '#f5f5f5', fontFamily: font, margin: 0, padding: '40px 0' }}>
+      <Body style={{ backgroundColor: '#e9eff7', fontFamily: font, margin: 0, padding: '40px 0' }}>
         <Container
           dir={dir}
           style={{
@@ -40,11 +40,11 @@ const VerifyEmail = ({ userName, verifyUrl, locale = 'fa' }: VerifyEmailProps) =
           <Section style={{ padding: '32px 40px 24px' }}>
             <BrandHeader locale={locale} />
             <Heading
-              style={{ color: '#171717', fontSize: '22px', fontWeight: 700, margin: '24px 0 8px', fontFamily: font }}
+              style={{ color: '#0f1b2d', fontSize: '22px', fontWeight: 700, margin: '24px 0 8px', fontFamily: font }}
             >
               {t.heading}
             </Heading>
-            <Text style={{ color: '#525252', fontSize: '15px', lineHeight: '24px', margin: 0, fontFamily: font }}>
+            <Text style={{ color: '#46586e', fontSize: '15px', lineHeight: '24px', margin: 0, fontFamily: font }}>
               {t.body(greeting)}
             </Text>
           </Section>
@@ -53,8 +53,8 @@ const VerifyEmail = ({ userName, verifyUrl, locale = 'fa' }: VerifyEmailProps) =
             <Button
               href={verifyUrl}
               style={{
-                backgroundColor: '#171717',
-                borderRadius: '8px',
+                backgroundColor: '#1a56db',
+                borderRadius: '999px',
                 color: '#ffffff',
                 display: 'inline-block',
                 fontSize: '15px',
@@ -69,8 +69,8 @@ const VerifyEmail = ({ userName, verifyUrl, locale = 'fa' }: VerifyEmailProps) =
           </Section>
 
           <Section style={{ padding: '16px 40px 32px' }}>
-            <Hr style={{ borderColor: '#e5e5e5', margin: '0 0 16px' }} />
-            <Text style={{ color: '#a3a3a3', fontSize: '13px', lineHeight: '20px', margin: 0, fontFamily: font }}>
+            <Hr style={{ borderColor: '#e2e8f1', margin: '0 0 16px' }} />
+            <Text style={{ color: '#6f8199', fontSize: '13px', lineHeight: '20px', margin: 0, fontFamily: font }}>
               {t.footer}
             </Text>
           </Section>

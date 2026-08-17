@@ -2,6 +2,8 @@ import * as React from 'react';
 
 import { Text } from '@react-email/components';
 
+import { EMAIL_COLORS } from '../colors';
+
 interface MonthBarProps {
   month: string; // 'Jan'
   // Amounts in the user's primary currency — only used relatively, for bar heights.
@@ -39,7 +41,7 @@ export const MonthBar = ({ month, income, expenses, max }: MonthBarProps) => {
                 style={{
                   width: '100%',
                   height: `${Math.max(2, incomeHeight)}px`,
-                  backgroundColor: '#10b981',
+                  backgroundColor: EMAIL_COLORS.success,
                   borderRadius: '2px 2px 0 0',
                 }}
               />
@@ -49,7 +51,7 @@ export const MonthBar = ({ month, income, expenses, max }: MonthBarProps) => {
                 style={{
                   width: '100%',
                   height: `${Math.max(2, expenseHeight)}px`,
-                  backgroundColor: '#171717',
+                  backgroundColor: EMAIL_COLORS.textPrimary,
                   borderRadius: '2px 2px 0 0',
                 }}
               />
@@ -57,7 +59,7 @@ export const MonthBar = ({ month, income, expenses, max }: MonthBarProps) => {
           </tr>
         </table>
       </div>
-      <Text className="m-0 mt-2 text-[10px] text-[#a3a3a3] uppercase" style={{ letterSpacing: '0.05em' }}>
+      <Text className="m-0 mt-2 text-[10px] text-[#6f8199] uppercase" style={{ letterSpacing: '0.05em' }}>
         {month}
       </Text>
     </td>

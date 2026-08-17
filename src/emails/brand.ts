@@ -4,7 +4,7 @@
 // localhost) ships a logo nobody but the sender can load.
 export const EMAIL_ASSET_ORIGIN = process.env.EMAIL_ASSET_ORIGIN ?? 'https://kharji.app';
 
-// The hosted PWA icon: black rounded square + white Zap.
+// The hosted PWA icon: cobalt rounded tile + the white bolt.
 export const EMAIL_LOGO_URL = `${EMAIL_ASSET_ORIGIN}/icons/icon-192.png`;
 
 export const BRAND_NAME = { en: 'Kharji', fa: 'خرجی' } as const;

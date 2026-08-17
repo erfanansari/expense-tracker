@@ -64,15 +64,15 @@ const MonthlyReport = ({
 
   return (
     <Layout preview={preview} unsubscribeUrl={unsubscribeUrl} webViewUrl={webViewUrl} logoUrl={logoUrl} locale={locale}>
-      <Text className="m-0 text-[14px] text-[#525252]">{greeting}</Text>
+      <Text className="m-0 text-[14px] text-[#46586e]">{greeting}</Text>
       <Heading
         as="h1"
-        className="m-0 mt-2 text-[#171717]"
+        className="m-0 mt-2 text-[#0f1b2d]"
         style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.02em', lineHeight: '32px' }}
       >
         {t.monthly.title(periodLabel)}
       </Heading>
-      <Text className="m-0 mt-2 text-[14px] leading-5 text-[#6b7280]">{t.monthly.subtitle}</Text>
+      <Text className="m-0 mt-2 text-[14px] leading-5 text-[#616579]">{t.monthly.subtitle}</Text>
 
       {/* Stats */}
       <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" dir={dir} style={{ marginTop: '24px' }}>
@@ -111,11 +111,11 @@ const MonthlyReport = ({
       {/* Top categories */}
       {topCategories.length > 0 && (
         <>
-          <Hr className="my-8 border-t border-[#e5e5e5]" />
-          <Heading as="h2" className="m-0 text-[#171717]" style={{ fontSize: '16px', fontWeight: 600 }}>
+          <Hr className="my-8 border-t border-[#e2e8f1]" />
+          <Heading as="h2" className="m-0 text-[#0f1b2d]" style={{ fontSize: '16px', fontWeight: 600 }}>
             {t.topCategories}
           </Heading>
-          <Text className="m-0 mt-1 text-[13px] text-[#a3a3a3]">{t.monthly.topCategoriesSubtitle(periodLabel)}</Text>
+          <Text className="m-0 mt-1 text-[13px] text-[#6f8199]">{t.monthly.topCategoriesSubtitle(periodLabel)}</Text>
           <Section style={{ marginTop: '20px' }}>
             {topCategories.map((c, i) => (
               <CategoryRow

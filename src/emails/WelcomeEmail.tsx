@@ -27,7 +27,7 @@ const WelcomeEmail = ({ userName, dashboardUrl, logoUrl, locale = 'fa' }: Welcom
         <FontStyles locale={locale} />
       </Head>
       <Preview>{t.preview}</Preview>
-      <Body style={{ backgroundColor: '#f5f5f5', fontFamily: font, margin: 0, padding: '40px 0' }}>
+      <Body style={{ backgroundColor: '#e9eff7', fontFamily: font, margin: 0, padding: '40px 0' }}>
         <Container
           dir={dir}
           style={{
@@ -46,7 +46,7 @@ const WelcomeEmail = ({ userName, dashboardUrl, logoUrl, locale = 'fa' }: Welcom
 
           {/* Body */}
           <Section style={{ padding: '0 40px 40px' }}>
-            <Text style={{ margin: '0 0 8px', fontSize: '15px', color: '#6b7280', fontFamily: font }}>{greeting}</Text>
+            <Text style={{ margin: '0 0 8px', fontSize: '15px', color: '#616579', fontFamily: font }}>{greeting}</Text>
             <Heading
               as="h1"
               style={{
@@ -55,14 +55,14 @@ const WelcomeEmail = ({ userName, dashboardUrl, logoUrl, locale = 'fa' }: Welcom
                 fontWeight: 700,
                 letterSpacing: '-0.03em',
                 lineHeight: '1.1',
-                color: '#171717',
+                color: '#0f1b2d',
                 fontFamily: font,
               }}
             >
               {t.heading}
             </Heading>
             <Text
-              style={{ margin: '0 0 32px', fontSize: '15px', lineHeight: '1.6', color: '#525252', fontFamily: font }}
+              style={{ margin: '0 0 32px', fontSize: '15px', lineHeight: '1.6', color: '#46586e', fontFamily: font }}
             >
               {t.body}
             </Text>
@@ -74,8 +74,8 @@ const WelcomeEmail = ({ userName, dashboardUrl, logoUrl, locale = 'fa' }: Welcom
                   <Button
                     href={dashboardUrl}
                     style={{
-                      backgroundColor: '#171717',
-                      borderRadius: '8px',
+                      backgroundColor: '#1a56db',
+                      borderRadius: '999px',
                       color: '#ffffff',
                       display: 'inline-block',
                       fontSize: '14px',
@@ -91,7 +91,7 @@ const WelcomeEmail = ({ userName, dashboardUrl, logoUrl, locale = 'fa' }: Welcom
               </tr>
             </table>
 
-            <Hr style={{ border: 'none', borderTop: '1px solid #e5e5e5', margin: '0 0 32px' }} />
+            <Hr style={{ border: 'none', borderTop: '1px solid #e2e8f1', margin: '0 0 32px' }} />
 
             {/* Features */}
             {t.features.map((f) => (
@@ -114,14 +114,14 @@ const WelcomeEmail = ({ userName, dashboardUrl, logoUrl, locale = 'fa' }: Welcom
                         margin: '0 0 3px',
                         fontSize: '14px',
                         fontWeight: 600,
-                        color: '#171717',
+                        color: '#0f1b2d',
                         fontFamily: font,
                       }}
                     >
                       {f.title}
                     </Text>
                     <Text
-                      style={{ margin: 0, fontSize: '13px', lineHeight: '1.5', color: '#6b7280', fontFamily: font }}
+                      style={{ margin: 0, fontSize: '13px', lineHeight: '1.5', color: '#616579', fontFamily: font }}
                     >
                       {f.description}
                     </Text>
@@ -132,10 +132,10 @@ const WelcomeEmail = ({ userName, dashboardUrl, logoUrl, locale = 'fa' }: Welcom
           </Section>
 
           {/* Footer */}
-          <Section style={{ borderTop: '1px solid #e5e5e5', padding: '24px 40px', backgroundColor: '#fafafa' }}>
-            <Text style={{ margin: '0 0 6px', fontSize: '12px', color: '#a3a3a3', fontFamily: font }}>{t.footer1}</Text>
-            <Text style={{ margin: 0, fontSize: '12px', color: '#a3a3a3', fontFamily: font }}>{t.footer2}</Text>
-            <Text style={{ margin: '16px 0 0', fontSize: '11px', color: '#a3a3a3', fontFamily: font }}>
+          <Section style={{ borderTop: '1px solid #e2e8f1', padding: '24px 40px', backgroundColor: '#f3f6fa' }}>
+            <Text style={{ margin: '0 0 6px', fontSize: '12px', color: '#6f8199', fontFamily: font }}>{t.footer1}</Text>
+            <Text style={{ margin: 0, fontSize: '12px', color: '#6f8199', fontFamily: font }}>{t.footer2}</Text>
+            <Text style={{ margin: '16px 0 0', fontSize: '11px', color: '#6f8199', fontFamily: font }}>
               {AUTH_EMAIL_STRINGS[locale].brandFooter}
             </Text>
           </Section>

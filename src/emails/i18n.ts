@@ -1,3 +1,5 @@
+import { EMAIL_COLORS } from './colors';
+
 export type EmailLocale = 'en' | 'fa';
 
 export const FONT_STACKS: Record<EmailLocale, string> = {
@@ -59,27 +61,27 @@ export const AUTH_EMAIL_STRINGS = {
       featuresTitle: null,
       features: [
         {
-          color: '#10b981',
+          color: EMAIL_COLORS.success,
           title: 'Expenses',
           description: 'Log daily spending with categories, tags, and multi-currency amounts.',
         },
         {
-          color: '#0070f3',
+          color: EMAIL_COLORS.brand,
           title: 'Income',
           description: 'Track monthly income by type — salary, freelance, investments, and more.',
         },
         {
-          color: '#8b5cf6',
+          color: EMAIL_COLORS.info,
           title: 'Assets & Net Worth',
           description: 'Monitor cash, crypto, gold, real estate, and investments in one place.',
         },
         {
-          color: '#f59e0b',
+          color: EMAIL_COLORS.warning,
           title: 'Reports & Insights',
           description: 'Spending charts and trends, plus monthly and yearly summaries in your inbox.',
         },
         {
-          color: '#171717',
+          color: EMAIL_COLORS.textPrimary,
           title: 'Your Data, Yours',
           description: 'Download a full Excel backup anytime, or import expenses from CSV.',
         },
@@ -128,27 +130,27 @@ export const AUTH_EMAIL_STRINGS = {
       featuresTitle: null,
       features: [
         {
-          color: '#10b981',
+          color: EMAIL_COLORS.success,
           title: 'هزینه‌ها',
           description: 'هزینه‌های روزانه‌ت رو با دسته‌بندی، برچسب و چند ارز ثبت کن.',
         },
         {
-          color: '#0070f3',
+          color: EMAIL_COLORS.brand,
           title: 'درآمد',
           description: 'درآمد ماهانه‌ت رو به تفکیک نوع دنبال کن — حقوق، فریلنس، سرمایه‌گذاری و بقیه.',
         },
         {
-          color: '#8b5cf6',
+          color: EMAIL_COLORS.info,
           title: 'دارایی‌ها و دارایی خالص',
           description: 'هر چی داری — کم یا زیاد، از حساب بانکی تا طلا — رو یک‌جا زیر نظر داشته باش.',
         },
         {
-          color: '#f59e0b',
+          color: EMAIL_COLORS.warning,
           title: 'گزارش‌ها و تحلیل‌ها',
           description: 'نمودارها و روند خرج کردنت، به‌علاوهٔ خلاصه‌های ماهانه و سالانه توی ایمیلت.',
         },
         {
-          color: '#171717',
+          color: EMAIL_COLORS.textPrimary,
           title: 'داده‌هات مال خودته',
           description: 'هر وقت خواستی یه بکاپ کامل اکسل بگیر، یا هزینه‌هات رو از CSV وارد کن.',
         },
