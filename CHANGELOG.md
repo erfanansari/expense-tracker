@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.3.0](https://github.com/erfanansari/kharji/compare/v1.2.0...v1.3.0) (2026-08-17)
+
+### Features
+
+- give settings a grouped sidebar and a route per section ([6290237](https://github.com/erfanansari/kharji/commit/6290237bce88054b4ef90c80c7c0feb7ade43a81))
+
+### Bug Fixes
+
+- correct tab arrow-key direction in Persian ([6c0fa9b](https://github.com/erfanansari/kharji/commit/6c0fa9b10e94dc47ade132c34495c8dcbefeb609))
+
 ## [1.2.0](https://github.com/erfanansari/kharji/compare/v1.1.0...v1.2.0) (2026-08-17)
 
 ### Features
