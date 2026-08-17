@@ -9,12 +9,24 @@ interface AmountInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
   onChange: (value: number) => void;
 }
 
+// Shorthand suffixes keyed by physical key position (KeyboardEvent.code), which
+// is layout-independent. A non-Latin layout — Persian, Arabic, Russian — puts a
+// letter on the K key that means nothing in an amount field ("ن" on fa), so the
+// keystroke filter drops it and the character never appears. Reading the physical
+// key lets "900k" work on any layout without enumerating each one's alphabet.
+const PHYSICAL_KEY_SHORTHAND: Record<string, string> = {
+  KeyK: 'k',
+  KeyM: 'm',
+  KeyB: 'b',
+  KeyT: 't',
+};
+
 /**
  * A numeric input that accepts shorthand notation (4k, 3.2m, 1.5b, 2t).
  * On each keystroke the parsed value is forwarded to onChange so bidirectional
  * conversions stay live. On blur the display is normalised to the resolved number.
  */
-const AmountInput = ({ value, onChange, onBlur, ...props }: AmountInputProps) => {
+const AmountInput = ({ value, onChange, onBlur, onKeyDown, ...props }: AmountInputProps) => {
   const [displayValue, setDisplayValue] = useState(value === 0 ? '' : String(value));
   const [prevValue, setPrevValue] = useState(value);
   const [isFocused, setIsFocused] = useState(false);
@@ -32,9 +44,7 @@ const AmountInput = ({ value, onChange, onBlur, ...props }: AmountInputProps) =>
 
   const handleFocus = () => setIsFocused(true);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value;
-
+  const applyInput = (raw: string) => {
     // Reject keystrokes that could never form a valid amount (e.g. letters)
     // instead of accepting them and reverting on blur.
     if (!isPlausibleAmountInput(raw)) return;
@@ -52,6 +62,28 @@ const AmountInput = ({ value, onChange, onBlur, ...props }: AmountInputProps) =>
     }
     // If null (partial / mid-shorthand e.g. user just typed "k"), keep the
     // previous numeric value so the form state stays valid while still typing.
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => applyInput(e.target.value);
+
+  // Translate the k/m/b/t key positions into their shorthand letters when the
+  // active layout would otherwise emit a non-Latin character. Latin layouts fall
+  // through untouched, so alternative ones (Dvorak, AZERTY) keep their own key
+  // positions — there the K key already reports e.key === 'k'.
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    onKeyDown?.(e);
+    if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+
+    const suffix = PHYSICAL_KEY_SHORTHAND[e.code];
+    if (!suffix || /^[a-z]$/i.test(e.key)) return;
+
+    const input = e.currentTarget;
+    if (input.readOnly) return;
+
+    e.preventDefault();
+    const start = input.selectionStart ?? displayValue.length;
+    const end = input.selectionEnd ?? start;
+    applyInput(displayValue.slice(0, start) + suffix + displayValue.slice(end));
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -82,6 +114,7 @@ const AmountInput = ({ value, onChange, onBlur, ...props }: AmountInputProps) =>
       inputMode="decimal"
       value={displayValue}
       onChange={handleChange}
+      onKeyDown={handleKeyDown}
       onFocus={handleFocus}
       onBlur={handleBlur}
     />
