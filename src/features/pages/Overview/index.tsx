@@ -15,6 +15,7 @@ import { ApiError } from '@core/errors';
 
 import { getButtonClasses } from '@components/Button';
 import ErrorState from '@components/ErrorState';
+import PageHeader from '@components/PageHeader';
 import Pulse from '@components/Skeleton';
 
 import { useDrawerStore } from '@stores/drawer';
@@ -167,22 +168,21 @@ const Dashboard = () => {
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       <div className="mx-auto max-w-[1600px] p-8 px-6">
-        {/* Header */}
-        <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">{t('title')}</h1>
-            <p className="text-text-muted mt-1 text-xs sm:text-sm">{t('subtitle')}</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => openExpenseDrawer()}
-            className={getButtonClasses('primary', 'shrink-0')}
-            aria-label={tCommon('addExpense')}
-          >
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">{tCommon('addExpense')}</span>
-          </button>
-        </div>
+        <PageHeader
+          title={t('title')}
+          subtitle={t('subtitle')}
+          action={
+            <button
+              type="button"
+              onClick={() => openExpenseDrawer()}
+              className={getButtonClasses('primary')}
+              aria-label={tCommon('addExpense')}
+            >
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">{tCommon('addExpense')}</span>
+            </button>
+          }
+        />
 
         {isLoading && <OverviewSkeleton />}
         {!isLoading &&

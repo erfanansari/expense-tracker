@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { Bell } from 'lucide-react';
 
+import SectionCard from '@components/SectionCard';
 import Toggle from '@components/Toggle';
 
 import { useToast } from '@stores/toast';
@@ -68,19 +69,7 @@ const NotificationsSection = () => {
   const emailOn = !!prefs?.emailEnabled;
 
   return (
-    <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
-      <div className="border-border-subtle border-b p-6">
-        <div className="flex items-center gap-3">
-          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-            <Bell className="text-text-secondary h-5 w-5" />
-          </div>
-          <div className="flex-1">
-            <h2 className="text-text-primary text-lg font-semibold">{t('title')}</h2>
-            <p className="text-text-muted text-sm">{t('subtitle')}</p>
-          </div>
-        </div>
-      </div>
-
+    <SectionCard icon={Bell} title={t('title')} subtitle={t('subtitle')}>
       <div className="p-6">
         <div className="max-w-2xl space-y-5">
           {isLoading || !prefs ? (
@@ -115,7 +104,7 @@ const NotificationsSection = () => {
           )}
         </div>
       </div>
-    </div>
+    </SectionCard>
   );
 };
 

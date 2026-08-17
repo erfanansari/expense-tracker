@@ -12,6 +12,7 @@ import { beginSignout } from '@core/client/auth-handler';
 
 import Button from '@components/Button';
 import DeleteAccountModal from '@components/DeleteAccountModal';
+import SectionCard from '@components/SectionCard';
 
 import { useAuth } from '@hooks/use-auth';
 
@@ -62,18 +63,7 @@ const DataManagement = () => {
 
   return (
     <>
-      <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
-        <div className="border-border-subtle border-b p-6">
-          <div className="flex items-center gap-3">
-            <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-              <Database className="text-text-secondary h-5 w-5" aria-hidden="true" />
-            </div>
-            <div>
-              <h2 className="text-text-primary text-lg font-semibold">{t('title')}</h2>
-              <p className="text-text-muted text-sm">{t('subtitle')}</p>
-            </div>
-          </div>
-        </div>
+      <SectionCard icon={Database} title={t('title')} subtitle={t('subtitle')}>
         <div className="p-6">
           <div className="flex max-w-2xl flex-col gap-3 sm:flex-row">
             <Button variant="outline" onClick={handleExport} disabled={isExporting}>
@@ -101,7 +91,7 @@ const DataManagement = () => {
           </div>
           <p className="text-text-muted mt-3 text-xs">{t('hint')}</p>
         </div>
-      </div>
+      </SectionCard>
 
       <ImportModal isOpen={isImportOpen} onClose={() => setIsImportOpen(false)} />
 

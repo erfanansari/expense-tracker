@@ -7,6 +7,8 @@ import { useTheme } from 'next-themes';
 
 import { Monitor, Moon, Palette, Sun } from 'lucide-react';
 
+import SectionCard from '@components/SectionCard';
+
 const THEME_OPTIONS = [
   { value: 'system', key: 'system', icon: Monitor },
   { value: 'light', key: 'light', icon: Sun },
@@ -29,18 +31,7 @@ const AppearanceSection = () => {
   const active = mounted ? (theme ?? 'system') : undefined;
 
   return (
-    <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
-      <div className="border-border-subtle border-b p-6">
-        <div className="flex items-center gap-3">
-          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-            <Palette className="text-text-secondary h-5 w-5" />
-          </div>
-          <div className="flex-1">
-            <h2 className="text-text-primary text-lg font-semibold">{t('title')}</h2>
-            <p className="text-text-muted text-sm">{t('subtitle')}</p>
-          </div>
-        </div>
-      </div>
+    <SectionCard icon={Palette} title={t('title')} subtitle={t('subtitle')}>
       <div className="p-6">
         <label className="text-text-secondary mb-2 block text-sm font-medium">{t('theme')}</label>
         <div
@@ -71,7 +62,7 @@ const AppearanceSection = () => {
         </div>
         <p className="text-text-muted mt-3 text-xs">{t('systemHint')}</p>
       </div>
-    </div>
+    </SectionCard>
   );
 };
 

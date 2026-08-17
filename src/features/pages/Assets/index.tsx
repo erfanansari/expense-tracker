@@ -17,6 +17,7 @@ import type { Asset, AssetCategory } from '@types';
 
 import Button from '@components/Button';
 import DeleteConfirmModal from '@components/DeleteConfirmModal';
+import PageHeader from '@components/PageHeader';
 import Pulse from '@components/Skeleton';
 
 import { useAssetCategoryLabel } from '@hooks/use-constant-labels';
@@ -120,27 +121,26 @@ const AssetsPage = () => {
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-[1600px] px-6 py-8">
-        {/* Page Header */}
-        <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
-          <div className="min-w-0 flex-1">
-            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">{t('title')}</h1>
-            <p className="text-text-muted mt-1 text-xs sm:text-sm">{t('subtitle')}</p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setIsRevalueOpen(true)}
-              disabled={showingSkeleton || assets.length === 0}
-            >
-              <RefreshCw className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('revalue.button')}</span>
-            </Button>
-            <Button variant="primary" onClick={() => openAssetDrawer()}>
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">{tCommon('addAsset')}</span>
-            </Button>
-          </div>
-        </div>
+        <PageHeader
+          title={t('title')}
+          subtitle={t('subtitle')}
+          action={
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setIsRevalueOpen(true)}
+                disabled={showingSkeleton || assets.length === 0}
+              >
+                <RefreshCw className="h-4 w-4" />
+                <span className="hidden sm:inline">{t('revalue.button')}</span>
+              </Button>
+              <Button variant="primary" onClick={() => openAssetDrawer()}>
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">{tCommon('addAsset')}</span>
+              </Button>
+            </>
+          }
+        />
 
         {/* On a failed fetch with no cached data, the table below shows the error —
             don't render zero-state cards that read as an empty account. */}

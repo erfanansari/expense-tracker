@@ -21,6 +21,7 @@ import DateRangeSelector, {
 
 import Button from '@components/Button';
 import ErrorState from '@components/ErrorState';
+import PageHeader from '@components/PageHeader';
 import Pulse from '@components/Skeleton';
 
 import { useLocalePreferences } from '@hooks/use-locale-preferences';
@@ -130,55 +131,52 @@ const ReportsPage = () => {
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-[1600px] px-6 py-8">
-        {/* Page Header */}
-        <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
-          <div className="min-w-0 flex-1">
-            <h1 className="text-text-primary text-xl font-semibold sm:text-2xl md:text-3xl">{t('title')}</h1>
-            <p className="text-text-muted mt-1 text-xs sm:text-sm">{t('subtitle')}</p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-            {/* Date range — inline on desktop, dropped below on mobile */}
-            <div className="hidden w-[150px] sm:block">
-              <DateRangeSelector value={dateRange} onChange={setDateRange} />
-            </div>
-            <div className="relative">
+        <PageHeader
+          title={t('title')}
+          subtitle={t('subtitle')}
+          action={
+            <>
+              {/* Date range — inline on desktop, dropped below on mobile */}
+              <div className="hidden w-[150px] sm:block">
+                <DateRangeSelector value={dateRange} onChange={setDateRange} />
+              </div>
+              <div className="relative">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsFilterOpen((v) => !v)}
+                  aria-expanded={isFilterOpen}
+                  aria-haspopup="dialog"
+                >
+                  <Filter className="h-4 w-4" />
+                  <span className="hidden sm:inline">{t('filterButton')}</span>
+                  {activeFilterCount > 0 && (
+                    <span className="bg-blue text-background ms-0.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-semibold tabular-nums">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </Button>
+                <ReportsFilterPopover
+                  isOpen={isFilterOpen}
+                  onClose={() => setIsFilterOpen(false)}
+                  selectedTags={filterTags}
+                  selectedCategoryIds={filterCategoryIds}
+                  onTagsChange={setFilterTags}
+                  onCategoriesChange={setFilterCategoryIds}
+                  onReset={handleResetFilters}
+                />
+              </div>
               <Button
-                variant="outline"
-                className="shrink-0"
-                onClick={() => setIsFilterOpen((v) => !v)}
-                aria-expanded={isFilterOpen}
-                aria-haspopup="dialog"
+                variant="primary"
+                onClick={handleExportCsv}
+                disabled={filteredExpenses.length === 0}
+                title={t('exportCsvTitle')}
               >
-                <Filter className="h-4 w-4" />
-                <span className="hidden sm:inline">{t('filterButton')}</span>
-                {activeFilterCount > 0 && (
-                  <span className="bg-blue text-background ms-0.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-semibold tabular-nums">
-                    {activeFilterCount}
-                  </span>
-                )}
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">{t('exportCsv')}</span>
               </Button>
-              <ReportsFilterPopover
-                isOpen={isFilterOpen}
-                onClose={() => setIsFilterOpen(false)}
-                selectedTags={filterTags}
-                selectedCategoryIds={filterCategoryIds}
-                onTagsChange={setFilterTags}
-                onCategoriesChange={setFilterCategoryIds}
-                onReset={handleResetFilters}
-              />
-            </div>
-            <Button
-              variant="primary"
-              className="shrink-0"
-              onClick={handleExportCsv}
-              disabled={filteredExpenses.length === 0}
-              title={t('exportCsvTitle')}
-            >
-              <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('exportCsv')}</span>
-            </Button>
-          </div>
-        </div>
+            </>
+          }
+        />
 
         {/* Mobile-only date range row */}
         <div className="mb-6 sm:hidden">

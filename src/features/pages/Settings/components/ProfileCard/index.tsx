@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 
 import { useTranslations } from 'next-intl';
@@ -5,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Loader2, User } from 'lucide-react';
 
 import Button from '@components/Button';
+import SectionCard from '@components/SectionCard';
 
 import { useAuth } from '@hooks/use-auth';
 import { useUpdateUserProfile } from '@hooks/use-user-profile';
@@ -59,18 +62,7 @@ const ProfileCard = () => {
   };
 
   return (
-    <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
-      <div className="border-border-subtle border-b p-6">
-        <div className="flex items-center gap-3">
-          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-            <User className="text-text-secondary h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="text-text-primary text-lg font-semibold">{t('title')}</h2>
-            <p className="text-text-muted text-sm">{t('subtitle')}</p>
-          </div>
-        </div>
-      </div>
+    <SectionCard icon={User} title={t('title')} subtitle={t('subtitle')}>
       <div className="p-6">
         {/* me-auto: a block with a max-width and no margin always hugs the
             physical left (that's how CSS resolves margin:0, direction doesn't
@@ -125,7 +117,7 @@ const ProfileCard = () => {
           </div>
         </div>
       </div>
-    </div>
+    </SectionCard>
   );
 };
 

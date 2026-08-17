@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import { Globe } from 'lucide-react';
 
+import SectionCard from '@components/SectionCard';
 import Select from '@components/Select';
 import Toggle from '@components/Toggle';
 
@@ -50,18 +51,7 @@ const LanguageSection = () => {
   };
 
   return (
-    <div className="border-border-subtle bg-background rounded-xl border shadow-sm">
-      <div className="border-border-subtle border-b p-6">
-        <div className="flex items-center gap-3">
-          <div className="border-border-subtle bg-background-secondary rounded-lg border p-2">
-            <Globe className="text-text-secondary h-5 w-5" />
-          </div>
-          <div className="flex-1">
-            <h2 className="text-text-primary text-lg font-semibold">{t('title')}</h2>
-            <p className="text-text-muted text-sm">{t('subtitle')}</p>
-          </div>
-        </div>
-      </div>
+    <SectionCard icon={Globe} title={t('title')} subtitle={t('subtitle')}>
       <div className="p-6">
         <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
           <div>
@@ -100,7 +90,7 @@ const LanguageSection = () => {
           />
         </div>
       </div>
-    </div>
+    </SectionCard>
   );
 };
 
