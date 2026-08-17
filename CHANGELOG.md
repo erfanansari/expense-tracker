@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/erfanansari/kharji/compare/v1.1.0...v1.2.0) (2026-08-17)
+
+### Features
+
+- redesign the interface around the Cobalt theme ([c809ffd](https://github.com/erfanansari/kharji/commit/c809ffdd78fa87d90029c194645b3630be0afcb7))
+- refresh the brand mark and regenerate app icons ([70069e8](https://github.com/erfanansari/kharji/commit/70069e820a4c34754796f33e8e8ae1c5b2fc346a))
+- restyle the email templates to match ([c8fc1ba](https://github.com/erfanansari/kharji/commit/c8fc1ba7e9af4ecb4aa9e9fdffddc131f88540f7))
+
 ## [1.1.0](https://github.com/erfanansari/kharji/compare/v1.0.1...v1.1.0) (2026-08-10)
 
 ### Features
