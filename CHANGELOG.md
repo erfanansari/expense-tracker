@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.1](https://github.com/erfanansari/kharji/compare/v1.3.0...v1.3.1) (2026-08-17)
+
+### Bug Fixes
+
+- accept k/m/b/t amount shorthand on non-Latin keyboard layouts ([53ffc3d](https://github.com/erfanansari/kharji/commit/53ffc3d4e7d1186eda67eb852b07e06525984f44))
+
 ## [1.3.0](https://github.com/erfanansari/kharji/compare/v1.2.0...v1.3.0) (2026-08-17)
 
 ### Features
