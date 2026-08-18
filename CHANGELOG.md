@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.0](https://github.com/erfanansari/kharji/compare/v1.3.1...v1.4.0) (2026-08-18)
+
+### Features
+
+- repeat an expense on a daily, weekly, monthly or yearly schedule ([cc1d796](https://github.com/erfanansari/kharji/commit/cc1d7966c1c13aa0d5a6c1d920493a18bb1054e3))
+
 ## [1.3.1](https://github.com/erfanansari/kharji/compare/v1.3.0...v1.3.1) (2026-08-17)
 
 ### Bug Fixes
