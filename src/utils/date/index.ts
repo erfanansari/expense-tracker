@@ -8,6 +8,25 @@ export type AppLocale = 'en' | 'fa';
 export type CalendarPreference = 'auto' | 'gregorian' | 'jalali';
 export type ResolvedCalendar = 'gregorian' | 'jalali';
 
+/**
+ * The zone the app treats as "the current day" for scheduling. Expense dates are
+ * bare yyyy-MM-dd with no zone attached, so anything that decides *which day it
+ * is* needs one fixed reference — and for Kharji that's Tehran. Using the
+ * server's UTC clock would post a 1st-of-month rule on the wrong local day
+ * (the daily cron runs 09:00 UTC = 12:30 Tehran).
+ */
+export const APP_TIME_ZONE = 'Asia/Tehran';
+
+/** Today's date as yyyy-MM-dd in the given zone. `en-CA` formats as ISO. */
+export function todayInTimeZone(timeZone: string = APP_TIME_ZONE, now: Date = new Date()): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(now);
+}
+
 /** auto: en -> gregorian, fa -> jalali. Explicit choices pass through untouched. */
 export function resolveCalendar(pref: CalendarPreference, locale: AppLocale): ResolvedCalendar {
   if (pref !== 'auto') return pref;

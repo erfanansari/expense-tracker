@@ -1,5 +1,5 @@
 export { fallbackT, type Translator } from './fallback-translator';
-export { createExpenseSchema, type CreateExpenseSchema } from './expense';
+export { createExpenseSchema, createExpenseObjectSchema, type CreateExpenseSchema, type RepeatSchema } from './expense';
 export { createIncomeSchema, type CreateIncomeSchema } from './income';
 export { createAssetSchema, type CreateAssetSchema } from './asset';
 export { createContactSchema, type ContactSchema } from './contact';

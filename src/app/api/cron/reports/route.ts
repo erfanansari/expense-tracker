@@ -7,6 +7,7 @@ import { gzipSync } from 'zlib';
 import { pruneOldBackups, uploadBackup } from '@core/database/backup-storage';
 import { db } from '@core/database/client';
 import { generateSqlDump } from '@core/database/dump';
+import { materializeDueExpenses } from '@core/recurring/materialize';
 import { getReportData, previousMonthOf } from '@core/reports/aggregate';
 import type { ReportType } from '@core/reports/aggregate';
 import { dispatchReport } from '@core/reports/dispatch';
@@ -147,10 +148,26 @@ export async function POST(request: NextRequest) {
     backupResult = { ok: false, error: message };
   }
 
-  // ── 2. Email reports (runs only on the 1st of each month) ─────────────────
+  // ── 2. Recurring expenses (runs every day) ────────────────────────────────
+  // Posts every occurrence owed as of today, for every user. Cheap when nothing
+  // is due. Failing here must not cost us the email reports below.
+  let recurringResult: Record<string, unknown>;
+  try {
+    recurringResult = { ok: true, ...(await materializeDueExpenses()) };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[cron/recurring] failed:', message);
+    recurringResult = { ok: false, error: message };
+  }
+
+  // ── 3. Email reports (runs only on the 1st of each month) ─────────────────
   const dispatch = decideDispatch(now);
   if (!dispatch) {
-    return NextResponse.json({ backup: backupResult, reports: { skipped: true } });
+    return NextResponse.json({
+      backup: backupResult,
+      recurring: recurringResult,
+      reports: { skipped: true },
+    });
   }
 
   const { reportType, year, month } = dispatch;
@@ -177,7 +194,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ backup: backupResult, reports: summary });
+  return NextResponse.json({ backup: backupResult, recurring: recurringResult, reports: summary });
 }
 
 // Vercel Cron Jobs send GET requests — alias POST so both work

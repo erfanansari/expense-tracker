@@ -149,6 +149,36 @@ export async function getEntryRate(currency: string): Promise<number | null> {
   return latest[currency] ?? null;
 }
 
+/**
+ * The `entryRate` snapshot for a record dated `date` (YYYY-MM-DD): the most
+ * recent known rate on or before that date.
+ *
+ * Used when a record is written for a day that isn't today — a recurring rule
+ * catching up on missed occurrences. Pinning each occurrence to the rate that
+ * was actually current on its own due date keeps a three-month catch-up
+ * historically honest instead of valuing all of it at today's rate.
+ *
+ * Falls back to the latest rate when the currency has no history that far back
+ * (e.g. it was added to the registry after the date in question), so a
+ * legitimately old occurrence still gets a usable rate rather than being
+ * blocked forever.
+ */
+export async function getEntryRateOn(currency: string, date: string): Promise<number | null> {
+  if (currency === PIVOT_CURRENCY) return 1;
+
+  const res = await db.execute({
+    sql: `SELECT rate FROM currencyRates
+          WHERE currency = ? AND rateDate <= ?
+          ORDER BY rateDate DESC LIMIT 1`,
+    args: [currency, date],
+  });
+
+  const rate = res.rows[0]?.rate as number | undefined;
+  if (rate !== undefined) return rate;
+
+  return getEntryRate(currency);
+}
+
 /** Count of distinct rate codes (currencies + tracked items) with a row for `date`. */
 async function rateCurrenciesPresentOn(date: string): Promise<number> {
   const codes = RATE_SERIES_ENTRIES.map((c) => c.code);

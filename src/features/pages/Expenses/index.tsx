@@ -110,12 +110,10 @@ const ExpensesPage = () => {
           title={t('title')}
           subtitle={t('subtitle')}
           action={
-            <>
-              <Button variant="primary" onClick={() => openExpenseDrawer()}>
-                <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">{t('addExpense')}</span>
-              </Button>
-            </>
+            <Button variant="primary" onClick={() => openExpenseDrawer()}>
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('addExpense')}</span>
+            </Button>
           }
         />
 

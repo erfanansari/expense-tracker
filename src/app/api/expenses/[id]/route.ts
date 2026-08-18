@@ -5,6 +5,7 @@ import { createExpenseSchema } from '@schemas';
 
 import { parseIdParam, validateBody, verifyOwnership, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
+import { syncExpenseRepeat } from '@core/database/expense-repeat';
 import { assignTagsToExpense } from '@core/database/tags';
 import { getEntryRate } from '@core/rates';
 
@@ -41,6 +42,21 @@ export const PUT = withAuth(async (user, request, { params }) => {
   });
 
   await assignTagsToExpense(id, body.tagIds);
+
+  // Setting `repeat` to null here is how a user stops a repeat — there is no
+  // separate rules screen. Already-posted expenses are kept either way.
+  await syncExpenseRepeat({
+    userId: user.userId,
+    expenseId: id,
+    date: body.date,
+    categoryId: body.categoryId,
+    description: body.description,
+    amount: body.amount,
+    currency: body.currency,
+    tagIds: body.tagIds,
+    repeat: body.repeat,
+    existingRecurringId: (existing.recurringId as number | null) ?? null,
+  });
 
   return NextResponse.json({ message: 'Expense updated successfully' }, { status: 200 });
 }, 'Expenses');

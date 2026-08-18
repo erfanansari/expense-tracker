@@ -1,7 +1,7 @@
 import type { useTranslations } from 'next-intl';
 
 import { type ColumnDef } from '@tanstack/react-table';
-import { Tag } from 'lucide-react';
+import { Repeat, Tag } from 'lucide-react';
 
 import type { Expense } from '@types';
 
@@ -63,7 +63,16 @@ export function buildExpenseColumns(
         const expense = row.original;
         return (
           <div className="flex min-w-0 flex-col gap-2">
-            <span className="text-text-primary truncate text-sm font-medium">{expense.description}</span>
+            <span className="flex min-w-0 items-center gap-1.5">
+              <span className="text-text-primary truncate text-sm font-medium">{expense.description}</span>
+              {/* Marks a row the user didn't type — posted by a recurring rule.
+                  Icon-only with a tooltip so it never crowds the description. */}
+              {expense.recurringId !== null && (
+                <span className="inline-flex shrink-0" title={t('expenses.generated')}>
+                  <Repeat className="text-text-muted h-3.5 w-3.5" aria-label={t('expenses.generated')} />
+                </span>
+              )}
+            </span>
             {expense.tags && expense.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {expense.tags.map((tag) => (

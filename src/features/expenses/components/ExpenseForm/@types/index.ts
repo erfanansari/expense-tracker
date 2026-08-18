@@ -1,4 +1,4 @@
-import type { Category, Tag } from '@types';
+import type { Category, ExpenseRepeat, Tag } from '@types';
 
 export interface ExpenseFormProps {
   onExpenseAdded: () => void;
@@ -10,6 +10,8 @@ export interface ExpenseFormProps {
     amount: number;
     currency: string;
     tags?: Tag[];
+    /** The repeat behind this expense, so editing it can change or stop it. */
+    repeat?: ExpenseRepeat | null;
   };
   onCancelEdit?: () => void;
   setIsDirty?: (dirty: boolean) => void;

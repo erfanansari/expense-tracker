@@ -131,6 +131,12 @@
       "passwordsMismatch": "Passwords do not match",
       "tokenRequired": "Token is required",
       "currentPasswordRequired": "Current password is required"
+    },
+    "recurring": {
+      "intervalMin": "Interval must be at least 1",
+      "intervalMax": "Interval can't be more than 99",
+      "endInvalid": "End date is invalid",
+      "endBeforeStart": "The end date can't be before the expense date"
     }
   },
   "dateRange": {
@@ -465,6 +471,43 @@
       "autoPriceSuggest": "Link to {item} price?",
       "added": "Asset added successfully!",
       "updated": "Asset updated successfully!"
+    },
+    "repeat": {
+      "label": "Repeat",
+      "none": "Doesn't repeat",
+      "preset": {
+        "daily": "Every day",
+        "weekly": "Every week",
+        "monthly": "Every month",
+        "yearly": "Every year"
+      },
+      "custom": "Custom…",
+      "every": "Every",
+      "unitLabel": "Period",
+      "unit": {
+        "daily": "{interval, plural, =1 {day} other {days}}",
+        "weekly": "{interval, plural, =1 {week} other {weeks}}",
+        "monthly": "{interval, plural, =1 {month} other {months}}",
+        "yearly": "{interval, plural, =1 {year} other {years}}"
+      },
+      "calendarLabel": "Repeat on",
+      "calendarOption": {
+        "gregorian": "Gregorian months",
+        "jalali": "Jalali months"
+      },
+      "endDate": "Until",
+      "noEndDate": "No end date",
+      "next": "Next: {dates}",
+      "summary": {
+        "daily": "{interval, plural, =1 {Every day} other {Every # days}}",
+        "weekly": "{interval, plural, =1 {Every week} other {Every # weeks}}",
+        "monthly": "{interval, plural, =1 {Every month} other {Every # months}}",
+        "yearly": "{interval, plural, =1 {Every year} other {Every # years}}"
+      },
+      "calendarShort": {
+        "gregorian": "Gregorian",
+        "jalali": "Jalali"
+      }
     }
   },
   "tables": {
@@ -478,7 +521,8 @@
       "description": "Description",
       "category": "Category",
       "date": "Date",
-      "amount": "Amount"
+      "amount": "Amount",
+      "generated": "Added automatically by a repeat"
     },
     "income": {
       "month": "Month",

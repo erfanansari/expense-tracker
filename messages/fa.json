@@ -131,6 +131,12 @@
       "passwordsMismatch": "رمزها با هم یکی نیستن",
       "tokenRequired": "این لینک معتبر نیست",
       "currentPasswordRequired": "رمز فعلیت رو وارد کن"
+    },
+    "recurring": {
+      "intervalMin": "بازه باید حداقل ۱ باشه",
+      "intervalMax": "بازه نمی‌تونه بیشتر از ۹۹ باشه",
+      "endInvalid": "تاریخ پایان معتبر نیست",
+      "endBeforeStart": "تاریخ پایان نمی‌تونه قبل از تاریخ هزینه باشه"
     }
   },
   "dateRange": {
@@ -465,6 +471,43 @@
       "autoPriceSuggest": "به قیمت {item} وصلش کنیم؟",
       "added": "دارایی ثبت شد!",
       "updated": "دارایی به‌روز شد!"
+    },
+    "repeat": {
+      "label": "تکرار",
+      "none": "تکرار نشه",
+      "preset": {
+        "daily": "هر روز",
+        "weekly": "هر هفته",
+        "monthly": "هر ماه",
+        "yearly": "هر سال"
+      },
+      "custom": "دلخواه…",
+      "every": "هر",
+      "unitLabel": "بازه",
+      "unit": {
+        "daily": "روز",
+        "weekly": "هفته",
+        "monthly": "ماه",
+        "yearly": "سال"
+      },
+      "calendarLabel": "تکرار بر اساس",
+      "calendarOption": {
+        "gregorian": "ماه‌های میلادی",
+        "jalali": "ماه‌های شمسی"
+      },
+      "endDate": "تا",
+      "noEndDate": "بدون تاریخ پایان",
+      "next": "بعدی: {dates}",
+      "summary": {
+        "daily": "{interval, plural, =1 {هر روز} other {هر # روز}}",
+        "weekly": "{interval, plural, =1 {هر هفته} other {هر # هفته}}",
+        "monthly": "{interval, plural, =1 {هر ماه} other {هر # ماه}}",
+        "yearly": "{interval, plural, =1 {هر سال} other {هر # سال}}"
+      },
+      "calendarShort": {
+        "gregorian": "میلادی",
+        "jalali": "شمسی"
+      }
     }
   },
   "tables": {
@@ -478,7 +521,8 @@
       "description": "توضیح",
       "category": "دسته‌بندی",
       "date": "تاریخ",
-      "amount": "مبلغ"
+      "amount": "مبلغ",
+      "generated": "خودکار از یه هزینهٔ تکرارشونده ثبت شده"
     },
     "income": {
       "month": "ماه",

@@ -30,6 +30,15 @@ export const expenseSchema: z.ZodType<Expense> = z.object({
   amount: z.number(),
   currency: z.string(),
   entryRate: z.number(),
+  recurringId: z.number().nullable(),
+  repeat: z
+    .object({
+      frequency: z.enum(['daily', 'weekly', 'monthly', 'yearly']),
+      intervalCount: z.number(),
+      calendar: z.enum(['gregorian', 'jalali']),
+      endDate: z.string().nullable(),
+    })
+    .nullable(),
   created_at: z.string(),
   tags: z.array(tagSchema).optional(),
 });

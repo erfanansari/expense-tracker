@@ -1,11 +1,13 @@
 import { z } from 'zod';
 
-import { createExpenseSchema, fallbackT } from '@schemas';
+import { createExpenseObjectSchema, fallbackT } from '@schemas';
 
 import client from '@core/client';
 import type { MutationKeyGenerator } from '@core/client/@types';
 
-const requestDataSchema = createExpenseSchema(fallbackT).partial().extend({ id: z.number() });
+// The un-refined object schema: Zod rejects `.partial()` on a schema carrying
+// refinements, and the cross-field endDate check isn't meaningful on a partial.
+const requestDataSchema = createExpenseObjectSchema(fallbackT).partial().extend({ id: z.number() });
 
 type RequestData = z.infer<typeof requestDataSchema>;
 const responseSchema = z.object({ message: z.string() });

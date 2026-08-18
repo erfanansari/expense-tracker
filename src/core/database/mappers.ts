@@ -1,6 +1,7 @@
 import type { Asset, AssetValuation } from '@/@types/asset';
 import type { Category, Expense, Tag } from '@/@types/expense';
 import type { Income } from '@/@types/income';
+import type { ExpenseRepeat } from '@/@types/recurring';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DbRow = Record<string, any>;
@@ -56,7 +57,7 @@ export function mapRowToAssetValuation(row: DbRow): AssetValuation {
   };
 }
 
-export function mapRowToExpense(row: DbRow, category: Category, tags?: Tag[]): Expense {
+export function mapRowToExpense(row: DbRow, category: Category, tags?: Tag[], repeat?: ExpenseRepeat): Expense {
   return {
     id: row.id as number,
     date: row.date as string,
@@ -65,6 +66,8 @@ export function mapRowToExpense(row: DbRow, category: Category, tags?: Tag[]): E
     amount: row.amount as number,
     currency: row.currency as string,
     entryRate: row.entryRate as number,
+    recurringId: (row.recurringId as number | null) ?? null,
+    repeat: repeat ?? null,
     created_at: row.created_at as string,
     tags: tags ?? [],
   };

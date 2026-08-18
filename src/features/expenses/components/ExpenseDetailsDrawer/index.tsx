@@ -4,10 +4,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useLocale, useTranslations } from 'next-intl';
 
-import { ArrowLeftRight, Calendar, Coins, Tag as TagIcon, X } from 'lucide-react';
+import { ArrowLeftRight, Calendar, Coins, Repeat, Tag as TagIcon, X } from 'lucide-react';
 import { Drawer } from 'vaul';
 
 import { formatMoney } from '@features/ExchangeRate/utils/currency';
+import { useRecurrenceSummary } from '@features/expenses/utils/use-recurrence-summary';
 
 import CategoryBadge from '@components/CategoryBadge';
 import Money from '@components/Money';
@@ -86,6 +87,7 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
   const isRtl = locale === 'fa';
   const { prefs: localePrefs } = useLocalePreferences();
   const calendar = resolveCalendar(localePrefs.calendar, locale);
+  const summarizeRepeat = useRecurrenceSummary();
 
   // Currency context (for the exchange-rate cell)
   const { primaryCurrency, secondaryCurrency, convert } = useCurrency();
@@ -266,6 +268,16 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
                     />
                   )}
                 </section>
+
+                {/* Explains a row the user may not remember entering, and names
+                    the schedule behind it. Disappears once the repeat is
+                    removed (recurringId is SET NULL). */}
+                {expense.repeat && (
+                  <p className="text-text-secondary border-border-subtle bg-background-secondary mt-1 flex items-center gap-2 rounded-lg border px-3 py-2 text-xs">
+                    <Repeat className="text-text-muted h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                    {summarizeRepeat(expense.repeat)}
+                  </p>
+                )}
 
                 {/* ─── Footer metadata ─────────────────────────────────── */}
                 <p className="text-text-muted border-border-subtle/60 mt-1 border-t pt-4 text-xs">

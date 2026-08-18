@@ -35,6 +35,7 @@ import { useToast } from '@stores/toast';
 import { ensureError } from '@utils';
 
 import CategorySelect from '../CategorySelect';
+import RepeatField from '../RepeatField';
 import TagInput from '../TagInput';
 
 import type { ExpenseFormProps } from './@types';
@@ -65,6 +66,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
       amount: 0,
       currency: primaryCurrency || PIVOT_CURRENCY,
       tagIds: [],
+      repeat: null,
     }),
     [primaryCurrency]
   );
@@ -79,6 +81,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
             amount: editingExpense.amount,
             currency: editingExpense.currency,
             tagIds: editingExpense.tags?.map((t) => t.id) || [],
+            repeat: editingExpense.repeat,
           }
         : null,
     [editingExpense]
@@ -95,6 +98,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
   const { formState, reset, setValue, watch } = methods;
   const amount = watch('amount');
   const currency = watch('currency');
+  const date = watch('date');
 
   // Mutations
   const createMutation = useMutation<unknown, Error, CreateExpenseSchema>({
@@ -186,6 +190,13 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
           <FormDatePicker name="date" />
         </div>
       </div>
+
+      {/* Repetition belongs to the date, so it sits directly under it. */}
+      <Controller
+        name="repeat"
+        control={methods.control}
+        render={({ field }) => <RepeatField date={date} value={field.value} onChange={field.onChange} />}
+      />
 
       {/* Description */}
       <div className="space-y-1">

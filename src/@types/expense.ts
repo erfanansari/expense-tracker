@@ -1,3 +1,5 @@
+import type { ExpenseRepeat } from './recurring';
+
 export interface Tag {
   id: number;
   name: string;
@@ -49,6 +51,12 @@ export interface Expense {
   currency: string;
   /** Rate to the pivot at entry time (frozen snapshot). */
   entryRate: number;
+  /** Set when this expense came from a repeat; null if entered by hand. Goes null
+   * (not deleted) when the repeat is removed — see migration 019. */
+  recurringId: number | null;
+  /** The live schedule behind `recurringId`, so editing an expense can show and
+   * change its repeat. Null once the repeat is removed or has finished. */
+  repeat: ExpenseRepeat | null;
   created_at: string;
   tags?: Tag[];
 }
@@ -60,4 +68,6 @@ export interface CreateExpenseInput {
   amount: number;
   currency: string;
   tagIds?: number[];
+  /** null or omitted = doesn't repeat. */
+  repeat?: ExpenseRepeat | null;
 }

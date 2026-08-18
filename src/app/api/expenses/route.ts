@@ -6,9 +6,11 @@ import { createExpenseSchema } from '@schemas';
 import { getSearchParams, validateBody, verifyOwnership, withAuth } from '@core/api/utils';
 import { fetchCategoriesForExpenses } from '@core/database/categories';
 import { db } from '@core/database/client';
+import { fetchRepeatsForExpenses, syncExpenseRepeat } from '@core/database/expense-repeat';
 import { mapRowToExpense } from '@core/database/mappers';
 import { assignTagsToExpense, fetchTagsForExpenses } from '@core/database/tags';
 import { getEntryRate } from '@core/rates';
+import { materializeDueExpensesSafely } from '@core/recurring/materialize';
 
 // GET /api/expenses - Fetch expenses with pagination support
 // Query parameters:
@@ -18,6 +20,11 @@ import { getEntryRate } from '@core/rates';
 // If limit is not provided, returns all expenses in the old format (backward compatible)
 // If limit is provided, returns paginated format: { expenses, nextCursor, hasMore }
 export const GET = withAuth(async (user, request) => {
+  // Post anything a recurring rule owes before reading, so a user who opens the
+  // app ahead of the daily cron still sees today's rent. No-op (one indexed
+  // query) when nothing is due, and never throws — see materializeDueExpensesSafely.
+  await materializeDueExpensesSafely(user.userId);
+
   const searchParams = getSearchParams(request);
   const limitParam = searchParams.get('limit');
   const cursor = searchParams.get('cursor');
@@ -37,12 +44,16 @@ export const GET = withAuth(async (user, request) => {
     });
 
     const ids = result.rows.map((row) => row.id);
-    const [tagsMap, categoriesMap] = await Promise.all([fetchTagsForExpenses(ids), fetchCategoriesForExpenses(ids)]);
+    const [tagsMap, categoriesMap, repeatsMap] = await Promise.all([
+      fetchTagsForExpenses(ids),
+      fetchCategoriesForExpenses(ids),
+      fetchRepeatsForExpenses(ids),
+    ]);
     const expenses = result.rows
       .map((row) => {
         const cat = categoriesMap[row.id as number];
         if (!cat) return null;
-        return mapRowToExpense(row, cat, tagsMap[row.id as number]);
+        return mapRowToExpense(row, cat, tagsMap[row.id as number], repeatsMap[row.id as number]);
       })
       .filter((e): e is NonNullable<typeof e> => e !== null);
 
@@ -91,12 +102,16 @@ export const GET = withAuth(async (user, request) => {
   const expensesToReturn = hasMore ? result.rows.slice(0, limit) : result.rows;
 
   const ids = expensesToReturn.map((row) => row.id);
-  const [tagsMap, categoriesMap] = await Promise.all([fetchTagsForExpenses(ids), fetchCategoriesForExpenses(ids)]);
+  const [tagsMap, categoriesMap, repeatsMap] = await Promise.all([
+    fetchTagsForExpenses(ids),
+    fetchCategoriesForExpenses(ids),
+    fetchRepeatsForExpenses(ids),
+  ]);
   const expenses = expensesToReturn
     .map((row) => {
       const cat = categoriesMap[row.id as number];
       if (!cat) return null;
-      return mapRowToExpense(row, cat, tagsMap[row.id as number]);
+      return mapRowToExpense(row, cat, tagsMap[row.id as number], repeatsMap[row.id as number]);
     })
     .filter((e): e is NonNullable<typeof e> => e !== null);
 
@@ -140,6 +155,21 @@ export const POST = withAuth(async (user, request) => {
   const expenseId = expenseResult.rows[0].id as number;
 
   await assignTagsToExpense(expenseId, body.tagIds);
+
+  // A repeat is saved as part of the expense, never managed on its own. The
+  // expense just created is occurrence #0, so the rule resumes from #1.
+  await syncExpenseRepeat({
+    userId: user.userId,
+    expenseId,
+    date: body.date,
+    categoryId: body.categoryId,
+    description: body.description,
+    amount: body.amount,
+    currency: body.currency,
+    tagIds: body.tagIds,
+    repeat: body.repeat,
+    existingRecurringId: null,
+  });
 
   return NextResponse.json({ message: 'Expense created successfully', id: expenseId }, { status: 201 });
 }, 'Expenses');
