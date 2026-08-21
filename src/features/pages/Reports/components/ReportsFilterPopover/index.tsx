@@ -1,21 +1,30 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { createElement, useEffect, useRef, useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 
 import { getCategoryListKeyGenerator } from '@api/getCategoryListQuery';
 import { getTagListKeyGenerator } from '@api/getTagListQuery';
+import { getCategoryColor, getCategoryIcon } from '@constants/categories';
 import { useQuery } from '@tanstack/react-query';
 import { Check, X } from 'lucide-react';
 import { components as rsComponents } from 'react-select';
-import type { CSSObjectWithLabel, MenuListProps, MultiValue, OptionProps, StylesConfig } from 'react-select';
+import type {
+  CSSObjectWithLabel,
+  MenuListProps,
+  MultiValue,
+  MultiValueGenericProps,
+  OptionProps,
+  StylesConfig,
+} from 'react-select';
 import Select2 from 'react-select';
 import { twMerge } from 'tailwind-merge';
 
 import type { Category } from '@types';
 
 import Button from '@components/Button';
+import CategoryTile from '@components/CategoryTile';
 import Modal from '@components/Modal';
 
 import type { Tag } from '@/@types/expense';
@@ -37,6 +46,7 @@ interface TagOption {
 interface CategoryOption {
   value: number;
   label: string;
+  category: Category;
 }
 
 // ─── Shared multi-select styles (mirrors TagInput) ──────────────────────────────
@@ -86,6 +96,7 @@ const TagOptionRenderer = ({ data, isFocused, isSelected, innerProps, innerRef }
   </div>
 );
 
+// Picking a category — same tile as the expense form's category select.
 const CategoryOptionRenderer = ({
   data,
   isFocused,
@@ -97,15 +108,33 @@ const CategoryOptionRenderer = ({
     {...innerProps}
     ref={innerRef}
     className={twMerge(
-      'text-text-secondary flex cursor-pointer items-center justify-between gap-6 rounded-md px-2.5 py-1.5 text-[13px] whitespace-nowrap transition-colors duration-100',
-      isFocused && 'bg-background-elevated text-text-primary',
-      isSelected && 'text-text-primary font-medium'
+      'flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 whitespace-nowrap transition-colors duration-100',
+      isFocused && 'bg-background-elevated'
     )}
   >
-    <span className="truncate">{data.label}</span>
+    <CategoryTile category={data.category} className="flex-1" emphasis={isFocused || isSelected} />
     {isSelected && <Check className="text-blue h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
   </div>
 );
+
+// The chosen chips are a "read" surface, so they carry the category's own
+// colour and icon rather than sitting in an anonymous grey pill.
+const CategoryMultiValueLabel = (props: MultiValueGenericProps<CategoryOption, true>) => {
+  const category = props.data.category;
+  // createElement, not <Icon />: binding the looked-up icon to a capitalised
+  // local and rendering it as JSX reads to the React Compiler as creating a
+  // component mid-render. Same reason CategoryTile does it this way.
+  const iconComp = getCategoryIcon(category.icon);
+  const color = getCategoryColor(category.color);
+  return (
+    <rsComponents.MultiValueLabel {...props}>
+      <span className="flex min-w-0 items-center gap-1.5">
+        {createElement(iconComp, { className: twMerge('h-3 w-3 shrink-0', color.text), 'aria-hidden': true })}
+        <span className="truncate">{category.name}</span>
+      </span>
+    </rsComponents.MultiValueLabel>
+  );
+};
 
 const ScrollSafeMenuList = <T,>(props: MenuListProps<T, true>) => (
   <rsComponents.MenuList
@@ -192,6 +221,7 @@ const FilterBody = ({
           styles={multiSelectStyles}
           components={{
             Option: CategoryOptionRenderer,
+            MultiValueLabel: CategoryMultiValueLabel,
             MenuList: ScrollSafeMenuList,
             DropdownIndicator: () => null,
             IndicatorSeparator: () => null,
@@ -265,7 +295,7 @@ const ReportsFilterPopover = ({
 
   const tagOptions: TagOption[] = allTags.map((t) => ({ value: t.id, label: t.name }));
   const selectedTagOptions: TagOption[] = selectedTags.map((t) => ({ value: t.id, label: t.name }));
-  const categoryOptions: CategoryOption[] = allCategories.map((c) => ({ value: c.id, label: c.name }));
+  const categoryOptions: CategoryOption[] = allCategories.map((c) => ({ value: c.id, label: c.name, category: c }));
   const selectedCategoryOptions: CategoryOption[] = categoryOptions.filter((c) =>
     selectedCategoryIds.includes(c.value)
   );

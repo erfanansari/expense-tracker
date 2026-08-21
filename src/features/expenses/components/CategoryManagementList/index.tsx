@@ -13,19 +13,14 @@ import { EXPENSES_SCOPE } from '@api/getExpenseListQuery';
 import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
 import { updateCategoryKeyGenerator } from '@api/updateCategoryMutation';
 import type { UpdateCategoryRequestData } from '@api/updateCategoryMutation';
-import {
-  CATEGORY_COLORS,
-  DEFAULT_CATEGORY_COLOR,
-  DEFAULT_CATEGORY_ICON,
-  getCategoryColor,
-  getCategoryIcon,
-} from '@constants/categories';
+import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR, DEFAULT_CATEGORY_ICON } from '@constants/categories';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Edit2, Folder, Loader2, Plus, Search, Trash2, X } from 'lucide-react';
 
 import type { Category, CategoryWithUsage } from '@types';
 
 import CategoryBadge from '@components/CategoryBadge';
+import CategoryTile from '@components/CategoryTile';
 import ColorPicker from '@components/ColorPicker';
 import DeleteCategoryModal from '@components/DeleteCategoryModal';
 import IconPicker from '@components/IconPicker';
@@ -299,8 +294,6 @@ const CategoryManagementList = () => {
             <p className="text-text-muted py-8 text-center text-sm">{t('noMatch', { query: searchQuery })}</p>
           ) : (
             filteredCategories.map((category) => {
-              const Icon = getCategoryIcon(category.icon);
-              const color = getCategoryColor(category.color);
               const isEditing = editingId === category.id;
 
               if (isEditing) {
@@ -380,14 +373,13 @@ const CategoryManagementList = () => {
                   key={category.id}
                   className="border-border-subtle bg-background hover:border-border-default flex items-center gap-3 rounded-lg border p-3 transition-all sm:p-4"
                 >
-                  <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${color.pill}`}>
-                    <Icon className="h-4 w-4" />
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <p className="text-text-primary truncate text-sm font-medium">{category.name}</p>
-                    <p className="text-text-muted text-xs">{t('usedIn', { count: category.usage_count })}</p>
-                  </div>
+                  <CategoryTile
+                    category={category}
+                    size="md"
+                    emphasis
+                    subtitle={t('usedIn', { count: category.usage_count })}
+                    className="min-w-0 flex-1"
+                  />
 
                   <div className="flex shrink-0 items-center gap-2">
                     <button

@@ -511,6 +511,34 @@ Each semantic colour also has a `-light` tint (for filled callouts) and a
    `src/emails/colors.ts`, `src/app/opengraph-image.tsx`, `src/app/global-error.tsx`,
    `src/app/manifest.ts`, `layout.tsx`'s `themeColor`, and canvas particle colours
 
+### UI/UX - Rendering a category
+
+A category is drawn **two** ways, and which one you use is decided by what the
+surface is for — not by taste. Reach for one of these; never hand-roll a third.
+
+- **`src/components/CategoryBadge`** — a tinted pill (icon + name). Use it where
+  a category is **read**: the expenses table, the details drawer, the chart
+  legend, the delete-modal preview, live previews in the editors. A scanned
+  column of tinted pills lets colour do the sorting, which is the fastest cue
+  in a dense table.
+- **`src/components/CategoryTile`** — a tinted icon tile followed by the name.
+  Use it where a category is **picked**: the expense form's category select
+  (options + chosen value), the expenses-table filter, the reports filter
+  popover, the settings list, the delete-modal reassign rows. Names stay
+  left-aligned on one grid so the eye runs straight down them; sixteen stacked
+  pills read as confetti and sort nothing.
+
+`CategoryTile` takes `size` (`sm` for menus, `md` for the settings list),
+`emphasis` for the active row, and `subtitle` for a secondary line such as a
+usage count.
+
+This rule exists because the same category was once drawn eight different ways
+across the app, with three different icon sizes and three surfaces (the chart
+legend and both filter selects) that dropped the icon and colour altogether.
+When auditing this, search for consumers of `getCategoryListKeyGenerator` and
+for plain `{ value, label }` option lists — grepping for `getCategoryIcon` only
+finds the surfaces that already draw one.
+
 ### UI/UX - Icon Consistency
 
 **ALWAYS use these standardized icons from lucide-react:**

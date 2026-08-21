@@ -18,6 +18,7 @@ import { ApiError } from '@core/errors';
 
 import Button from '@components/Button';
 import CategoryBadge from '@components/CategoryBadge';
+import CategoryTile from '@components/CategoryTile';
 import DataTable from '@components/DataTable';
 import DatePicker from '@components/DatePicker';
 import EmptyState from '@components/EmptyState';
@@ -301,6 +302,12 @@ const ExpensesTable = ({
               ]}
               placeholder={t('allCategories')}
               className="min-w-[130px] flex-1"
+              // Picking a category, so it gets the tile. The "all categories"
+              // row has no category behind it and stays plain text.
+              formatOptionLabel={(option) => {
+                const category = allCategories.find((c) => String(c.id) === option.value);
+                return category ? <CategoryTile category={category} /> : <span>{option.label}</span>;
+              }}
             />
 
             {/* Date range */}

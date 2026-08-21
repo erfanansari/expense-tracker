@@ -1,14 +1,14 @@
 'use client';
 
-import { createElement, useState } from 'react';
+import { useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 
-import { getCategoryColor, getCategoryIcon } from '@constants/categories';
 import { AlertTriangle, ArrowRight, Loader2 } from 'lucide-react';
 
 import Button from '@components/Button';
 import CategoryBadge from '@components/CategoryBadge';
+import CategoryTile from '@components/CategoryTile';
 import Modal from '@components/Modal';
 
 import type { CategoryWithUsage } from '@/@types/expense';
@@ -77,8 +77,6 @@ const DeleteCategoryModal = ({
               ) : (
                 <ul className="space-y-1">
                   {candidates.map((c) => {
-                    const iconComp = getCategoryIcon(c.icon);
-                    const color = getCategoryColor(c.color);
                     const selected = reassignToId === c.id;
                     return (
                       <li key={c.id}>
@@ -95,13 +93,8 @@ const DeleteCategoryModal = ({
                             onChange={() => setReassignToId(c.id)}
                             className="sr-only"
                           />
-                          <span
-                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${color.pill}`}
-                          >
-                            {createElement(iconComp, { className: 'h-3.5 w-3.5' })}
-                          </span>
-                          <span className="text-text-primary flex-1 text-sm font-medium">{c.name}</span>
-                          <span className="text-text-muted text-xs">
+                          <CategoryTile category={c} emphasis className="flex-1" />
+                          <span className="text-text-muted shrink-0 text-xs">
                             {t('categoryUsage', { count: c.usage_count })}
                           </span>
                           {selected && (

@@ -1,11 +1,10 @@
 'use client';
 
-import { createElement, useState } from 'react';
+import { useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 
 import { getCategoryListKeyGenerator } from '@api/getCategoryListQuery';
-import { getCategoryColor, getCategoryIcon } from '@constants/categories';
 import { useQuery } from '@tanstack/react-query';
 import { Check, ChevronDown, Plus } from 'lucide-react';
 import ReactSelect, { components } from 'react-select';
@@ -18,6 +17,8 @@ import type {
   StylesConfig,
 } from 'react-select';
 import { twMerge } from 'tailwind-merge';
+
+import CategoryTile from '@components/CategoryTile';
 
 import type { Category } from '@/@types/expense';
 
@@ -90,23 +91,16 @@ const Option = (props: OptionProps<AnyOption, false>) => {
     );
   }
 
-  const iconComp = getCategoryIcon(data.category.icon);
-  const color = getCategoryColor(data.category.color);
-
   return (
     <div
       {...innerProps}
       ref={innerRef}
       className={twMerge(
-        'text-text-secondary flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] whitespace-nowrap transition-colors duration-100',
-        isFocused && 'bg-background-elevated text-text-primary',
-        isSelected && 'text-text-primary font-medium'
+        'flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 whitespace-nowrap transition-colors duration-100',
+        isFocused && 'bg-background-elevated'
       )}
     >
-      <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border ${color.pill}`}>
-        {createElement(iconComp, { className: 'h-3 w-3' })}
-      </span>
-      <span className="flex-1 truncate">{data.label}</span>
+      <CategoryTile category={data.category} className="flex-1" emphasis={isFocused || isSelected} />
       {isSelected && <Check className="text-blue h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
     </div>
   );
@@ -116,15 +110,9 @@ const SingleValue = (props: SingleValueProps<AnyOption, false>) => {
   const { data } = props;
   if (isCreateOption(data)) return null;
 
-  const iconComp = getCategoryIcon(data.category.icon);
-  const color = getCategoryColor(data.category.color);
-
   return (
     <components.SingleValue {...props}>
-      <span className="flex min-w-0 items-center gap-1.5">
-        <span className={`shrink-0 ${color.text}`}>{createElement(iconComp, { className: 'h-4 w-4' })}</span>
-        <span className="text-text-primary min-w-0 truncate text-sm font-medium">{data.label}</span>
-      </span>
+      <CategoryTile category={data.category} emphasis />
     </components.SingleValue>
   );
 };

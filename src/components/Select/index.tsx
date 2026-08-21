@@ -69,7 +69,9 @@ const DropdownIndicator = (props: DropdownIndicatorProps<SelectOption, false>) =
 const Option = (props: OptionProps<SelectOption, false>) => (
   <components.Option {...props}>
     <div className="flex items-center justify-between gap-6">
-      <span className="truncate">{props.children}</span>
+      {/* min-w-0 + flex-1 so `truncate` actually applies (it's inert on an
+          inline box) and a rich formatOptionLabel node can lay itself out. */}
+      <span className="min-w-0 flex-1 truncate">{props.children}</span>
       {props.isSelected && <Check className="text-blue h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
     </div>
   </components.Option>
