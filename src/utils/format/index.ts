@@ -22,9 +22,40 @@ const AXIS_FORMATTERS: Record<NumberLocale, Intl.NumberFormat> = {
   fa: new Intl.NumberFormat('fa-IR', { notation: 'compact', compactDisplay: 'short', maximumFractionDigits: 1 }),
 };
 
-// Compact tick labels for chart axes: 14B, 1.5M, 900K, 42 (fa: Persian digits/words).
+// U+2067 RIGHT-TO-LEFT ISOLATE opens a run whose base direction is forced to
+// RTL whatever surrounds it; U+2069 POP DIRECTIONAL ISOLATE closes it. Both are
+// invisible and zero-width.
+const RLI = '⁧';
+const PDI = '⁩';
+
+/**
+ * Compact tick labels for chart axes: 14B, 1.5M, 900K, 42 (fa: Persian
+ * digits/words).
+ *
+ * The Farsi isolate is load-bearing, not cosmetic. `Intl` emits the label as
+ * digits + U+00A0 + a Persian word ("۱۴ میلیارد"), and that mix reorders
+ * according to the base direction it lands in. Measured in Chrome:
+ *
+ *   • RTL base → "۱۴ میلیارد" — number on the left.
+ *   • LTR base → "میلیارد ۱۴" — number on the right.
+ *
+ * Chart bodies carry `dir="ltr"` because Recharts lays its axes out along that
+ * direction, and the ticks are SVG <text> that inherit it. So the axis rendered
+ * number-on-the-right while the tooltip beside it — plain RTL HTML — rendered
+ * number-on-the-left: the same value, mirrored, side by side.
+ *
+ * Fixing it in the text rather than in CSS is deliberate. Setting
+ * `direction: rtl` on the tick element does resolve the order, but it collides
+ * with the `text-anchor: end` Recharts uses to right-align Y ticks and the
+ * label renders clipped. An isolate carries its own base direction, survives
+ * into SVG, and can't be overridden by an ancestor.
+ *
+ * `en` output is returned untouched — it has no RTL runs to reorder, so the
+ * marks would be dead weight.
+ */
 export function formatAxisNumber(value: number, locale: NumberLocale = 'en'): string {
-  return AXIS_FORMATTERS[locale].format(value);
+  const formatted = AXIS_FORMATTERS[locale].format(value);
+  return locale === 'fa' ? `${RLI}${formatted}${PDI}` : formatted;
 }
 
 const SHORTHAND_MULTIPLIERS: Record<string, number> = {

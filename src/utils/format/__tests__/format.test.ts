@@ -1,5 +1,10 @@
 import { formatAxisNumber, formatNumber } from '../index';
 
+// U+2067 RLI / U+2069 PDI — the isolate formatAxisNumber wraps fa labels in.
+const RLI = '\u2067';
+const PDI = '\u2069';
+const stripIsolate = (s: string) => s.replaceAll(RLI, '').replaceAll(PDI, '');
+
 describe('formatNumber', () => {
   it('formats integers with commas', () => {
     expect(formatNumber(1000)).toBe('1,000');
@@ -46,9 +51,30 @@ describe('formatAxisNumber', () => {
 
   it('spells out compact units in Persian for fa locale', () => {
     // Intl's fa-IR compact formatter joins the value and unit with a
-    // non-breaking space ( ), not a regular space.
-    expect(formatAxisNumber(14_000_000_000, 'fa')).toBe('۱۴ میلیارد');
-    expect(formatAxisNumber(900_000, 'fa')).toBe('۹۰۰ هزار');
-    expect(formatAxisNumber(42, 'fa')).toBe('۴۲');
+    // non-breaking space ( ), not a regular space. The label is wrapped in an
+    // LTR isolate — see the next test for why.
+    expect(stripIsolate(formatAxisNumber(14_000_000_000, 'fa'))).toBe('۱۴ میلیارد');
+    expect(stripIsolate(formatAxisNumber(900_000, 'fa'))).toBe('۹۰۰ هزار');
+    expect(stripIsolate(formatAxisNumber(42, 'fa'))).toBe('۴۲');
+  });
+
+  // Measured in Chrome: an RTL base renders "۱۴ میلیارد" (number left, matching
+  // the chart tooltip), an LTR base flips it to "میلیارد ۱۴". Chart ticks are SVG
+  // <text> inheriting the chart body's dir="ltr", so the axis rendered mirrored
+  // relative to the tooltip next to it. The isolate has to live in the text:
+  // `direction: rtl` on the tick collides with Recharts' text-anchor="end" and
+  // clips the label.
+  it('wraps Persian labels in an RTL isolate so the number stays first', () => {
+    const label = formatAxisNumber(14_000_000_000, 'fa');
+    expect(label.startsWith(RLI)).toBe(true);
+    expect(label.endsWith(PDI)).toBe(true);
+    expect(label).toBe(`${RLI}۱۴ میلیارد${PDI}`);
+  });
+
+  it('leaves English labels free of bidi controls', () => {
+    // No RTL runs to reorder, so the marks would be dead weight.
+    for (const value of [14_000_000_000, 900_000, 42, 0]) {
+      expect(formatAxisNumber(value, 'en')).not.toMatch(/[\u2066-\u2069\u200e\u200f]/);
+    }
   });
 });
