@@ -574,11 +574,23 @@ export async function seedDemo() {
     const now = NOW.toISOString();
     const createdAt = `${START_YEAR}-${pad2(START_MONTH)}-01T10:00:00`;
 
+    // The asset row and its most recent valuation must agree — every real write
+    // path (create, update, revalue) writes both from the same numbers, so a
+    // demo that disagrees with itself makes the net-worth chart contradict the
+    // summary cards. Captured here, replayed as the closing snapshot below.
+    const finalValuation = new Map<string, { unitValue: number; amount: number; entryRate: number }>();
+
     for (const asset of ASSET_DEFS) {
       // Current value (after WINDOW_YEARS of growth)
       const currentUnitValue = asset.baseUnitValueUsd * Math.pow(asset.growth, WINDOW_YEARS);
       const totalValueUsd = parseFloat((asset.quantity * currentUnitValue).toFixed(2));
       const rate = getExchangeRate(END_YEAR, END_MONTH);
+
+      finalValuation.set(asset.name, {
+        unitValue: parseFloat(currentUnitValue.toFixed(2)),
+        amount: totalValueUsd,
+        entryRate: rate,
+      });
 
       assetStatements.push({
         sql: `INSERT INTO assets (userId, category, name, quantity, unit, unitValue, amount, currency, entryRate, notes, lastValuedAt, createdAt, updatedAt)
@@ -626,19 +638,26 @@ export async function seedDemo() {
       for (const { year, month } of PERIODS) {
         if (month !== 1 && month !== 7 && !isCurrentMonth(year, month)) continue;
 
+        // Historic snapshots wander a little so the chart has texture; the
+        // closing one is copied verbatim from the asset row instead, because
+        // it is the value every summary card reads.
+        const final = finalValuation.get(asset.name);
+        const isClosing = isCurrentMonth(year, month) && final !== undefined;
+
         const yearsElapsed = year - START_YEAR + (month - 1) / 12;
         const unitValue = asset.baseUnitValueUsd * Math.pow(asset.growth, yearsElapsed);
-        // Add some noise to valuations
         const noise = 1 + (rand() - 0.5) * 0.08;
         const noisyUnitValue = parseFloat((unitValue * noise).toFixed(2));
-        const totalUsd = parseFloat((asset.quantity * noisyUnitValue).toFixed(2));
-        const rate = getExchangeRate(year, month);
-        const valuedAt = `${year}-${pad2(month)}-${pad2(clampDay(year, month, 15))}T10:00:00`;
+
+        const snapUnitValue = isClosing ? final!.unitValue : noisyUnitValue;
+        const snapAmount = isClosing ? final!.amount : parseFloat((asset.quantity * noisyUnitValue).toFixed(2));
+        const rate = isClosing ? final!.entryRate : getExchangeRate(year, month);
+        const valuedAt = isClosing ? now : `${year}-${pad2(month)}-${pad2(clampDay(year, month, 15))}T10:00:00`;
 
         valuationStatements.push({
           sql: `INSERT INTO assetValuations (assetId, quantity, unitValue, amount, currency, entryRate, valuedAt, createdAt)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          args: [assetId, asset.quantity, noisyUnitValue, totalUsd, 'USD', rate, valuedAt, valuedAt],
+          args: [assetId, asset.quantity, snapUnitValue, snapAmount, 'USD', rate, valuedAt, valuedAt],
         });
         valuationCount++;
       }

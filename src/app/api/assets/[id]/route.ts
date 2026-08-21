@@ -6,7 +6,7 @@ import { createAssetSchema } from '@schemas';
 import { parseIdParam, validateBody, verifyOwnership, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
 import { mapRowToAsset, mapRowToAssetValuation } from '@core/database/mappers';
-import { getEntryRate } from '@core/rates';
+import { getEntryRateOn } from '@core/rates';
 
 // GET /api/assets/[id] - Get a single asset with valuation history
 export const GET = withAuth(async (user, _request, { params }) => {
@@ -104,15 +104,31 @@ export const PUT = withAuth(async (user, request, { params }) => {
     args.push(body.notes || null);
   }
 
+  // Moving the valuation date IS a valuation change: it re-states what the
+  // asset was worth and when. Without this, editing only the date updated
+  // `assets.lastValuedAt` and wrote no snapshot, so the asset row and its
+  // newest valuation disagreed about the date. Nothing looks wrong in the pivot
+  // currency — but every date-sensitive conversion then reads the rate from a
+  // different day, which is how the assets page and the net-worth chart came to
+  // report different secondary-currency totals for the same portfolio.
   if (body.lastValuedAt !== undefined) {
     updates.push('lastValuedAt = ?');
     args.push(body.lastValuedAt);
+    if (body.lastValuedAt !== currentAsset.lastValuedAt) valuationChanged = true;
   }
 
-  // Re-snapshot the entry rate whenever the valuation changes (rate at this valuation time).
+  if (updates.length === 0 && !valuationChanged) {
+    return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
+  }
+
+  const valuedAt = body.lastValuedAt || new Date().toISOString();
+
+  // Re-snapshot the entry rate whenever the valuation changes, using the rate
+  // that was current on the valuation's OWN date — backdating a valuation must
+  // not value it at today's rate (same rule the recurring materializer follows).
   let newEntryRate = currentAsset.entryRate as number;
   if (valuationChanged) {
-    const rate = await getEntryRate(newCurrency);
+    const rate = await getEntryRateOn(newCurrency, valuedAt.slice(0, 10));
     if (rate === null) {
       return NextResponse.json({ error: `No exchange rate available for ${newCurrency}` }, { status: 422 });
     }
@@ -121,12 +137,6 @@ export const PUT = withAuth(async (user, request, { params }) => {
     args.push(newCurrency, newEntryRate);
   }
 
-  if (updates.length === 0) {
-    return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
-  }
-
-  // Update lastValuedAt if valuation changed
-  const valuedAt = body.lastValuedAt || new Date().toISOString();
   if (valuationChanged && body.lastValuedAt === undefined) {
     updates.push('lastValuedAt = ?');
     args.push(valuedAt);

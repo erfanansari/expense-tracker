@@ -24,12 +24,11 @@ import Select from '@components/Select';
 import Pulse from '@components/Skeleton';
 
 import { useCurrency } from '@hooks/use-currency';
+import type { MoneyItem } from '@hooks/use-currency';
 import { useLocalePreferences } from '@hooks/use-locale-preferences';
 import { type NetWorthRange, useNetWorthHistory } from '@hooks/use-net-worth-history';
 
 import { formatAxisNumber, formatChartAxisDate, formatChartTooltipDate, resolveCalendar } from '@utils';
-
-import { PIVOT_CURRENCY } from '@/constants/currencies';
 
 const RANGE_KEYS: { value: NetWorthRange; key: 'range1M' | 'range3M' | 'range6M' | 'range1Y' | 'rangeAll' }[] = [
   { value: '1M', key: 'range1M' },
@@ -40,25 +39,25 @@ const RANGE_KEYS: { value: NetWorthRange; key: 'range1M' | 'range3M' | 'range6M'
 ];
 
 // ─── Custom tooltip ──────────────────────────────────────────────────────────
-// Net-worth points are in the pivot currency; the tooltip converts for display.
+// A point carries the valuations that were current on its date. Summing them
+// per-record — each at its OWN valuation date — is the same path the assets
+// page uses, which is what keeps the two totals equal.
 function NetWorthTooltip({
   active,
   payload,
 }: {
   active?: boolean;
   payload?: ReadonlyArray<{
-    value: number;
-    payload: { date: string; value: number };
+    payload: { date: string; items: MoneyItem[] };
   }>;
 }) {
   const locale = useLocale() as 'en' | 'fa';
   const { prefs } = useLocalePreferences();
   const calendar = resolveCalendar(prefs.calendar, locale);
-  const { display } = useCurrency();
+  const { sumDisplay } = useCurrency();
   if (!active || !payload?.length) return null;
   const point = payload[0].payload;
-  // Convert at the point's own date so the secondary is historically accurate & stable.
-  const { primary, secondary } = display(point.value, PIVOT_CURRENCY, point.date, { compact: true });
+  const { primary, secondary } = sumDisplay(point.items ?? [], { compact: true });
   return (
     <ChartTooltip
       primary={primary}
@@ -72,25 +71,22 @@ function NetWorthTooltip({
 // Shows only the absolute change over the range. A percentage would conflate
 // asset contributions with performance — snapshots can't tell them apart.
 function DeltaBadge({ data }: { data: Array<{ value: number }> }) {
-  const { convert, primaryCurrency } = useCurrency();
-  const { deltaPivot, isPositive } = useMemo(() => {
-    if (data.length < 2) return { deltaPivot: 0, isPositive: true };
+  const { primaryCurrency } = useCurrency();
+  const { delta, isPositive } = useMemo(() => {
+    if (data.length < 2) return { delta: 0, isPositive: true };
     const d = data[data.length - 1].value - data[0].value;
-    return { deltaPivot: d, isPositive: d >= 0 };
+    return { delta: d, isPositive: d >= 0 };
   }, [data]);
 
   if (data.length < 2) return null;
 
   const sign = isPositive ? '+' : '-';
   const color = isPositive ? 'text-success' : 'text-danger';
-  // Numeric conversion (latest rate, like display() with no date) so the value
-  // can animate when the range selector changes it.
-  const converted = convert(Math.abs(deltaPivot), PIVOT_CURRENCY, primaryCurrency);
 
   return (
     <span className={`text-sm font-medium ${color}`}>
       {sign}
-      {converted === null ? '—' : <AnimatedMoney amount={converted} currency={primaryCurrency} />}
+      <AnimatedMoney amount={Math.abs(delta)} currency={primaryCurrency} />
     </span>
   );
 }
@@ -103,6 +99,7 @@ const NetWorthChart = () => {
   const rangeOptions = RANGE_KEYS.map((r) => ({ value: r.value, label: t(r.key) }));
   const [range, setRange] = useState<NetWorthRange>('6M');
   const { data, isLoading, isError, error, refetch } = useNetWorthHistory(range);
+  const { sumTo, primaryCurrency } = useCurrency();
 
   const isShortRange = range === '1M' || range === '3M';
 
@@ -131,7 +128,25 @@ const NetWorthChart = () => {
   // Project each point to an epoch-ms timestamp so the X-axis can use a real
   // time scale; categorical positioning made clustered snapshots collapse on top
   // of each other on narrow screens.
-  const chartData = useMemo(() => (data ?? []).map((p) => ({ ...p, timestamp: parseISO(p.date).getTime() })), [data]);
+  //
+  // `value` is summed into the PRIMARY currency here rather than left in the
+  // pivot: the Y axis formats whatever it is handed, so plotting pivot rials
+  // while the tooltip showed pounds left the two disagreeing by a factor of the
+  // exchange rate. Each valuation converts at its own date, matching the assets
+  // page exactly.
+  const chartData = useMemo(
+    () =>
+      (data ?? []).map((p) => {
+        const items: MoneyItem[] = p.items.map((i) => ({
+          amount: i.amount,
+          currency: i.currency,
+          date: i.valuedAt,
+          entryRate: i.entryRate,
+        }));
+        return { date: p.date, items, value: sumTo(items, primaryCurrency), timestamp: parseISO(p.date).getTime() };
+      }),
+    [data, sumTo, primaryCurrency]
+  );
 
   const xDomain = useMemo<[number, number] | undefined>(() => {
     if (chartData.length === 0) return undefined;
@@ -223,7 +238,7 @@ const NetWorthChart = () => {
       {/* Delta badge */}
       {hasData && (
         <div className="mb-4">
-          <DeltaBadge data={data ?? []} />
+          <DeltaBadge data={chartData} />
         </div>
       )}
 
@@ -276,6 +291,7 @@ const NetWorthChart = () => {
                 tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
                 axisLine={{ stroke: 'var(--color-border-subtle)' }}
                 tickLine={{ stroke: 'var(--color-border-subtle)' }}
+                width="auto"
                 tickFormatter={(value: number) => formatAxisNumber(value, locale)}
               />
               <RechartsTooltip
