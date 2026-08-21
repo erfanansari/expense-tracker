@@ -42,8 +42,8 @@ import {
 import type { SpendingTrendChartProps } from '../../@types';
 
 // ─── Custom recharts tooltip ────────────────────────────────────────────────────
-// Chart values are in the pivot currency; the tooltip sums the bucket's records
-// per-record at each record's own date (matches the summary cards).
+// Chart values are already in the primary currency; the tooltip sums the
+// bucket's records per-record at each record's own date (matches the cards).
 function SpendingTooltip({
   active,
   payload,
@@ -82,6 +82,7 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
   const { prefs: localePrefs } = useLocalePreferences();
   const calendar = resolveCalendar(localePrefs.calendar, locale);
   const openExpenseDrawer = useDrawerStore((state) => state.openExpenseDrawer);
+  const { sumTo, primaryCurrency } = useCurrency();
   // States
   const [dateRange, setDateRange] = useState<DateRange>('30D');
 
@@ -95,11 +96,10 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
   const spendingTrend = useMemo(() => {
     if (filteredExpenses.length === 0) return [];
 
-    const aggregated = new Map<string, { amount: number; items: MoneyItem[] }>();
+    const aggregated = new Map<string, { items: MoneyItem[] }>();
 
     filteredExpenses.forEach((exp) => {
       const date = new Date(`${exp.date}T00:00:00`);
-      const pivot = exp.amount * exp.entryRate;
       const item: MoneyItem = { amount: exp.amount, currency: exp.currency, date: exp.date, entryRate: exp.entryRate };
       let key: string;
 
@@ -118,17 +118,18 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
 
       const existing = aggregated.get(key);
       if (existing) {
-        existing.amount += pivot;
         existing.items.push(item);
       } else {
-        aggregated.set(key, { amount: pivot, items: [item] });
+        aggregated.set(key, { items: [item] });
       }
     });
 
+    // `amount` is the bucket total in the primary currency, so the Y axis that
+    // formats it speaks the same currency as the tooltip above it.
     return Array.from(aggregated.entries())
-      .map(([date, data]) => ({ date, ...data }))
+      .map(([date, data]) => ({ date, items: data.items, amount: sumTo(data.items, primaryCurrency) }))
       .sort((a, b) => a.date.localeCompare(b.date));
-  }, [filteredExpenses, granularity, calendar]);
+  }, [filteredExpenses, granularity, calendar, sumTo, primaryCurrency]);
 
   return (
     <div className="border-border-subtle bg-background relative flex h-full flex-col rounded-xl border p-5 shadow-sm sm:p-6 lg:col-span-2">
@@ -193,6 +194,7 @@ const SpendingTrendChart = ({ expenses }: SpendingTrendChartProps) => {
                 tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
                 axisLine={{ stroke: 'var(--color-border-subtle)' }}
                 tickLine={{ stroke: 'var(--color-border-subtle)' }}
+                width="auto"
                 tickFormatter={(value: number) => formatAxisNumber(value, locale)}
               />
               <RechartsTooltip

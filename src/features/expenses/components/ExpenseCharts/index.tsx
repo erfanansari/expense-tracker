@@ -20,6 +20,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import CategoryBadge from '@components/CategoryBadge';
 import ChartTooltip from '@components/ChartTooltip';
 
 import { useCurrency } from '@hooks/use-currency';
@@ -102,21 +103,21 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
   const { sumTo, format: fmtMoney, primaryCurrency, secondaryCurrency } = useCurrency();
   const showSecondary = !!secondaryCurrency && secondaryCurrency !== primaryCurrency;
 
-  // Aggregate per category. `value` (pivot) drives segment sizing; primary/
-  // secondary strings are summed per-record at each expense's date (accurate).
-  const catMap = new Map<number, { name: string; color: string; value: number; items: MoneyItem[] }>();
+  // Aggregate per category. Each expense converts at its OWN date; `value` is
+  // the total in the PRIMARY currency, which both sizes the segments and is
+  // what the bar chart's axis formats — leaving it in the pivot made the axis
+  // read in rials while every label beside it read in the user's currency.
+  const catMap = new Map<number, { name: string; color: string; category: Expense['category']; items: MoneyItem[] }>();
   expenses.forEach((exp) => {
-    const pivot = exp.amount * exp.entryRate;
     const item: MoneyItem = { amount: exp.amount, currency: exp.currency, date: exp.date, entryRate: exp.entryRate };
     const ex = catMap.get(exp.category.id);
     if (ex) {
-      ex.value += pivot;
       ex.items.push(item);
     } else {
       catMap.set(exp.category.id, {
         name: exp.category.name,
         color: getCategoryColor(exp.category.color).fill,
-        value: pivot,
+        category: exp.category,
         items: [item],
       });
     }
@@ -127,7 +128,8 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
       categoryId,
       name: c.name,
       color: c.color,
-      value: c.value,
+      category: c.category,
+      value: sumTo(c.items, primaryCurrency),
       primaryStr: fmtMoney(sumTo(c.items, primaryCurrency), primaryCurrency, { compact: true }),
       secondaryStr: showSecondary
         ? fmtMoney(sumTo(c.items, secondaryCurrency || primaryCurrency), secondaryCurrency || primaryCurrency, {
@@ -141,11 +143,10 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
   const aggregateExpenses = () => {
     if (expenses.length === 0) return [];
 
-    const aggregated = new Map<string, { amount: number; items: MoneyItem[] }>();
+    const aggregated = new Map<string, { items: MoneyItem[] }>();
 
     expenses.forEach((exp) => {
       const date = new Date(`${exp.date.slice(0, 10)}T00:00:00`);
-      const pivot = exp.amount * exp.entryRate;
       const item: MoneyItem = { amount: exp.amount, currency: exp.currency, date: exp.date, entryRate: exp.entryRate };
       let key: string;
 
@@ -164,15 +165,16 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
 
       const existing = aggregated.get(key);
       if (existing) {
-        existing.amount += pivot;
         existing.items.push(item);
       } else {
-        aggregated.set(key, { amount: pivot, items: [item] });
+        aggregated.set(key, { items: [item] });
       }
     });
 
+    // `amount` is the bucket total in the primary currency — same unit as the
+    // Y axis that formats it and the tooltip that sits above it.
     return Array.from(aggregated.entries())
-      .map(([date, data]) => ({ date, ...data }))
+      .map(([date, data]) => ({ date, items: data.items, amount: sumTo(data.items, primaryCurrency) }))
       .sort((a, b) => a.date.localeCompare(b.date));
   };
 
@@ -214,15 +216,12 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
           </ResponsiveContainer>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-2">
+        {/* Legend is a surface you READ, so it uses the same badge as the
+            expenses table — it used to be a bare colour dot, the one place in
+            the app that dropped the category icon altogether. */}
+        <div className="mt-6 flex flex-wrap gap-2">
           {categoryTotals.map((cat) => (
-            <div
-              key={cat.categoryId}
-              className="border-border-subtle bg-background-secondary hover:bg-background-elevated flex cursor-default items-center gap-2.5 rounded-lg border p-2.5 transition-all duration-200"
-            >
-              <div className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: cat.color }} />
-              <span className="text-text-secondary truncate text-sm font-medium">{cat.name}</span>
-            </div>
+            <CategoryBadge key={cat.categoryId} category={cat.category} size="md" className="max-w-full" />
           ))}
         </div>
       </div>
@@ -314,6 +313,7 @@ export function ExpenseCharts({ expenses, granularity = 'daily' }: ExpenseCharts
                 tick={{ fill: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500 }}
                 axisLine={{ stroke: 'var(--color-border-subtle)' }}
                 tickLine={{ stroke: 'var(--color-border-subtle)' }}
+                width="auto"
                 tickFormatter={(value: number) => formatAxisNumber(value, locale)}
               />
               <Tooltip
