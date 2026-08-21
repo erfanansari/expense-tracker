@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.4.1](https://github.com/erfanansari/kharji/compare/v1.4.0...v1.4.1) (2026-08-21)
+
+### Bug Fixes
+
+- draw chart axes in the primary currency ([290560f](https://github.com/erfanansari/kharji/commit/290560f3714a43256c4d9ee5a6b1dfb860d4d132))
+- keep Persian chart labels reading number-first ([6528152](https://github.com/erfanansari/kharji/commit/65281525773fb5a065484ca1cd3ef25c0468b263))
+- label the tags field and add tags without waiting for the server ([010b695](https://github.com/erfanansari/kharji/commit/010b6957cacf39ecfaf8bda7b41cddf1c359a70a))
+- render every category with the same icon and colour ([1733589](https://github.com/erfanansari/kharji/commit/1733589c735d004d046a3ae87919a5496dd5fff1))
+- report the same total on the assets page and the net-worth chart ([835c42a](https://github.com/erfanansari/kharji/commit/835c42ad5ac24b993c43d3a5bb51678879cf745b))
+- restore the pointer cursor on buttons ([c838d29](https://github.com/erfanansari/kharji/commit/c838d29d013687c2509949352199a18a958129d4))
+
 ## [1.4.0](https://github.com/erfanansari/kharji/compare/v1.3.1...v1.4.0) (2026-08-18)
 
 ### Features
