@@ -487,6 +487,32 @@ html[lang='en'] body {
   }
 }
 
+/* Pointer affordance. Tailwind v4 stopped shipping `cursor: pointer` on
+   buttons (it defers to the UA default, which is `default`), so every button in
+   the app rendered with an arrow unless someone remembered `cursor-pointer` —
+   and almost nobody did. Restoring it centrally beats sprinkling the utility on
+   a few hundred elements and forgetting it on the next one.
+
+   Everything sits inside :where() so the whole selector has zero specificity: an
+   explicit `cursor-*` utility on any element still wins, and so does the
+   disabled rule below. Native <a href> and <select> already get a pointer from
+   the UA sheet; role="button" elements and <summary> do not. */
+@layer base {
+  :where(
+    button:not(:disabled):not([aria-disabled='true']),
+    [role='button']:not([aria-disabled='true']),
+    [role='tab']:not([aria-disabled='true']),
+    [role='option'],
+    summary
+  ) {
+    cursor: pointer;
+  }
+
+  :where(button:disabled, button[aria-disabled='true'], [role='button'][aria-disabled='true']) {
+    cursor: not-allowed;
+  }
+}
+
 input[type='text'],
 input[type='number'],
 input[type='email'],
