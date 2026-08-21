@@ -422,6 +422,7 @@
       "category": "دسته‌بندی",
       "date": "تاریخ",
       "description": "توضیح",
+      "tags": "برچسب‌ها",
       "amount": "مبلغ",
       "saving": "در حال ذخیره...",
       "update": "ذخیرهٔ تغییرات",
@@ -434,12 +435,13 @@
       "editTitle": "ویرایش هزینه",
       "selectCategoryPlaceholder": "یه دسته‌بندی انتخاب کن…",
       "createCategoryOption": "ساخت دسته‌بندی…",
-      "tagsPlaceholder": "برچسب‌ها",
+      "tagsPlaceholder": "برچسب اضافه کن…",
       "createTagOption": "ساخت «{label}»",
       "descriptionPlaceholder": "واسه چی خرج کردی؟",
       "amountPlaceholder": "مثلاً 60k یا 1.5m",
       "added": "هزینه ثبت شد!",
-      "updated": "هزینه به‌روز شد!"
+      "updated": "هزینه به‌روز شد!",
+      "tagsHint": "بنویس تا پیدا کنی، یا یه اسم تازه بزن تا ساخته شه."
     },
     "income": {
       "addTitle": "ثبت درآمد جدید",

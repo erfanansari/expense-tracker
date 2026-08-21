@@ -422,6 +422,7 @@
       "category": "Category",
       "date": "Date",
       "description": "Description",
+      "tags": "Tags",
       "amount": "Amount",
       "saving": "Saving...",
       "update": "Update",
@@ -434,12 +435,13 @@
       "editTitle": "Edit Expense",
       "selectCategoryPlaceholder": "Select category…",
       "createCategoryOption": "Create category…",
-      "tagsPlaceholder": "Tags",
+      "tagsPlaceholder": "Add a tag…",
       "createTagOption": "Create \"{label}\"",
       "descriptionPlaceholder": "Enter expense details...",
       "amountPlaceholder": "e.g. 60k, 1.5m",
       "added": "Expense added successfully!",
-      "updated": "Expense updated successfully!"
+      "updated": "Expense updated successfully!",
+      "tagsHint": "Type to search, or enter a new name to create one."
     },
     "income": {
       "addTitle": "Add New Income",

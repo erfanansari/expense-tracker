@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useTranslations } from 'next-intl';
 
@@ -14,7 +14,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { numberToWords } from '@persian-tools/persian-tools';
 import type { QueryClient } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Calendar, Coins, FileText, Layers, Loader2, Plus } from 'lucide-react';
+import { Calendar, Coins, FileText, Layers, Loader2, Plus, Tag as TagIcon } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { type Tag } from '@types';
@@ -129,6 +129,21 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
     return Number.isSafeInteger(rounded) ? `${numberToWords(rounded)} تومان` : '';
   }, [amount, currency]);
 
+  // Stable identity so TagInput's memoised react-select props survive a render,
+  // and `shouldValidate: false` because tagIds carry no validation rules —
+  // re-running the whole zod schema on every tag click was wasted work.
+  const handleTagsChange = useCallback(
+    (tags: Tag[]) => {
+      setSelectedTags(tags);
+      setValue(
+        'tagIds',
+        tags.map((tag) => tag.id),
+        { shouldDirty: true, shouldValidate: false }
+      );
+    },
+    [setValue]
+  );
+
   const handleSubmit = async (data: CreateExpenseSchema) => {
     const dataToSubmit = { ...data, tagIds: selectedTags.map((t) => t.id) };
 
@@ -216,18 +231,17 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
         )}
       </div>
 
-      {/* Tags */}
-      <TagInput
-        selectedTags={selectedTags}
-        onTagsChange={(tags) => {
-          setSelectedTags(tags);
-          setValue(
-            'tagIds',
-            tags.map((t) => t.id),
-            { shouldDirty: true }
-          );
-        }}
-      />
+      {/* Tags — labelled like every other field in this form. It used to be the
+          one bare box with only a placeholder to name it, which is what made
+          the stack read as unfinished. */}
+      <div className="space-y-1">
+        <label htmlFor="tags" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+          <TagIcon className="text-text-muted h-4 w-4" aria-hidden="true" />
+          {t('shared.tags')}
+        </label>
+        <TagInput selectedTags={selectedTags} onTagsChange={handleTagsChange} />
+        <p className="text-text-muted text-xs">{t('expense.tagsHint')}</p>
+      </div>
 
       {/* Amount + Currency */}
       <div className="space-y-1">
