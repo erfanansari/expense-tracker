@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.0](https://github.com/erfanansari/kharji/compare/v1.4.1...v1.5.0) (2026-09-06)
+
+### Features
+
+- pay an expense from a cash or bank account ([746ff35](https://github.com/erfanansari/kharji/commit/746ff359000dc5ece5bc8332e0bbfdd71d4e48c2))
+
 ## [1.4.1](https://github.com/erfanansari/kharji/compare/v1.4.0...v1.4.1) (2026-08-21)
 
 ### Bug Fixes
