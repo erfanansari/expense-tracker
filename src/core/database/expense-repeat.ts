@@ -25,6 +25,9 @@ interface SyncArgs {
   amount: number;
   currency: string;
   tagIds?: number[];
+  /** The account future occurrences should be paid from. Part of the template,
+   * like amount and description — so auto-posted rent moves the balance too. */
+  paidFromAssetId?: number | null;
   /** `endDate` arrives from Zod's `.nullish()`, so undefined and null both mean
    * "no end date" — normalized to null on the way into the rule. */
   repeat: RepeatInput | null | undefined;
@@ -106,7 +109,7 @@ export async function syncExpenseRepeat(args: SyncArgs): Promise<number | null> 
 
       await db.execute({
         sql: `UPDATE recurringExpenses
-              SET categoryId = ?, description = ?, amount = ?, currency = ?,
+              SET categoryId = ?, description = ?, amount = ?, currency = ?, paidFromAssetId = ?,
                   frequency = ?, intervalCount = ?, calendar = ?, anchorDate = ?, endDate = ?,
                   postedCount = ?, nextDueDate = ?, updatedAt = CURRENT_TIMESTAMP
               WHERE id = ? AND userId = ?`,
@@ -115,6 +118,7 @@ export async function syncExpenseRepeat(args: SyncArgs): Promise<number | null> 
           args.description,
           args.amount,
           args.currency,
+          args.paidFromAssetId ?? null,
           rule.frequency,
           rule.intervalCount,
           rule.calendar,
@@ -139,9 +143,9 @@ export async function syncExpenseRepeat(args: SyncArgs): Promise<number | null> 
 
   const inserted = await db.execute({
     sql: `INSERT INTO recurringExpenses
-            (userId, categoryId, description, amount, currency, frequency, intervalCount,
+            (userId, categoryId, description, amount, currency, paidFromAssetId, frequency, intervalCount,
              calendar, anchorDate, endDate, postedCount, nextDueDate)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           RETURNING id`,
     args: [
       userId,
@@ -149,6 +153,7 @@ export async function syncExpenseRepeat(args: SyncArgs): Promise<number | null> 
       args.description,
       args.amount,
       args.currency,
+      args.paidFromAssetId ?? null,
       rule.frequency,
       rule.intervalCount,
       rule.calendar,

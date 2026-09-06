@@ -5,6 +5,7 @@ import { createAssetSchema } from '@schemas';
 
 import { parseIdParam, validateBody, verifyOwnership, withAuth } from '@core/api/utils';
 import { db } from '@core/database/client';
+import { buildAccountCleanupStatements } from '@core/database/expense-funding';
 import { mapRowToAsset, mapRowToAssetValuation } from '@core/database/mappers';
 import { getEntryRateOn } from '@core/rates';
 
@@ -52,9 +53,9 @@ export const PUT = withAuth(async (user, request, { params }) => {
 
   // Track if the valuation changed (amount/currency/quantity/unitValue) for a snapshot.
   let valuationChanged = false;
-  const newQuantity = body.quantity ?? (currentAsset.quantity as number);
-  const newUnitValue = body.unitValue ?? (currentAsset.unitValue as number | null);
-  const newAmount = body.amount ?? (currentAsset.amount as number);
+  // Only the currency is still needed as a local — it drives the rate lookup
+  // below. Quantity, unitValue and amount are written to the row by the UPDATE
+  // and read back out of it by the snapshot, so there is nothing to carry.
   const newCurrency = body.currency ?? (currentAsset.currency as string);
 
   if (body.category !== undefined) {
@@ -145,19 +146,31 @@ export const PUT = withAuth(async (user, request, { params }) => {
   updates.push('updatedAt = CURRENT_TIMESTAMP');
   args.push(id, user.userId);
 
-  await db.execute({
-    sql: `UPDATE assets SET ${updates.join(', ')} WHERE id = ? AND userId = ?`,
-    args,
-  });
+  // The row update and its snapshot go in ONE batch. As two separate
+  // statements, a failure between them left `assets.lastValuedAt` moved with no
+  // matching valuation — the exact drift migration 020 had to repair by hand,
+  // and it recurred afterwards (two rows were still drifting as of Sep 2026).
+  //
+  // The snapshot is SELECTed back out of the row the previous statement just
+  // wrote rather than rebuilt from the same JS variables, so the two can't
+  // disagree even if this handler's update logic changes later.
+  const statements = [
+    {
+      sql: `UPDATE assets SET ${updates.join(', ')} WHERE id = ? AND userId = ?`,
+      args,
+    },
+  ];
 
-  // Create valuation snapshot if values changed
   if (valuationChanged) {
-    await db.execute({
-      sql: `INSERT INTO assetValuations (assetId, quantity, unitValue, amount, currency, entryRate, valuedAt)
-            VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      args: [id, newQuantity, newUnitValue, newAmount, newCurrency, newEntryRate, valuedAt],
+    statements.push({
+      sql: `INSERT INTO assetValuations (assetId, quantity, unitValue, amount, currency, entryRate, valuedAt, source)
+            SELECT id, quantity, unitValue, amount, currency, entryRate, lastValuedAt, 'manual'
+              FROM assets WHERE id = ? AND userId = ?`,
+      args: [id, user.userId],
     });
   }
+
+  await db.batch(statements, 'write');
 
   return NextResponse.json({ message: 'Asset updated successfully' });
 }, 'Assets');
@@ -167,15 +180,22 @@ export const DELETE = withAuth(async (user, _request, { params }) => {
   const id = await parseIdParam(params);
   if (id instanceof NextResponse) return id;
 
-  // Delete asset (valuations will cascade delete due to foreign key)
-  const result = await db.execute({
-    sql: 'DELETE FROM assets WHERE id = ? AND userId = ?',
-    args: [id, user.userId],
-  });
+  const asset = await verifyOwnership('assets', id, user.userId);
+  if (asset instanceof NextResponse) return asset;
 
-  if (result.rowsAffected === 0) {
-    return NextResponse.json({ error: 'Asset not found' }, { status: 404 });
-  }
+  // Clear every expense and repeat pointing at this account first. Migration
+  // 021 declares ON DELETE SET NULL, but SQLite leaves PRAGMA foreign_keys off
+  // by default and nothing here turns it on, so the clause may never fire.
+  //
+  // Balances are deliberately NOT restored — that money was genuinely spent.
+  // Valuations still cascade with the asset row.
+  await db.batch(
+    [
+      ...buildAccountCleanupStatements(user.userId, id),
+      { sql: 'DELETE FROM assets WHERE id = ? AND userId = ?', args: [id, user.userId] },
+    ],
+    'write'
+  );
 
   return NextResponse.json({ message: 'Asset deleted successfully' });
 }, 'Assets');

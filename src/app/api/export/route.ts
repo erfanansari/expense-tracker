@@ -41,8 +41,25 @@ export const GET = withAuth(async (user) => {
 
   const xlsx = await import('xlsx');
 
+  // Resolved from the assets we already loaded rather than a second join —
+  // an account is always one of the user's own assets.
+  const assetNameById = new Map(assets.map((a) => [a.id, a.name]));
+
   const expenseRows = [
-    ['ID', 'Date', 'Category', 'Description', 'Amount', 'Currency', 'Entry Rate (to IRT)', 'Tags', 'Created At'],
+    [
+      'ID',
+      'Date',
+      'Category',
+      'Description',
+      'Amount',
+      'Currency',
+      'Entry Rate (to IRT)',
+      'Tags',
+      'Paid From Account',
+      'Paid From Amount',
+      'Paid From Currency',
+      'Created At',
+    ],
     ...expenses.map((e) => [
       e.id,
       e.date,
@@ -52,6 +69,9 @@ export const GET = withAuth(async (user) => {
       e.currency,
       e.entryRate,
       (e.tags ?? []).map((t) => t.name).join(';'),
+      e.paidFromAssetId === null ? '' : (assetNameById.get(e.paidFromAssetId) ?? ''),
+      e.paidFromDelta ?? '',
+      e.paidFromCurrency ?? '',
       e.created_at,
     ]),
   ];
@@ -112,6 +132,7 @@ export const GET = withAuth(async (user) => {
       'Currency',
       'Entry Rate (to IRT)',
       'Valued At',
+      'Source',
       'Created At',
     ],
     ...valuations.map((v) => [
@@ -124,6 +145,7 @@ export const GET = withAuth(async (user) => {
       v.currency,
       v.entryRate,
       v.valuedAt,
+      v.source ?? '',
       v.createdAt,
     ]),
   ];

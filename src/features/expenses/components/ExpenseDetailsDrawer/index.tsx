@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useLocale, useTranslations } from 'next-intl';
 
-import { ArrowLeftRight, Calendar, Coins, Repeat, Tag as TagIcon, X } from 'lucide-react';
+import { ArrowLeftRight, Calendar, Coins, Landmark, Repeat, Tag as TagIcon, X } from 'lucide-react';
 import { Drawer } from 'vaul';
 
 import { formatMoney } from '@features/ExchangeRate/utils/currency';
@@ -265,6 +265,24 @@ const ExpenseDetailsDrawer = ({ expense, isOpen, onClose }: ExpenseDetailsDrawer
                       icon={<Coins className="text-text-muted h-3 w-3" />}
                       label={t('pages.expenses.details.exchangeRate')}
                       primary={`1 ${rateInfo.base} = ${formatMoney(rateInfo.rate, rateInfo.quote, { locale })}`}
+                    />
+                  )}
+                  {expense.paidFrom && (
+                    <MetaCell
+                      icon={<Landmark className="text-text-muted h-3 w-3" />}
+                      label={t('pages.expenses.details.paidFrom')}
+                      primary={expense.paidFrom.name}
+                      // The raw stored delta in its stored currency, deliberately
+                      // not <Money>: this answers "what actually left the
+                      // account", and that is the number a reversal will use. A
+                      // re-conversion could show a figure the balance never moved by.
+                      secondary={
+                        expense.paidFromDelta !== null && expense.paidFromCurrency !== null ? (
+                          <span className="block tabular-nums">
+                            {formatMoney(expense.paidFromDelta, expense.paidFromCurrency, { locale })}
+                          </span>
+                        ) : undefined
+                      }
                     />
                   )}
                 </section>

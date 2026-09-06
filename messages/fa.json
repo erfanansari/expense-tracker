@@ -108,7 +108,8 @@
       "dateRequired": "تاریخ رو انتخاب کن",
       "categoryRequired": "یه دسته‌بندی انتخاب کن",
       "descriptionRequired": "توضیح رو بنویس",
-      "amountNonNegative": "مبلغ نمی‌تونه منفی باشه"
+      "amountNonNegative": "مبلغ نمی‌تونه منفی باشه",
+      "paidFromInvalid": "یه حساب معتبر انتخاب کن"
     },
     "income": {
       "amountNonNegative": "مبلغ نمی‌تونه منفی باشه"
@@ -441,7 +442,12 @@
       "amountPlaceholder": "مثلاً 60k یا 1.5m",
       "added": "هزینه ثبت شد!",
       "updated": "هزینه به‌روز شد!",
-      "tagsHint": "بنویس تا پیدا کنی، یا یه اسم تازه بزن تا ساخته شه."
+      "tagsHint": "بنویس تا پیدا کنی، یا یه اسم تازه بزن تا ساخته شه.",
+      "paidFrom": "پرداخت از",
+      "paidFromPlaceholder": "حساب رو انتخاب کن…",
+      "paidFromNone": "ثبت نشه",
+      "paidFromEmpty": "هنوز حساب نقدی یا بانکی نداری — از بخش دارایی‌ها اضافه کن.",
+      "paidFromOverdraw": "با این کار موجودی {account} منفی می‌شه."
     },
     "income": {
       "addTitle": "ثبت درآمد جدید",
@@ -812,6 +818,7 @@
         "date": "تاریخ",
         "enteredIn": "ثبت‌شده با",
         "exchangeRate": "نرخ ارز",
+        "paidFrom": "پرداخت از",
         "created": "تاریخ ثبت"
       }
     },

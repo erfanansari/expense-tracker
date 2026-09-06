@@ -47,6 +47,9 @@ export interface AssetValuation {
   currency: string;
   entryRate: number;
   valuedAt: string;
+  /** What wrote this snapshot: 'manual' | 'revalue' | 'expense'. Null for rows
+   * written before migration 021, whose provenance is unknowable. */
+  source: string | null;
   createdAt: string;
 }
 

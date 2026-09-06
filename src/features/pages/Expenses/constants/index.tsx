@@ -1,7 +1,7 @@
 import type { useTranslations } from 'next-intl';
 
 import { type ColumnDef } from '@tanstack/react-table';
-import { Repeat, Tag } from 'lucide-react';
+import { Landmark, Repeat, Tag } from 'lucide-react';
 
 import type { Expense } from '@types';
 
@@ -70,6 +70,15 @@ export function buildExpenseColumns(
               {expense.recurringId !== null && (
                 <span className="inline-flex shrink-0" title={t('expenses.generated')}>
                   <Repeat className="text-text-muted h-3.5 w-3.5" aria-label={t('expenses.generated')} />
+                </span>
+              )}
+              {/* Which account paid, as a marker rather than a column: it's
+                  empty for most rows, and a sixth column would spend ~14% of
+                  the table's width on it. The name lives in the tooltip and
+                  the details drawer. */}
+              {expense.paidFrom && (
+                <span className="inline-flex shrink-0" title={expense.paidFrom.name}>
+                  <Landmark className="text-text-muted h-3.5 w-3.5" aria-label={expense.paidFrom.name} />
                 </span>
               )}
             </span>

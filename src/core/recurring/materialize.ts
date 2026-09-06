@@ -12,6 +12,7 @@
  * advances on the "already exists" path too, so the rule still moves forward.
  */
 import { db } from '@core/database/client';
+import { applyFundingToExpense } from '@core/database/expense-funding';
 import { getEntryRateOn } from '@core/rates';
 
 import { todayInTimeZone } from '@utils';
@@ -28,6 +29,11 @@ export interface MaterializeSummary {
   expensesCreated: number;
   /** Occurrences skipped because no exchange rate was available yet. */
   rateBlocked: number;
+  /** Generated expenses that moved an account balance. */
+  fundingApplied: number;
+  /** Generated expenses whose rule named an account we couldn't deduct from
+   *  (deleted, no longer spendable, no rate). The expense still posted. */
+  fundingSkipped: number;
 }
 
 interface RuleRow {
@@ -37,6 +43,7 @@ interface RuleRow {
   description: string;
   amount: number;
   currency: string;
+  paidFromAssetId: number | null;
   frequency: string;
   intervalCount: number;
   calendar: string;
@@ -76,13 +83,23 @@ async function insertGeneratedExpense(
   tagIds: number[]
 ): Promise<number | null> {
   const result = await db.execute({
-    sql: `INSERT INTO expenses (user_id, date, category_id, description, amount, currency, entryRate, recurringId)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    sql: `INSERT INTO expenses (user_id, date, category_id, description, amount, currency, entryRate, recurringId, paidFromAssetId)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
           -- The conflict target must repeat the partial index's WHERE clause,
           -- or SQLite refuses to match it to any unique constraint.
           ON CONFLICT(recurringId, date) WHERE recurringId IS NOT NULL DO NOTHING
           RETURNING id`,
-    args: [row.userId, date, row.categoryId, row.description, row.amount, row.currency, entryRate, row.id],
+    args: [
+      row.userId,
+      date,
+      row.categoryId,
+      row.description,
+      row.amount,
+      row.currency,
+      entryRate,
+      row.id,
+      row.paidFromAssetId,
+    ],
   });
 
   const expenseId = result.rows[0]?.id as number | undefined;
@@ -99,6 +116,56 @@ async function insertGeneratedExpense(
 }
 
 /**
+ * Deduct a generated expense from the account its rule names.
+ *
+ * ── Why this is a separate write from the INSERT above ────────────────────
+ * It looks like a missed optimization; it is the double-deduct guarantee.
+ *
+ * `insertGeneratedExpense` is a single atomic statement whose `ON CONFLICT …
+ * DO NOTHING RETURNING id` yields an id only to whichever caller actually
+ * created the row. The daily cron and the lazy read-path materializer race
+ * freely on the 1st of the month; exactly one of them wins, and funding hangs
+ * off that win. Folding the balance update into the same batch would break it,
+ * because a batch's statements are unconditional — the conflict would no-op the
+ * insert while the asset UPDATE still ran, deducting twice.
+ *
+ * The cost is a crash window leaving the expense with `paidFromAssetId` set and
+ * `paidFromDelta` NULL: chosen but not applied. That is safe, detectable with
+ * one query, and self-repairing the next time the expense is edited.
+ *
+ * A funding failure must never abort the run. Losing an occurrence is worse
+ * than posting one whose balance needs a nudge — the expense is the money, the
+ * balance is bookkeeping the user can correct.
+ */
+async function fundGeneratedExpense(
+  row: RuleRow,
+  expenseId: number,
+  entryRate: number,
+  summary: MaterializeSummary
+): Promise<void> {
+  if (row.paidFromAssetId === null) return;
+
+  try {
+    const plan = await applyFundingToExpense({
+      userId: row.userId,
+      expenseId,
+      assetId: row.paidFromAssetId,
+      expense: { amount: row.amount, currency: row.currency, entryRate },
+    });
+
+    if (plan.ok) {
+      summary.fundingApplied += 1;
+    } else {
+      summary.fundingSkipped += 1;
+      console.warn(`[recurring] rule ${row.id}: no deduction for expense ${expenseId} (${plan.reason})`);
+    }
+  } catch (error) {
+    summary.fundingSkipped += 1;
+    console.error(`[recurring] rule ${row.id}: funding expense ${expenseId} failed:`, error);
+  }
+}
+
+/**
  * Post every occurrence owed as of today.
  *
  * Scoped to one user when `userId` is given (the read path), otherwise every
@@ -111,12 +178,18 @@ async function insertGeneratedExpense(
  */
 export async function materializeDueExpenses(userId?: number): Promise<MaterializeSummary> {
   const today = todayInTimeZone();
-  const summary: MaterializeSummary = { rulesProcessed: 0, expensesCreated: 0, rateBlocked: 0 };
+  const summary: MaterializeSummary = {
+    rulesProcessed: 0,
+    expensesCreated: 0,
+    rateBlocked: 0,
+    fundingApplied: 0,
+    fundingSkipped: 0,
+  };
 
   // Exhausted rules (next occurrence past their end date) are filtered out in
   // SQL rather than skipped in JS, so they stop being re-read every single run.
   const result = await db.execute({
-    sql: `SELECT id, userId, categoryId, description, amount, currency,
+    sql: `SELECT id, userId, categoryId, description, amount, currency, paidFromAssetId,
                  frequency, intervalCount, calendar, anchorDate, endDate, postedCount
           FROM recurringExpenses
           WHERE paused = 0
@@ -157,7 +230,10 @@ export async function materializeDueExpenses(userId?: number): Promise<Materiali
 
       try {
         const expenseId = await insertGeneratedExpense(row, date, entryRate, tagIds);
-        if (expenseId !== null) summary.expensesCreated += 1;
+        if (expenseId !== null) {
+          summary.expensesCreated += 1;
+          await fundGeneratedExpense(row, expenseId, entryRate, summary);
+        }
       } catch (error) {
         // A single bad occurrence must not abort the rest of the batch.
         console.error(`[recurring] rule ${row.id} failed to post ${date}:`, error);

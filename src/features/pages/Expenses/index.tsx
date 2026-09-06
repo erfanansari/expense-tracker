@@ -6,8 +6,10 @@ import { useTranslations } from 'next-intl';
 
 import { deleteExpenseKeyGenerator } from '@api/deleteExpenseMutation';
 import type { DeleteExpenseRequestData } from '@api/deleteExpenseMutation';
+import { ASSETS_SCOPE } from '@api/getAssetListQuery';
 import { EXPENSES_SCOPE, getExpenseListKeyGenerator } from '@api/getExpenseListQuery';
 import type { ExpenseFilters, ExpensesPage as ExpensesPageData } from '@api/getExpenseListQuery';
+import { NET_WORTH_SCOPE } from '@api/getNetWorthHistoryQuery';
 import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
 import { keepPreviousData, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
@@ -72,9 +74,13 @@ const ExpensesPage = () => {
   } = useDeleteConfirmation<Expense>({
     onDelete: async (id) => {
       await deleteExpenseAsync({ id });
+      // Assets and net worth too: deleting an expense gives back whatever it
+      // took out of an account, which moves that balance and writes a valuation.
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: EXPENSES_SCOPE }),
         queryClient.invalidateQueries({ queryKey: SUMMARY_SCOPE }),
+        queryClient.invalidateQueries({ queryKey: ASSETS_SCOPE }),
+        queryClient.invalidateQueries({ queryKey: NET_WORTH_SCOPE }),
       ]);
       showToast(t('deleted'), 'info');
     },

@@ -139,8 +139,8 @@ export const POST = withAuth(async (user, request) => {
           args: [change.next.amount, change.next.unitValue, change.next.entryRate, valuedAt, change.id, user.userId],
         },
         {
-          sql: `INSERT INTO assetValuations (assetId, quantity, unitValue, amount, currency, entryRate, valuedAt)
-                VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          sql: `INSERT INTO assetValuations (assetId, quantity, unitValue, amount, currency, entryRate, valuedAt, source)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'revalue')`,
           args: [
             change.id,
             asset.quantity,

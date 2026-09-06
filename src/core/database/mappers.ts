@@ -1,5 +1,5 @@
 import type { Asset, AssetValuation } from '@/@types/asset';
-import type { Category, Expense, Tag } from '@/@types/expense';
+import type { Category, Expense, ExpensePaidFrom, Tag } from '@/@types/expense';
 import type { Income } from '@/@types/income';
 import type { ExpenseRepeat } from '@/@types/recurring';
 
@@ -53,11 +53,18 @@ export function mapRowToAssetValuation(row: DbRow): AssetValuation {
     currency: row.currency as string,
     entryRate: row.entryRate as number,
     valuedAt: row.valuedAt as string,
+    source: (row.source as string | null) ?? null,
     createdAt: row.createdAt as string,
   };
 }
 
-export function mapRowToExpense(row: DbRow, category: Category, tags?: Tag[], repeat?: ExpenseRepeat): Expense {
+export function mapRowToExpense(
+  row: DbRow,
+  category: Category,
+  tags?: Tag[],
+  repeat?: ExpenseRepeat,
+  paidFrom?: ExpensePaidFrom
+): Expense {
   return {
     id: row.id as number,
     date: row.date as string,
@@ -68,6 +75,10 @@ export function mapRowToExpense(row: DbRow, category: Category, tags?: Tag[], re
     entryRate: row.entryRate as number,
     recurringId: (row.recurringId as number | null) ?? null,
     repeat: repeat ?? null,
+    paidFromAssetId: (row.paidFromAssetId as number | null) ?? null,
+    paidFromDelta: (row.paidFromDelta as number | null) ?? null,
+    paidFromCurrency: (row.paidFromCurrency as string | null) ?? null,
+    paidFrom: paidFrom ?? null,
     created_at: row.created_at as string,
     tags: tags ?? [],
   };

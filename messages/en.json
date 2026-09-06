@@ -108,7 +108,8 @@
       "dateRequired": "Date is required",
       "categoryRequired": "Category is required",
       "descriptionRequired": "Description is required",
-      "amountNonNegative": "Amount must be non-negative"
+      "amountNonNegative": "Amount must be non-negative",
+      "paidFromInvalid": "Select a valid account"
     },
     "income": {
       "amountNonNegative": "Amount must be non-negative"
@@ -441,7 +442,12 @@
       "amountPlaceholder": "e.g. 60k, 1.5m",
       "added": "Expense added successfully!",
       "updated": "Expense updated successfully!",
-      "tagsHint": "Type to search, or enter a new name to create one."
+      "tagsHint": "Type to search, or enter a new name to create one.",
+      "paidFrom": "Paid from",
+      "paidFromPlaceholder": "Select account…",
+      "paidFromNone": "Don't track",
+      "paidFromEmpty": "No cash or bank accounts yet — add one in Assets.",
+      "paidFromOverdraw": "This takes {account} below zero."
     },
     "income": {
       "addTitle": "Add New Income",
@@ -812,6 +818,7 @@
         "date": "Date",
         "enteredIn": "Entered in",
         "exchangeRate": "Exchange rate",
+        "paidFrom": "Paid from",
         "created": "Created"
       }
     },

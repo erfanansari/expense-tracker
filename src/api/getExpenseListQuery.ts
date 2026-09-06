@@ -22,6 +22,13 @@ export const categorySchema = z.object({
   created_at: z.string(),
 });
 
+export const paidFromSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  category: z.string(),
+  currency: z.string(),
+});
+
 export const expenseSchema: z.ZodType<Expense> = z.object({
   id: z.number(),
   date: z.string(),
@@ -39,6 +46,10 @@ export const expenseSchema: z.ZodType<Expense> = z.object({
       endDate: z.string().nullable(),
     })
     .nullable(),
+  paidFromAssetId: z.number().nullable(),
+  paidFromDelta: z.number().nullable(),
+  paidFromCurrency: z.string().nullable(),
+  paidFrom: paidFromSchema.nullable(),
   created_at: z.string(),
   tags: z.array(tagSchema).optional(),
 });

@@ -5,7 +5,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { createExpenseKeyGenerator } from '@api/createExpenseMutation';
+import { ASSETS_SCOPE, getAssetListKeyGenerator } from '@api/getAssetListQuery';
 import { EXPENSES_SCOPE } from '@api/getExpenseListQuery';
+import { NET_WORTH_SCOPE } from '@api/getNetWorthHistoryQuery';
 import { SUMMARY_SCOPE } from '@api/getSummaryQuery';
 import { updateExpenseKeyGenerator } from '@api/updateExpenseMutation';
 import type { UpdateExpenseRequestData } from '@api/updateExpenseMutation';
@@ -13,8 +15,8 @@ import { PIVOT_CURRENCY } from '@constants/currencies';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { numberToWords } from '@persian-tools/persian-tools';
 import type { QueryClient } from '@tanstack/react-query';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Calendar, Coins, FileText, Layers, Loader2, Plus, Tag as TagIcon } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Calendar, Coins, FileText, Landmark, Layers, Loader2, Plus, Tag as TagIcon } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { type Tag } from '@types';
@@ -34,16 +36,28 @@ import { useToast } from '@stores/toast';
 
 import { ensureError } from '@utils';
 
+import type { Asset } from '@/@types/asset';
+import { isSpendableAssetCategory } from '@/constants/assets';
+
+import AccountSelect from '../AccountSelect';
+import AccountBalancePreview from '../AccountSelect/Preview';
+import { useLastAccount } from '../AccountSelect/use-last-account';
 import CategorySelect from '../CategorySelect';
 import RepeatField from '../RepeatField';
 import TagInput from '../TagInput';
 
 import type { ExpenseFormProps } from './@types';
 
+// Assets and net worth are invalidated too: an expense paid from an account
+// moves that account's balance and writes a valuation, so leaving those caches
+// alone would show a stale balance on the assets page and a chart missing its
+// newest point. Cheap when nothing was funded, wrong when something was.
 const invalidateExpenseData = (queryClient: QueryClient) =>
   Promise.all([
     queryClient.invalidateQueries({ queryKey: EXPENSES_SCOPE }),
     queryClient.invalidateQueries({ queryKey: SUMMARY_SCOPE }),
+    queryClient.invalidateQueries({ queryKey: ASSETS_SCOPE }),
+    queryClient.invalidateQueries({ queryKey: NET_WORTH_SCOPE }),
   ]);
 
 const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty }: ExpenseFormProps) => {
@@ -67,6 +81,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
       currency: primaryCurrency || PIVOT_CURRENCY,
       tagIds: [],
       repeat: null,
+      paidFromAssetId: null,
     }),
     [primaryCurrency]
   );
@@ -82,6 +97,7 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
             currency: editingExpense.currency,
             tagIds: editingExpense.tags?.map((t) => t.id) || [],
             repeat: editingExpense.repeat,
+            paidFromAssetId: editingExpense.paidFromAssetId ?? null,
           }
         : null,
     [editingExpense]
@@ -99,6 +115,13 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
   const amount = watch('amount');
   const currency = watch('currency');
   const date = watch('date');
+  const paidFromAssetId = watch('paidFromAssetId');
+
+  // Accounts (cash + bank assets) for the "paid from" field's default.
+  const { data: assets = [] } = useQuery<Asset[]>({ queryKey: getAssetListKeyGenerator() });
+  const accounts = useMemo(() => assets.filter((a) => isSpendableAssetCategory(a.category)), [assets]);
+  const hasAccounts = accounts.length > 0;
+  const { lastAccountId, rememberAccount } = useLastAccount();
 
   // Mutations
   const createMutation = useMutation<unknown, Error, CreateExpenseSchema>({
@@ -121,6 +144,23 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
   useEffect(() => {
     setIsDirty?.(formState.isDirty);
   }, [formState.isDirty, setIsDirty]);
+
+  // Pre-select the account so logging an expense stays one motion. Editing is
+  // excluded outright: an existing expense's account is a record of what
+  // happened, and a default must never quietly rewrite it. Only fills an empty
+  // field, so an explicit "Don't track" survives a re-render.
+  useEffect(() => {
+    if (editingExpense || paidFromAssetId != null || !hasAccounts) return;
+
+    const single = accounts.length === 1 ? accounts[0].id : null;
+    const remembered = accounts.some((a) => a.id === lastAccountId) ? lastAccountId : null;
+    const next = single ?? remembered;
+    if (next == null) return;
+
+    // Not dirtying the form: a default the user never chose shouldn't make the
+    // drawer warn about unsaved changes on close.
+    setValue('paidFromAssetId', next, { shouldDirty: false, shouldValidate: false });
+  }, [editingExpense, paidFromAssetId, hasAccounts, accounts, lastAccountId, setValue]);
 
   // Persian words helper only applies when the entry currency is Toman.
   const numberToPersianWord = useMemo(() => {
@@ -157,6 +197,10 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
         await invalidateExpenseData(queryClient);
         showToast(t('expense.added'), 'success');
       }
+
+      // Remembered on success, not on change, so abandoning a half-filled form
+      // doesn't move the default for next time.
+      rememberAccount(dataToSubmit.paidFromAssetId ?? null);
 
       reset(defaultFormData);
       setSelectedTags([]);
@@ -253,6 +297,29 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit, setIsDirty 
           <FormMoneyInput amountName="amount" currencyName="currency" placeholder={t('expense.amountPlaceholder')} />
         </Tooltip>
       </div>
+
+      {/* Which account the money leaves. Sits under the amount because it's a
+          property of the money, not of the category or the date. Hidden
+          entirely when the user has no cash or bank assets — a dead control
+          teaching a concept they haven't opted into is worse than nothing. */}
+      {hasAccounts && (
+        <div className="space-y-1">
+          <label htmlFor="paidFromAssetId" className="text-text-secondary flex items-center gap-2 text-sm font-medium">
+            <Landmark className="text-text-muted h-4 w-4" aria-hidden="true" />
+            {t('expense.paidFrom')}
+          </label>
+          <Controller
+            name="paidFromAssetId"
+            control={methods.control}
+            render={({ field }) => (
+              <>
+                <AccountSelect inputId="paidFromAssetId" value={field.value ?? null} onChange={field.onChange} />
+                <AccountBalancePreview assetId={field.value ?? null} amount={amount} currency={currency} />
+              </>
+            )}
+          />
+        </div>
+      )}
 
       {/* Buttons */}
       <div className="flex gap-3 pt-1 rtl:flex-row-reverse">

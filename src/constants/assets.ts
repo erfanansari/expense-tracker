@@ -22,6 +22,41 @@ export const ASSET_CATEGORY_COLORS: Record<string, string> = {
 
 export const ASSET_CATEGORY_COLOR_FALLBACK = 'var(--color-text-secondary)';
 
+/**
+ * The asset categories you can *spend out of*, as opposed to merely track.
+ *
+ * Every serious tracker draws this line — YNAB splits budget from tracking
+ * accounts, Actual Budget on-budget from off-budget, Firefly III makes a
+ * withdrawal's source an asset account. The reason is the same everywhere: you
+ * hand over cash and you move money out of a bank, but you do not pay rent
+ * "from" your apartment. Kharji gets the split for free from the category.
+ *
+ * This constant is the single source of truth — never re-spell the pair inline.
+ */
+export const SPENDABLE_ASSET_CATEGORIES = ['cash', 'bank'] as const;
+
+export type SpendableAssetCategory = (typeof SPENDABLE_ASSET_CATEGORIES)[number];
+
+export function isSpendableAssetCategory(category: string): category is SpendableAssetCategory {
+  return (SPENDABLE_ASSET_CATEGORIES as readonly string[]).includes(category);
+}
+
+/**
+ * How a spendable account is drawn in the expense form's account picker.
+ *
+ * `CategoryTile` is the shared "a thing you pick from a list" primitive, and it
+ * resolves its icon and colour through the *category* registry
+ * (`getCategoryIcon` / `getCategoryColor` in `@constants/categories`), which
+ * takes plain keys. `ASSET_CATEGORY_COLORS` above stores rendered CSS variable
+ * strings instead, so the two cannot be shared — the values here are the same
+ * hues deliberately (`violet` for bank, `green` for cash), just spelled in the
+ * other registry's vocabulary. Retune one and you must retune the other.
+ */
+export const SPENDABLE_ASSET_TILE: Record<SpendableAssetCategory, { icon: string; color: string }> = {
+  cash: { icon: 'Wallet', color: 'green' },
+  bank: { icon: 'CreditCard', color: 'violet' },
+};
+
 export function getAssetCategoryLabel(category: string): { en: string; fa: string; icon: string } {
   const found = ASSET_CATEGORIES.find((c) => c.value === category);
   return found

@@ -57,8 +57,27 @@ export interface Expense {
   /** The live schedule behind `recurringId`, so editing an expense can show and
    * change its repeat. Null once the repeat is removed or has finished. */
   repeat: ExpenseRepeat | null;
+  /** The cash/bank asset this was paid out of; null when untracked. Goes null
+   * (not deleted) when the account is deleted — the money was still spent. */
+  paidFromAssetId: number | null;
+  /** What was actually subtracted from that account's balance, in
+   * `paidFromCurrency`. Null while chosen-but-not-yet-applied. Reversal adds
+   * exactly this number back rather than re-converting at a later rate. */
+  paidFromDelta: number | null;
+  /** The account's currency when `paidFromDelta` was applied. */
+  paidFromCurrency: string | null;
+  /** The account itself, joined for display. Null when untracked or deleted. */
+  paidFrom: ExpensePaidFrom | null;
   created_at: string;
   tags?: Tag[];
+}
+
+/** The account behind `paidFromAssetId`, joined for display. */
+export interface ExpensePaidFrom {
+  id: number;
+  name: string;
+  category: string;
+  currency: string;
 }
 
 export interface CreateExpenseInput {
@@ -70,4 +89,6 @@ export interface CreateExpenseInput {
   tagIds?: number[];
   /** null or omitted = doesn't repeat. */
   repeat?: ExpenseRepeat | null;
+  /** null or omitted = don't touch any account balance. */
+  paidFromAssetId?: number | null;
 }

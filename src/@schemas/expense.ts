@@ -45,6 +45,10 @@ export function createExpenseObjectSchema(t: Translator) {
     currency: currencyCodeSchema,
     tagIds: z.array(z.number().int()).optional(),
     repeat: createRepeatSchema(t).nullish(),
+    // The cash/bank asset this expense is paid out of. `null` means "don't
+    // touch any balance", and is also how an existing link is removed. Lives on
+    // the object schema (not the refined one) so `.partial()` picks it up.
+    paidFromAssetId: z.number().int().positive(t('zod.expense.paidFromInvalid')).nullish(),
   });
 }
 

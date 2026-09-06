@@ -6,6 +6,14 @@ import { createExpenseSchema } from '@schemas';
 import { getSearchParams, validateBody, verifyOwnership, withAuth } from '@core/api/utils';
 import { fetchCategoriesForExpenses } from '@core/database/categories';
 import { db } from '@core/database/client';
+import {
+  applyFundingToExpense,
+  fetchPaidFromForExpenses,
+  FUNDING_ERROR_MESSAGE,
+  FUNDING_ERROR_STATUS,
+  planFunding,
+} from '@core/database/expense-funding';
+import type { FundingPlanErrorReason } from '@core/database/expense-funding';
 import { fetchRepeatsForExpenses, syncExpenseRepeat } from '@core/database/expense-repeat';
 import { mapRowToExpense } from '@core/database/mappers';
 import { assignTagsToExpense, fetchTagsForExpenses } from '@core/database/tags';
@@ -44,16 +52,23 @@ export const GET = withAuth(async (user, request) => {
     });
 
     const ids = result.rows.map((row) => row.id);
-    const [tagsMap, categoriesMap, repeatsMap] = await Promise.all([
+    const [tagsMap, categoriesMap, repeatsMap, paidFromMap] = await Promise.all([
       fetchTagsForExpenses(ids),
       fetchCategoriesForExpenses(ids),
       fetchRepeatsForExpenses(ids),
+      fetchPaidFromForExpenses(ids),
     ]);
     const expenses = result.rows
       .map((row) => {
         const cat = categoriesMap[row.id as number];
         if (!cat) return null;
-        return mapRowToExpense(row, cat, tagsMap[row.id as number], repeatsMap[row.id as number]);
+        return mapRowToExpense(
+          row,
+          cat,
+          tagsMap[row.id as number],
+          repeatsMap[row.id as number],
+          paidFromMap[row.id as number]
+        );
       })
       .filter((e): e is NonNullable<typeof e> => e !== null);
 
@@ -102,16 +117,23 @@ export const GET = withAuth(async (user, request) => {
   const expensesToReturn = hasMore ? result.rows.slice(0, limit) : result.rows;
 
   const ids = expensesToReturn.map((row) => row.id);
-  const [tagsMap, categoriesMap, repeatsMap] = await Promise.all([
+  const [tagsMap, categoriesMap, repeatsMap, paidFromMap] = await Promise.all([
     fetchTagsForExpenses(ids),
     fetchCategoriesForExpenses(ids),
     fetchRepeatsForExpenses(ids),
+    fetchPaidFromForExpenses(ids),
   ]);
   const expenses = expensesToReturn
     .map((row) => {
       const cat = categoriesMap[row.id as number];
       if (!cat) return null;
-      return mapRowToExpense(row, cat, tagsMap[row.id as number], repeatsMap[row.id as number]);
+      return mapRowToExpense(
+        row,
+        cat,
+        tagsMap[row.id as number],
+        repeatsMap[row.id as number],
+        paidFromMap[row.id as number]
+      );
     })
     .filter((e): e is NonNullable<typeof e> => e !== null);
 
@@ -147,12 +169,50 @@ export const POST = withAuth(async (user, request) => {
     return NextResponse.json({ error: `No exchange rate available for ${body.currency}` }, { status: 422 });
   }
 
+  // Plan the deduction *before* inserting, so an unusable account can never
+  // leave a half-created expense behind.
+  const paidFromAssetId = body.paidFromAssetId ?? null;
+  const plan =
+    paidFromAssetId !== null
+      ? await planFunding({
+          userId: user.userId,
+          assetId: paidFromAssetId,
+          expense: { amount: body.amount, currency: body.currency, entryRate },
+        })
+      : null;
+
+  if (plan && !plan.ok) {
+    const reason: FundingPlanErrorReason = plan.reason;
+    return NextResponse.json({ error: FUNDING_ERROR_MESSAGE[reason] }, { status: FUNDING_ERROR_STATUS[reason] });
+  }
+
   const expenseResult = await db.execute({
-    sql: 'INSERT INTO expenses (user_id, date, category_id, description, amount, currency, entryRate) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id',
-    args: [user.userId, body.date, body.categoryId, body.description, body.amount, body.currency, entryRate],
+    sql: 'INSERT INTO expenses (user_id, date, category_id, description, amount, currency, entryRate, paidFromAssetId) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id',
+    args: [
+      user.userId,
+      body.date,
+      body.categoryId,
+      body.description,
+      body.amount,
+      body.currency,
+      entryRate,
+      paidFromAssetId,
+    ],
   });
 
   const expenseId = expenseResult.rows[0].id as number;
+
+  // Second phase: move the balance and stamp the applied delta back onto the
+  // expense. Until this lands the row reads "account chosen, nothing applied",
+  // which is safe and self-repairs on the next edit.
+  if (plan?.ok) {
+    await applyFundingToExpense({
+      userId: user.userId,
+      expenseId,
+      assetId: plan.assetId,
+      expense: { amount: body.amount, currency: body.currency, entryRate },
+    });
+  }
 
   await assignTagsToExpense(expenseId, body.tagIds);
 
@@ -168,6 +228,7 @@ export const POST = withAuth(async (user, request) => {
     currency: body.currency,
     tagIds: body.tagIds,
     repeat: body.repeat,
+    paidFromAssetId,
     existingRecurringId: null,
   });
 
